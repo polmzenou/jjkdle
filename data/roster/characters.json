@@ -1,0 +1,514 @@
+[
+  {
+    "id": "gojo",
+    "name": "Satoru Gojo",
+    "title": "Special Grade",
+    "tier": "s",
+    "image": "/assets/characters/Satoru_Portrait_Anime.webp",
+    "ratings": {
+      "innate-technique": 92,
+      "speed": 76,
+      "battle-iq": 100,
+      "physical-strength": 80,
+      "cursed-energy": 90,
+      "domain-expansion": 90,
+      "versatility": 80,
+      "endurance": 90
+    }
+  },
+  {
+    "id": "sukuna",
+    "name": "Ryomen Sukuna",
+    "title": "King of Curses",
+    "tier": "s",
+    "image": "/assets/characters/Sukuna_Portrait_Anime.webp",
+    "ratings": {
+      "innate-technique": 94,
+      "speed": 72,
+      "battle-iq": 76,
+      "physical-strength": 100,
+      "cursed-energy": 100,
+      "domain-expansion": 80,
+      "versatility": 80,
+      "endurance": 90
+    }
+  },
+  {
+    "id": "yuta",
+    "name": "Yuta Okkotsu",
+    "title": "Special Grade",
+    "tier": "1",
+    "image": "/assets/characters/Yuta_Portrait_Anime.webp",
+    "ratings": {
+      "innate-technique": 88,
+      "battle-iq": 60,
+      "cursed-energy": 95,
+      "domain-expansion": 70,
+      "versatility": 100,
+      "endurance": 70
+    }
+  },
+  {
+    "id": "yuji",
+    "name": "Yuji Itadori",
+    "title": "Grade 1 (vessel)",
+    "tier": "1",
+    "image": "/assets/characters/Yuji_Portrait_Anime_2.webp",
+    "ratings": {
+      "innate-technique": 78,
+      "battle-iq": 48,
+      "physical-strength": 80
+    }
+  },
+  {
+    "id": "megumi",
+    "name": "Megumi Fushiguro",
+    "title": "Grade 2",
+    "tier": "2",
+    "image": "/assets/characters/Megumi_Portrait_Anime.webp",
+    "ratings": {
+      "innate-technique": 80,
+      "battle-iq": 52,
+      "cursed-energy": 60,
+      "versatility": 55,
+      "endurance": 60
+    }
+  },
+  {
+    "id": "nobara",
+    "name": "Nobara Kugisaki",
+    "title": "Grade 3",
+    "tier": "3",
+    "image": "/assets/characters/Nobara_Portrait_Anime.webp",
+    "ratings": {
+      "innate-technique": 48
+    }
+  },
+  {
+    "id": "nanami",
+    "name": "Kento Nanami",
+    "title": "Grade 1",
+    "tier": "1",
+    "image": "/assets/characters/Kento_Portrait_Anime.webp",
+    "ratings": {
+      "innate-technique": 56,
+      "physical-strength": 60,
+      "cursed-energy": 65,
+      "versatility": 10
+    }
+  },
+  {
+    "id": "geto",
+    "name": "Suguru Geto",
+    "title": "Special Grade",
+    "tier": "1",
+    "image": "/assets/characters/Suguru_Portrait_Anime.webp",
+    "ratings": {
+      "innate-technique": 84,
+      "battle-iq": 64,
+      "cursed-energy": 80
+    }
+  },
+  {
+    "id": "toji",
+    "name": "Toji Fushiguro",
+    "title": "Sorcerer Killer",
+    "tier": "1",
+    "image": "/assets/characters/Toji_Portrait_Anime.webp",
+    "ratings": {
+      "speed": 68,
+      "physical-strength": 95,
+      "cursed-energy": 0,
+      "endurance": 80
+    }
+  },
+  {
+    "id": "mahito",
+    "name": "Mahito",
+    "title": "Special Grade Curse",
+    "tier": "1",
+    "image": "/assets/characters/Mahito_Portrait_Anime.webp",
+    "ratings": {
+      "innate-technique": 76,
+      "curse-status": 65,
+      "battle-iq": 44,
+      "domain-expansion": 60
+    }
+  },
+  {
+    "id": "jogo",
+    "name": "Jogo",
+    "title": "Special Grade Curse",
+    "tier": "2",
+    "image": "/assets/characters/Jogo_Portrait_Anime.webp",
+    "ratings": {
+      "innate-technique": 68,
+      "curse-status": 60,
+      "domain-expansion": 40
+    }
+  },
+  {
+    "id": "todo",
+    "name": "Aoi Todo",
+    "title": "Grade 1",
+    "tier": "1",
+    "image": "/assets/characters/Aoi_Portrait_Anime.webp",
+    "ratings": {
+      "innate-technique": 50,
+      "physical-strength": 90,
+      "endurance": 65
+    }
+  },
+  {
+    "id": "maki",
+    "name": "Maki Zenin",
+    "title": "Grade 4 → ascendante",
+    "tier": "3",
+    "image": "/assets/characters/Maki_Portrait_Anime_2.webp",
+    "ratings": {
+      "speed": 64,
+      "physical-strength": 95,
+      "cursed-energy": 0,
+      "endurance": 80
+    }
+  },
+  {
+    "id": "panda",
+    "name": "Panda",
+    "title": "Grade 2 (mutated corpse)",
+    "tier": "2",
+    "image": "/assets/characters/Panda_Portrait_Anime.webp",
+    "ratings": {
+      "innate-technique": 44
+    }
+  },
+  {
+    "id": "inumaki",
+    "name": "Toge Inumaki",
+    "title": "Grade 2",
+    "tier": "2",
+    "image": "/assets/characters/Toge_Portrait_Anime.webp",
+    "ratings": {
+      "innate-technique": 52
+    }
+  },
+  {
+    "id": "yaga",
+    "name": "Masamichi Yaga",
+    "title": "Grade 1 (principal)",
+    "tier": "2",
+    "image": "/assets/characters/Masamichi_Portrait_Anime.webp",
+    "ratings": {
+      "innate-technique": 46
+    }
+  },
+  {
+    "id": "takaba",
+    "name": "Fumihiko Takaba",
+    "title": "Grade 1",
+    "tier": "1",
+    "image": "/assets/characters/Fumihiko_Portrait_Anime.webp",
+    "ratings": {
+      "innate-technique": 100
+    }
+  },
+  {
+    "id": "yuji-modulo",
+    "name": "Yuji Modulo",
+    "title": "Forme théorique",
+    "tier": "s",
+    "image": "/assets/characters/Yuji_Portrait_Modulo.webp",
+    "ratings": {
+      "innate-technique": 96,
+      "speed": 80,
+      "battle-iq": 80,
+      "cursed-energy": 90,
+      "domain-expansion": 85,
+      "versatility": 90,
+      "endurance": 100
+    }
+  },
+  {
+    "id": "dabura",
+    "name": "Dabura",
+    "title": "???",
+    "tier": "s",
+    "image": "/assets/characters/Dabura_Karaba_(Volume_2).webp",
+    "ratings": {
+      "innate-technique": 90,
+      "speed": 100,
+      "battle-iq": 72,
+      "physical-strength": 85,
+      "domain-expansion": 70,
+      "endurance": 85
+    }
+  },
+  {
+    "id": "yuki-tsukumo",
+    "name": "Yuki Tsukumo",
+    "title": "Special Grade",
+    "tier": "s",
+    "image": "/assets/characters/Yuki_Portrait_Anime.webp",
+    "ratings": {
+      "innate-technique": 86,
+      "battle-iq": 56,
+      "endurance": 70
+    }
+  },
+  {
+    "id": "uraume",
+    "name": "Uraume",
+    "title": "Special Grade",
+    "tier": "1",
+    "image": "/assets/characters/Uraume_Portrait_Anime.webp",
+    "ratings": {
+      "innate-technique": 82
+    }
+  },
+  {
+    "id": "kenjaku",
+    "name": "Kenjaku",
+    "title": "Special Grade",
+    "tier": "s",
+    "image": "/assets/characters/Faux_Suguru_Portrait_Anime.webp",
+    "ratings": {
+      "innate-technique": 74,
+      "battle-iq": 68,
+      "domain-expansion": 75,
+      "endurance": 75
+    }
+  },
+  {
+    "id": "hakari",
+    "name": "Kinji Hakari",
+    "title": "Grade 1",
+    "tier": "1",
+    "image": "/assets/characters/Hakari_asking_Megumi_to_be_buds_29.webp",
+    "ratings": {
+      "innate-technique": 72,
+      "battle-iq": 30,
+      "physical-strength": 75,
+      "cursed-energy": 75,
+      "domain-expansion": 45
+    }
+  },
+  {
+    "id": "kashimo",
+    "name": "Hajime Kashimo",
+    "title": "Special Grade",
+    "tier": "1",
+    "image": "/assets/characters/Hajime_Portrait_Anime.webp",
+    "ratings": {
+      "innate-technique": 70,
+      "speed": 60,
+      "cursed-energy": 70
+    }
+  },
+  {
+    "id": "hanami",
+    "name": "Hanami",
+    "title": "Special Grade Curse",
+    "tier": "1",
+    "image": "/assets/characters/Hanami_Portrait_Anime.webp",
+    "ratings": {
+      "innate-technique": 66,
+      "curse-status": 45
+    }
+  },
+  {
+    "id": "dagon",
+    "name": "Dagon",
+    "title": "Special Grade Curse",
+    "tier": "1",
+    "image": "/assets/characters/Dagon_Portrait_Anime_2.webp",
+    "ratings": {
+      "innate-technique": 64,
+      "curse-status": 50,
+      "domain-expansion": 35
+    }
+  },
+  {
+    "id": "naoya",
+    "name": "Naoya Zenin",
+    "title": "Grade 1",
+    "tier": "1",
+    "image": "/assets/characters/Naoya_Portrait_Anime.webp",
+    "ratings": {
+      "innate-technique": 62,
+      "speed": 56
+    }
+  },
+  {
+    "id": "naoya-fleau",
+    "name": "Naoya (forme fléau)",
+    "title": "Fléau transfiguré",
+    "tier": "s",
+    "image": "/assets/characters/Naoya_Evoluant_CH192.webp",
+    "ratings": {
+      "curse-status": 80
+    }
+  },
+  {
+    "id": "choso",
+    "name": "Choso",
+    "title": "Special Grade",
+    "tier": "1",
+    "image": "/assets/characters/Choso_Portrait_Anime.webp",
+    "ratings": {
+      "innate-technique": 60,
+      "speed": 52,
+      "versatility": 45,
+      "endurance": 60
+    }
+  },
+  {
+    "id": "reggie",
+    "name": "Reggie Star",
+    "title": "Grade 1",
+    "tier": "2",
+    "image": "/assets/characters/Reggie_Star_first_appearance_(Anime).webp",
+    "ratings": {
+      "innate-technique": 58
+    }
+  },
+  {
+    "id": "mei-mei",
+    "name": "Mei Mei",
+    "title": "Grade 1",
+    "tier": "1",
+    "image": "/assets/characters/Mei_Mei_recieves_the_payment_from_Gojo_29.webp",
+    "ratings": {
+      "innate-technique": 54
+    }
+  },
+  {
+    "id": "mahoraga",
+    "name": "Mahoraga",
+    "title": "Shikigami adaptatif",
+    "tier": "s",
+    "image": "/assets/characters/Mahoraga_EP41.webp",
+    "ratings": {
+      "curse-status": 100
+    }
+  },
+  {
+    "id": "rika",
+    "name": "Rika",
+    "title": "Reine des Malédictions",
+    "tier": "s",
+    "image": "/assets/characters/Rika_Portrait_Anime.webp",
+    "ratings": {
+      "curse-status": 90
+    }
+  },
+  {
+    "id": "kurourushi",
+    "name": "Kurourushi",
+    "title": "Special Grade Curse",
+    "tier": "1",
+    "image": "/assets/characters/Kurourushi.webp",
+    "ratings": {
+      "curse-status": 70
+    }
+  },
+  {
+    "id": "chien-de-jade",
+    "name": "Chien de jade",
+    "title": "Shikigami",
+    "tier": "3",
+    "image": "/assets/characters/Divine_Dog_Totality_29.webp",
+    "ratings": {
+      "curse-status": 40
+    }
+  },
+  {
+    "id": "toad",
+    "name": "Toad",
+    "title": "Shikigami",
+    "tier": "4",
+    "image": "/assets/characters/Toad_EP35.webp",
+    "ratings": {
+      "curse-status": 30
+    }
+  },
+  {
+    "id": "ryu-ishigori",
+    "name": "Ryu Ishigori",
+    "title": "Culling Game player",
+    "tier": "1",
+    "image": "/assets/characters/Ryu_Ishigori_29.webp",
+    "ratings": {
+      "physical-strength": 75,
+      "versatility": 50,
+      "domain-expansion": 50
+    }
+  },
+  {
+    "id": "higuruma",
+    "name": "Hiromi Higuruma",
+    "title": "Grade 1",
+    "tier": "1",
+    "image": "/assets/characters/Hiromi_Portrait_Anime.webp",
+    "ratings": {
+      "cursed-energy": 70,
+      "versatility": 30,
+      "domain-expansion": 100
+    }
+  },
+  {
+    "id": "gakuganji",
+    "name": "Yoshinobu Gakuganji",
+    "title": "Directeur — École de Kyoto",
+    "tier": "1",
+    "image": "/assets/characters/Yoshinobu_Portrait_Anime.webp",
+    "ratings": {}
+  },
+  {
+    "id": "utahime",
+    "name": "Utahime Iori",
+    "title": "Enseignante — École de Kyoto",
+    "tier": "2",
+    "image": "/assets/characters/Utahime_Portrait_Anime.webp",
+    "ratings": {}
+  },
+  {
+    "id": "mai-zenin",
+    "name": "Mai Zenin",
+    "title": "Grade 2 — École de Kyoto",
+    "tier": "2",
+    "image": "/assets/characters/Mai_Portrait_Anime.webp",
+    "ratings": {}
+  },
+  {
+    "id": "miwa",
+    "name": "Kasumi Miwa",
+    "title": "Grade 3 — École de Kyoto",
+    "tier": "3",
+    "image": "/assets/characters/Kasumi_Portrait_Anime.webp",
+    "ratings": {}
+  },
+  {
+    "id": "mechamaru",
+    "name": "Mechamaru (Kokichi Muta)",
+    "title": "Grade 2 — École de Kyoto",
+    "tier": "1",
+    "image": "/assets/characters/Kokichi_Portrait_Anime.webp",
+    "ratings": {}
+  },
+  {
+    "id": "kamo",
+    "name": "Noritoshi Kamo",
+    "title": "Grade 2 — École de Kyoto",
+    "tier": "2",
+    "image": "/assets/characters/Noritoshi_Portrait_Anime.webp",
+    "ratings": {}
+  },
+  {
+    "id": "momo",
+    "name": "Momo Nishimiya",
+    "title": "Grade 2 — École de Kyoto",
+    "tier": "3",
+    "image": "/assets/characters/Momo_Portrait_Anime.webp",
+    "ratings": {}
+  }
+]
