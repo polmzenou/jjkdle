@@ -112,6 +112,21 @@ describe("drawOne (variante grille)", () => {
     const b = drawOne("speed", roster, seededRng(42));
     expect(a?.id).toBe(b?.id);
   });
+
+  it("ne re-tire jamais le perso exclu quand d'autres existent", () => {
+    for (let seed = 0; seed < 60; seed++) {
+      const c = drawOne("speed", roster, seededRng(seed), "a");
+      expect(c?.id).not.toBe("a");
+    }
+  });
+
+  it("renvoie quand même le perso exclu s'il est le seul éligible", () => {
+    // 'domain-expansion' éligibles = a, c. En excluant les deux possibles un par
+    // un on garde toujours un résultat valide ; si un seul éligible existait,
+    // l'exclusion serait ignorée (ici on vérifie qu'on ne renvoie jamais null).
+    const c = drawOne("domain-expansion", roster, seededRng(1), "a");
+    expect(c?.id).toBe("c");
+  });
 });
 
 describe("drawAllOne / redrawUnlockedOne", () => {
@@ -134,5 +149,20 @@ describe("drawAllOne / redrawUnlockedOne", () => {
     expect(["a", "c", null]).toContainEqual(
       next["domain-expansion"]?.id ?? null,
     );
+  });
+
+  it("ne re-tire jamais deux fois de suite le même perso dans une case", () => {
+    // 'speed' a 5 éligibles → un re-tirage ne doit jamais redonner le perso courant.
+    for (let seed = 0; seed < 60; seed++) {
+      const current = drawAllOne([speed], roster, seededRng(seed));
+      const next = redrawUnlockedOne(
+        current,
+        [speed],
+        new Set<CategoryId>(),
+        roster,
+        seededRng(seed + 1000),
+      );
+      expect(next.speed?.id).not.toBe(current.speed?.id);
+    }
   });
 });

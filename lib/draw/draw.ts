@@ -91,15 +91,23 @@ export function redrawUnlocked(
 /** Tirage grille : un personnage (ou null si aucun éligible) par catégorie. */
 export type SingleDraw = Record<CategoryId, Character | null>;
 
-/** Tire UN personnage aléatoire parmi les éligibles d'une catégorie. */
+/**
+ * Tire UN personnage aléatoire parmi les éligibles d'une catégorie.
+ * `excludeId` évite de re-tirer le même perso deux fois de suite dans la même
+ * case (ignoré s'il ne reste qu'un seul éligible).
+ */
 export function drawOne(
   categoryId: CategoryId,
   roster: Character[],
   rng: Rng = Math.random,
+  excludeId?: string,
 ): Character | null {
   const pool = eligibleFor(categoryId, roster);
   if (pool.length === 0) return null;
-  return pool[Math.floor(rng() * pool.length)];
+  const filtered =
+    excludeId === undefined ? pool : pool.filter((c) => c.id !== excludeId);
+  const from = filtered.length > 0 ? filtered : pool;
+  return from[Math.floor(rng() * from.length)];
 }
 
 /** Tire un personnage pour chaque catégorie (démarrage de partie). */
@@ -130,7 +138,8 @@ export function redrawUnlockedOne(
   for (const category of categories) {
     next[category.id] = lockedIds.has(category.id)
       ? current[category.id]
-      : drawOne(category.id, roster, rng);
+      : // Exclut le perso affiché juste avant → jamais deux fois de suite.
+        drawOne(category.id, roster, rng, current[category.id]?.id);
   }
   return next;
 }

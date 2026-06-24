@@ -14,6 +14,7 @@ export const GAMES: Game[] = [
     glyph: "🩸",
     tags: ["tap game", "roster JJK", "score"],
     accent: "#dc2626",
+    previewImage: "/assets/builder-screen.png",
     status: "live",
   },
   {
@@ -25,6 +26,7 @@ export const GAMES: Game[] = [
     glyph: "🔺",
     tags: ["ranking", "drag & drop", "roster JJK"],
     accent: "#7c3aed",
+    previewImage: "/assets/pyramid-screen.png",
     status: "live",
   },
   // Exemple de jeu futur (grisé sur le hub) :

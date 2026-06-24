@@ -2,7 +2,7 @@ import { GameCard } from "@/components/GameCard";
 import { Logo } from "@/components/Logo";
 import { GAMES } from "@/lib/games/registry";
 
-const FEATURES = ["Sans compte", "Best score local", "Visuels 100 % maison"];
+const FEATURES = ["Sans compte", "Best score local"];
 
 /** Hub : liste tous les jeux du registre (système pluggable). */
 export default function HomePage() {
@@ -58,7 +58,7 @@ export default function HomePage() {
       </section>
 
       <footer className="mt-auto pt-20 text-center text-xs text-white/30">
-        Fan-projet non officiel · visuels 100 % originaux · aucun asset
+        Fan-projet non officiel · aucun asset
         copyrighté.
       </footer>
     </main>

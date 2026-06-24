@@ -20,6 +20,8 @@ export interface Game {
   tags?: string[];
   /** Couleur d'accent (hex) de la carte sur le hub. Défaut : violet "domain". */
   accent?: string;
+  /** Screenshot du jeu, révélé en fond de carte au survol (chemin sous public/). */
+  previewImage?: string;
   /** Permet de griser une carte "à venir" sans la retirer du registre. */
   status?: "live" | "coming-soon";
 }
