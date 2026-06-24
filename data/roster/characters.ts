@@ -460,6 +460,65 @@ export const ROSTER: Character[] = [
     image: "/assets/characters/Hiromi_Portrait_Anime.webp",
     ratings: { "cursed-energy": 70, versatility: 30, "domain-expansion": 100 },
   },
+
+  // ── École de Kyoto (utilisés par le jeu "JJK Pyramid") ──
+  // ratings vides → jamais tirés dans le builder ; images fournies plus tard.
+  {
+    id: "gakuganji",
+    name: "Yoshinobu Gakuganji",
+    title: "Directeur — École de Kyoto",
+    tier: "1",
+    image: "/assets/characters/Yoshinobu_Portrait_Anime.webp",
+    ratings: {},
+  },
+  {
+    id: "utahime",
+    name: "Utahime Iori",
+    title: "Enseignante — École de Kyoto",
+    tier: "2",
+    image: "/assets/characters/Utahime_Portrait_Anime.webp",
+    ratings: {},
+  },
+  {
+    id: "mai-zenin",
+    name: "Mai Zenin",
+    title: "Grade 2 — École de Kyoto",
+    tier: "2",
+    image: "/assets/characters/Mai_Portrait_Anime.webp",
+    ratings: {},
+  },
+  {
+    id: "miwa",
+    name: "Kasumi Miwa",
+    title: "Grade 3 — École de Kyoto",
+    tier: "3",
+    image: "/assets/characters/Kasumi_Portrait_Anime.webp",
+    ratings: {},
+  },
+  {
+    id: "mechamaru",
+    name: "Mechamaru (Kokichi Muta)",
+    title: "Grade 2 — École de Kyoto",
+    tier: "1",
+    image: "/assets/characters/Kokichi_Portrait_Anime.webp",
+    ratings: {},
+  },
+  {
+    id: "kamo",
+    name: "Noritoshi Kamo",
+    title: "Grade 2 — École de Kyoto",
+    tier: "2",
+    image: "/assets/characters/Noritoshi_Portrait_Anime.webp",
+    ratings: {},
+  },
+  {
+    id: "momo",
+    name: "Momo Nishimiya",
+    title: "Grade 2 — École de Kyoto",
+    tier: "3",
+    image: "/assets/characters/Momo_Portrait_Anime.webp",
+    ratings: {},
+  },
 ];
 
 /** Accès rapide à un personnage par son ID. */

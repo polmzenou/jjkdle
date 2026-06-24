@@ -18,6 +18,7 @@ import {
 import { saveBestScore } from "@/lib/bestScore";
 import { CategoryTile } from "@/components/CategoryTile";
 import { RankFooter } from "@/components/RankFooter";
+import { Logo } from "@/components/Logo";
 import { ScoreReveal } from "@/components/ScoreReveal";
 
 interface BuilderGameProps {
@@ -117,9 +118,7 @@ export function BuilderGame({
         >
           ← Home
         </Link>
-        <h1 className="glitch-hover font-display text-lg font-black uppercase tracking-wider text-white">
-          🩸 <span className="text-glow text-domain-light">Build the Sorcerer</span>
-        </h1>
+        <Logo className="h-12 w-auto sm:h-14" />
         <div className="flex items-center gap-3">
           <span className="text-xs font-bold uppercase tracking-wider text-white/70">
             Tap! ({lockedCount}/{total})

@@ -13,6 +13,18 @@ export const GAMES: Game[] = [
     route: "/games/builder",
     glyph: "🩸",
     tags: ["tap game", "roster JJK", "score"],
+    accent: "#dc2626",
+    status: "live",
+  },
+  {
+    id: "ranking",
+    title: "JJK Pyramid",
+    description:
+      "Classe 8 personnages du plus fort au plus faible selon la consigne. Les bonnes positions se verrouillent, les fausses reviennent. 4 tentatives, jusqu'à 10 000 points.",
+    route: "/games/ranking",
+    glyph: "🔺",
+    tags: ["ranking", "drag & drop", "roster JJK"],
+    accent: "#7c3aed",
     status: "live",
   },
   // Exemple de jeu futur (grisé sur le hub) :

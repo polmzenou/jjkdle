@@ -18,6 +18,8 @@ export interface Game {
   /** Emoji/glyphe de secours affiché si `thumbnail` est absent. */
   glyph?: string;
   tags?: string[];
+  /** Couleur d'accent (hex) de la carte sur le hub. Défaut : violet "domain". */
+  accent?: string;
   /** Permet de griser une carte "à venir" sans la retirer du registre. */
   status?: "live" | "coming-soon";
 }

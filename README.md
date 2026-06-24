@@ -1,7 +1,8 @@
 # JJK Arcade — Plateforme de mini-jeux Jujutsu Kaisen
 
 Plateforme web **modulaire** de mini-jeux autour de l'univers Jujutsu Kaisen.
-Jeu principal au lancement : **Build the Perfect Sorcerer** (tap game).
+Jeux disponibles : **Build the Perfect Sorcerer** (tap game) et **JJK Pyramid**
+(jeu de classement).
 
 > ⚠️ Fan-projet non officiel. **Aucun asset officiel copyrighté** : tous les
 > visuels sont des silhouettes/placeholders originaux.
@@ -89,6 +90,27 @@ présentes dans `ratings` déterminent les catégories où il peut apparaître.
 
 1. Ajouter une entrée `Game` dans `lib/games/registry.ts`.
 2. Créer la route `app/games/<id>/page.tsx`.
+
+## 🔺 Le jeu : JJK Pyramid
+
+Jeu de **classement**. Une consigne est tirée au hasard à chaque chargement
+(« Classe ces sorciers du plus fort au plus faible »…). Place les 8 personnages
+dans les slots 1→8 (**drag & drop** ou **tap-to-place**), puis **CHECK ORDER** :
+
+- Les bonnes positions se **verrouillent** (vert + 🔒).
+- Les mauvaises (flash rouge) **retournent** dans la zone « Available ».
+- **4 tentatives**. Points selon la tentative gagnante : 10 000 / 7 500 / 5 000 /
+  2 500. Épuiser les 4 tentatives = **Game Over**.
+
+Best score persistant en cookie (clé `ranking`).
+
+### Ajouter une condition (JJK Pyramid)
+
+Éditer `data/ranking/conditions.ts` : ajouter un objet `RankingCondition` avec
+`category`, `prompt` et `order` = **8 `id` de personnages**, du plus fort (rang 1)
+au plus faible (rang 8). Les `id` doivent exister dans le roster
+(`data/roster/characters.ts`) ; sinon, créer d'abord le personnage (un perso avec
+`ratings: {}` n'apparaît pas dans le builder mais reste utilisable ici).
 
 ## ☁️ Déploiement Vercel
 
