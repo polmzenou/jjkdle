@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import type { GradeTier } from "@/lib/scoring/grades";
 import type { CategoryBreakdown } from "@/lib/scoring/scoring";
 import { MAX_SCORE } from "@/lib/scoring/scoring";
+import { CategoryTile } from "./CategoryTile";
 
 interface ScoreRevealProps {
   score: number;
@@ -30,7 +31,7 @@ export function ScoreReveal({
       initial={{ opacity: 0, scale: 0.96 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.4 }}
-      className="mx-auto max-w-2xl rounded-3xl border border-white/10 bg-void-800/70 p-8 text-center backdrop-blur"
+      className="mx-auto max-w-3xl rounded-3xl border border-white/10 bg-void-800/70 p-8 text-center backdrop-blur"
     >
       <p className="text-sm uppercase tracking-[0.3em] text-white/40">
         Build terminé
@@ -61,18 +62,24 @@ export function ScoreReveal({
         </p>
       )}
 
-      {/* Détail par catégorie */}
-      <div className="mt-6 space-y-2 text-left">
-        {breakdown.map(({ category, character, normalized }) => (
+      {/* Récap des choix : mêmes cartes que le jeu, sans les points */}
+      <p className="mt-7 text-sm uppercase tracking-[0.2em] text-white/40">
+        Ton build
+      </p>
+      <div className="mt-3 flex flex-wrap justify-center gap-3">
+        {breakdown.map(({ category, character }) => (
           <div
             key={category.id}
-            className="flex items-center justify-between rounded-lg bg-void-700/50 px-3 py-2 text-sm"
+            // justify-center du parent → la dernière ligne incomplète est centrée.
+            className="w-[calc(33.333%-12px)] sm:w-[calc(25%-12px)] md:w-[calc(20%-12px)]"
           >
-            <span className="text-white/70">{category.label}</span>
-            <span className="font-medium text-white">
-              {character?.name ?? "—"}
-              <span className="ml-2 text-domain-light">+{normalized}</span>
-            </span>
+            <CategoryTile
+              category={category}
+              character={character}
+              locked
+              onTap={() => {}}
+              drawKey={0}
+            />
           </div>
         ))}
       </div>

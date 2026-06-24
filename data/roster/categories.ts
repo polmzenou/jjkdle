@@ -71,8 +71,8 @@ export const CATEGORIES: CategoryConfig[] = [
   },
   {
     id: "cursed-energy",
-    label: "Énergie maudite",
-    description: "Réserve et flux d'énergie maudite.",
+    label: "Énergie occulte",
+    description: "Réserve et flux d'énergie occulte.",
     weight: 1.2,
     drawCount: 4,
   },
