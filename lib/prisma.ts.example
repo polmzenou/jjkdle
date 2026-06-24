@@ -1,0 +1,17 @@
+// Helper client Prisma — À RENOMMER en `lib/prisma.ts` lors de l'activation du
+// leaderboard global. Laissé en `.example` pour ne pas casser le build du MVP
+// (qui n'a pas la dépendance @prisma/client installée).
+//
+//   npm install @prisma/client && npm install -D prisma
+//
+// Singleton pour éviter d'épuiser les connexions en dev (hot-reload Next).
+
+import { PrismaClient } from "@prisma/client";
+
+const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
+
+export const prisma = globalForPrisma.prisma ?? new PrismaClient();
+
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
+}

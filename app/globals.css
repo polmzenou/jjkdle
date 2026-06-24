@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+}
+
+@layer base {
+  html,
+  body {
+    @apply bg-void-900 text-white antialiased;
+    font-family: var(--font-body);
+  }
+
+  /* Scrollbar discrète façon "cursed" */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0a0a0f;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #5b21b6;
+    border-radius: 9999px;
+  }
+}
+
+@layer utilities {
+  /* Titre avec effet glitch léger au survol */
+  .glitch-hover:hover {
+    animation: glitch 0.4s steps(2, end) 1;
+  }
+
+  /* Texte néon "domain" */
+  .text-glow {
+    text-shadow: 0 0 12px rgba(124, 58, 237, 0.7);
+  }
+}

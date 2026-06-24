@@ -1,0 +1,26 @@
+// Schéma Prisma — OPTIONNEL, pour le leaderboard global futur (Neon Postgres).
+//
+// Le MVP n'utilise PAS cette base : le best score est stocké en cookie httpOnly.
+// Pour activer le leaderboard :
+//   1. Renseigner DATABASE_URL dans .env (voir .env.example).
+//   2. Décommenter le modèle ci-dessous.
+//   3. npx prisma generate && npx prisma migrate dev --name init_leaderboard
+//   4. Câbler app/api/leaderboard/route.ts (instructions dans le fichier).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// model LeaderboardEntry {
+//   id        String   @id @default(cuid())
+//   pseudo    String   @db.VarChar(24)
+//   score     Int
+//   createdAt DateTime @default(now())
+//
+//   @@index([score])
+// }

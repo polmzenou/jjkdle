@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Silhouette générique ORIGINALE (aucun visuel officiel). Placeholder maison. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img" aria-label="Silhouette de sorcier">
+  <defs>
+    <radialGradient id="aura" cx="50%" cy="35%" r="70%">
+      <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#0a0a0f" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="120" height="120" fill="#12121c"/>
+  <circle cx="60" cy="55" r="50" fill="url(#aura)"/>
+  <!-- Tête + buste stylisés -->
+  <circle cx="60" cy="42" r="18" fill="#1b1b2b" stroke="#7c3aed" stroke-width="2"/>
+  <path d="M28 110c0-22 14-38 32-38s32 16 32 38z" fill="#1b1b2b" stroke="#7c3aed" stroke-width="2"/>
+  <!-- Yeux néon -->
+  <circle cx="53" cy="42" r="2.4" fill="#a78bfa"/>
+  <circle cx="67" cy="42" r="2.4" fill="#a78bfa"/>
+</svg>

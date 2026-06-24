@@ -1,0 +1,138 @@
+import { describe, it, expect } from "vitest";
+import type { CategoryConfig, CategoryId } from "@/data/roster/categories";
+import type { Character } from "@/data/roster/characters";
+import {
+  eligibleFor,
+  drawCategory,
+  drawAll,
+  redrawUnlocked,
+  drawOne,
+  drawAllOne,
+  redrawUnlockedOne,
+  seededRng,
+} from "./draw";
+
+function char(id: string, ratings: Character["ratings"]): Character {
+  return { id, name: id, title: "", tier: "3", ratings };
+}
+
+const roster: Character[] = [
+  char("a", { speed: 90, "domain-expansion": 80 }),
+  char("b", { speed: 70 }),
+  char("c", { speed: 60, "domain-expansion": 50 }),
+  char("d", { speed: 40 }),
+  char("e", { speed: 30 }),
+];
+
+const speed: CategoryConfig = {
+  id: "speed",
+  label: "Vitesse",
+  description: "",
+  weight: 1,
+  drawCount: 3,
+};
+const domain: CategoryConfig = {
+  id: "domain-expansion",
+  label: "Domaine",
+  description: "",
+  weight: 1,
+  drawCount: 4,
+};
+
+describe("eligibleFor", () => {
+  it("ne garde que les personnages notés sur la catégorie", () => {
+    const ids = eligibleFor("domain-expansion", roster).map((c) => c.id);
+    expect(ids.sort()).toEqual(["a", "c"]);
+  });
+});
+
+describe("drawCategory", () => {
+  it("respecte le plafond drawCount", () => {
+    const drawn = drawCategory(speed, roster, seededRng(1));
+    expect(drawn).toHaveLength(3); // 5 éligibles, plafond 3
+  });
+
+  it("limite à nbÉligibles quand ils sont moins nombreux que drawCount", () => {
+    const drawn = drawCategory(domain, roster, seededRng(1));
+    expect(drawn).toHaveLength(2); // seulement a et c sont éligibles
+  });
+
+  it("ne produit pas de doublon dans la ligne", () => {
+    const ids = drawCategory(speed, roster, seededRng(7)).map((c) => c.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it("est déterministe avec une graine fixe", () => {
+    const a = drawCategory(speed, roster, seededRng(42)).map((c) => c.id);
+    const b = drawCategory(speed, roster, seededRng(42)).map((c) => c.id);
+    expect(a).toEqual(b);
+  });
+});
+
+describe("drawAll", () => {
+  it("tire toutes les catégories", () => {
+    const draw = drawAll([speed, domain], roster, seededRng(3));
+    expect(Object.keys(draw).sort()).toEqual(["domain-expansion", "speed"]);
+  });
+});
+
+describe("redrawUnlocked", () => {
+  it("conserve les catégories verrouillées et re-tire les autres", () => {
+    const initial = drawAll([speed, domain], roster, seededRng(5));
+    const locked = new Set<CategoryId>(["speed"]);
+    const next = redrawUnlocked(
+      initial,
+      [speed, domain],
+      locked,
+      roster,
+      seededRng(99),
+    );
+    // 'speed' verrouillée → référence identique conservée.
+    expect(next.speed).toBe(initial.speed);
+    // 'domain-expansion' re-tirée → toujours valide (≤ 2 éligibles).
+    expect(next["domain-expansion"].length).toBeLessThanOrEqual(2);
+  });
+});
+
+describe("drawOne (variante grille)", () => {
+  it("tire un personnage éligible", () => {
+    const c = drawOne("domain-expansion", roster, seededRng(1));
+    expect(c).not.toBeNull();
+    expect(["a", "c"]).toContain(c?.id);
+  });
+
+  it("renvoie null si aucun éligible", () => {
+    // Aucun personnage du roster de test n'a de note 'battle-iq'.
+    const c = drawOne("battle-iq", roster, seededRng(1));
+    expect(c).toBeNull();
+  });
+
+  it("est déterministe avec une graine fixe", () => {
+    const a = drawOne("speed", roster, seededRng(42));
+    const b = drawOne("speed", roster, seededRng(42));
+    expect(a?.id).toBe(b?.id);
+  });
+});
+
+describe("drawAllOne / redrawUnlockedOne", () => {
+  it("tire un perso par catégorie", () => {
+    const draw = drawAllOne([speed, domain], roster, seededRng(3));
+    expect(Object.keys(draw).sort()).toEqual(["domain-expansion", "speed"]);
+  });
+
+  it("conserve les catégories verrouillées et re-tire les autres", () => {
+    const initial = drawAllOne([speed, domain], roster, seededRng(5));
+    const locked = new Set<CategoryId>(["speed"]);
+    const next = redrawUnlockedOne(
+      initial,
+      [speed, domain],
+      locked,
+      roster,
+      seededRng(99),
+    );
+    expect(next.speed).toBe(initial.speed); // verrouillée → conservée
+    expect(["a", "c", null]).toContainEqual(
+      next["domain-expansion"]?.id ?? null,
+    );
+  });
+});
