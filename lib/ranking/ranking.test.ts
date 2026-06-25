@@ -50,14 +50,14 @@ describe("isComplete", () => {
 
 describe("pickRandomCondition / shuffledPool", () => {
   it("tire une condition du pool", () => {
-    const c = pickRandomCondition(seededRng(1));
+    const c = pickRandomCondition(CONDITIONS, seededRng(1));
     expect(CONDITIONS).toContain(c);
   });
 
   it("ne retombe jamais sur la condition exclue", () => {
     for (const excluded of CONDITIONS) {
       for (let seed = 0; seed < 50; seed++) {
-        const c = pickRandomCondition(seededRng(seed), excluded.id);
+        const c = pickRandomCondition(CONDITIONS, seededRng(seed), excluded.id);
         expect(c.id).not.toBe(excluded.id);
       }
     }

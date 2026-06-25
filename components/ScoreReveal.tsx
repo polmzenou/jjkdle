@@ -14,6 +14,7 @@ interface ScoreRevealProps {
   breakdown: CategoryBreakdown[];
   bestScore: number;
   isNewRecord: boolean;
+  isAuthed: boolean;
   onRestart: () => void;
 }
 
@@ -23,6 +24,7 @@ export function ScoreReveal({
   breakdown,
   bestScore,
   isNewRecord,
+  isAuthed,
   onRestart,
 }: ScoreRevealProps) {
   const animatedScore = useCountUp(score, 1100);
@@ -86,7 +88,7 @@ export function ScoreReveal({
       </div>
 
       <div className="mx-auto max-w-sm">
-        <SubmitScore score={score} game="builder" />
+        <SubmitScore score={score} game="builder" isAuthed={isAuthed} />
       </div>
 
       <button

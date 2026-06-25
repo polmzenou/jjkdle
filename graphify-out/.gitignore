@@ -1,0 +1,9 @@
+# graphify : on versionne les sorties portables (graph.html, graph.json,
+# GRAPH_REPORT.md) mais pas les fichiers spécifiques à la machine ni le cache.
+.graphify_python
+.graphify_root
+.graphify_labels.json
+.detect_err.txt
+cache/
+manifest.json
+cost.json

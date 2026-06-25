@@ -1,46 +1,38 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import {
-  addEntry,
-  writesAllowed,
-  MAX_SCORE,
-  type LeaderboardGame,
-} from "./store";
+import { getCurrentUser } from "@/lib/auth/session";
+import { saveScore, MAX_SCORE, type LeaderboardGame } from "./store";
 
-export type SubmitResult = { ok: boolean; error?: string };
+export type SubmitResult = {
+  ok: boolean;
+  error?: string;
+  /** true si l'erreur vient d'une absence de connexion (UI propose /login). */
+  needsAuth?: boolean;
+};
 
 const GAMES: LeaderboardGame[] = ["builder", "ranking"];
 
-/** Nettoie un pseudo : retire les chevrons, compresse les espaces, limite à 24. */
-function cleanPseudo(raw: unknown): string {
-  return String(raw ?? "")
-    .replace(/[<>]/g, "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 24);
-}
-
-/** Ajoute un score au leaderboard global après validation. */
+/**
+ * Enregistre le score de l'utilisateur connecté au leaderboard.
+ * Refuse si l'utilisateur n'est pas connecté (jouer reste possible sans compte,
+ * mais l'enregistrement des scores nécessite un compte).
+ */
 export async function submitScoreAction(
-  pseudoRaw: string,
   scoreRaw: number,
   game: LeaderboardGame,
 ): Promise<SubmitResult> {
-  if (!writesAllowed()) {
+  const user = await getCurrentUser();
+  if (!user) {
     return {
       ok: false,
-      error:
-        "Leaderboard en lecture seule sur Vercel (filesystem). À utiliser en local.",
+      needsAuth: true,
+      error: "Connecte-toi pour enregistrer ton score.",
     };
   }
+
   if (!GAMES.includes(game)) {
     return { ok: false, error: "Jeu inconnu." };
-  }
-
-  const pseudo = cleanPseudo(pseudoRaw);
-  if (pseudo.length < 2) {
-    return { ok: false, error: "Pseudo trop court (2 caractères minimum)." };
   }
 
   const score = Math.round(Number(scoreRaw));
@@ -49,9 +41,9 @@ export async function submitScoreAction(
   }
 
   try {
-    await addEntry({ pseudo, score, game });
+    await saveScore(user.id, game, score);
   } catch (e) {
-    return { ok: false, error: `Échec d'écriture : ${(e as Error).message}` };
+    return { ok: false, error: `Échec d'enregistrement : ${(e as Error).message}` };
   }
 
   revalidatePath(`/games/${game}`);

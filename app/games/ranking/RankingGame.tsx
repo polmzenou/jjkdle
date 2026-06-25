@@ -25,6 +25,8 @@ import {
 } from "@/lib/ranking/ranking";
 import { saveBestScore } from "@/lib/bestScore";
 import { formatScore } from "@/lib/format";
+import type { Character } from "@/data/roster/characters";
+import { RosterProvider } from "@/components/ranking/RosterContext";
 import { RankingSlot } from "@/components/ranking/RankingSlot";
 import { CharacterPool } from "@/components/ranking/CharacterPool";
 import { AttemptsBar } from "@/components/ranking/AttemptsBar";
@@ -35,6 +37,11 @@ import { Logo } from "@/components/Logo";
 
 interface RankingGameProps {
   initialBestScore: number;
+  isAuthed: boolean;
+  /** Conditions du jeu (depuis la base). */
+  conditions: RankingCondition[];
+  /** Roster indexé par id, pour résoudre les cartes côté client. */
+  characterById: Record<string, Character>;
 }
 
 type Status = "playing" | "won" | "lost";
@@ -42,7 +49,17 @@ type Status = "playing" | "won" | "lost";
 const emptySlots = () => Array<string | null>(SLOT_COUNT).fill(null);
 const emptyFlags = () => Array<boolean>(SLOT_COUNT).fill(false);
 
-export function RankingGame({ initialBestScore }: RankingGameProps) {
+export function RankingGame({
+  initialBestScore,
+  isAuthed,
+  conditions,
+  characterById,
+}: RankingGameProps) {
+  // Conditions lues via une ref : `startNewGame` reste à deps [] (identité
+  // stable) pour ne pas réinitialiser la partie lors d'un refresh de route
+  // (déclenché par la soumission de score au leaderboard).
+  const conditionsRef = useRef(conditions);
+  conditionsRef.current = conditions;
   // Tiré côté client (post-montage) pour éviter le mismatch d'hydratation.
   const [condition, setCondition] = useState<RankingCondition | null>(null);
   const [poolOrder, setPoolOrder] = useState<string[]>([]);
@@ -62,7 +79,12 @@ export function RankingGame({ initialBestScore }: RankingGameProps) {
   // route (déclenché par le Server Action saveBestScore) réinitialiserait la
   // partie et ferait disparaître le modal de victoire.
   const startNewGame = useCallback(() => {
-    const c = pickRandomCondition(Math.random, lastConditionId.current);
+    if (conditionsRef.current.length === 0) return;
+    const c = pickRandomCondition(
+      conditionsRef.current,
+      Math.random,
+      lastConditionId.current,
+    );
     lastConditionId.current = c.id;
     setCondition(c);
     setPoolOrder(shuffledPool(c));
@@ -187,11 +209,20 @@ export function RankingGame({ initialBestScore }: RankingGameProps) {
     }
   }, [condition, allFilled, status, slots, locked, attempt]);
 
+  if (conditions.length === 0) {
+    return (
+      <p className="py-24 text-center text-white/40">
+        Aucune condition disponible pour le moment.
+      </p>
+    );
+  }
+
   if (!condition) {
     return <p className="py-24 text-center text-white/40">Chargement…</p>;
   }
 
   return (
+    <RosterProvider value={characterById}>
     <div>
       {/* En-tête */}
       <header className="mb-4 flex items-center justify-between py-4">
@@ -280,6 +311,7 @@ export function RankingGame({ initialBestScore }: RankingGameProps) {
           score={score}
           bestScore={bestScore}
           isNewRecord={isNewRecord}
+          isAuthed={isAuthed}
           onReplay={startNewGame}
         />
       )}
@@ -291,5 +323,6 @@ export function RankingGame({ initialBestScore }: RankingGameProps) {
         />
       )}
     </div>
+    </RosterProvider>
   );
 }

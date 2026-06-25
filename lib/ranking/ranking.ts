@@ -1,5 +1,4 @@
 import type { RankingCondition } from "@/data/ranking/conditions";
-import { CONDITIONS } from "@/data/ranking/conditions";
 import { shuffle, type Rng } from "@/lib/draw/draw";
 
 /**
@@ -38,19 +37,20 @@ export function isComplete(correctFlags: boolean[]): boolean {
 }
 
 /**
- * Tire une condition au hasard dans le pool.
+ * Tire une condition au hasard dans `conditions`.
  * `excludeId` permet d'éviter de retomber sur la condition précédente
  * (ignoré s'il ne reste plus qu'une condition possible).
  */
 export function pickRandomCondition(
+  conditions: RankingCondition[],
   rng: Rng = Math.random,
   excludeId?: string,
 ): RankingCondition {
   const pool =
     excludeId === undefined
-      ? CONDITIONS
-      : CONDITIONS.filter((c) => c.id !== excludeId);
-  const from = pool.length > 0 ? pool : CONDITIONS;
+      ? conditions
+      : conditions.filter((c) => c.id !== excludeId);
+  const from = pool.length > 0 ? pool : conditions;
   return from[Math.floor(rng() * from.length)];
 }
 

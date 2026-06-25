@@ -1,17 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import {
-  checkPassword,
-  isAdminAuthed,
-  setAdminCookie,
-  clearAdminCookie,
-} from "@/lib/admin/auth";
-import {
-  upsertCharacter,
-  deleteCharacter,
-  writesAllowed,
-} from "@/lib/admin/roster-store";
+import { getAdminUser } from "@/lib/auth/session";
+import { upsertCharacter, deleteCharacter } from "@/lib/admin/roster-store";
 import type { Character, CharacterTier } from "@/data/roster/characters";
 import { CATEGORY_BY_ID, type CategoryId } from "@/data/roster/categories";
 
@@ -19,29 +10,12 @@ export type ActionResult = { ok: boolean; error?: string };
 
 const TIERS: CharacterTier[] = ["4minus", "4", "3", "2", "1", "s"];
 
-export async function loginAction(password: string): Promise<ActionResult> {
-  if (!checkPassword(password)) {
-    return { ok: false, error: "Mot de passe incorrect." };
-  }
-  await setAdminCookie();
-  return { ok: true };
-}
-
-export async function logoutAction(): Promise<void> {
-  await clearAdminCookie();
-}
-
-/** Valide + enregistre (ajout ou édition) un personnage dans le JSON. */
+/** Valide + enregistre (ajout ou édition) un personnage en base. */
 export async function saveCharacterAction(
   input: Character,
 ): Promise<ActionResult> {
-  if (!(await isAdminAuthed())) return { ok: false, error: "Non authentifié." };
-  if (!writesAllowed()) {
-    return {
-      ok: false,
-      error:
-        "Écriture impossible sur Vercel (filesystem en lecture seule). Édite en local puis commit/redeploy.",
-    };
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
   }
 
   const id = String(input.id ?? "").trim();
@@ -89,9 +63,8 @@ export async function saveCharacterAction(
 }
 
 export async function deleteCharacterAction(id: string): Promise<ActionResult> {
-  if (!(await isAdminAuthed())) return { ok: false, error: "Non authentifié." };
-  if (!writesAllowed()) {
-    return { ok: false, error: "Suppression impossible sur Vercel (lecture seule)." };
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
   }
   try {
     await deleteCharacter(id);

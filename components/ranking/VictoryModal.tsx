@@ -12,6 +12,7 @@ interface VictoryModalProps {
   score: number;
   bestScore: number;
   isNewRecord: boolean;
+  isAuthed: boolean;
   onReplay: () => void;
 }
 
@@ -22,6 +23,7 @@ export function VictoryModal({
   score,
   bestScore,
   isNewRecord,
+  isAuthed,
   onReplay,
 }: VictoryModalProps) {
   return (
@@ -73,7 +75,7 @@ export function VictoryModal({
           ))}
         </div>
 
-        <SubmitScore score={score} game="ranking" />
+        <SubmitScore score={score} game="ranking" isAuthed={isAuthed} />
 
         <button
           type="button"

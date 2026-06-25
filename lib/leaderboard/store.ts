@@ -1,13 +1,10 @@
-import { readFile, writeFile, mkdir } from "node:fs/promises";
-import { randomUUID } from "node:crypto";
-import { dirname, resolve } from "node:path";
+import { prisma } from "@/lib/prisma";
 
 /**
- * Stockage du leaderboard (data/leaderboard/entries.json).
+ * Leaderboard global (Neon Postgres via Prisma).
  *
- * Même contrat que le roster (lib/admin/roster-store.ts) : lecture possible
- * partout, écriture uniquement en local (le filesystem de Vercel est en
- * lecture seule). `writesAllowed()` le détecte pour bloquer proprement.
+ * Les scores sont liés à un compte (table `Score`, un meilleur score par
+ * couple utilisateur/jeu). Le pseudo affiché est le `username` du compte.
  */
 
 export type LeaderboardGame = "builder" | "ranking";
@@ -16,8 +13,6 @@ export interface LeaderboardEntry {
   id: string;
   pseudo: string;
   score: number;
-  game: LeaderboardGame;
-  createdAt: string;
 }
 
 /** Score maximum atteignable par jeu (sert à valider les soumissions). */
@@ -26,69 +21,50 @@ export const MAX_SCORE: Record<LeaderboardGame, number> = {
   ranking: 10000,
 };
 
-const FILE = resolve(process.cwd(), "data/leaderboard/entries.json");
-/** Plafond d'entrées conservées pour éviter une croissance illimitée du fichier. */
-const MAX_STORED = 500;
+/**
+ * Enregistre le score d'un utilisateur pour un jeu : ne met à jour que si
+ * c'est un nouveau record. Renvoie le meilleur score à jour et si un record
+ * a été battu.
+ */
+export async function saveScore(
+  userId: string,
+  game: LeaderboardGame,
+  score: number,
+): Promise<{ best: number; isNewRecord: boolean }> {
+  const existing = await prisma.score.findUnique({
+    where: { userId_gameId: { userId, gameId: game } },
+  });
 
-/** Les écritures sont-elles possibles (hors Vercel) ? */
-export function writesAllowed(): boolean {
-  return !process.env.VERCEL;
-}
-
-export async function readLeaderboard(): Promise<LeaderboardEntry[]> {
-  try {
-    const raw = await readFile(FILE, "utf8");
-    const list = JSON.parse(raw) as unknown;
-    return Array.isArray(list) ? (list as LeaderboardEntry[]) : [];
-  } catch {
-    // Fichier absent / illisible → leaderboard vide.
-    return [];
+  if (existing && existing.best >= score) {
+    return { best: existing.best, isNewRecord: false };
   }
+
+  await prisma.score.upsert({
+    where: { userId_gameId: { userId, gameId: game } },
+    create: { userId, gameId: game, best: score },
+    update: { best: score },
+  });
+
+  return { best: score, isNewRecord: true };
 }
 
 /**
- * Top N trié par score décroissant (départage par ancienneté).
- * Si `game` est fourni, ne garde que les scores de ce jeu.
+ * Top N d'un jeu (meilleur score décroissant, départage par ancienneté).
  */
 export async function topEntries(
   limit = 8,
   game?: LeaderboardGame,
 ): Promise<LeaderboardEntry[]> {
-  const list = await readLeaderboard();
-  return list
-    .filter((e) => (game ? e.game === game : true))
-    .sort(
-      (a, b) => b.score - a.score || a.createdAt.localeCompare(b.createdAt),
-    )
-    .slice(0, limit);
-}
+  const rows = await prisma.score.findMany({
+    where: game ? { gameId: game } : undefined,
+    orderBy: [{ best: "desc" }, { updatedAt: "asc" }],
+    take: limit,
+    include: { user: { select: { username: true } } },
+  });
 
-async function writeLeaderboard(list: LeaderboardEntry[]): Promise<void> {
-  await mkdir(dirname(FILE), { recursive: true });
-  await writeFile(FILE, JSON.stringify(list, null, 2) + "\n", "utf8");
-}
-
-/** Ajoute une entrée (déjà validée par l'appelant) et renvoie l'entrée créée. */
-export async function addEntry(input: {
-  pseudo: string;
-  score: number;
-  game: LeaderboardGame;
-}): Promise<LeaderboardEntry> {
-  const list = await readLeaderboard();
-  const entry: LeaderboardEntry = {
-    id: randomUUID(),
-    pseudo: input.pseudo,
-    score: input.score,
-    game: input.game,
-    createdAt: new Date().toISOString(),
-  };
-  list.push(entry);
-
-  // Ne garde que les meilleurs scores si on dépasse le plafond.
-  const trimmed = list
-    .sort((a, b) => b.score - a.score || a.createdAt.localeCompare(b.createdAt))
-    .slice(0, MAX_STORED);
-
-  await writeLeaderboard(trimmed);
-  return entry;
+  return rows.map((r) => ({
+    id: r.id,
+    pseudo: r.user.username,
+    score: r.best,
+  }));
 }
