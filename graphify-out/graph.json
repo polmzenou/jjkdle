@@ -4,36 +4,6 @@
   "graph": {},
   "nodes": [
     {
-      "label": "settings.local.json",
-      "file_type": "code",
-      "source_file": ".claude/settings.local.json",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "claude_settings_local",
-      "community": 10,
-      "norm_label": "settings.local.json"
-    },
-    {
-      "label": "permissions",
-      "file_type": "code",
-      "source_file": ".claude/settings.local.json",
-      "source_location": "L2",
-      "_origin": "ast",
-      "id": "claude_settings_local_permissions",
-      "community": 10,
-      "norm_label": "permissions"
-    },
-    {
-      "label": "allow",
-      "file_type": "code",
-      "source_file": ".claude/settings.local.json",
-      "source_location": "L3",
-      "_origin": "ast",
-      "id": "claude_settings_local_permissions_allow",
-      "community": 10,
-      "norm_label": "allow"
-    },
-    {
       "label": "LoginForm.tsx",
       "file_type": "code",
       "source_file": "app/(auth)/login/LoginForm.tsx",
@@ -730,7 +700,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "ranking_rankinggame_rankinggame",
-      "community": 1,
+      "community": 4,
       "norm_label": "rankinggame()"
     },
     {
@@ -1190,7 +1160,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "leaderboard_leaderboard_leaderboard",
-      "community": 6,
+      "community": 4,
       "norm_label": "leaderboard()"
     },
     {
@@ -1564,22 +1534,12 @@
       "norm_label": "category_by_id"
     },
     {
-      "label": "characters.json",
-      "file_type": "code",
-      "source_file": "data/roster/characters.json",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "data_roster_characters_json_roster_characters",
-      "community": 13,
-      "norm_label": "characters.json"
-    },
-    {
       "label": "characters.ts",
       "file_type": "code",
       "source_file": "data/roster/characters.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "data_roster_characters_ts_roster_characters",
+      "id": "roster_characters",
       "community": 0,
       "norm_label": "characters.ts"
     },
@@ -3677,26 +3637,6 @@
   ],
   "links": [
     {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".claude/settings.local.json",
-      "source_location": "L2",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "claude_settings_local",
-      "target": "claude_settings_local_permissions"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".claude/settings.local.json",
-      "source_location": "L3",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "claude_settings_local_permissions",
-      "target": "claude_settings_local_permissions_allow"
-    },
-    {
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -4244,6 +4184,17 @@
       "target": "roster_categories_categoryconfig"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/AdminDashboard.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "admin_admindashboard",
+      "target": "roster_characters",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -4294,6 +4245,7 @@
       "source_file": "app/admin/AdminDashboard.tsx",
       "source_location": "L33",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_admindashboard_admindashboardprops",
       "target": "auth_users_adminuser",
       "confidence_score": 1.0
@@ -4853,6 +4805,17 @@
       "target": "roster_categories_categoryid"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "admin_actions",
+      "target": "roster_characters",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -5145,6 +5108,17 @@
       "confidence_score": 1.0,
       "source": "admin_page",
       "target": "leaderboard_store_listallscores"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/page.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "admin_page",
+      "target": "roster_characters",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -5587,6 +5561,17 @@
       "confidence_score": 1.0,
       "source": "builder_buildergame",
       "target": "roster_categories_categoryid"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/games/builder/BuilderGame.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "builder_buildergame",
+      "target": "roster_characters",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -6294,6 +6279,17 @@
       "target": "ranking_victorymodal_victorymodal"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/games/ranking/RankingGame.tsx",
+      "source_location": "L28",
+      "weight": 1.0,
+      "source": "ranking_rankinggame",
+      "target": "roster_characters",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -6779,6 +6775,17 @@
       "target": "roster_categories_categoryconfig"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "components/CategoryTile.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "components_categorytile",
+      "target": "roster_characters",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -6862,6 +6869,17 @@
       "confidence_score": 1.0,
       "source": "components_characterimage",
       "target": "components_characterimage_initials"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "components/CharacterImage.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "components_characterimage",
+      "target": "roster_characters",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -7959,6 +7977,17 @@
       "target": "ranking_rostercontext_usecharacter"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "components/ranking/RosterContext.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "ranking_rostercontext",
+      "target": "roster_characters",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -8145,17 +8174,6 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
-      "source_file": "data/roster/characters.ts",
-      "source_location": "L1",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "data_roster_characters_ts_roster_characters",
-      "target": "roster_categories"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
       "source_file": "lib/draw/draw.ts",
       "source_location": "L1",
       "weight": 1.0,
@@ -8229,6 +8247,17 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "data/roster/characters.ts",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "roster_characters",
+      "target": "roster_categories",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "lib/scoring/scoring.ts",
       "source_location": "L1",
       "weight": 1.0,
@@ -8262,17 +8291,6 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
-      "source_file": "data/roster/characters.ts",
-      "source_location": "L1",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "data_roster_characters_ts_roster_characters",
-      "target": "roster_categories_categoryid"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
       "source_file": "lib/draw/draw.ts",
       "source_location": "L1",
       "weight": 1.0,
@@ -8290,6 +8308,17 @@
       "confidence_score": 1.0,
       "source": "draw_draw_test",
       "target": "roster_categories_categoryid"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "data/roster/characters.ts",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "roster_characters",
+      "target": "roster_categories_categoryid",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -8405,11 +8434,77 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "lib/admin/roster-store.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "admin_roster_store",
+      "target": "roster_characters",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/content/queries.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "content_queries",
+      "target": "roster_characters",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/draw/draw.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "draw_draw",
+      "target": "roster_characters",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/draw/draw.test.ts",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "draw_draw_test",
+      "target": "roster_characters",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/seed.ts",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "prisma_seed",
+      "target": "roster_characters",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/ranking/ranking.test.ts",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "ranking_ranking_test",
+      "target": "roster_characters",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "data/roster/characters.ts",
       "source_location": "L2",
       "weight": 1.0,
-      "source": "data_roster_characters_ts_roster_characters",
-      "target": "data_roster_characters_ts_roster_characters",
+      "source": "roster_characters",
+      "target": "roster_characters",
       "confidence_score": 1.0
     },
     {
@@ -8418,9 +8513,9 @@
       "source_file": "data/roster/characters.ts",
       "source_location": "L24",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "data_roster_characters_ts_roster_characters",
-      "target": "roster_characters_character"
+      "source": "roster_characters",
+      "target": "roster_characters_character",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -8428,9 +8523,9 @@
       "source_file": "data/roster/characters.ts",
       "source_location": "L44",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "data_roster_characters_ts_roster_characters",
-      "target": "roster_characters_character_by_id"
+      "source": "roster_characters",
+      "target": "roster_characters_character_by_id",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -8438,9 +8533,9 @@
       "source_file": "data/roster/characters.ts",
       "source_location": "L22",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "data_roster_characters_ts_roster_characters",
-      "target": "roster_characters_charactertier"
+      "source": "roster_characters",
+      "target": "roster_characters_charactertier",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -8448,9 +8543,31 @@
       "source_file": "data/roster/characters.ts",
       "source_location": "L41",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "data_roster_characters_ts_roster_characters",
-      "target": "roster_characters_roster"
+      "source": "roster_characters",
+      "target": "roster_characters_roster",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/scoring/scoring.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "scoring_scoring",
+      "target": "roster_characters",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/scoring/scoring.test.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "scoring_scoring_test",
+      "target": "roster_characters",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
