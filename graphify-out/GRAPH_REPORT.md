@@ -15,18 +15,19 @@
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- [[_COMMUNITY_Community 0|Community 0]]
-- [[_COMMUNITY_Community 1|Community 1]]
-- [[_COMMUNITY_Community 2|Community 2]]
-- [[_COMMUNITY_Community 3|Community 3]]
+- [[_COMMUNITY_Builder, Draw & Scoring|Builder, Draw & Scoring]]
+- [[_COMMUNITY_Pyramid Game & Ranking Logic|Pyramid Game & Ranking Logic]]
+- [[_COMMUNITY_Auth & Site Shell|Auth & Site Shell]]
+- [[_COMMUNITY_Dependencies & Tooling|Dependencies & Tooling]]
 - [[_COMMUNITY_Community 4|Community 4]]
-- [[_COMMUNITY_Community 6|Community 6]]
-- [[_COMMUNITY_Community 7|Community 7]]
-- [[_COMMUNITY_Community 8|Community 8]]
-- [[_COMMUNITY_Community 9|Community 9]]
-- [[_COMMUNITY_Community 11|Community 11]]
-- [[_COMMUNITY_Community 12|Community 12]]
-- [[_COMMUNITY_Community 14|Community 14]]
+- [[_COMMUNITY_Leaderboard|Leaderboard]]
+- [[_COMMUNITY_TypeScript Config|TypeScript Config]]
+- [[_COMMUNITY_Game Registry & Showcase|Game Registry & Showcase]]
+- [[_COMMUNITY_Domain Concepts & Rationale|Domain Concepts & Rationale]]
+- [[_COMMUNITY_Claude Permissions Config|Claude Permissions Config]]
+- [[_COMMUNITY_PostCSS Config|PostCSS Config]]
+- [[_COMMUNITY_Tailwind Config|Tailwind Config]]
+- [[_COMMUNITY_Next.js Config|Next.js Config]]
 - [[_COMMUNITY_Community 16|Community 16]]
 - [[_COMMUNITY_Community 18|Community 18]]
 - [[_COMMUNITY_Community 19|Community 19]]
@@ -36,6 +37,8 @@
 2. `getCurrentUser` - 16 edges
 3. `compilerOptions` - 16 edges
 4. `CategoryConfig` - 13 edges
+5. `getAdminUser()` - 12 edges
+6. `scripts` - 12 edges
 5. `getAdminUser()` - 12 edges
 6. `scripts` - 12 edges
 7. `CategoryId` - 9 edges
@@ -52,6 +55,8 @@
   app/(auth)/register/page.tsx → lib/auth/session.ts
 - `FormState` --references--> `CharacterTier`  [EXTRACTED]
   app/admin/AdminDashboard.tsx → data/roster/characters.ts
+- `AdminDashboardProps` --references--> `CategoryConfig`  [EXTRACTED]
+  app/admin/AdminDashboard.tsx → data/roster/categories.ts
 - `AdminDashboardProps` --references--> `CategoryConfig`  [EXTRACTED]
   app/admin/AdminDashboard.tsx → data/roster/categories.ts
 
@@ -78,6 +83,7 @@ Nodes (37): dependencies, @dnd-kit/core, @dnd-kit/utilities, framer-motion, next
 
 ### Community 4 - "Community 4"
 Cohesion: 0.15
+Nodes (19): AdminDashboard(), AdminPage(), metadata, readRoster(), listUsers(), BuilderGame(), BuilderPage(), metadata (+11 more)
 Nodes (19): AdminDashboard(), AdminPage(), metadata, readRoster(), listUsers(), BuilderGame(), BuilderPage(), metadata (+11 more)
 
 ### Community 6 - "Community 6"

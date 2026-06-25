@@ -66,8 +66,10 @@ export default async function AdminPage() {
     roster = [];
   }
   const [categories, scores, users] = await Promise.all([
+  const [categories, scores, users] = await Promise.all([
     getCategories(),
     listAllScores(),
+    listUsers(),
     listUsers(),
   ]);
 
@@ -76,6 +78,8 @@ export default async function AdminPage() {
       roster={roster}
       categories={categories}
       scores={scores}
+      users={users}
+      currentUserId={user.id}
       users={users}
       currentUserId={user.id}
     />
