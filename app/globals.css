@@ -8,9 +8,14 @@
 }
 
 @layer base {
-  html,
-  body {
+  /* Le fond opaque va sur <html> (le canvas) et PAS sur <body> : sinon le
+     fond du body recouvre les calques décoratifs en `position: fixed`
+     (CursedBackground, MangaDecor) à cause de l'ordre de peinture CSS. */
+  html {
     @apply bg-void-900 text-white antialiased;
+  }
+  body {
+    @apply text-white antialiased;
     font-family: var(--font-body);
   }
 

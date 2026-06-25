@@ -8,17 +8,6 @@ export function CursedBackground() {
       {/* Dégradé de base */}
       <div className="absolute inset-0 bg-void-900" />
 
-      {/* Halos violet/rouge en glow lent */}
-      <div className="absolute -left-32 top-1/4 h-96 w-96 rounded-full bg-domain/20 blur-3xl animate-glow-pulse" />
-      <div
-        className="absolute -right-24 top-2/3 h-80 w-80 rounded-full bg-cursed/15 blur-3xl animate-glow-pulse"
-        style={{ animationDelay: "1.2s" }}
-      />
-      <div
-        className="absolute left-1/2 top-0 h-72 w-72 -translate-x-1/2 rounded-full bg-domain-dark/20 blur-3xl animate-glow-pulse"
-        style={{ animationDelay: "0.6s" }}
-      />
-
       {/* Grille subtile */}
       <div
         className="absolute inset-0 opacity-[0.04]"

@@ -70,6 +70,47 @@ export async function topEntries(
 }
 
 // ──────────────────────────────────────────────────────────────────────────
+// Récap personnel (vue /account)
+// ──────────────────────────────────────────────────────────────────────────
+
+export interface UserScore {
+  gameId: string;
+  best: number;
+  /** Position dans le classement du jeu (1 = meilleur). */
+  rank: number;
+  /** Nombre total de joueurs classés sur ce jeu. */
+  totalPlayers: number;
+  /** Date du dernier record (ISO). */
+  updatedAt: string;
+}
+
+/** Meilleurs scores d'un utilisateur, avec son rang par jeu. */
+export async function getUserScores(userId: string): Promise<UserScore[]> {
+  const scores = await prisma.score.findMany({
+    where: { userId },
+    orderBy: { gameId: "asc" },
+  });
+
+  return Promise.all(
+    scores.map(async (s) => {
+      const [better, totalPlayers] = await Promise.all([
+        prisma.score.count({
+          where: { gameId: s.gameId, best: { gt: s.best } },
+        }),
+        prisma.score.count({ where: { gameId: s.gameId } }),
+      ]);
+      return {
+        gameId: s.gameId,
+        best: s.best,
+        rank: better + 1,
+        totalPlayers,
+        updatedAt: s.updatedAt.toISOString(),
+      };
+    }),
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────────
 // Administration du leaderboard (vue /admin)
 // ──────────────────────────────────────────────────────────────────────────
 
