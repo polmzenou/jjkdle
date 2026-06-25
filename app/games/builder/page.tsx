@@ -1,6 +1,6 @@
 import { getBestScore } from "@/lib/bestScore";
-import { CATEGORIES } from "@/data/roster/categories";
-import { ROSTER } from "@/data/roster/characters";
+import { getCurrentUser } from "@/lib/auth/session";
+import { getCategories, getRoster } from "@/lib/content/queries";
 import { Leaderboard } from "@/components/leaderboard/Leaderboard";
 import { BuilderGame } from "./BuilderGame";
 
@@ -17,14 +17,20 @@ export const dynamic = "force-dynamic";
  * ranks et le reveal sont gérés par BuilderGame).
  */
 export default async function BuilderPage() {
-  const bestScore = await getBestScore("builder");
+  const [bestScore, user, categories, roster] = await Promise.all([
+    getBestScore("builder"),
+    getCurrentUser(),
+    getCategories(),
+    getRoster(),
+  ]);
 
   return (
     <main className="mx-auto max-w-5xl px-4 pb-16 sm:px-6">
       <BuilderGame
-        categories={CATEGORIES}
-        roster={ROSTER}
+        categories={categories}
+        roster={roster}
         initialBestScore={bestScore}
+        isAuthed={Boolean(user)}
       />
 
       <div className="mt-10">

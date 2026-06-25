@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { CursedBackground } from "@/components/CursedBackground";
 import { SiteNav } from "@/components/SiteNav";
+import { getCurrentUser } from "@/lib/auth/session";
 import "./globals.css";
 
 const inter = Inter({
@@ -23,14 +24,19 @@ export const metadata: Metadata = {
     "Plateforme de mini-jeux autour de l'univers Jujutsu Kaisen. Jeu principal : Build the Perfect Sorcerer.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const user = await getCurrentUser();
+  const navUser = user
+    ? { username: user.username, isAdmin: user.role === "ADMIN" }
+    : null;
+
   return (
     <html lang="fr" className={`${inter.variable} ${spaceGrotesk.variable}`}>
       <body className="min-h-screen">
         <CursedBackground />
-        <SiteNav />
+        <SiteNav user={navUser} />
         {children}
       </body>
     </html>

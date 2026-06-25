@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { adminConfigured, isAdminAuthed } from "@/lib/admin/auth";
-import { readRoster, writesAllowed } from "@/lib/admin/roster-store";
-import { ROSTER, type Character } from "@/data/roster/characters";
-import { CATEGORIES } from "@/data/roster/categories";
-import { AdminLogin } from "./AdminLogin";
+import Link from "next/link";
+import { getCurrentUser } from "@/lib/auth/session";
+import { readRoster } from "@/lib/admin/roster-store";
+import { getCategories } from "@/lib/content/queries";
+import type { Character } from "@/data/roster/characters";
 import { AdminDashboard } from "./AdminDashboard";
 
 export const metadata: Metadata = {
@@ -14,42 +14,58 @@ export const metadata: Metadata = {
 // Toujours dynamique (auth par cookie + lecture du fichier à jour).
 export const dynamic = "force-dynamic";
 
+/** Bloc d'accès refusé (non connecté ou rôle insuffisant). */
+function AccessDenied({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <main className="mx-auto max-w-md px-6 py-24 text-center">
+      <h1 className="font-display text-2xl font-bold text-white">{title}</h1>
+      <p className="mt-3 text-sm text-white/55">{children}</p>
+    </main>
+  );
+}
+
 export default async function AdminPage() {
-  if (!adminConfigured()) {
+  const user = await getCurrentUser();
+
+  if (!user) {
     return (
-      <main className="mx-auto max-w-md px-6 py-24 text-center">
-        <h1 className="font-display text-2xl font-bold text-white">
-          Admin désactivé
-        </h1>
-        <p className="mt-3 text-sm text-white/55">
-          Définis la variable d&apos;environnement{" "}
-          <code className="rounded bg-void-700 px-1.5 py-0.5 text-domain-light">
-            ADMIN_PASSWORD
-          </code>{" "}
-          (dans <code className="text-white/70">.env</code>) pour activer la vue
-          admin.
-        </p>
-      </main>
+      <AccessDenied title="Connexion requise">
+        Cette section est réservée aux administrateurs.{" "}
+        <Link
+          href="/login"
+          className="font-semibold text-domain-light hover:underline"
+        >
+          Se connecter
+        </Link>
+        .
+      </AccessDenied>
     );
   }
 
-  if (!(await isAdminAuthed())) {
-    return <AdminLogin />;
+  if (user.role !== "ADMIN") {
+    return (
+      <AccessDenied title="Accès refusé">
+        Ton compte (<span className="text-white/80">{user.username}</span>) n
+        &apos;a pas le rôle administrateur.
+      </AccessDenied>
+    );
   }
 
-  // Lit le fichier à jour ; repli sur le ROSTER importé si lecture impossible.
-  let roster: Character[];
+  let roster: Character[] = [];
   try {
     roster = await readRoster();
   } catch {
-    roster = ROSTER;
+    roster = [];
   }
+  const categories = await getCategories();
 
   return (
-    <AdminDashboard
-      roster={roster}
-      categories={CATEGORIES}
-      canWrite={writesAllowed()}
-    />
+    <AdminDashboard roster={roster} categories={categories} canWrite />
   );
 }

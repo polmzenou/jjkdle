@@ -1,41 +1,47 @@
-import { readFile, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { prisma } from "@/lib/prisma";
 import type { Character } from "@/data/roster/characters";
+import { getRoster } from "@/lib/content/queries";
 
 /**
- * Lecture/écriture du roster JSON (data/roster/characters.json).
+ * Lecture/écriture du roster en base (Neon Postgres).
  *
- * ⚠️ L'écriture ne fonctionne qu'en local : le filesystem de Vercel est en
- * lecture seule. `writesAllowed()` le détecte pour bloquer proprement.
+ * Contrairement à l'ancienne version sur fichier JSON, l'écriture fonctionne
+ * partout (y compris en production) : plus de limite « filesystem en lecture
+ * seule » de Vercel.
  */
 
-const FILE = resolve(process.cwd(), "data/roster/characters.json");
-
-/** Les écritures sont-elles possibles (hors Vercel) ? */
-export function writesAllowed(): boolean {
-  return !process.env.VERCEL;
-}
-
+/** Roster complet (ordre d'affichage). */
 export async function readRoster(): Promise<Character[]> {
-  const raw = await readFile(FILE, "utf8");
-  return JSON.parse(raw) as Character[];
+  return getRoster();
 }
 
-async function writeRoster(list: Character[]): Promise<void> {
-  await writeFile(FILE, JSON.stringify(list, null, 2) + "\n", "utf8");
-}
-
-/** Ajoute (ou remplace si l'id existe) un personnage, puis réécrit le fichier. */
+/** Ajoute (ou met à jour si l'id existe) un personnage. */
 export async function upsertCharacter(char: Character): Promise<void> {
-  const list = await readRoster();
-  const idx = list.findIndex((c) => c.id === char.id);
-  if (idx >= 0) list[idx] = char;
-  else list.push(char);
-  await writeRoster(list);
+  const data = {
+    name: char.name,
+    title: char.title,
+    tier: char.tier,
+    image: char.image ?? null,
+    ratings: char.ratings,
+  };
+
+  const existing = await prisma.character.findUnique({
+    where: { id: char.id },
+    select: { id: true },
+  });
+
+  if (existing) {
+    await prisma.character.update({ where: { id: char.id }, data });
+  } else {
+    // Nouveau personnage : positionné en fin de liste.
+    const max = await prisma.character.aggregate({ _max: { position: true } });
+    await prisma.character.create({
+      data: { id: char.id, ...data, position: (max._max.position ?? -1) + 1 },
+    });
+  }
 }
 
-/** Supprime un personnage par id. */
+/** Supprime un personnage par id (ignore s'il n'existe pas). */
 export async function deleteCharacter(id: string): Promise<void> {
-  const list = await readRoster();
-  await writeRoster(list.filter((c) => c.id !== id));
+  await prisma.character.deleteMany({ where: { id } });
 }

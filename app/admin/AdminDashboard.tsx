@@ -6,11 +6,8 @@ import Link from "next/link";
 import type { CategoryConfig } from "@/data/roster/categories";
 import type { Character, CharacterTier } from "@/data/roster/characters";
 import { CharacterImage } from "@/components/CharacterImage";
-import {
-  saveCharacterAction,
-  deleteCharacterAction,
-  logoutAction,
-} from "./actions";
+import { saveCharacterAction, deleteCharacterAction } from "./actions";
+import { logoutAction } from "@/lib/auth/actions";
 
 const TIERS: CharacterTier[] = ["s", "1", "2", "3", "4", "4minus"];
 

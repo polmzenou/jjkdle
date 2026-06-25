@@ -2,9 +2,13 @@ import type { CategoryId } from "./categories";
 import rosterData from "./characters.json";
 
 /**
- * Roster du jeu. Les données vivent désormais dans `characters.json`, éditable
- * via la vue admin (/admin) en développement local. `characters.ts` se contente
- * de les typer et de les ré-exporter — tout le reste de l'app importe d'ici.
+ * Types du roster + données de SEED.
+ *
+ * La source de vérité au runtime est désormais la base (table `Character`,
+ * éditable via /admin, lue par `lib/content/queries.ts`). Ce fichier ne sert
+ * plus qu'à : (1) typer le roster, (2) fournir les données initiales au seed
+ * (`prisma/seed.ts` importe `ROSTER`), (3) servir de fixture aux tests.
+ * `characters.json` reste la donnée d'amorçage, ré-exportée typée ci-dessous.
  *
  * `ratings` est PARTIEL : la présence d'une clé = le personnage est éligible à
  * cette catégorie. L'absence = il ne sera jamais tiré dans cette catégorie.
@@ -13,9 +17,6 @@ import rosterData from "./characters.json";
  * `tier` est un champ de flavor (rang canonique) ; il n'influence ni le score ni
  * la couleur des cartes. `image` pointe vers un fichier de public/assets/characters/
  * (sinon : initiales en placeholder, aucun visuel officiel copyrighté).
- *
- * ⚠️ L'écriture du JSON ne marche qu'en local (`npm run dev`) : le filesystem de
- * Vercel est en lecture seule. Workflow : éditer via /admin → commit → redeploy.
  */
 
 export type CharacterTier = "4minus" | "4" | "3" | "2" | "1" | "s";

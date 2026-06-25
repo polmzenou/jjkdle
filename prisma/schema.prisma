@@ -1,11 +1,10 @@
-// Schéma Prisma — OPTIONNEL, pour le leaderboard global futur (Neon Postgres).
+// Schéma Prisma — JJK Arcade (Neon Postgres).
 //
-// Le MVP n'utilise PAS cette base : le best score est stocké en cookie httpOnly.
-// Pour activer le leaderboard :
-//   1. Renseigner DATABASE_URL dans .env (voir .env.example).
-//   2. Décommenter le modèle ci-dessous.
-//   3. npx prisma generate && npx prisma migrate dev --name init_leaderboard
-//   4. Câbler app/api/leaderboard/route.ts (instructions dans le fichier).
+// Workflow : pas de migrations, on synchronise le schéma avec la base via
+//   npx prisma db push        (applique le schéma à Neon)
+//   npx prisma generate       (régénère le client typé)
+//
+// DATABASE_URL est défini dans .env (voir .env.example).
 
 generator client {
   provider = "prisma-client-js"
@@ -16,11 +15,90 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// model LeaderboardEntry {
-//   id        String   @id @default(cuid())
-//   pseudo    String   @db.VarChar(24)
-//   score     Int
-//   createdAt DateTime @default(now())
-//
-//   @@index([score])
-// }
+/// Rôle d'un utilisateur. PLAYER par défaut ; ADMIN donne accès à /admin.
+enum Role {
+  PLAYER
+  ADMIN
+}
+
+/// Compte utilisateur. Le jeu se joue sans compte ; le compte sert au
+/// leaderboard (enregistrement des scores) et, pour les ADMIN, à l'édition du roster.
+model User {
+  id           String    @id @default(cuid())
+  username     String    @unique
+  email        String    @unique
+  passwordHash String
+  role         Role      @default(PLAYER)
+  createdAt    DateTime  @default(now())
+
+  sessions Session[]
+  scores   Score[]
+}
+
+/// Session d'authentification (token aléatoire stocké en cookie httpOnly).
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+/// Meilleur score d'un utilisateur pour un jeu donné (un enregistrement par
+/// couple utilisateur/jeu — upsert quand un nouveau record est battu).
+model Score {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gameId    String
+  best      Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, gameId])
+  @@index([gameId, best])
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Contenu du jeu (anciennement dans data/). Source de vérité = la base ;
+// les fichiers data/ ne servent plus qu'au typage et au seed initial.
+// ──────────────────────────────────────────────────────────────────────────
+
+/// Catégorie de stats du builder ("Build the Perfect Sorcerer").
+/// `id` = CategoryId (ex. "innate-technique").
+model Category {
+  id          String @id
+  label       String
+  description String
+  weight      Float
+  drawCount   Int
+  position    Int    @default(0)
+}
+
+/// Personnage du roster. `ratings` est un objet JSON
+/// { [categoryId]: note 0-100 } — la présence d'une clé = éligible à la catégorie.
+model Character {
+  id       String  @id
+  name     String
+  title    String
+  tier     String
+  image    String?
+  ratings  Json
+  position Int     @default(0)
+
+  @@index([position])
+}
+
+/// Consigne du jeu "JJK Pyramid" : `order` = 8 IDs de personnages, rang 1→8.
+model RankingCondition {
+  id       String   @id
+  category String
+  prompt   String
+  order    String[]
+  position Int      @default(0)
+
+  @@index([position])
+}
