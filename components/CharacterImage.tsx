@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import type { Character } from "@/data/roster/characters";
 
 /** Accent violet uniforme des cartes (couleur "domain"). */
 export const CARD_ACCENT = "#7c3aed";
 
 interface CharacterImageProps {
-  character: Character;
+  /** Forme minimale partagée par le roster builder et le roster draft. */
+  character: { name: string; image?: string };
   className?: string;
 }
 

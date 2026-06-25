@@ -11,6 +11,16 @@ import {
   MAX_SCORE,
   type LeaderboardGame,
 } from "@/lib/leaderboard/store";
+import {
+  upsertDraftCharacter,
+  deleteDraftCharacter,
+} from "@/lib/admin/draft-store";
+import { DRAFT_CATEGORY_BY_ID } from "@/lib/games/draft/categories";
+import type {
+  DraftCharacter,
+  DraftCategoryId,
+  DraftTier,
+} from "@/lib/games/draft/types";
 import type { Character, CharacterTier } from "@/data/roster/characters";
 import { CATEGORY_BY_ID, type CategoryId } from "@/data/roster/categories";
 
@@ -18,6 +28,7 @@ export type ActionResult = { ok: boolean; error?: string };
 
 const TIERS: CharacterTier[] = ["4minus", "4", "3", "2", "1", "s"];
 const GAMES: LeaderboardGame[] = ["builder", "ranking"];
+const DRAFT_TIERS: DraftTier[] = ["S", "A", "B", "C"];
 
 /** Valide + enregistre (ajout ou édition) un personnage en base. */
 export async function saveCharacterAction(
@@ -81,6 +92,84 @@ export async function deleteCharacterAction(id: string): Promise<ActionResult> {
     return { ok: false, error: `Échec de suppression : ${(e as Error).message}` };
   }
   revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Roster "Jujutsu Draft"
+// ──────────────────────────────────────────────────────────────────────────
+
+/** Valide + enregistre (ajout ou édition) un personnage du draft. */
+export async function saveDraftCharacterAction(
+  input: DraftCharacter,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+
+  const id = String(input.id ?? "").trim();
+  const name = String(input.name ?? "").trim();
+
+  if (!/^[a-z0-9-]+$/.test(id)) {
+    return {
+      ok: false,
+      error: "L'identifiant doit être en minuscules (lettres, chiffres, tirets).",
+    };
+  }
+  if (!name) return { ok: false, error: "Le nom est obligatoire." };
+  if (!(input.excellenceCategory in DRAFT_CATEGORY_BY_ID)) {
+    return { ok: false, error: "Catégorie d'excellence invalide." };
+  }
+  if (!DRAFT_TIERS.includes(input.tier)) {
+    return { ok: false, error: "Tier invalide (S, A, B ou C)." };
+  }
+
+  const cost = Math.round(Number(input.cost));
+  const statValue = Math.round(Number(input.statValue));
+  if (!Number.isFinite(cost) || cost < 0 || cost > 99) {
+    return { ok: false, error: "Coût invalide (0 à 99)." };
+  }
+  if (!Number.isFinite(statValue) || statValue < 0 || statValue > 99) {
+    return { ok: false, error: "StatValue invalide (0 à 99)." };
+  }
+
+  const image = String(input.image ?? "").trim();
+
+  const char: DraftCharacter = {
+    id,
+    name,
+    excellenceCategory: input.excellenceCategory as DraftCategoryId,
+    tier: input.tier,
+    cost,
+    statValue,
+    ...(image ? { image } : {}),
+  };
+
+  try {
+    await upsertDraftCharacter(char);
+  } catch (e) {
+    return { ok: false, error: `Échec d'écriture : ${(e as Error).message}` };
+  }
+
+  revalidatePath("/games/jujutsu-draft");
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+/** Supprime un personnage du roster draft. */
+export async function deleteDraftCharacterAction(
+  id: string,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  try {
+    await deleteDraftCharacter(id);
+  } catch (e) {
+    return { ok: false, error: `Échec de suppression : ${(e as Error).message}` };
+  }
+  revalidatePath("/games/jujutsu-draft");
+  revalidatePath("/admin");
   return { ok: true };
 }
 
