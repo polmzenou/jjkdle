@@ -25,6 +25,7 @@ interface BuilderGameProps {
   categories: CategoryConfig[];
   roster: Character[];
   initialBestScore: number;
+  isAuthed: boolean;
 }
 
 /** Seuil de note pour le tirage resserré (cf. `minRating` dans `draw.ts`). */
@@ -40,6 +41,7 @@ export function BuilderGame({
   categories,
   roster,
   initialBestScore,
+  isAuthed,
 }: BuilderGameProps) {
   // Tirage initialisé côté client (post-montage) pour éviter un mismatch SSR.
   const [draw, setDraw] = useState<SingleDraw | null>(null);
@@ -176,6 +178,7 @@ export function BuilderGame({
           breakdown={breakdown}
           bestScore={bestScore}
           isNewRecord={isNewRecord}
+          isAuthed={isAuthed}
           onRestart={startNewGame}
         />
       ) : (

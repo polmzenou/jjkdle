@@ -1,7 +1,7 @@
 "use client";
 
-import { CHARACTER_BY_ID } from "@/data/roster/characters";
 import { CharacterImage, CARD_ACCENT } from "@/components/CharacterImage";
+import { useCharacter } from "./RosterContext";
 
 export const LOCK_COLOR = "#22c55e"; // vert "position correcte"
 export const WRONG_COLOR = "#ef4444"; // rouge "mauvaise position"
@@ -22,7 +22,7 @@ export function RankingCard({
   dragging = false,
   className = "",
 }: RankingCardProps) {
-  const character = CHARACTER_BY_ID[characterId];
+  const character = useCharacter(characterId);
   if (!character) return null;
 
   return (
