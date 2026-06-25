@@ -95,18 +95,27 @@ export type SingleDraw = Record<CategoryId, Character | null>;
  * Tire UN personnage aléatoire parmi les éligibles d'une catégorie.
  * `excludeId` évite de re-tirer le même perso deux fois de suite dans la même
  * case (ignoré s'il ne reste qu'un seul éligible).
+ * `minRating`, s'il est fourni, restreint le tirage aux personnages dont la note
+ * dans la catégorie atteint ce seuil (repli sur le pool complet si aucun ne le
+ * satisfait — la case reste toujours jouable).
  */
 export function drawOne(
   categoryId: CategoryId,
   roster: Character[],
   rng: Rng = Math.random,
   excludeId?: string,
+  minRating?: number,
 ): Character | null {
   const pool = eligibleFor(categoryId, roster);
   if (pool.length === 0) return null;
+  let working = pool;
+  if (minRating !== undefined) {
+    const strong = pool.filter((c) => (c.ratings[categoryId] ?? 0) >= minRating);
+    if (strong.length > 0) working = strong;
+  }
   const filtered =
-    excludeId === undefined ? pool : pool.filter((c) => c.id !== excludeId);
-  const from = filtered.length > 0 ? filtered : pool;
+    excludeId === undefined ? working : working.filter((c) => c.id !== excludeId);
+  const from = filtered.length > 0 ? filtered : working;
   return from[Math.floor(rng() * from.length)];
 }
 
@@ -115,10 +124,11 @@ export function drawAllOne(
   categories: CategoryConfig[],
   roster: Character[],
   rng: Rng = Math.random,
+  minRating?: number,
 ): SingleDraw {
   const draw = {} as SingleDraw;
   for (const category of categories) {
-    draw[category.id] = drawOne(category.id, roster, rng);
+    draw[category.id] = drawOne(category.id, roster, rng, undefined, minRating);
   }
   return draw;
 }
@@ -133,13 +143,14 @@ export function redrawUnlockedOne(
   lockedIds: Set<CategoryId>,
   roster: Character[],
   rng: Rng = Math.random,
+  minRating?: number,
 ): SingleDraw {
   const next = {} as SingleDraw;
   for (const category of categories) {
     next[category.id] = lockedIds.has(category.id)
       ? current[category.id]
       : // Exclut le perso affiché juste avant → jamais deux fois de suite.
-        drawOne(category.id, roster, rng, current[category.id]?.id);
+        drawOne(category.id, roster, rng, current[category.id]?.id, minRating);
   }
   return next;
 }
