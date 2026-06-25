@@ -65,7 +65,5 @@ export default async function AdminPage() {
   }
   const categories = await getCategories();
 
-  return (
-    <AdminDashboard roster={roster} categories={categories} canWrite />
-  );
+  return <AdminDashboard roster={roster} categories={categories} />;
 }

@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { CategoryConfig } from "@/data/roster/categories";
 import type { Character, CharacterTier } from "@/data/roster/characters";
 import { CharacterImage } from "@/components/CharacterImage";
+import { ImageDropzone } from "./ImageDropzone";
 import { saveCharacterAction, deleteCharacterAction } from "./actions";
 import { logoutAction } from "@/lib/auth/actions";
 
@@ -24,7 +25,6 @@ interface FormState {
 interface AdminDashboardProps {
   roster: Character[];
   categories: CategoryConfig[];
-  canWrite: boolean;
 }
 
 function slugify(s: string): string {
@@ -36,11 +36,7 @@ function slugify(s: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
-export function AdminDashboard({
-  roster,
-  categories,
-  canWrite,
-}: AdminDashboardProps) {
+export function AdminDashboard({ roster, categories }: AdminDashboardProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -48,6 +44,10 @@ export function AdminDashboard({
     null,
   );
   const [query, setQuery] = useState("");
+
+  // Image : fichier en attente d'upload, ou retrait demandé.
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageRemoved, setImageRemoved] = useState(false);
 
   const emptyForm = useMemo<FormState>(
     () => ({
@@ -65,9 +65,37 @@ export function AdminDashboard({
 
   const [form, setForm] = useState<FormState>(emptyForm);
 
+  // Aperçu : objectURL du fichier déposé, sinon l'image existante (sauf si retirée).
+  const objectUrl = useMemo(
+    () => (imageFile ? URL.createObjectURL(imageFile) : null),
+    [imageFile],
+  );
+  useEffect(
+    () => () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    },
+    [objectUrl],
+  );
+  const previewUrl = imageFile
+    ? objectUrl
+    : imageRemoved
+      ? null
+      : form.image || null;
+
+  const stageImage = (file: File) => {
+    setImageFile(file);
+    setImageRemoved(false);
+  };
+  const removeImage = () => {
+    setImageFile(null);
+    setImageRemoved(true);
+  };
+
   const loadCharacter = (c: Character) => {
     setEditingId(c.id);
     setFeedback(null);
+    setImageFile(null);
+    setImageRemoved(false);
     setForm({
       id: c.id,
       name: c.name,
@@ -87,6 +115,8 @@ export function AdminDashboard({
   const resetForm = () => {
     setEditingId(null);
     setFeedback(null);
+    setImageFile(null);
+    setImageRemoved(false);
     setForm(emptyForm);
   };
 
@@ -98,7 +128,10 @@ export function AdminDashboard({
         ratings[cat.id] = Number(f.value);
       }
     }
-    const image = form.image.trim();
+    // Si l'image est retirée, on n'envoie pas de chemin (le DELETE nettoie aussi
+    // l'image uploadée). Sinon on préserve l'URL existante ; un éventuel upload
+    // écrasera `image` côté serveur après l'enregistrement.
+    const image = imageRemoved ? "" : form.image.trim();
     return {
       id: form.id.trim(),
       name: form.name.trim(),
@@ -114,14 +147,46 @@ export function AdminDashboard({
     setFeedback(null);
     const char = buildCharacter();
     startTransition(async () => {
+      // 1) Enregistre les champs texte/ratings (crée la ligne si nouvelle).
       const res = await saveCharacterAction(char);
-      if (res.ok) {
-        setFeedback({ ok: true, msg: `« ${char.name} » enregistré.` });
-        resetForm();
-        router.refresh();
-      } else {
+      if (!res.ok) {
         setFeedback({ ok: false, msg: res.error ?? "Échec." });
+        return;
       }
+
+      // 2) Opérations sur l'image (l'id existe désormais en base).
+      try {
+        if (imageFile) {
+          const fd = new FormData();
+          fd.append("file", imageFile);
+          const up = await fetch(`/api/characters/${char.id}/image`, {
+            method: "POST",
+            body: fd,
+          });
+          if (!up.ok) {
+            const j = await up.json().catch(() => ({}));
+            setFeedback({
+              ok: false,
+              msg: j.error ?? "Personnage enregistré, mais image refusée.",
+            });
+            router.refresh();
+            return;
+          }
+        } else if (imageRemoved) {
+          await fetch(`/api/characters/${char.id}/image`, { method: "DELETE" });
+        }
+      } catch {
+        setFeedback({
+          ok: false,
+          msg: "Personnage enregistré, mais l'upload de l'image a échoué.",
+        });
+        router.refresh();
+        return;
+      }
+
+      setFeedback({ ok: true, msg: `« ${char.name} » enregistré.` });
+      resetForm();
+      router.refresh();
     });
   };
 
@@ -150,15 +215,6 @@ export function AdminDashboard({
       c.id.includes(query.toLowerCase()),
   );
 
-  const previewChar: Character = {
-    id: form.id || "preview",
-    name: form.name || "—",
-    title: form.title,
-    tier: form.tier,
-    image: form.image || undefined,
-    ratings: {},
-  };
-
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
       {/* En-tête */}
@@ -185,14 +241,6 @@ export function AdminDashboard({
           </button>
         </div>
       </header>
-
-      {!canWrite && (
-        <div className="mb-5 rounded-xl border border-cursed/40 bg-cursed/10 px-4 py-3 text-sm text-cursed-light">
-          ⚠️ Édition désactivée : le filesystem est en lecture seule (Vercel). La
-          modification des personnages ne fonctionne qu&apos;en local
-          (<code>npm run dev</code>), puis commit &amp; redeploy.
-        </div>
-      )}
 
       {feedback && (
         <div
@@ -228,9 +276,12 @@ export function AdminDashboard({
           </div>
 
           <div className="flex gap-4">
-            <div className="h-24 w-[72px] shrink-0 overflow-hidden rounded-xl border border-white/10">
-              <CharacterImage character={previewChar} />
-            </div>
+            <ImageDropzone
+              previewUrl={previewUrl}
+              name={form.name}
+              onFile={stageImage}
+              onRemove={removeImage}
+            />
             <div className="flex-1 space-y-3">
               <Field label="Nom">
                 <input
@@ -268,31 +319,21 @@ export function AdminDashboard({
             />
           </Field>
 
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Tier (visuel)">
-              <select
-                value={form.tier}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, tier: e.target.value as CharacterTier }))
-                }
-                className={inputCls}
-              >
-                {TIERS.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Image (chemin public/)">
-              <input
-                value={form.image}
-                onChange={(e) => setForm((f) => ({ ...f, image: e.target.value }))}
-                className={inputCls}
-                placeholder="/assets/characters/x.webp"
-              />
-            </Field>
-          </div>
+          <Field label="Tier (visuel)">
+            <select
+              value={form.tier}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, tier: e.target.value as CharacterTier }))
+              }
+              className={inputCls}
+            >
+              {TIERS.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          </Field>
 
           {/* Catégories */}
           <div>
@@ -350,7 +391,7 @@ export function AdminDashboard({
 
           <button
             type="submit"
-            disabled={pending || !canWrite}
+            disabled={pending}
             className="w-full rounded-xl bg-domain px-4 py-3 font-display font-bold uppercase tracking-wide text-white shadow-glow transition-transform enabled:hover:scale-[1.02] disabled:opacity-40"
           >
             {pending ? "Enregistrement…" : editingId ? "Mettre à jour" : "Ajouter"}
@@ -418,8 +459,7 @@ export function AdminDashboard({
                     <button
                       type="button"
                       onClick={() => remove(c)}
-                      disabled={!canWrite}
-                      className="rounded-md border border-cursed/30 px-2 py-1 text-xs text-cursed-light hover:bg-cursed/10 disabled:opacity-30"
+                      className="rounded-md border border-cursed/30 px-2 py-1 text-xs text-cursed-light hover:bg-cursed/10"
                     >
                       Suppr.
                     </button>

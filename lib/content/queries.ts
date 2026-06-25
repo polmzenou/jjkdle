@@ -41,9 +41,21 @@ export async function getCategories(): Promise<CategoryConfig[]> {
   }));
 }
 
-/** Roster complet, dans l'ordre d'affichage. */
+/** Roster complet, dans l'ordre d'affichage.
+ * On ne sélectionne PAS `imageData` (les octets) : l'image est servie par la
+ * route /api/characters/[id]/image, `image` ne porte que l'URL d'affichage. */
 export async function getRoster(): Promise<Character[]> {
-  const rows = await prisma.character.findMany({ orderBy: { position: "asc" } });
+  const rows = await prisma.character.findMany({
+    orderBy: { position: "asc" },
+    select: {
+      id: true,
+      name: true,
+      title: true,
+      tier: true,
+      image: true,
+      ratings: true,
+    },
+  });
   return rows.map(toCharacter);
 }
 
