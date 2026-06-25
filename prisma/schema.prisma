@@ -85,7 +85,11 @@ model Character {
   name     String
   title    String
   tier     String
+  /// URL d'affichage : chemin statique (/assets/...) OU route API d'une image uploadée.
   image    String?
+  /// Image uploadée via /admin (binaire en base, servie par /api/characters/[id]/image).
+  imageData Bytes?
+  imageMime String?
   ratings  Json
   position Int     @default(0)
 
