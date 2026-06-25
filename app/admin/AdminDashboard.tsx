@@ -7,10 +7,12 @@ import type { CategoryConfig } from "@/data/roster/categories";
 import type { Character, CharacterTier } from "@/data/roster/characters";
 import { CharacterImage } from "@/components/CharacterImage";
 import type { AdminScore } from "@/lib/leaderboard/store";
+import type { AdminUser } from "@/lib/auth/users";
 import { ImageDropzone } from "./ImageDropzone";
 import { saveCharacterAction, deleteCharacterAction } from "./actions";
 import { logoutAction } from "@/lib/auth/actions";
 import { LeaderboardAdmin } from "./LeaderboardAdmin";
+import { UsersAdmin } from "./UsersAdmin";
 
 const TIERS: CharacterTier[] = ["s", "1", "2", "3", "4", "4minus"];
 
@@ -28,9 +30,11 @@ interface AdminDashboardProps {
   roster: Character[];
   categories: CategoryConfig[];
   scores: AdminScore[];
+  users: AdminUser[];
+  currentUserId: string;
 }
 
-type Tab = "roster" | "leaderboard";
+type Tab = "roster" | "leaderboard" | "users";
 
 function slugify(s: string): string {
   return s
@@ -45,6 +49,8 @@ export function AdminDashboard({
   roster,
   categories,
   scores,
+  users,
+  currentUserId,
 }: AdminDashboardProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -233,13 +239,19 @@ export function AdminDashboard({
           <h1 className="font-display text-2xl font-black uppercase tracking-wider text-white">
             Admin ·{" "}
             <span className="text-domain-light">
-              {tab === "roster" ? "Roster" : "Leaderboard"}
+              {tab === "roster"
+                ? "Roster"
+                : tab === "leaderboard"
+                  ? "Leaderboard"
+                  : "Users"}
             </span>
           </h1>
           <p className="text-sm text-white/45">
             {tab === "roster"
               ? `${roster.length} personnages`
-              : `${scores.length} scores`}
+              : tab === "leaderboard"
+                ? `${scores.length} scores`
+                : `${users.length} comptes`}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -261,7 +273,7 @@ export function AdminDashboard({
 
       {/* Onglets */}
       <div className="mb-6 flex w-fit gap-1 rounded-xl border border-white/10 bg-void-800/40 p-1">
-        {(["roster", "leaderboard"] as Tab[]).map((t) => (
+        {(["roster", "leaderboard", "users"] as Tab[]).map((t) => (
           <button
             key={t}
             type="button"
@@ -270,12 +282,16 @@ export function AdminDashboard({
               tab === t ? "bg-domain text-white" : "text-white/55 hover:text-white"
             }`}
           >
-            {t === "roster" ? "Roster" : "Leaderboard"}
+            {t === "roster" ? "Roster" : t === "leaderboard" ? "Leaderboard" : "Users"}
           </button>
         ))}
       </div>
 
       {tab === "leaderboard" && <LeaderboardAdmin scores={scores} />}
+
+      {tab === "users" && (
+        <UsersAdmin users={users} currentUserId={currentUserId} />
+      )}
 
       {tab === "roster" && (
         <>

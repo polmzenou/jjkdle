@@ -9,6 +9,8 @@ import {
   MAX_SCORE,
   type LeaderboardGame,
 } from "@/lib/leaderboard/store";
+import { adminSetUserRole, adminDeleteUser } from "@/lib/auth/users";
+import type { Role } from "@prisma/client";
 import type { Character, CharacterTier } from "@/data/roster/characters";
 import { CATEGORY_BY_ID, type CategoryId } from "@/data/roster/categories";
 
@@ -16,6 +18,7 @@ export type ActionResult = { ok: boolean; error?: string };
 
 const TIERS: CharacterTier[] = ["4minus", "4", "3", "2", "1", "s"];
 const GAMES: LeaderboardGame[] = ["builder", "ranking"];
+const ROLES: Role[] = ["PLAYER", "ADMIN"];
 
 /** Valide + enregistre (ajout ou édition) un personnage en base. */
 export async function saveCharacterAction(
@@ -127,6 +130,52 @@ export async function deleteScoreAction(
     return { ok: false, error: `Échec de suppression : ${(e as Error).message}` };
   }
   revalidatePath(`/games/${game}`);
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Utilisateurs (administration des comptes)
+// ──────────────────────────────────────────────────────────────────────────
+
+/** Change le rôle d'un utilisateur (interdit sur soi-même → anti-verrouillage). */
+export async function setUserRoleAction(
+  id: string,
+  role: string,
+): Promise<ActionResult> {
+  const admin = await getAdminUser();
+  if (!admin) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  if (id === admin.id) {
+    return { ok: false, error: "Tu ne peux pas changer ton propre rôle." };
+  }
+  if (!ROLES.includes(role as Role)) {
+    return { ok: false, error: "Rôle invalide." };
+  }
+  try {
+    await adminSetUserRole(id, role as Role);
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+/** Supprime un compte (cascade : sessions + scores). Interdit sur soi-même. */
+export async function deleteUserAction(id: string): Promise<ActionResult> {
+  const admin = await getAdminUser();
+  if (!admin) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  if (id === admin.id) {
+    return { ok: false, error: "Tu ne peux pas supprimer ton propre compte." };
+  }
+  try {
+    await adminDeleteUser(id);
+  } catch (e) {
+    return { ok: false, error: `Échec de suppression : ${(e as Error).message}` };
+  }
   revalidatePath("/admin");
   return { ok: true };
 }

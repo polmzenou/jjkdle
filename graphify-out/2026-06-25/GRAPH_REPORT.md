@@ -1,16 +1,16 @@
 # Graph Report - jjkdle  (2026-06-25)
 
 ## Corpus Check
-- 70 files · ~207,460 words
+- 70 files · ~207,542 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 350 nodes · 681 edges · 20 communities (15 shown, 5 thin omitted)
+- 350 nodes · 684 edges · 18 communities (13 shown, 5 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 6 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `6a042489`
+- Built from commit: `945f62ac`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -19,8 +19,6 @@
 - [[_COMMUNITY_Pyramid Game & Ranking Logic|Pyramid Game & Ranking Logic]]
 - [[_COMMUNITY_Auth & Site Shell|Auth & Site Shell]]
 - [[_COMMUNITY_Dependencies & Tooling|Dependencies & Tooling]]
-- [[_COMMUNITY_Content Queries & Pages|Content Queries & Pages]]
-- [[_COMMUNITY_Admin & Roster Editing|Admin & Roster Editing]]
 - [[_COMMUNITY_Leaderboard|Leaderboard]]
 - [[_COMMUNITY_TypeScript Config|TypeScript Config]]
 - [[_COMMUNITY_Game Registry & Showcase|Game Registry & Showcase]]
@@ -53,23 +51,23 @@
   app/(auth)/register/page.tsx → lib/auth/session.ts
 - `RootLayout()` --calls--> `getCurrentUser`  [EXTRACTED]
   app/layout.tsx → lib/auth/session.ts
+- `CharacterImageProps` --references--> `Character`  [EXTRACTED]
+  components/CharacterImage.tsx → data/roster/characters.ts
 - `FormState` --references--> `CharacterTier`  [EXTRACTED]
   app/admin/AdminDashboard.tsx → data/roster/characters.ts
-- `POST()` --calls--> `getAdminUser()`  [EXTRACTED]
-  app/api/characters/[id]/image/route.ts → lib/auth/session.ts
 
 ## Import Cycles
 - 1-file cycle: `data/roster/characters.ts -> data/roster/characters.ts`
 
-## Communities (20 total, 5 thin omitted)
+## Communities (18 total, 5 thin omitted)
 
 ### Community 0 - "Builder, Draw & Scoring"
-Cohesion: 0.18
-Nodes (18): BuilderGame(), RankFooter(), RankFooterProps, ScoreReveal(), ScoreRevealProps, useCountUp(), SingleDraw, getGrade() (+10 more)
+Cohesion: 0.15
+Nodes (24): AdminDashboardProps, BuilderGameProps, CategoryTile(), CategoryTileProps, RankFooter(), RankFooterProps, ScoreReveal(), ScoreRevealProps (+16 more)
 
 ### Community 1 - "Pyramid Game & Ranking Logic"
-Cohesion: 0.11
-Nodes (23): LeaderboardRow(), SubmitScore(), formatScore(), AttemptsBar(), AttemptsBarProps, CharacterPool(), CharacterPoolProps, DraggableCard() (+15 more)
+Cohesion: 0.09
+Nodes (28): CharacterImage(), CharacterImageProps, initials(), LeaderboardRow(), SubmitScore(), formatScore(), AttemptsBar(), AttemptsBarProps (+20 more)
 
 ### Community 2 - "Auth & Site Shell"
 Cohesion: 0.09
@@ -79,17 +77,9 @@ Nodes (26): inter, metadata, RootLayout(), spaceGrotesk, AuthResult, loginAction
 Cohesion: 0.05
 Nodes (37): dependencies, @dnd-kit/core, @dnd-kit/utilities, framer-motion, next, @prisma/client, react, react-dom (+29 more)
 
-### Community 4 - "Content Queries & Pages"
-Cohesion: 0.21
-Nodes (15): AdminPage(), readRoster(), getCurrentUser, BuilderPage(), metadata, getCategories(), getCharacterMap(), getConditions() (+7 more)
-
-### Community 5 - "Admin & Roster Editing"
-Cohesion: 0.09
-Nodes (26): AdminDashboard(), AdminDashboardProps, CatField, FormState, Tab, TIERS, ImageDropzone(), ImageDropzoneProps (+18 more)
-
 ### Community 6 - "Leaderboard"
-Cohesion: 0.17
-Nodes (16): GAMES, SubmitResult, submitScoreAction(), GAME_GLYPH, GAME_LABEL, Leaderboard(), LeaderboardProps, MEDALS (+8 more)
+Cohesion: 0.10
+Nodes (30): AdminPage(), getCurrentUser, BuilderGame(), BuilderPage(), metadata, getCategories(), getCharacterMap(), getConditions() (+22 more)
 
 ### Community 7 - "TypeScript Config"
 Cohesion: 0.10
@@ -104,12 +94,12 @@ Cohesion: 0.18
 Nodes (17): Character SVG Naming Convention, Original-Only Assets Policy, Best Score Persistence (httpOnly cookie), Build the Perfect Sorcerer (tap game), Draw Eligibility & Random Draw (seedable), Grade Tiers (Grade 4- to Grade S), JJK Arcade Platform, JJK Pyramid (ranking game) (+9 more)
 
 ### Community 16 - "Community 16"
-Cohesion: 0.12
-Nodes (22): ActionResult, deleteCharacterAction(), deleteScoreAction(), GAMES, saveCharacterAction(), TIERS, updateScoreAction(), Feedback (+14 more)
+Cohesion: 0.07
+Nodes (33): ActionResult, deleteCharacterAction(), deleteScoreAction(), GAMES, saveCharacterAction(), TIERS, updateScoreAction(), AdminDashboard() (+25 more)
 
 ### Community 17 - "Community 17"
-Cohesion: 0.16
-Nodes (21): Draw, drawAll(), drawAllOne(), drawCategory(), drawOne(), eligibleFor(), redrawUnlocked(), redrawUnlockedOne() (+13 more)
+Cohesion: 0.12
+Nodes (26): Draw, drawAll(), drawAllOne(), drawCategory(), drawOne(), eligibleFor(), redrawUnlocked(), redrawUnlockedOne() (+18 more)
 
 ### Community 18 - "Community 18"
 Cohesion: 0.14
@@ -123,17 +113,17 @@ Nodes (13): Ajouter un jeu (système pluggable), Ajouter un personnage, Ajouter 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Character` connect `Admin & Roster Editing` to `Builder, Draw & Scoring`, `Pyramid Game & Ranking Logic`, `Content Queries & Pages`, `Community 16`, `Community 17`?**
-  _High betweenness centrality (0.092) - this node is a cross-community bridge._
+- **Why does `Character` connect `Builder, Draw & Scoring` to `Community 16`, `Pyramid Game & Ranking Logic`, `Community 17`?**
+  _High betweenness centrality (0.091) - this node is a cross-community bridge._
 - **Why does `Logo()` connect `Auth & Site Shell` to `Game Registry & Showcase`, `Builder, Draw & Scoring`, `Pyramid Game & Ranking Logic`?**
   _High betweenness centrality (0.031) - this node is a cross-community bridge._
-- **Why does `getCurrentUser` connect `Content Queries & Pages` to `Community 16`, `Auth & Site Shell`, `Admin & Roster Editing`, `Leaderboard`?**
+- **Why does `getCurrentUser` connect `Leaderboard` to `Community 16`, `Auth & Site Shell`?**
   _High betweenness centrality (0.028) - this node is a cross-community bridge._
 - **What connects `allow`, `metadata`, `metadata` to the rest of the system?**
   _120 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `Builder, Draw & Scoring` be split into smaller, more focused modules?**
+  _Cohesion score 0.14761904761904762 - nodes in this community are weakly interconnected._
 - **Should `Pyramid Game & Ranking Logic` be split into smaller, more focused modules?**
-  _Cohesion score 0.1092436974789916 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.09146341463414634 - nodes in this community are weakly interconnected._
 - **Should `Auth & Site Shell` be split into smaller, more focused modules?**
   _Cohesion score 0.08502024291497975 - nodes in this community are weakly interconnected._
-- **Should `Dependencies & Tooling` be split into smaller, more focused modules?**
-  _Cohesion score 0.05405405405405406 - nodes in this community are weakly interconnected._
