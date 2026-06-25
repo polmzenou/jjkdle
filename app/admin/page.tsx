@@ -69,5 +69,11 @@ export default async function AdminPage() {
     listAllScores(),
   ]);
 
-  return <AdminDashboard roster={roster} categories={categories} />;
+  return (
+    <AdminDashboard
+      roster={roster}
+      categories={categories}
+      scores={scores}
+    />
+  );
 }
