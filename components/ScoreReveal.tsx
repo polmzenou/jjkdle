@@ -6,6 +6,7 @@ import type { GradeTier } from "@/lib/scoring/grades";
 import type { CategoryBreakdown } from "@/lib/scoring/scoring";
 import { MAX_SCORE } from "@/lib/scoring/scoring";
 import { CategoryTile } from "./CategoryTile";
+import { SubmitScore } from "./leaderboard/SubmitScore";
 
 interface ScoreRevealProps {
   score: number;
@@ -84,10 +85,14 @@ export function ScoreReveal({
         ))}
       </div>
 
+      <div className="mx-auto max-w-sm">
+        <SubmitScore score={score} game="builder" />
+      </div>
+
       <button
         type="button"
         onClick={onRestart}
-        className="mt-7 rounded-xl bg-domain px-6 py-3 font-display font-bold uppercase tracking-wide text-white shadow-glow transition-transform hover:scale-105 active:scale-95"
+        className="mt-4 rounded-xl bg-domain px-6 py-3 font-display font-bold uppercase tracking-wide text-white shadow-glow transition-transform hover:scale-105 active:scale-95"
       >
         Rejouer
       </button>

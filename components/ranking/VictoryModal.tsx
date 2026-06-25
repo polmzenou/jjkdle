@@ -2,6 +2,8 @@
 
 import { motion } from "framer-motion";
 import { RankingCard, LOCK_COLOR } from "./RankingCard";
+import { SubmitScore } from "@/components/leaderboard/SubmitScore";
+import { formatScore } from "@/lib/format";
 
 interface VictoryModalProps {
   /** Classement correct (ordre = rangs 1→8). */
@@ -42,7 +44,7 @@ export function VictoryModal({
         <p className="text-sm text-white/55">{category}</p>
 
         <div className="my-4 font-display text-4xl font-bold text-white">
-          +{score.toLocaleString("fr-FR")}
+          +{formatScore(score)}
           <span className="text-lg text-white/40"> pts</span>
         </div>
 
@@ -54,7 +56,7 @@ export function VictoryModal({
           <p className="text-sm text-white/50">
             Meilleur score&nbsp;:{" "}
             <span className="font-semibold text-white">
-              {bestScore.toLocaleString("fr-FR")}
+              {formatScore(bestScore)}
             </span>
           </p>
         )}
@@ -71,10 +73,12 @@ export function VictoryModal({
           ))}
         </div>
 
+        <SubmitScore score={score} game="ranking" />
+
         <button
           type="button"
           onClick={onReplay}
-          className="mt-7 rounded-xl bg-domain px-6 py-3 font-display font-bold uppercase tracking-wide text-white shadow-glow transition-transform hover:scale-105 active:scale-95"
+          className="mt-4 rounded-xl bg-domain px-6 py-3 font-display font-bold uppercase tracking-wide text-white shadow-glow transition-transform hover:scale-105 active:scale-95"
         >
           Rejouer
         </button>

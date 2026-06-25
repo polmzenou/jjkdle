@@ -1,6 +1,7 @@
 "use client";
 
 import { MAX_ATTEMPTS, scoreForAttempt } from "@/lib/ranking/ranking";
+import { formatScore } from "@/lib/format";
 
 interface AttemptsBarProps {
   /** Tentative courante (1-based). */
@@ -56,7 +57,7 @@ export function AttemptsBar({ attempt, canCheck, onCheck }: AttemptsBarProps) {
       <p className="text-right text-xs text-domain-light sm:text-sm">
         Worth{" "}
         <span className="font-bold">
-          {scoreForAttempt(attempt).toLocaleString("fr-FR")}
+          {formatScore(scoreForAttempt(attempt))}
         </span>{" "}
         pts if correct now
       </p>

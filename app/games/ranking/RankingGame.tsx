@@ -24,6 +24,7 @@ import {
   shuffledPool,
 } from "@/lib/ranking/ranking";
 import { saveBestScore } from "@/lib/bestScore";
+import { formatScore } from "@/lib/format";
 import { RankingSlot } from "@/components/ranking/RankingSlot";
 import { CharacterPool } from "@/components/ranking/CharacterPool";
 import { AttemptsBar } from "@/components/ranking/AttemptsBar";
@@ -204,7 +205,7 @@ export function RankingGame({ initialBestScore }: RankingGameProps) {
         <span className="rounded-full bg-void-700/60 px-3 py-1 text-xs text-white/60">
           Record&nbsp;:{" "}
           <span className="font-bold text-domain-light">
-            {bestScore.toLocaleString("fr-FR")}
+            {formatScore(bestScore)}
           </span>
         </span>
       </header>

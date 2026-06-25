@@ -1,11 +1,15 @@
 import { getBestScore } from "@/lib/bestScore";
 import { CATEGORIES } from "@/data/roster/categories";
 import { ROSTER } from "@/data/roster/characters";
+import { Leaderboard } from "@/components/leaderboard/Leaderboard";
 import { BuilderGame } from "./BuilderGame";
 
 export const metadata = {
   title: "Build the Perfect Sorcerer — JJK Arcade",
 };
+
+// Le leaderboard lit le fichier à chaque requête (scores à jour).
+export const dynamic = "force-dynamic";
 
 /**
  * Page serveur : charge le best score (cookie) et passe la data statique au
@@ -22,6 +26,10 @@ export default async function BuilderPage() {
         roster={ROSTER}
         initialBestScore={bestScore}
       />
+
+      <div className="mt-10">
+        <Leaderboard game="builder" limit={8} />
+      </div>
     </main>
   );
 }
