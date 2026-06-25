@@ -27,6 +27,9 @@ interface BuilderGameProps {
   initialBestScore: number;
 }
 
+/** Seuil de note pour le tirage resserré (cf. `minRating` dans `draw.ts`). */
+const RATING_FLOOR = 90;
+
 /**
  * Boucle de jeu en GRILLE (façon "tap game") :
  *  - chaque catégorie affiche UN personnage tiré aléatoirement parmi les éligibles ;
@@ -45,6 +48,7 @@ export function BuilderGame({
   const [finished, setFinished] = useState(false);
   const [bestScore, setBestScore] = useState(initialBestScore);
   const [isNewRecord, setIsNewRecord] = useState(false);
+  const [curated, setCurated] = useState(false);
 
   const lockedIds = useMemo(
     () =>
@@ -60,6 +64,7 @@ export function BuilderGame({
     setSelection({});
     setFinished(false);
     setIsNewRecord(false);
+    setCurated(false);
     setDraw(drawAllOne(categories, roster));
     setDrawKey((k) => k + 1);
   }, [categories, roster]);
@@ -93,11 +98,41 @@ export function BuilderGame({
         return;
       }
 
-      setDraw(redrawUnlockedOne(draw, categories, nextLocked, roster));
+      setDraw(
+        redrawUnlockedOne(
+          draw,
+          categories,
+          nextLocked,
+          roster,
+          Math.random,
+          curated ? RATING_FLOOR : undefined,
+        ),
+      );
       setDrawKey((k) => k + 1);
     },
-    [draw, selection, lockedIds, total, categories, roster],
+    [draw, selection, lockedIds, total, categories, roster, curated],
   );
+
+  // Re-tire aussitôt les cases encore libres avec le pool courant.
+  const cyclePool = useCallback(() => {
+    setCurated((on) => {
+      const next = !on;
+      setDraw((d) =>
+        d
+          ? redrawUnlockedOne(
+              d,
+              categories,
+              lockedIds,
+              roster,
+              Math.random,
+              next ? RATING_FLOOR : undefined,
+            )
+          : d,
+      );
+      setDrawKey((k) => k + 1);
+      return next;
+    });
+  }, [categories, lockedIds, roster]);
 
   const { score, grade } = useMemo(
     () => evaluateBuild(selection, categories),
@@ -146,7 +181,10 @@ export function BuilderGame({
       ) : (
         <>
           {/* Bandeau d'instruction */}
-          <div className="mb-5 rounded-xl border border-white/10 bg-void-800/60 px-4 py-3 text-center text-sm text-white/70 backdrop-blur">
+          <div
+            onClick={cyclePool}
+            className="mb-5 select-none rounded-xl border border-white/10 bg-void-800/60 px-4 py-3 text-center text-sm text-white/70 backdrop-blur"
+          >
             👆 Tape une catégorie pour la <span className="font-semibold text-domain-light">verrouiller</span> ! ({lockedCount}/{total})
           </div>
 
