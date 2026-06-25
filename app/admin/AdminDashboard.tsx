@@ -6,6 +6,7 @@ import Link from "next/link";
 import type { CategoryConfig } from "@/data/roster/categories";
 import type { Character, CharacterTier } from "@/data/roster/characters";
 import { CharacterImage } from "@/components/CharacterImage";
+import type { AdminScore } from "@/lib/leaderboard/store";
 import { ImageDropzone } from "./ImageDropzone";
 import { saveCharacterAction, deleteCharacterAction } from "./actions";
 import { logoutAction } from "@/lib/auth/actions";
@@ -26,6 +27,7 @@ interface FormState {
 interface AdminDashboardProps {
   roster: Character[];
   categories: CategoryConfig[];
+  scores: AdminScore[];
 }
 
 type Tab = "roster" | "leaderboard";
@@ -39,7 +41,11 @@ function slugify(s: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
-export function AdminDashboard({ roster, categories }: AdminDashboardProps) {
+export function AdminDashboard({
+  roster,
+  categories,
+  scores,
+}: AdminDashboardProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [tab, setTab] = useState<Tab>("roster");
@@ -253,6 +259,26 @@ export function AdminDashboard({ roster, categories }: AdminDashboardProps) {
         </div>
       </header>
 
+      {/* Onglets */}
+      <div className="mb-6 flex w-fit gap-1 rounded-xl border border-white/10 bg-void-800/40 p-1">
+        {(["roster", "leaderboard"] as Tab[]).map((t) => (
+          <button
+            key={t}
+            type="button"
+            onClick={() => setTab(t)}
+            className={`rounded-lg px-4 py-1.5 font-display text-sm font-bold uppercase tracking-wide transition-colors ${
+              tab === t ? "bg-domain text-white" : "text-white/55 hover:text-white"
+            }`}
+          >
+            {t === "roster" ? "Roster" : "Leaderboard"}
+          </button>
+        ))}
+      </div>
+
+      {tab === "leaderboard" && <LeaderboardAdmin scores={scores} />}
+
+      {tab === "roster" && (
+        <>
       {feedback && (
         <div
           className={`mb-5 rounded-xl px-4 py-3 text-sm ${
