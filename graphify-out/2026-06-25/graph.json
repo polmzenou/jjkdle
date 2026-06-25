@@ -9,9 +9,9 @@
       "source_file": ".claude/settings.local.json",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "claude_settings_local",
       "community": 10,
-      "norm_label": "settings.local.json",
-      "id": "claude_settings_local"
+      "norm_label": "settings.local.json"
     },
     {
       "label": "permissions",
@@ -19,9 +19,9 @@
       "source_file": ".claude/settings.local.json",
       "source_location": "L2",
       "_origin": "ast",
+      "id": "claude_settings_local_permissions",
       "community": 10,
-      "norm_label": "permissions",
-      "id": "claude_settings_local_permissions"
+      "norm_label": "permissions"
     },
     {
       "label": "allow",
@@ -29,9 +29,9 @@
       "source_file": ".claude/settings.local.json",
       "source_location": "L3",
       "_origin": "ast",
+      "id": "claude_settings_local_permissions_allow",
       "community": 10,
-      "norm_label": "allow",
-      "id": "claude_settings_local_permissions_allow"
+      "norm_label": "allow"
     },
     {
       "label": "LoginForm.tsx",
@@ -39,9 +39,9 @@
       "source_file": "app/(auth)/login/LoginForm.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "login_loginform",
       "community": 2,
-      "norm_label": "loginform.tsx",
-      "id": "login_loginform"
+      "norm_label": "loginform.tsx"
     },
     {
       "label": "LoginForm()",
@@ -49,9 +49,9 @@
       "source_file": "app/(auth)/login/LoginForm.tsx",
       "source_location": "L9",
       "_origin": "ast",
+      "id": "login_loginform_loginform",
       "community": 2,
-      "norm_label": "loginform()",
-      "id": "login_loginform_loginform"
+      "norm_label": "loginform()"
     },
     {
       "label": "page.tsx",
@@ -59,9 +59,9 @@
       "source_file": "app/(auth)/login/page.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "login_page",
       "community": 2,
-      "norm_label": "page.tsx",
-      "id": "login_page"
+      "norm_label": "page.tsx"
     },
     {
       "label": "metadata",
@@ -69,9 +69,9 @@
       "source_file": "app/(auth)/login/page.tsx",
       "source_location": "L8",
       "_origin": "ast",
+      "id": "login_page_metadata",
       "community": 2,
-      "norm_label": "metadata",
-      "id": "login_page_metadata"
+      "norm_label": "metadata"
     },
     {
       "label": "LoginPage()",
@@ -79,9 +79,9 @@
       "source_file": "app/(auth)/login/page.tsx",
       "source_location": "L15",
       "_origin": "ast",
+      "id": "login_page_loginpage",
       "community": 2,
-      "norm_label": "loginpage()",
-      "id": "login_page_loginpage"
+      "norm_label": "loginpage()"
     },
     {
       "label": "RegisterForm.tsx",
@@ -89,9 +89,9 @@
       "source_file": "app/(auth)/register/RegisterForm.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "register_registerform",
       "community": 2,
-      "norm_label": "registerform.tsx",
-      "id": "register_registerform"
+      "norm_label": "registerform.tsx"
     },
     {
       "label": "RegisterForm()",
@@ -99,9 +99,9 @@
       "source_file": "app/(auth)/register/RegisterForm.tsx",
       "source_location": "L9",
       "_origin": "ast",
+      "id": "register_registerform_registerform",
       "community": 2,
-      "norm_label": "registerform()",
-      "id": "register_registerform_registerform"
+      "norm_label": "registerform()"
     },
     {
       "label": "page.tsx",
@@ -109,9 +109,9 @@
       "source_file": "app/(auth)/register/page.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "register_page",
       "community": 2,
-      "norm_label": "page.tsx",
-      "id": "register_page"
+      "norm_label": "page.tsx"
     },
     {
       "label": "metadata",
@@ -119,9 +119,9 @@
       "source_file": "app/(auth)/register/page.tsx",
       "source_location": "L8",
       "_origin": "ast",
+      "id": "register_page_metadata",
       "community": 2,
-      "norm_label": "metadata",
-      "id": "register_page_metadata"
+      "norm_label": "metadata"
     },
     {
       "label": "RegisterPage()",
@@ -129,9 +129,9 @@
       "source_file": "app/(auth)/register/page.tsx",
       "source_location": "L15",
       "_origin": "ast",
+      "id": "register_page_registerpage",
       "community": 2,
-      "norm_label": "registerpage()",
-      "id": "register_page_registerpage"
+      "norm_label": "registerpage()"
     },
     {
       "label": "AdminDashboard.tsx",
@@ -139,79 +139,159 @@
       "source_file": "app/admin/AdminDashboard.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "admin_admindashboard",
       "community": 5,
-      "norm_label": "admindashboard.tsx",
-      "id": "admin_admindashboard"
+      "norm_label": "admindashboard.tsx"
     },
     {
       "label": "TIERS",
       "file_type": "code",
       "source_file": "app/admin/AdminDashboard.tsx",
-      "source_location": "L12",
+      "source_location": "L14",
       "_origin": "ast",
+      "id": "admin_admindashboard_tiers",
       "community": 5,
-      "norm_label": "tiers",
-      "id": "admin_admindashboard_tiers"
+      "norm_label": "tiers"
     },
     {
       "label": "CatField",
       "file_type": "code",
       "source_file": "app/admin/AdminDashboard.tsx",
-      "source_location": "L14",
+      "source_location": "L16",
       "_origin": "ast",
+      "id": "admin_admindashboard_catfield",
       "community": 5,
-      "norm_label": "catfield",
-      "id": "admin_admindashboard_catfield"
+      "norm_label": "catfield"
     },
     {
       "label": "FormState",
       "file_type": "code",
       "source_file": "app/admin/AdminDashboard.tsx",
-      "source_location": "L15",
+      "source_location": "L17",
       "_origin": "ast",
+      "id": "admin_admindashboard_formstate",
       "community": 5,
-      "norm_label": "formstate",
-      "id": "admin_admindashboard_formstate"
+      "norm_label": "formstate"
     },
     {
       "label": "AdminDashboardProps",
       "file_type": "code",
       "source_file": "app/admin/AdminDashboard.tsx",
-      "source_location": "L24",
+      "source_location": "L26",
       "_origin": "ast",
-      "community": 0,
-      "norm_label": "admindashboardprops",
-      "id": "admin_admindashboard_admindashboardprops"
+      "id": "admin_admindashboard_admindashboardprops",
+      "community": 5,
+      "norm_label": "admindashboardprops"
+    },
+    {
+      "label": "Tab",
+      "file_type": "code",
+      "source_file": "app/admin/AdminDashboard.tsx",
+      "source_location": "L31",
+      "_origin": "ast",
+      "id": "admin_admindashboard_tab",
+      "community": 5,
+      "norm_label": "tab"
     },
     {
       "label": "slugify()",
       "file_type": "code",
       "source_file": "app/admin/AdminDashboard.tsx",
-      "source_location": "L30",
+      "source_location": "L33",
       "_origin": "ast",
+      "id": "admin_admindashboard_slugify",
       "community": 5,
-      "norm_label": "slugify()",
-      "id": "admin_admindashboard_slugify"
+      "norm_label": "slugify()"
     },
     {
       "label": "AdminDashboard()",
       "file_type": "code",
       "source_file": "app/admin/AdminDashboard.tsx",
-      "source_location": "L39",
+      "source_location": "L42",
       "_origin": "ast",
-      "community": 4,
-      "norm_label": "admindashboard()",
-      "id": "admin_admindashboard_admindashboard"
+      "id": "admin_admindashboard_admindashboard",
+      "community": 5,
+      "norm_label": "admindashboard()"
     },
     {
       "label": "Field()",
       "file_type": "code",
       "source_file": "app/admin/AdminDashboard.tsx",
-      "source_location": "L445",
+      "source_location": "L498",
       "_origin": "ast",
+      "id": "admin_admindashboard_field",
       "community": 5,
-      "norm_label": "field()",
-      "id": "admin_admindashboard_field"
+      "norm_label": "field()"
+    },
+    {
+      "label": "ImageDropzone.tsx",
+      "file_type": "code",
+      "source_file": "app/admin/ImageDropzone.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "admin_imagedropzone",
+      "community": 5,
+      "norm_label": "imagedropzone.tsx"
+    },
+    {
+      "label": "ImageDropzoneProps",
+      "file_type": "code",
+      "source_file": "app/admin/ImageDropzone.tsx",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "admin_imagedropzone_imagedropzoneprops",
+      "community": 5,
+      "norm_label": "imagedropzoneprops"
+    },
+    {
+      "label": "ImageDropzone()",
+      "file_type": "code",
+      "source_file": "app/admin/ImageDropzone.tsx",
+      "source_location": "L19",
+      "_origin": "ast",
+      "id": "admin_imagedropzone_imagedropzone",
+      "community": 5,
+      "norm_label": "imagedropzone()"
+    },
+    {
+      "label": "LeaderboardAdmin.tsx",
+      "file_type": "code",
+      "source_file": "app/admin/LeaderboardAdmin.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "admin_leaderboardadmin",
+      "community": 16,
+      "norm_label": "leaderboardadmin.tsx"
+    },
+    {
+      "label": "LeaderboardAdminProps",
+      "file_type": "code",
+      "source_file": "app/admin/LeaderboardAdmin.tsx",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "admin_leaderboardadmin_leaderboardadminprops",
+      "community": 16,
+      "norm_label": "leaderboardadminprops"
+    },
+    {
+      "label": "Feedback",
+      "file_type": "code",
+      "source_file": "app/admin/LeaderboardAdmin.tsx",
+      "source_location": "L13",
+      "_origin": "ast",
+      "id": "admin_leaderboardadmin_feedback",
+      "community": 16,
+      "norm_label": "feedback"
+    },
+    {
+      "label": "LeaderboardAdmin()",
+      "file_type": "code",
+      "source_file": "app/admin/LeaderboardAdmin.tsx",
+      "source_location": "L16",
+      "_origin": "ast",
+      "id": "admin_leaderboardadmin_leaderboardadmin",
+      "community": 16,
+      "norm_label": "leaderboardadmin()"
     },
     {
       "label": "actions.ts",
@@ -219,49 +299,79 @@
       "source_file": "app/admin/actions.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 5,
-      "norm_label": "actions.ts",
-      "id": "admin_actions"
+      "id": "admin_actions",
+      "community": 16,
+      "norm_label": "actions.ts"
     },
     {
       "label": "ActionResult",
       "file_type": "code",
       "source_file": "app/admin/actions.ts",
-      "source_location": "L9",
+      "source_location": "L15",
       "_origin": "ast",
-      "community": 5,
-      "norm_label": "actionresult",
-      "id": "admin_actions_actionresult"
+      "id": "admin_actions_actionresult",
+      "community": 16,
+      "norm_label": "actionresult"
     },
     {
       "label": "TIERS",
       "file_type": "code",
       "source_file": "app/admin/actions.ts",
-      "source_location": "L11",
+      "source_location": "L17",
       "_origin": "ast",
-      "community": 5,
-      "norm_label": "tiers",
-      "id": "admin_actions_tiers"
+      "id": "admin_actions_tiers",
+      "community": 16,
+      "norm_label": "tiers"
+    },
+    {
+      "label": "GAMES",
+      "file_type": "code",
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "admin_actions_games",
+      "community": 16,
+      "norm_label": "games"
     },
     {
       "label": "saveCharacterAction()",
       "file_type": "code",
       "source_file": "app/admin/actions.ts",
-      "source_location": "L14",
+      "source_location": "L21",
       "_origin": "ast",
-      "community": 5,
-      "norm_label": "savecharacteraction()",
-      "id": "admin_actions_savecharacteraction"
+      "id": "admin_actions_savecharacteraction",
+      "community": 16,
+      "norm_label": "savecharacteraction()"
     },
     {
       "label": "deleteCharacterAction()",
       "file_type": "code",
       "source_file": "app/admin/actions.ts",
-      "source_location": "L65",
+      "source_location": "L72",
       "_origin": "ast",
-      "community": 5,
-      "norm_label": "deletecharacteraction()",
-      "id": "admin_actions_deletecharacteraction"
+      "id": "admin_actions_deletecharacteraction",
+      "community": 16,
+      "norm_label": "deletecharacteraction()"
+    },
+    {
+      "label": "updateScoreAction()",
+      "file_type": "code",
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L90",
+      "_origin": "ast",
+      "id": "admin_actions_updatescoreaction",
+      "community": 16,
+      "norm_label": "updatescoreaction()"
+    },
+    {
+      "label": "deleteScoreAction()",
+      "file_type": "code",
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L117",
+      "_origin": "ast",
+      "id": "admin_actions_deletescoreaction",
+      "community": 16,
+      "norm_label": "deletescoreaction()"
     },
     {
       "label": "page.tsx",
@@ -269,39 +379,99 @@
       "source_file": "app/admin/page.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 4,
-      "norm_label": "page.tsx",
-      "id": "admin_page"
+      "id": "admin_page",
+      "community": 5,
+      "norm_label": "page.tsx"
     },
     {
       "label": "metadata",
       "file_type": "code",
       "source_file": "app/admin/page.tsx",
-      "source_location": "L9",
+      "source_location": "L10",
       "_origin": "ast",
-      "community": 4,
-      "norm_label": "metadata",
-      "id": "admin_page_metadata"
+      "id": "admin_page_metadata",
+      "community": 5,
+      "norm_label": "metadata"
     },
     {
       "label": "AccessDenied()",
       "file_type": "code",
       "source_file": "app/admin/page.tsx",
-      "source_location": "L18",
+      "source_location": "L19",
       "_origin": "ast",
-      "community": 4,
-      "norm_label": "accessdenied()",
-      "id": "admin_page_accessdenied"
+      "id": "admin_page_accessdenied",
+      "community": 5,
+      "norm_label": "accessdenied()"
     },
     {
       "label": "AdminPage()",
       "file_type": "code",
       "source_file": "app/admin/page.tsx",
-      "source_location": "L33",
+      "source_location": "L34",
       "_origin": "ast",
+      "id": "admin_page_adminpage",
       "community": 4,
-      "norm_label": "adminpage()",
-      "id": "admin_page_adminpage"
+      "norm_label": "adminpage()"
+    },
+    {
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "app/api/characters/[id]/image/route.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "image_route",
+      "community": 16,
+      "norm_label": "route.ts"
+    },
+    {
+      "label": "ALLOWED_MIME",
+      "file_type": "code",
+      "source_file": "app/api/characters/[id]/image/route.ts",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "image_route_allowed_mime",
+      "community": 16,
+      "norm_label": "allowed_mime"
+    },
+    {
+      "label": "Params",
+      "file_type": "code",
+      "source_file": "app/api/characters/[id]/image/route.ts",
+      "source_location": "L26",
+      "_origin": "ast",
+      "id": "image_route_params",
+      "community": 16,
+      "norm_label": "params"
+    },
+    {
+      "label": "GET()",
+      "file_type": "code",
+      "source_file": "app/api/characters/[id]/image/route.ts",
+      "source_location": "L28",
+      "_origin": "ast",
+      "id": "image_route_get",
+      "community": 16,
+      "norm_label": "get()"
+    },
+    {
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "app/api/characters/[id]/image/route.ts",
+      "source_location": "L48",
+      "_origin": "ast",
+      "id": "image_route_post",
+      "community": 16,
+      "norm_label": "post()"
+    },
+    {
+      "label": "DELETE()",
+      "file_type": "code",
+      "source_file": "app/api/characters/[id]/image/route.ts",
+      "source_location": "L88",
+      "_origin": "ast",
+      "id": "image_route_delete",
+      "community": 16,
+      "norm_label": "delete()"
     },
     {
       "label": "route.ts",
@@ -309,9 +479,9 @@
       "source_file": "app/api/leaderboard/route.ts",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "leaderboard_route",
       "community": 6,
-      "norm_label": "route.ts",
-      "id": "leaderboard_route"
+      "norm_label": "route.ts"
     },
     {
       "label": "GAMES",
@@ -319,9 +489,9 @@
       "source_file": "app/api/leaderboard/route.ts",
       "source_location": "L16",
       "_origin": "ast",
+      "id": "leaderboard_route_games",
       "community": 6,
-      "norm_label": "games",
-      "id": "leaderboard_route_games"
+      "norm_label": "games"
     },
     {
       "label": "GET()",
@@ -329,9 +499,9 @@
       "source_file": "app/api/leaderboard/route.ts",
       "source_location": "L18",
       "_origin": "ast",
+      "id": "leaderboard_route_get",
       "community": 6,
-      "norm_label": "get()",
-      "id": "leaderboard_route_get"
+      "norm_label": "get()"
     },
     {
       "label": "BuilderGame.tsx",
@@ -339,9 +509,9 @@
       "source_file": "app/games/builder/BuilderGame.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "builder_buildergame",
       "community": 0,
-      "norm_label": "buildergame.tsx",
-      "id": "builder_buildergame"
+      "norm_label": "buildergame.tsx"
     },
     {
       "label": "BuilderGameProps",
@@ -349,9 +519,9 @@
       "source_file": "app/games/builder/BuilderGame.tsx",
       "source_location": "L24",
       "_origin": "ast",
-      "community": 0,
-      "norm_label": "buildergameprops",
-      "id": "builder_buildergame_buildergameprops"
+      "id": "builder_buildergame_buildergameprops",
+      "community": 5,
+      "norm_label": "buildergameprops"
     },
     {
       "label": "BuilderGame()",
@@ -359,9 +529,9 @@
       "source_file": "app/games/builder/BuilderGame.tsx",
       "source_location": "L40",
       "_origin": "ast",
-      "community": 4,
-      "norm_label": "buildergame()",
-      "id": "builder_buildergame_buildergame"
+      "id": "builder_buildergame_buildergame",
+      "community": 0,
+      "norm_label": "buildergame()"
     },
     {
       "label": "page.tsx",
@@ -369,9 +539,9 @@
       "source_file": "app/games/builder/page.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "builder_page",
       "community": 4,
-      "norm_label": "page.tsx",
-      "id": "builder_page"
+      "norm_label": "page.tsx"
     },
     {
       "label": "metadata",
@@ -379,9 +549,9 @@
       "source_file": "app/games/builder/page.tsx",
       "source_location": "L7",
       "_origin": "ast",
+      "id": "builder_page_metadata",
       "community": 4,
-      "norm_label": "metadata",
-      "id": "builder_page_metadata"
+      "norm_label": "metadata"
     },
     {
       "label": "BuilderPage()",
@@ -389,9 +559,9 @@
       "source_file": "app/games/builder/page.tsx",
       "source_location": "L19",
       "_origin": "ast",
+      "id": "builder_page_builderpage",
       "community": 4,
-      "norm_label": "builderpage()",
-      "id": "builder_page_builderpage"
+      "norm_label": "builderpage()"
     },
     {
       "label": "page.tsx",
@@ -399,9 +569,9 @@
       "source_file": "app/games/page.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "games_page",
       "community": 8,
-      "norm_label": "page.tsx",
-      "id": "games_page"
+      "norm_label": "page.tsx"
     },
     {
       "label": "metadata",
@@ -409,9 +579,9 @@
       "source_file": "app/games/page.tsx",
       "source_location": "L5",
       "_origin": "ast",
+      "id": "games_page_metadata",
       "community": 8,
-      "norm_label": "metadata",
-      "id": "games_page_metadata"
+      "norm_label": "metadata"
     },
     {
       "label": "FEATURES",
@@ -419,9 +589,9 @@
       "source_file": "app/games/page.tsx",
       "source_location": "L11",
       "_origin": "ast",
+      "id": "games_page_features",
       "community": 8,
-      "norm_label": "features",
-      "id": "games_page_features"
+      "norm_label": "features"
     },
     {
       "label": "GamesPage()",
@@ -429,9 +599,9 @@
       "source_file": "app/games/page.tsx",
       "source_location": "L14",
       "_origin": "ast",
+      "id": "games_page_gamespage",
       "community": 8,
-      "norm_label": "gamespage()",
-      "id": "games_page_gamespage"
+      "norm_label": "gamespage()"
     },
     {
       "label": "RankingGame.tsx",
@@ -439,9 +609,9 @@
       "source_file": "app/games/ranking/RankingGame.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "ranking_rankinggame",
       "community": 1,
-      "norm_label": "rankinggame.tsx",
-      "id": "ranking_rankinggame"
+      "norm_label": "rankinggame.tsx"
     },
     {
       "label": "RankingGameProps",
@@ -449,9 +619,9 @@
       "source_file": "app/games/ranking/RankingGame.tsx",
       "source_location": "L38",
       "_origin": "ast",
-      "community": 1,
-      "norm_label": "rankinggameprops",
-      "id": "ranking_rankinggame_rankinggameprops"
+      "id": "ranking_rankinggame_rankinggameprops",
+      "community": 5,
+      "norm_label": "rankinggameprops"
     },
     {
       "label": "Status",
@@ -459,9 +629,9 @@
       "source_file": "app/games/ranking/RankingGame.tsx",
       "source_location": "L47",
       "_origin": "ast",
+      "id": "ranking_rankinggame_status",
       "community": 1,
-      "norm_label": "status",
-      "id": "ranking_rankinggame_status"
+      "norm_label": "status"
     },
     {
       "label": "emptySlots()",
@@ -469,9 +639,9 @@
       "source_file": "app/games/ranking/RankingGame.tsx",
       "source_location": "L49",
       "_origin": "ast",
+      "id": "ranking_rankinggame_emptyslots",
       "community": 1,
-      "norm_label": "emptyslots()",
-      "id": "ranking_rankinggame_emptyslots"
+      "norm_label": "emptyslots()"
     },
     {
       "label": "emptyFlags()",
@@ -479,9 +649,9 @@
       "source_file": "app/games/ranking/RankingGame.tsx",
       "source_location": "L50",
       "_origin": "ast",
+      "id": "ranking_rankinggame_emptyflags",
       "community": 1,
-      "norm_label": "emptyflags()",
-      "id": "ranking_rankinggame_emptyflags"
+      "norm_label": "emptyflags()"
     },
     {
       "label": "RankingGame()",
@@ -489,9 +659,9 @@
       "source_file": "app/games/ranking/RankingGame.tsx",
       "source_location": "L52",
       "_origin": "ast",
+      "id": "ranking_rankinggame_rankinggame",
       "community": 1,
-      "norm_label": "rankinggame()",
-      "id": "ranking_rankinggame_rankinggame"
+      "norm_label": "rankinggame()"
     },
     {
       "label": "page.tsx",
@@ -499,9 +669,9 @@
       "source_file": "app/games/ranking/page.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "ranking_page",
       "community": 4,
-      "norm_label": "page.tsx",
-      "id": "ranking_page"
+      "norm_label": "page.tsx"
     },
     {
       "label": "metadata",
@@ -509,9 +679,9 @@
       "source_file": "app/games/ranking/page.tsx",
       "source_location": "L7",
       "_origin": "ast",
+      "id": "ranking_page_metadata",
       "community": 4,
-      "norm_label": "metadata",
-      "id": "ranking_page_metadata"
+      "norm_label": "metadata"
     },
     {
       "label": "RankingPage()",
@@ -519,9 +689,9 @@
       "source_file": "app/games/ranking/page.tsx",
       "source_location": "L18",
       "_origin": "ast",
+      "id": "ranking_page_rankingpage",
       "community": 4,
-      "norm_label": "rankingpage()",
-      "id": "ranking_page_rankingpage"
+      "norm_label": "rankingpage()"
     },
     {
       "label": "layout.tsx",
@@ -529,9 +699,9 @@
       "source_file": "app/layout.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "app_layout",
       "community": 2,
-      "norm_label": "layout.tsx",
-      "id": "app_layout"
+      "norm_label": "layout.tsx"
     },
     {
       "label": "inter",
@@ -539,9 +709,9 @@
       "source_file": "app/layout.tsx",
       "source_location": "L8",
       "_origin": "ast",
+      "id": "app_layout_inter",
       "community": 2,
-      "norm_label": "inter",
-      "id": "app_layout_inter"
+      "norm_label": "inter"
     },
     {
       "label": "spaceGrotesk",
@@ -549,9 +719,9 @@
       "source_file": "app/layout.tsx",
       "source_location": "L14",
       "_origin": "ast",
+      "id": "app_layout_spacegrotesk",
       "community": 2,
-      "norm_label": "spacegrotesk",
-      "id": "app_layout_spacegrotesk"
+      "norm_label": "spacegrotesk"
     },
     {
       "label": "metadata",
@@ -559,9 +729,9 @@
       "source_file": "app/layout.tsx",
       "source_location": "L21",
       "_origin": "ast",
+      "id": "app_layout_metadata",
       "community": 2,
-      "norm_label": "metadata",
-      "id": "app_layout_metadata"
+      "norm_label": "metadata"
     },
     {
       "label": "RootLayout()",
@@ -569,9 +739,9 @@
       "source_file": "app/layout.tsx",
       "source_location": "L27",
       "_origin": "ast",
+      "id": "app_layout_rootlayout",
       "community": 2,
-      "norm_label": "rootlayout()",
-      "id": "app_layout_rootlayout"
+      "norm_label": "rootlayout()"
     },
     {
       "label": "page.tsx",
@@ -579,9 +749,9 @@
       "source_file": "app/page.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "app_page",
       "community": 8,
-      "norm_label": "page.tsx",
-      "id": "app_page"
+      "norm_label": "page.tsx"
     },
     {
       "label": "STATS",
@@ -589,29 +759,19 @@
       "source_file": "app/page.tsx",
       "source_location": "L8",
       "_origin": "ast",
+      "id": "app_page_stats",
       "community": 8,
-      "norm_label": "stats",
-      "id": "app_page_stats"
-    },
-    {
-      "label": "HIGHLIGHTS",
-      "file_type": "code",
-      "source_file": "app/page.tsx",
-      "source_location": "L14",
-      "_origin": "ast",
-      "community": 8,
-      "norm_label": "highlights",
-      "id": "app_page_highlights"
+      "norm_label": "stats"
     },
     {
       "label": "HomePage()",
       "file_type": "code",
       "source_file": "app/page.tsx",
-      "source_location": "L33",
+      "source_location": "L15",
       "_origin": "ast",
+      "id": "app_page_homepage",
       "community": 8,
-      "norm_label": "homepage()",
-      "id": "app_page_homepage"
+      "norm_label": "homepage()"
     },
     {
       "label": "CategoryTile.tsx",
@@ -619,9 +779,9 @@
       "source_file": "components/CategoryTile.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 0,
-      "norm_label": "categorytile.tsx",
-      "id": "components_categorytile"
+      "id": "components_categorytile",
+      "community": 5,
+      "norm_label": "categorytile.tsx"
     },
     {
       "label": "CategoryTileProps",
@@ -629,9 +789,9 @@
       "source_file": "components/CategoryTile.tsx",
       "source_location": "L8",
       "_origin": "ast",
-      "community": 0,
-      "norm_label": "categorytileprops",
-      "id": "components_categorytile_categorytileprops"
+      "id": "components_categorytile_categorytileprops",
+      "community": 5,
+      "norm_label": "categorytileprops"
     },
     {
       "label": "CategoryTile()",
@@ -639,9 +799,9 @@
       "source_file": "components/CategoryTile.tsx",
       "source_location": "L18",
       "_origin": "ast",
-      "community": 0,
-      "norm_label": "categorytile()",
-      "id": "components_categorytile_categorytile"
+      "id": "components_categorytile_categorytile",
+      "community": 5,
+      "norm_label": "categorytile()"
     },
     {
       "label": "CharacterImage.tsx",
@@ -649,9 +809,9 @@
       "source_file": "components/CharacterImage.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "components_characterimage",
       "community": 5,
-      "norm_label": "characterimage.tsx",
-      "id": "components_characterimage"
+      "norm_label": "characterimage.tsx"
     },
     {
       "label": "CharacterImageProps",
@@ -659,9 +819,9 @@
       "source_file": "components/CharacterImage.tsx",
       "source_location": "L9",
       "_origin": "ast",
+      "id": "components_characterimage_characterimageprops",
       "community": 5,
-      "norm_label": "characterimageprops",
-      "id": "components_characterimage_characterimageprops"
+      "norm_label": "characterimageprops"
     },
     {
       "label": "CharacterImage()",
@@ -669,9 +829,9 @@
       "source_file": "components/CharacterImage.tsx",
       "source_location": "L18",
       "_origin": "ast",
+      "id": "components_characterimage_characterimage",
       "community": 5,
-      "norm_label": "characterimage()",
-      "id": "components_characterimage_characterimage"
+      "norm_label": "characterimage()"
     },
     {
       "label": "initials()",
@@ -679,9 +839,9 @@
       "source_file": "components/CharacterImage.tsx",
       "source_location": "L48",
       "_origin": "ast",
+      "id": "components_characterimage_initials",
       "community": 5,
-      "norm_label": "initials()",
-      "id": "components_characterimage_initials"
+      "norm_label": "initials()"
     },
     {
       "label": "CursedBackground.tsx",
@@ -689,9 +849,9 @@
       "source_file": "components/CursedBackground.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "components_cursedbackground",
       "community": 2,
-      "norm_label": "cursedbackground.tsx",
-      "id": "components_cursedbackground"
+      "norm_label": "cursedbackground.tsx"
     },
     {
       "label": "CursedBackground()",
@@ -699,9 +859,9 @@
       "source_file": "components/CursedBackground.tsx",
       "source_location": "L5",
       "_origin": "ast",
+      "id": "components_cursedbackground_cursedbackground",
       "community": 2,
-      "norm_label": "cursedbackground()",
-      "id": "components_cursedbackground_cursedbackground"
+      "norm_label": "cursedbackground()"
     },
     {
       "label": "GameCard.tsx",
@@ -709,9 +869,9 @@
       "source_file": "components/GameCard.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "components_gamecard",
       "community": 8,
-      "norm_label": "gamecard.tsx",
-      "id": "components_gamecard"
+      "norm_label": "gamecard.tsx"
     },
     {
       "label": "GameCardProps",
@@ -719,9 +879,9 @@
       "source_file": "components/GameCard.tsx",
       "source_location": "L8",
       "_origin": "ast",
+      "id": "components_gamecard_gamecardprops",
       "community": 8,
-      "norm_label": "gamecardprops",
-      "id": "components_gamecard_gamecardprops"
+      "norm_label": "gamecardprops"
     },
     {
       "label": "GameCard()",
@@ -729,9 +889,9 @@
       "source_file": "components/GameCard.tsx",
       "source_location": "L20",
       "_origin": "ast",
+      "id": "components_gamecard_gamecard",
       "community": 8,
-      "norm_label": "gamecard()",
-      "id": "components_gamecard_gamecard"
+      "norm_label": "gamecard()"
     },
     {
       "label": "Logo.tsx",
@@ -739,9 +899,9 @@
       "source_file": "components/Logo.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "components_logo",
       "community": 2,
-      "norm_label": "logo.tsx",
-      "id": "components_logo"
+      "norm_label": "logo.tsx"
     },
     {
       "label": "LogoProps",
@@ -749,9 +909,9 @@
       "source_file": "components/Logo.tsx",
       "source_location": "L3",
       "_origin": "ast",
+      "id": "components_logo_logoprops",
       "community": 2,
-      "norm_label": "logoprops",
-      "id": "components_logo_logoprops"
+      "norm_label": "logoprops"
     },
     {
       "label": "Logo()",
@@ -759,9 +919,9 @@
       "source_file": "components/Logo.tsx",
       "source_location": "L14",
       "_origin": "ast",
+      "id": "components_logo_logo",
       "community": 2,
-      "norm_label": "logo()",
-      "id": "components_logo_logo"
+      "norm_label": "logo()"
     },
     {
       "label": "RankFooter.tsx",
@@ -769,9 +929,9 @@
       "source_file": "components/RankFooter.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "components_rankfooter",
       "community": 0,
-      "norm_label": "rankfooter.tsx",
-      "id": "components_rankfooter"
+      "norm_label": "rankfooter.tsx"
     },
     {
       "label": "RankFooterProps",
@@ -779,9 +939,9 @@
       "source_file": "components/RankFooter.tsx",
       "source_location": "L5",
       "_origin": "ast",
+      "id": "components_rankfooter_rankfooterprops",
       "community": 0,
-      "norm_label": "rankfooterprops",
-      "id": "components_rankfooter_rankfooterprops"
+      "norm_label": "rankfooterprops"
     },
     {
       "label": "RankFooter()",
@@ -789,9 +949,9 @@
       "source_file": "components/RankFooter.tsx",
       "source_location": "L15",
       "_origin": "ast",
+      "id": "components_rankfooter_rankfooter",
       "community": 0,
-      "norm_label": "rankfooter()",
-      "id": "components_rankfooter_rankfooter"
+      "norm_label": "rankfooter()"
     },
     {
       "label": "ScoreReveal.tsx",
@@ -799,9 +959,9 @@
       "source_file": "components/ScoreReveal.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "components_scorereveal",
       "community": 0,
-      "norm_label": "scorereveal.tsx",
-      "id": "components_scorereveal"
+      "norm_label": "scorereveal.tsx"
     },
     {
       "label": "ScoreRevealProps",
@@ -809,9 +969,9 @@
       "source_file": "components/ScoreReveal.tsx",
       "source_location": "L11",
       "_origin": "ast",
+      "id": "components_scorereveal_scorerevealprops",
       "community": 0,
-      "norm_label": "scorerevealprops",
-      "id": "components_scorereveal_scorerevealprops"
+      "norm_label": "scorerevealprops"
     },
     {
       "label": "ScoreReveal()",
@@ -819,9 +979,9 @@
       "source_file": "components/ScoreReveal.tsx",
       "source_location": "L21",
       "_origin": "ast",
+      "id": "components_scorereveal_scorereveal",
       "community": 0,
-      "norm_label": "scorereveal()",
-      "id": "components_scorereveal_scorereveal"
+      "norm_label": "scorereveal()"
     },
     {
       "label": "useCountUp()",
@@ -829,9 +989,9 @@
       "source_file": "components/ScoreReveal.tsx",
       "source_location": "L106",
       "_origin": "ast",
+      "id": "components_scorereveal_usecountup",
       "community": 0,
-      "norm_label": "usecountup()",
-      "id": "components_scorereveal_usecountup"
+      "norm_label": "usecountup()"
     },
     {
       "label": "SiteNav.tsx",
@@ -839,9 +999,9 @@
       "source_file": "components/SiteNav.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "components_sitenav",
       "community": 2,
-      "norm_label": "sitenav.tsx",
-      "id": "components_sitenav"
+      "norm_label": "sitenav.tsx"
     },
     {
       "label": "LINKS",
@@ -849,9 +1009,9 @@
       "source_file": "components/SiteNav.tsx",
       "source_location": "L9",
       "_origin": "ast",
+      "id": "components_sitenav_links",
       "community": 2,
-      "norm_label": "links",
-      "id": "components_sitenav_links"
+      "norm_label": "links"
     },
     {
       "label": "NavUser",
@@ -859,9 +1019,9 @@
       "source_file": "components/SiteNav.tsx",
       "source_location": "L14",
       "_origin": "ast",
+      "id": "components_sitenav_navuser",
       "community": 2,
-      "norm_label": "navuser",
-      "id": "components_sitenav_navuser"
+      "norm_label": "navuser"
     },
     {
       "label": "SiteNav()",
@@ -869,9 +1029,9 @@
       "source_file": "components/SiteNav.tsx",
       "source_location": "L28",
       "_origin": "ast",
+      "id": "components_sitenav_sitenav",
       "community": 2,
-      "norm_label": "sitenav()",
-      "id": "components_sitenav_sitenav"
+      "norm_label": "sitenav()"
     },
     {
       "label": "UserMenu()",
@@ -879,9 +1039,9 @@
       "source_file": "components/SiteNav.tsx",
       "source_location": "L80",
       "_origin": "ast",
+      "id": "components_sitenav_usermenu",
       "community": 2,
-      "norm_label": "usermenu()",
-      "id": "components_sitenav_usermenu"
+      "norm_label": "usermenu()"
     },
     {
       "label": "GameShowcase.tsx",
@@ -889,9 +1049,9 @@
       "source_file": "components/landing/GameShowcase.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "landing_gameshowcase",
       "community": 8,
-      "norm_label": "gameshowcase.tsx",
-      "id": "landing_gameshowcase"
+      "norm_label": "gameshowcase.tsx"
     },
     {
       "label": "GameShowcase()",
@@ -899,9 +1059,9 @@
       "source_file": "components/landing/GameShowcase.tsx",
       "source_location": "L13",
       "_origin": "ast",
+      "id": "landing_gameshowcase_gameshowcase",
       "community": 8,
-      "norm_label": "gameshowcase()",
-      "id": "landing_gameshowcase_gameshowcase"
+      "norm_label": "gameshowcase()"
     },
     {
       "label": "Leaderboard.tsx",
@@ -909,9 +1069,9 @@
       "source_file": "components/leaderboard/Leaderboard.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "leaderboard_leaderboard",
       "community": 6,
-      "norm_label": "leaderboard.tsx",
-      "id": "leaderboard_leaderboard"
+      "norm_label": "leaderboard.tsx"
     },
     {
       "label": "MEDALS",
@@ -919,9 +1079,9 @@
       "source_file": "components/leaderboard/Leaderboard.tsx",
       "source_location": "L9",
       "_origin": "ast",
+      "id": "leaderboard_leaderboard_medals",
       "community": 6,
-      "norm_label": "medals",
-      "id": "leaderboard_leaderboard_medals"
+      "norm_label": "medals"
     },
     {
       "label": "GAME_GLYPH",
@@ -929,9 +1089,9 @@
       "source_file": "components/leaderboard/Leaderboard.tsx",
       "source_location": "L15",
       "_origin": "ast",
+      "id": "leaderboard_leaderboard_game_glyph",
       "community": 6,
-      "norm_label": "game_glyph",
-      "id": "leaderboard_leaderboard_game_glyph"
+      "norm_label": "game_glyph"
     },
     {
       "label": "GAME_LABEL",
@@ -939,9 +1099,9 @@
       "source_file": "components/leaderboard/Leaderboard.tsx",
       "source_location": "L20",
       "_origin": "ast",
+      "id": "leaderboard_leaderboard_game_label",
       "community": 6,
-      "norm_label": "game_label",
-      "id": "leaderboard_leaderboard_game_label"
+      "norm_label": "game_label"
     },
     {
       "label": "LeaderboardProps",
@@ -949,9 +1109,9 @@
       "source_file": "components/leaderboard/Leaderboard.tsx",
       "source_location": "L25",
       "_origin": "ast",
+      "id": "leaderboard_leaderboard_leaderboardprops",
       "community": 6,
-      "norm_label": "leaderboardprops",
-      "id": "leaderboard_leaderboard_leaderboardprops"
+      "norm_label": "leaderboardprops"
     },
     {
       "label": "Leaderboard()",
@@ -959,9 +1119,9 @@
       "source_file": "components/leaderboard/Leaderboard.tsx",
       "source_location": "L36",
       "_origin": "ast",
+      "id": "leaderboard_leaderboard_leaderboard",
       "community": 6,
-      "norm_label": "leaderboard()",
-      "id": "leaderboard_leaderboard_leaderboard"
+      "norm_label": "leaderboard()"
     },
     {
       "label": "LeaderboardRow()",
@@ -969,9 +1129,9 @@
       "source_file": "components/leaderboard/Leaderboard.tsx",
       "source_location": "L67",
       "_origin": "ast",
+      "id": "leaderboard_leaderboard_leaderboardrow",
       "community": 1,
-      "norm_label": "leaderboardrow()",
-      "id": "leaderboard_leaderboard_leaderboardrow"
+      "norm_label": "leaderboardrow()"
     },
     {
       "label": "SubmitScore.tsx",
@@ -979,9 +1139,9 @@
       "source_file": "components/leaderboard/SubmitScore.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "leaderboard_submitscore",
       "community": 6,
-      "norm_label": "submitscore.tsx",
-      "id": "leaderboard_submitscore"
+      "norm_label": "submitscore.tsx"
     },
     {
       "label": "SubmitScoreProps",
@@ -989,9 +1149,9 @@
       "source_file": "components/leaderboard/SubmitScore.tsx",
       "source_location": "L8",
       "_origin": "ast",
+      "id": "leaderboard_submitscore_submitscoreprops",
       "community": 6,
-      "norm_label": "submitscoreprops",
-      "id": "leaderboard_submitscore_submitscoreprops"
+      "norm_label": "submitscoreprops"
     },
     {
       "label": "SubmitScore()",
@@ -999,9 +1159,9 @@
       "source_file": "components/leaderboard/SubmitScore.tsx",
       "source_location": "L20",
       "_origin": "ast",
+      "id": "leaderboard_submitscore_submitscore",
       "community": 1,
-      "norm_label": "submitscore()",
-      "id": "leaderboard_submitscore_submitscore"
+      "norm_label": "submitscore()"
     },
     {
       "label": "AttemptsBar.tsx",
@@ -1009,9 +1169,9 @@
       "source_file": "components/ranking/AttemptsBar.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "ranking_attemptsbar",
       "community": 1,
-      "norm_label": "attemptsbar.tsx",
-      "id": "ranking_attemptsbar"
+      "norm_label": "attemptsbar.tsx"
     },
     {
       "label": "AttemptsBarProps",
@@ -1019,9 +1179,9 @@
       "source_file": "components/ranking/AttemptsBar.tsx",
       "source_location": "L6",
       "_origin": "ast",
+      "id": "ranking_attemptsbar_attemptsbarprops",
       "community": 1,
-      "norm_label": "attemptsbarprops",
-      "id": "ranking_attemptsbar_attemptsbarprops"
+      "norm_label": "attemptsbarprops"
     },
     {
       "label": "AttemptsBar()",
@@ -1029,9 +1189,9 @@
       "source_file": "components/ranking/AttemptsBar.tsx",
       "source_location": "L15",
       "_origin": "ast",
+      "id": "ranking_attemptsbar_attemptsbar",
       "community": 1,
-      "norm_label": "attemptsbar()",
-      "id": "ranking_attemptsbar_attemptsbar"
+      "norm_label": "attemptsbar()"
     },
     {
       "label": "CharacterPool.tsx",
@@ -1039,9 +1199,9 @@
       "source_file": "components/ranking/CharacterPool.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "ranking_characterpool",
       "community": 1,
-      "norm_label": "characterpool.tsx",
-      "id": "ranking_characterpool"
+      "norm_label": "characterpool.tsx"
     },
     {
       "label": "CharacterPoolProps",
@@ -1049,9 +1209,9 @@
       "source_file": "components/ranking/CharacterPool.tsx",
       "source_location": "L7",
       "_origin": "ast",
+      "id": "ranking_characterpool_characterpoolprops",
       "community": 1,
-      "norm_label": "characterpoolprops",
-      "id": "ranking_characterpool_characterpoolprops"
+      "norm_label": "characterpoolprops"
     },
     {
       "label": "CharacterPool()",
@@ -1059,9 +1219,9 @@
       "source_file": "components/ranking/CharacterPool.tsx",
       "source_location": "L15",
       "_origin": "ast",
+      "id": "ranking_characterpool_characterpool",
       "community": 1,
-      "norm_label": "characterpool()",
-      "id": "ranking_characterpool_characterpool"
+      "norm_label": "characterpool()"
     },
     {
       "label": "DraggableCard.tsx",
@@ -1069,9 +1229,9 @@
       "source_file": "components/ranking/DraggableCard.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "ranking_draggablecard",
       "community": 1,
-      "norm_label": "draggablecard.tsx",
-      "id": "ranking_draggablecard"
+      "norm_label": "draggablecard.tsx"
     },
     {
       "label": "DraggableCardProps",
@@ -1079,9 +1239,9 @@
       "source_file": "components/ranking/DraggableCard.tsx",
       "source_location": "L7",
       "_origin": "ast",
+      "id": "ranking_draggablecard_draggablecardprops",
       "community": 1,
-      "norm_label": "draggablecardprops",
-      "id": "ranking_draggablecard_draggablecardprops"
+      "norm_label": "draggablecardprops"
     },
     {
       "label": "DraggableCard()",
@@ -1089,9 +1249,9 @@
       "source_file": "components/ranking/DraggableCard.tsx",
       "source_location": "L17",
       "_origin": "ast",
+      "id": "ranking_draggablecard_draggablecard",
       "community": 1,
-      "norm_label": "draggablecard()",
-      "id": "ranking_draggablecard_draggablecard"
+      "norm_label": "draggablecard()"
     },
     {
       "label": "GameOverScreen.tsx",
@@ -1099,9 +1259,9 @@
       "source_file": "components/ranking/GameOverScreen.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "ranking_gameoverscreen",
       "community": 1,
-      "norm_label": "gameoverscreen.tsx",
-      "id": "ranking_gameoverscreen"
+      "norm_label": "gameoverscreen.tsx"
     },
     {
       "label": "GameOverScreenProps",
@@ -1109,9 +1269,9 @@
       "source_file": "components/ranking/GameOverScreen.tsx",
       "source_location": "L7",
       "_origin": "ast",
+      "id": "ranking_gameoverscreen_gameoverscreenprops",
       "community": 1,
-      "norm_label": "gameoverscreenprops",
-      "id": "ranking_gameoverscreen_gameoverscreenprops"
+      "norm_label": "gameoverscreenprops"
     },
     {
       "label": "GameOverScreen()",
@@ -1119,9 +1279,9 @@
       "source_file": "components/ranking/GameOverScreen.tsx",
       "source_location": "L15",
       "_origin": "ast",
+      "id": "ranking_gameoverscreen_gameoverscreen",
       "community": 1,
-      "norm_label": "gameoverscreen()",
-      "id": "ranking_gameoverscreen_gameoverscreen"
+      "norm_label": "gameoverscreen()"
     },
     {
       "label": "RankingCard.tsx",
@@ -1129,9 +1289,9 @@
       "source_file": "components/ranking/RankingCard.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "ranking_rankingcard",
       "community": 1,
-      "norm_label": "rankingcard.tsx",
-      "id": "ranking_rankingcard"
+      "norm_label": "rankingcard.tsx"
     },
     {
       "label": "RankingCardProps",
@@ -1139,9 +1299,9 @@
       "source_file": "components/ranking/RankingCard.tsx",
       "source_location": "L9",
       "_origin": "ast",
+      "id": "ranking_rankingcard_rankingcardprops",
       "community": 1,
-      "norm_label": "rankingcardprops",
-      "id": "ranking_rankingcard_rankingcardprops"
+      "norm_label": "rankingcardprops"
     },
     {
       "label": "RankingCard()",
@@ -1149,9 +1309,9 @@
       "source_file": "components/ranking/RankingCard.tsx",
       "source_location": "L19",
       "_origin": "ast",
+      "id": "ranking_rankingcard_rankingcard",
       "community": 1,
-      "norm_label": "rankingcard()",
-      "id": "ranking_rankingcard_rankingcard"
+      "norm_label": "rankingcard()"
     },
     {
       "label": "RankingSlot.tsx",
@@ -1159,9 +1319,9 @@
       "source_file": "components/ranking/RankingSlot.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "ranking_rankingslot",
       "community": 1,
-      "norm_label": "rankingslot.tsx",
-      "id": "ranking_rankingslot"
+      "norm_label": "rankingslot.tsx"
     },
     {
       "label": "RankingSlotProps",
@@ -1169,9 +1329,9 @@
       "source_file": "components/ranking/RankingSlot.tsx",
       "source_location": "L9",
       "_origin": "ast",
+      "id": "ranking_rankingslot_rankingslotprops",
       "community": 1,
-      "norm_label": "rankingslotprops",
-      "id": "ranking_rankingslot_rankingslotprops"
+      "norm_label": "rankingslotprops"
     },
     {
       "label": "RankingSlot()",
@@ -1179,9 +1339,9 @@
       "source_file": "components/ranking/RankingSlot.tsx",
       "source_location": "L18",
       "_origin": "ast",
+      "id": "ranking_rankingslot_rankingslot",
       "community": 1,
-      "norm_label": "rankingslot()",
-      "id": "ranking_rankingslot_rankingslot"
+      "norm_label": "rankingslot()"
     },
     {
       "label": "RosterContext.tsx",
@@ -1189,9 +1349,9 @@
       "source_file": "components/ranking/RosterContext.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "ranking_rostercontext",
       "community": 1,
-      "norm_label": "rostercontext.tsx",
-      "id": "ranking_rostercontext"
+      "norm_label": "rostercontext.tsx"
     },
     {
       "label": "RosterContext",
@@ -1199,9 +1359,9 @@
       "source_file": "components/ranking/RosterContext.tsx",
       "source_location": "L13",
       "_origin": "ast",
+      "id": "ranking_rostercontext_rostercontext",
       "community": 1,
-      "norm_label": "rostercontext",
-      "id": "ranking_rostercontext_rostercontext"
+      "norm_label": "rostercontext"
     },
     {
       "label": "RosterProvider()",
@@ -1209,9 +1369,9 @@
       "source_file": "components/ranking/RosterContext.tsx",
       "source_location": "L15",
       "_origin": "ast",
+      "id": "ranking_rostercontext_rosterprovider",
       "community": 1,
-      "norm_label": "rosterprovider()",
-      "id": "ranking_rostercontext_rosterprovider"
+      "norm_label": "rosterprovider()"
     },
     {
       "label": "useCharacter()",
@@ -1219,9 +1379,9 @@
       "source_file": "components/ranking/RosterContext.tsx",
       "source_location": "L28",
       "_origin": "ast",
+      "id": "ranking_rostercontext_usecharacter",
       "community": 1,
-      "norm_label": "usecharacter()",
-      "id": "ranking_rostercontext_usecharacter"
+      "norm_label": "usecharacter()"
     },
     {
       "label": "VictoryModal.tsx",
@@ -1229,9 +1389,9 @@
       "source_file": "components/ranking/VictoryModal.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "ranking_victorymodal",
       "community": 1,
-      "norm_label": "victorymodal.tsx",
-      "id": "ranking_victorymodal"
+      "norm_label": "victorymodal.tsx"
     },
     {
       "label": "VictoryModalProps",
@@ -1239,9 +1399,9 @@
       "source_file": "components/ranking/VictoryModal.tsx",
       "source_location": "L8",
       "_origin": "ast",
+      "id": "ranking_victorymodal_victorymodalprops",
       "community": 1,
-      "norm_label": "victorymodalprops",
-      "id": "ranking_victorymodal_victorymodalprops"
+      "norm_label": "victorymodalprops"
     },
     {
       "label": "VictoryModal()",
@@ -1249,9 +1409,9 @@
       "source_file": "components/ranking/VictoryModal.tsx",
       "source_location": "L20",
       "_origin": "ast",
+      "id": "ranking_victorymodal_victorymodal",
       "community": 1,
-      "norm_label": "victorymodal()",
-      "id": "ranking_victorymodal_victorymodal"
+      "norm_label": "victorymodal()"
     },
     {
       "label": "conditions.ts",
@@ -1259,9 +1419,9 @@
       "source_file": "data/ranking/conditions.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 1,
-      "norm_label": "conditions.ts",
-      "id": "ranking_conditions"
+      "id": "ranking_conditions",
+      "community": 5,
+      "norm_label": "conditions.ts"
     },
     {
       "label": "RankingCondition",
@@ -1269,9 +1429,9 @@
       "source_file": "data/ranking/conditions.ts",
       "source_location": "L13",
       "_origin": "ast",
-      "community": 1,
-      "norm_label": "rankingcondition",
-      "id": "ranking_conditions_rankingcondition"
+      "id": "ranking_conditions_rankingcondition",
+      "community": 5,
+      "norm_label": "rankingcondition"
     },
     {
       "label": "CONDITIONS",
@@ -1279,9 +1439,9 @@
       "source_file": "data/ranking/conditions.ts",
       "source_location": "L25",
       "_origin": "ast",
-      "community": 1,
-      "norm_label": "conditions",
-      "id": "ranking_conditions_conditions"
+      "id": "ranking_conditions_conditions",
+      "community": 5,
+      "norm_label": "conditions"
     },
     {
       "label": "categories.ts",
@@ -1289,9 +1449,9 @@
       "source_file": "data/roster/categories.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 0,
-      "norm_label": "categories.ts",
-      "id": "roster_categories"
+      "id": "roster_categories",
+      "community": 5,
+      "norm_label": "categories.ts"
     },
     {
       "label": "CategoryId",
@@ -1299,9 +1459,9 @@
       "source_file": "data/roster/categories.ts",
       "source_location": "L15",
       "_origin": "ast",
-      "community": 0,
-      "norm_label": "categoryid",
-      "id": "roster_categories_categoryid"
+      "id": "roster_categories_categoryid",
+      "community": 5,
+      "norm_label": "categoryid"
     },
     {
       "label": "CategoryConfig",
@@ -1309,9 +1469,9 @@
       "source_file": "data/roster/categories.ts",
       "source_location": "L26",
       "_origin": "ast",
-      "community": 0,
-      "norm_label": "categoryconfig",
-      "id": "roster_categories_categoryconfig"
+      "id": "roster_categories_categoryconfig",
+      "community": 5,
+      "norm_label": "categoryconfig"
     },
     {
       "label": "CATEGORIES",
@@ -1319,9 +1479,9 @@
       "source_file": "data/roster/categories.ts",
       "source_location": "L36",
       "_origin": "ast",
-      "community": 0,
-      "norm_label": "categories",
-      "id": "roster_categories_categories"
+      "id": "roster_categories_categories",
+      "community": 5,
+      "norm_label": "categories"
     },
     {
       "label": "CATEGORY_BY_ID",
@@ -1329,9 +1489,9 @@
       "source_file": "data/roster/categories.ts",
       "source_location": "L103",
       "_origin": "ast",
-      "community": 5,
-      "norm_label": "category_by_id",
-      "id": "roster_categories_category_by_id"
+      "id": "roster_categories_category_by_id",
+      "community": 16,
+      "norm_label": "category_by_id"
     },
     {
       "label": "characters.json",
@@ -1339,9 +1499,9 @@
       "source_file": "data/roster/characters.json",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "data_roster_characters_json_roster_characters",
       "community": 13,
-      "norm_label": "characters.json",
-      "id": "data_roster_characters_json_roster_characters"
+      "norm_label": "characters.json"
     },
     {
       "label": "characters.ts",
@@ -1349,9 +1509,9 @@
       "source_file": "data/roster/characters.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 0,
-      "norm_label": "characters.ts",
-      "id": "data_roster_characters_ts_roster_characters"
+      "id": "data_roster_characters_ts_roster_characters",
+      "community": 5,
+      "norm_label": "characters.ts"
     },
     {
       "label": "CharacterTier",
@@ -1359,9 +1519,9 @@
       "source_file": "data/roster/characters.ts",
       "source_location": "L22",
       "_origin": "ast",
+      "id": "roster_characters_charactertier",
       "community": 5,
-      "norm_label": "charactertier",
-      "id": "roster_characters_charactertier"
+      "norm_label": "charactertier"
     },
     {
       "label": "Character",
@@ -1369,9 +1529,9 @@
       "source_file": "data/roster/characters.ts",
       "source_location": "L24",
       "_origin": "ast",
-      "community": 0,
-      "norm_label": "character",
-      "id": "roster_characters_character"
+      "id": "roster_characters_character",
+      "community": 5,
+      "norm_label": "character"
     },
     {
       "label": "ROSTER",
@@ -1379,9 +1539,9 @@
       "source_file": "data/roster/characters.ts",
       "source_location": "L41",
       "_origin": "ast",
-      "community": 0,
-      "norm_label": "roster",
-      "id": "roster_characters_roster"
+      "id": "roster_characters_roster",
+      "community": 5,
+      "norm_label": "roster"
     },
     {
       "label": "CHARACTER_BY_ID",
@@ -1389,9 +1549,9 @@
       "source_file": "data/roster/characters.ts",
       "source_location": "L44",
       "_origin": "ast",
-      "community": 1,
-      "norm_label": "character_by_id",
-      "id": "roster_characters_character_by_id"
+      "id": "roster_characters_character_by_id",
+      "community": 17,
+      "norm_label": "character_by_id"
     },
     {
       "label": "roster-store.ts",
@@ -1399,9 +1559,9 @@
       "source_file": "lib/admin/roster-store.ts",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "admin_roster_store",
       "community": 4,
-      "norm_label": "roster-store.ts",
-      "id": "admin_roster_store"
+      "norm_label": "roster-store.ts"
     },
     {
       "label": "readRoster()",
@@ -1409,9 +1569,9 @@
       "source_file": "lib/admin/roster-store.ts",
       "source_location": "L14",
       "_origin": "ast",
+      "id": "admin_roster_store_readroster",
       "community": 4,
-      "norm_label": "readroster()",
-      "id": "admin_roster_store_readroster"
+      "norm_label": "readroster()"
     },
     {
       "label": "upsertCharacter()",
@@ -1419,9 +1579,9 @@
       "source_file": "lib/admin/roster-store.ts",
       "source_location": "L19",
       "_origin": "ast",
-      "community": 5,
-      "norm_label": "upsertcharacter()",
-      "id": "admin_roster_store_upsertcharacter"
+      "id": "admin_roster_store_upsertcharacter",
+      "community": 16,
+      "norm_label": "upsertcharacter()"
     },
     {
       "label": "deleteCharacter()",
@@ -1429,9 +1589,9 @@
       "source_file": "lib/admin/roster-store.ts",
       "source_location": "L45",
       "_origin": "ast",
-      "community": 5,
-      "norm_label": "deletecharacter()",
-      "id": "admin_roster_store_deletecharacter"
+      "id": "admin_roster_store_deletecharacter",
+      "community": 16,
+      "norm_label": "deletecharacter()"
     },
     {
       "label": "actions.ts",
@@ -1439,9 +1599,9 @@
       "source_file": "lib/auth/actions.ts",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "auth_actions",
       "community": 2,
-      "norm_label": "actions.ts",
-      "id": "auth_actions"
+      "norm_label": "actions.ts"
     },
     {
       "label": "AuthResult",
@@ -1449,9 +1609,9 @@
       "source_file": "lib/auth/actions.ts",
       "source_location": "L9",
       "_origin": "ast",
+      "id": "auth_actions_authresult",
       "community": 2,
-      "norm_label": "authresult",
-      "id": "auth_actions_authresult"
+      "norm_label": "authresult"
     },
     {
       "label": "registerAction()",
@@ -1459,9 +1619,9 @@
       "source_file": "lib/auth/actions.ts",
       "source_location": "L16",
       "_origin": "ast",
+      "id": "auth_actions_registeraction",
       "community": 2,
-      "norm_label": "registeraction()",
-      "id": "auth_actions_registeraction"
+      "norm_label": "registeraction()"
     },
     {
       "label": "loginAction()",
@@ -1469,9 +1629,9 @@
       "source_file": "lib/auth/actions.ts",
       "source_location": "L80",
       "_origin": "ast",
+      "id": "auth_actions_loginaction",
       "community": 2,
-      "norm_label": "loginaction()",
-      "id": "auth_actions_loginaction"
+      "norm_label": "loginaction()"
     },
     {
       "label": "logoutAction()",
@@ -1479,9 +1639,9 @@
       "source_file": "lib/auth/actions.ts",
       "source_location": "L117",
       "_origin": "ast",
+      "id": "auth_actions_logoutaction",
       "community": 2,
-      "norm_label": "logoutaction()",
-      "id": "auth_actions_logoutaction"
+      "norm_label": "logoutaction()"
     },
     {
       "label": "admin-emails.ts",
@@ -1489,9 +1649,19 @@
       "source_file": "lib/auth/admin-emails.ts",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "auth_admin_emails",
       "community": 2,
-      "norm_label": "admin-emails.ts",
-      "id": "auth_admin_emails"
+      "norm_label": "admin-emails.ts"
+    },
+    {
+      "label": "adminEmails()",
+      "file_type": "code",
+      "source_file": "lib/auth/admin-emails.ts",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "auth_admin_emails_adminemails",
+      "community": 2,
+      "norm_label": "adminemails()"
     },
     {
       "label": "isAdminEmail()",
@@ -1499,9 +1669,9 @@
       "source_file": "lib/auth/admin-emails.ts",
       "source_location": "L18",
       "_origin": "ast",
+      "id": "auth_admin_emails_isadminemail",
       "community": 2,
-      "norm_label": "isadminemail()",
-      "id": "auth_admin_emails_isadminemail"
+      "norm_label": "isadminemail()"
     },
     {
       "label": "session.ts",
@@ -1509,9 +1679,9 @@
       "source_file": "lib/auth/session.ts",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "auth_session",
       "community": 2,
-      "norm_label": "session.ts",
-      "id": "auth_session"
+      "norm_label": "session.ts"
     },
     {
       "label": "SessionUser",
@@ -1519,9 +1689,9 @@
       "source_file": "lib/auth/session.ts",
       "source_location": "L17",
       "_origin": "ast",
+      "id": "auth_session_sessionuser",
       "community": 2,
-      "norm_label": "sessionuser",
-      "id": "auth_session_sessionuser"
+      "norm_label": "sessionuser"
     },
     {
       "label": "createSession()",
@@ -1529,9 +1699,9 @@
       "source_file": "lib/auth/session.ts",
       "source_location": "L25",
       "_origin": "ast",
+      "id": "auth_session_createsession",
       "community": 2,
-      "norm_label": "createsession()",
-      "id": "auth_session_createsession"
+      "norm_label": "createsession()"
     },
     {
       "label": "getCurrentUser",
@@ -1539,9 +1709,9 @@
       "source_file": "lib/auth/session.ts",
       "source_location": "L43",
       "_origin": "ast",
-      "community": 2,
-      "norm_label": "getcurrentuser",
-      "id": "auth_session_getcurrentuser"
+      "id": "auth_session_getcurrentuser",
+      "community": 4,
+      "norm_label": "getcurrentuser"
     },
     {
       "label": "getAdminUser()",
@@ -1549,9 +1719,9 @@
       "source_file": "lib/auth/session.ts",
       "source_location": "L58",
       "_origin": "ast",
-      "community": 2,
-      "norm_label": "getadminuser()",
-      "id": "auth_session_getadminuser"
+      "id": "auth_session_getadminuser",
+      "community": 16,
+      "norm_label": "getadminuser()"
     },
     {
       "label": "destroySession()",
@@ -1559,9 +1729,9 @@
       "source_file": "lib/auth/session.ts",
       "source_location": "L64",
       "_origin": "ast",
+      "id": "auth_session_destroysession",
       "community": 2,
-      "norm_label": "destroysession()",
-      "id": "auth_session_destroysession"
+      "norm_label": "destroysession()"
     },
     {
       "label": "bestScore.ts",
@@ -1569,9 +1739,9 @@
       "source_file": "lib/bestScore.ts",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "lib_bestscore",
       "community": 4,
-      "norm_label": "bestscore.ts",
-      "id": "lib_bestscore"
+      "norm_label": "bestscore.ts"
     },
     {
       "label": "cookieName()",
@@ -1579,9 +1749,9 @@
       "source_file": "lib/bestScore.ts",
       "source_location": "L15",
       "_origin": "ast",
+      "id": "lib_bestscore_cookiename",
       "community": 4,
-      "norm_label": "cookiename()",
-      "id": "lib_bestscore_cookiename"
+      "norm_label": "cookiename()"
     },
     {
       "label": "getBestScore()",
@@ -1589,9 +1759,9 @@
       "source_file": "lib/bestScore.ts",
       "source_location": "L20",
       "_origin": "ast",
+      "id": "lib_bestscore_getbestscore",
       "community": 4,
-      "norm_label": "getbestscore()",
-      "id": "lib_bestscore_getbestscore"
+      "norm_label": "getbestscore()"
     },
     {
       "label": "saveBestScore()",
@@ -1599,9 +1769,9 @@
       "source_file": "lib/bestScore.ts",
       "source_location": "L31",
       "_origin": "ast",
+      "id": "lib_bestscore_savebestscore",
       "community": 4,
-      "norm_label": "savebestscore()",
-      "id": "lib_bestscore_savebestscore"
+      "norm_label": "savebestscore()"
     },
     {
       "label": "queries.ts",
@@ -1609,9 +1779,9 @@
       "source_file": "lib/content/queries.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 4,
-      "norm_label": "queries.ts",
-      "id": "content_queries"
+      "id": "content_queries",
+      "community": 5,
+      "norm_label": "queries.ts"
     },
     {
       "label": "CharacterRow",
@@ -1619,9 +1789,9 @@
       "source_file": "lib/content/queries.ts",
       "source_location": "L12",
       "_origin": "ast",
-      "community": 4,
-      "norm_label": "characterrow",
-      "id": "content_queries_characterrow"
+      "id": "content_queries_characterrow",
+      "community": 5,
+      "norm_label": "characterrow"
     },
     {
       "label": "toCharacter()",
@@ -1629,9 +1799,9 @@
       "source_file": "lib/content/queries.ts",
       "source_location": "L21",
       "_origin": "ast",
-      "community": 4,
-      "norm_label": "tocharacter()",
-      "id": "content_queries_tocharacter"
+      "id": "content_queries_tocharacter",
+      "community": 5,
+      "norm_label": "tocharacter()"
     },
     {
       "label": "getCategories()",
@@ -1639,39 +1809,39 @@
       "source_file": "lib/content/queries.ts",
       "source_location": "L33",
       "_origin": "ast",
+      "id": "content_queries_getcategories",
       "community": 4,
-      "norm_label": "getcategories()",
-      "id": "content_queries_getcategories"
+      "norm_label": "getcategories()"
     },
     {
       "label": "getRoster()",
       "file_type": "code",
       "source_file": "lib/content/queries.ts",
-      "source_location": "L45",
+      "source_location": "L47",
       "_origin": "ast",
+      "id": "content_queries_getroster",
       "community": 4,
-      "norm_label": "getroster()",
-      "id": "content_queries_getroster"
+      "norm_label": "getroster()"
     },
     {
       "label": "getCharacterMap()",
       "file_type": "code",
       "source_file": "lib/content/queries.ts",
-      "source_location": "L51",
+      "source_location": "L63",
       "_origin": "ast",
+      "id": "content_queries_getcharactermap",
       "community": 4,
-      "norm_label": "getcharactermap()",
-      "id": "content_queries_getcharactermap"
+      "norm_label": "getcharactermap()"
     },
     {
       "label": "getConditions()",
       "file_type": "code",
       "source_file": "lib/content/queries.ts",
-      "source_location": "L57",
+      "source_location": "L69",
       "_origin": "ast",
+      "id": "content_queries_getconditions",
       "community": 4,
-      "norm_label": "getconditions()",
-      "id": "content_queries_getconditions"
+      "norm_label": "getconditions()"
     },
     {
       "label": "draw.test.ts",
@@ -1679,9 +1849,9 @@
       "source_file": "lib/draw/draw.test.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 0,
-      "norm_label": "draw.test.ts",
-      "id": "draw_draw_test"
+      "id": "draw_draw_test",
+      "community": 17,
+      "norm_label": "draw.test.ts"
     },
     {
       "label": "char()",
@@ -1689,9 +1859,9 @@
       "source_file": "lib/draw/draw.test.ts",
       "source_location": "L17",
       "_origin": "ast",
-      "community": 0,
-      "norm_label": "char()",
-      "id": "draw_draw_test_char"
+      "id": "draw_draw_test_char",
+      "community": 17,
+      "norm_label": "char()"
     },
     {
       "label": "roster",
@@ -1699,9 +1869,9 @@
       "source_file": "lib/draw/draw.test.ts",
       "source_location": "L21",
       "_origin": "ast",
-      "community": 0,
-      "norm_label": "roster",
-      "id": "draw_draw_test_roster"
+      "id": "draw_draw_test_roster",
+      "community": 17,
+      "norm_label": "roster"
     },
     {
       "label": "speed",
@@ -1709,9 +1879,9 @@
       "source_file": "lib/draw/draw.test.ts",
       "source_location": "L29",
       "_origin": "ast",
-      "community": 0,
-      "norm_label": "speed",
-      "id": "draw_draw_test_speed"
+      "id": "draw_draw_test_speed",
+      "community": 17,
+      "norm_label": "speed"
     },
     {
       "label": "domain",
@@ -1719,9 +1889,9 @@
       "source_file": "lib/draw/draw.test.ts",
       "source_location": "L36",
       "_origin": "ast",
-      "community": 0,
-      "norm_label": "domain",
-      "id": "draw_draw_test_domain"
+      "id": "draw_draw_test_domain",
+      "community": 17,
+      "norm_label": "domain"
     },
     {
       "label": "draw.ts",
@@ -1729,9 +1899,9 @@
       "source_file": "lib/draw/draw.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 0,
-      "norm_label": "draw.ts",
-      "id": "draw_draw"
+      "id": "draw_draw",
+      "community": 17,
+      "norm_label": "draw.ts"
     },
     {
       "label": "Rng",
@@ -1739,9 +1909,9 @@
       "source_file": "lib/draw/draw.ts",
       "source_location": "L17",
       "_origin": "ast",
-      "community": 1,
-      "norm_label": "rng",
-      "id": "draw_draw_rng"
+      "id": "draw_draw_rng",
+      "community": 17,
+      "norm_label": "rng"
     },
     {
       "label": "eligibleFor()",
@@ -1749,9 +1919,9 @@
       "source_file": "lib/draw/draw.ts",
       "source_location": "L20",
       "_origin": "ast",
-      "community": 0,
-      "norm_label": "eligiblefor()",
-      "id": "draw_draw_eligiblefor"
+      "id": "draw_draw_eligiblefor",
+      "community": 17,
+      "norm_label": "eligiblefor()"
     },
     {
       "label": "shuffle()",
@@ -1759,9 +1929,9 @@
       "source_file": "lib/draw/draw.ts",
       "source_location": "L28",
       "_origin": "ast",
-      "community": 1,
-      "norm_label": "shuffle()",
-      "id": "draw_draw_shuffle"
+      "id": "draw_draw_shuffle",
+      "community": 17,
+      "norm_label": "shuffle()"
     },
     {
       "label": "drawCategory()",
@@ -1769,9 +1939,9 @@
       "source_file": "lib/draw/draw.ts",
       "source_location": "L41",
       "_origin": "ast",
-      "community": 0,
-      "norm_label": "drawcategory()",
-      "id": "draw_draw_drawcategory"
+      "id": "draw_draw_drawcategory",
+      "community": 17,
+      "norm_label": "drawcategory()"
     },
     {
       "label": "Draw",
@@ -1779,9 +1949,9 @@
       "source_file": "lib/draw/draw.ts",
       "source_location": "L52",
       "_origin": "ast",
-      "community": 0,
-      "norm_label": "draw",
-      "id": "draw_draw_draw"
+      "id": "draw_draw_draw",
+      "community": 17,
+      "norm_label": "draw"
     },
     {
       "label": "drawAll()",
@@ -1789,9 +1959,9 @@
       "source_file": "lib/draw/draw.ts",
       "source_location": "L55",
       "_origin": "ast",
-      "community": 0,
-      "norm_label": "drawall()",
-      "id": "draw_draw_drawall"
+      "id": "draw_draw_drawall",
+      "community": 17,
+      "norm_label": "drawall()"
     },
     {
       "label": "redrawUnlocked()",
@@ -1799,9 +1969,9 @@
       "source_file": "lib/draw/draw.ts",
       "source_location": "L71",
       "_origin": "ast",
-      "community": 0,
-      "norm_label": "redrawunlocked()",
-      "id": "draw_draw_redrawunlocked"
+      "id": "draw_draw_redrawunlocked",
+      "community": 17,
+      "norm_label": "redrawunlocked()"
     },
     {
       "label": "SingleDraw",
@@ -1809,9 +1979,9 @@
       "source_file": "lib/draw/draw.ts",
       "source_location": "L92",
       "_origin": "ast",
+      "id": "draw_draw_singledraw",
       "community": 0,
-      "norm_label": "singledraw",
-      "id": "draw_draw_singledraw"
+      "norm_label": "singledraw"
     },
     {
       "label": "drawOne()",
@@ -1819,9 +1989,9 @@
       "source_file": "lib/draw/draw.ts",
       "source_location": "L102",
       "_origin": "ast",
-      "community": 0,
-      "norm_label": "drawone()",
-      "id": "draw_draw_drawone"
+      "id": "draw_draw_drawone",
+      "community": 17,
+      "norm_label": "drawone()"
     },
     {
       "label": "drawAllOne()",
@@ -1829,9 +1999,9 @@
       "source_file": "lib/draw/draw.ts",
       "source_location": "L123",
       "_origin": "ast",
-      "community": 0,
-      "norm_label": "drawallone()",
-      "id": "draw_draw_drawallone"
+      "id": "draw_draw_drawallone",
+      "community": 17,
+      "norm_label": "drawallone()"
     },
     {
       "label": "redrawUnlockedOne()",
@@ -1839,9 +2009,9 @@
       "source_file": "lib/draw/draw.ts",
       "source_location": "L140",
       "_origin": "ast",
-      "community": 0,
-      "norm_label": "redrawunlockedone()",
-      "id": "draw_draw_redrawunlockedone"
+      "id": "draw_draw_redrawunlockedone",
+      "community": 17,
+      "norm_label": "redrawunlockedone()"
     },
     {
       "label": "seededRng()",
@@ -1849,9 +2019,9 @@
       "source_file": "lib/draw/draw.ts",
       "source_location": "L162",
       "_origin": "ast",
-      "community": 1,
-      "norm_label": "seededrng()",
-      "id": "draw_draw_seededrng"
+      "id": "draw_draw_seededrng",
+      "community": 17,
+      "norm_label": "seededrng()"
     },
     {
       "label": "format.ts",
@@ -1859,9 +2029,9 @@
       "source_file": "lib/format.ts",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "lib_format",
       "community": 1,
-      "norm_label": "format.ts",
-      "id": "lib_format"
+      "norm_label": "format.ts"
     },
     {
       "label": "formatScore()",
@@ -1869,9 +2039,9 @@
       "source_file": "lib/format.ts",
       "source_location": "L12",
       "_origin": "ast",
+      "id": "lib_format_formatscore",
       "community": 1,
-      "norm_label": "formatscore()",
-      "id": "lib_format_formatscore"
+      "norm_label": "formatscore()"
     },
     {
       "label": "registry.ts",
@@ -1879,9 +2049,9 @@
       "source_file": "lib/games/registry.ts",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "games_registry",
       "community": 8,
-      "norm_label": "registry.ts",
-      "id": "games_registry"
+      "norm_label": "registry.ts"
     },
     {
       "label": "GAMES",
@@ -1889,9 +2059,9 @@
       "source_file": "lib/games/registry.ts",
       "source_location": "L7",
       "_origin": "ast",
+      "id": "games_registry_games",
       "community": 8,
-      "norm_label": "games",
-      "id": "games_registry_games"
+      "norm_label": "games"
     },
     {
       "label": "getGame()",
@@ -1899,9 +2069,9 @@
       "source_file": "lib/games/registry.ts",
       "source_location": "L43",
       "_origin": "ast",
-      "community": 8,
-      "norm_label": "getgame()",
-      "id": "games_registry_getgame"
+      "id": "games_registry_getgame",
+      "community": 16,
+      "norm_label": "getgame()"
     },
     {
       "label": "types.ts",
@@ -1909,9 +2079,9 @@
       "source_file": "lib/games/types.ts",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "games_types",
       "community": 8,
-      "norm_label": "types.ts",
-      "id": "games_types"
+      "norm_label": "types.ts"
     },
     {
       "label": "Game",
@@ -1919,9 +2089,9 @@
       "source_file": "lib/games/types.ts",
       "source_location": "L6",
       "_origin": "ast",
+      "id": "games_types_game",
       "community": 8,
-      "norm_label": "game",
-      "id": "games_types_game"
+      "norm_label": "game"
     },
     {
       "label": "actions.ts",
@@ -1929,9 +2099,9 @@
       "source_file": "lib/leaderboard/actions.ts",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "leaderboard_actions",
       "community": 6,
-      "norm_label": "actions.ts",
-      "id": "leaderboard_actions"
+      "norm_label": "actions.ts"
     },
     {
       "label": "SubmitResult",
@@ -1939,9 +2109,9 @@
       "source_file": "lib/leaderboard/actions.ts",
       "source_location": "L7",
       "_origin": "ast",
+      "id": "leaderboard_actions_submitresult",
       "community": 6,
-      "norm_label": "submitresult",
-      "id": "leaderboard_actions_submitresult"
+      "norm_label": "submitresult"
     },
     {
       "label": "GAMES",
@@ -1949,9 +2119,9 @@
       "source_file": "lib/leaderboard/actions.ts",
       "source_location": "L14",
       "_origin": "ast",
+      "id": "leaderboard_actions_games",
       "community": 6,
-      "norm_label": "games",
-      "id": "leaderboard_actions_games"
+      "norm_label": "games"
     },
     {
       "label": "submitScoreAction()",
@@ -1959,9 +2129,9 @@
       "source_file": "lib/leaderboard/actions.ts",
       "source_location": "L21",
       "_origin": "ast",
+      "id": "leaderboard_actions_submitscoreaction",
       "community": 6,
-      "norm_label": "submitscoreaction()",
-      "id": "leaderboard_actions_submitscoreaction"
+      "norm_label": "submitscoreaction()"
     },
     {
       "label": "store.ts",
@@ -1969,9 +2139,9 @@
       "source_file": "lib/leaderboard/store.ts",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "leaderboard_store",
       "community": 6,
-      "norm_label": "store.ts",
-      "id": "leaderboard_store"
+      "norm_label": "store.ts"
     },
     {
       "label": "LeaderboardGame",
@@ -1979,9 +2149,9 @@
       "source_file": "lib/leaderboard/store.ts",
       "source_location": "L10",
       "_origin": "ast",
+      "id": "leaderboard_store_leaderboardgame",
       "community": 6,
-      "norm_label": "leaderboardgame",
-      "id": "leaderboard_store_leaderboardgame"
+      "norm_label": "leaderboardgame"
     },
     {
       "label": "LeaderboardEntry",
@@ -1989,9 +2159,9 @@
       "source_file": "lib/leaderboard/store.ts",
       "source_location": "L12",
       "_origin": "ast",
+      "id": "leaderboard_store_leaderboardentry",
       "community": 6,
-      "norm_label": "leaderboardentry",
-      "id": "leaderboard_store_leaderboardentry"
+      "norm_label": "leaderboardentry"
     },
     {
       "label": "MAX_SCORE",
@@ -1999,9 +2169,9 @@
       "source_file": "lib/leaderboard/store.ts",
       "source_location": "L19",
       "_origin": "ast",
+      "id": "leaderboard_store_max_score",
       "community": 6,
-      "norm_label": "max_score",
-      "id": "leaderboard_store_max_score"
+      "norm_label": "max_score"
     },
     {
       "label": "saveScore()",
@@ -2009,9 +2179,9 @@
       "source_file": "lib/leaderboard/store.ts",
       "source_location": "L29",
       "_origin": "ast",
+      "id": "leaderboard_store_savescore",
       "community": 6,
-      "norm_label": "savescore()",
-      "id": "leaderboard_store_savescore"
+      "norm_label": "savescore()"
     },
     {
       "label": "topEntries()",
@@ -2019,9 +2189,49 @@
       "source_file": "lib/leaderboard/store.ts",
       "source_location": "L54",
       "_origin": "ast",
+      "id": "leaderboard_store_topentries",
       "community": 6,
-      "norm_label": "topentries()",
-      "id": "leaderboard_store_topentries"
+      "norm_label": "topentries()"
+    },
+    {
+      "label": "AdminScore",
+      "file_type": "code",
+      "source_file": "lib/leaderboard/store.ts",
+      "source_location": "L76",
+      "_origin": "ast",
+      "id": "leaderboard_store_adminscore",
+      "community": 16,
+      "norm_label": "adminscore"
+    },
+    {
+      "label": "listAllScores()",
+      "file_type": "code",
+      "source_file": "lib/leaderboard/store.ts",
+      "source_location": "L87",
+      "_origin": "ast",
+      "id": "leaderboard_store_listallscores",
+      "community": 4,
+      "norm_label": "listallscores()"
+    },
+    {
+      "label": "adminUpdateScore()",
+      "file_type": "code",
+      "source_file": "lib/leaderboard/store.ts",
+      "source_location": "L103",
+      "_origin": "ast",
+      "id": "leaderboard_store_adminupdatescore",
+      "community": 16,
+      "norm_label": "adminupdatescore()"
+    },
+    {
+      "label": "adminDeleteScore()",
+      "file_type": "code",
+      "source_file": "lib/leaderboard/store.ts",
+      "source_location": "L108",
+      "_origin": "ast",
+      "id": "leaderboard_store_admindeletescore",
+      "community": 16,
+      "norm_label": "admindeletescore()"
     },
     {
       "label": "prisma.ts",
@@ -2029,9 +2239,9 @@
       "source_file": "lib/prisma.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 4,
-      "norm_label": "prisma.ts",
-      "id": "lib_prisma"
+      "id": "lib_prisma",
+      "community": 2,
+      "norm_label": "prisma.ts"
     },
     {
       "label": "globalForPrisma",
@@ -2039,9 +2249,9 @@
       "source_file": "lib/prisma.ts",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 4,
-      "norm_label": "globalforprisma",
-      "id": "lib_prisma_globalforprisma"
+      "id": "lib_prisma_globalforprisma",
+      "community": 2,
+      "norm_label": "globalforprisma"
     },
     {
       "label": "ranking.test.ts",
@@ -2049,9 +2259,9 @@
       "source_file": "lib/ranking/ranking.test.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 1,
-      "norm_label": "ranking.test.ts",
-      "id": "ranking_ranking_test"
+      "id": "ranking_ranking_test",
+      "community": 17,
+      "norm_label": "ranking.test.ts"
     },
     {
       "label": "order",
@@ -2059,9 +2269,9 @@
       "source_file": "lib/ranking/ranking.test.ts",
       "source_location": "L14",
       "_origin": "ast",
-      "community": 1,
-      "norm_label": "order",
-      "id": "ranking_ranking_test_order"
+      "id": "ranking_ranking_test_order",
+      "community": 17,
+      "norm_label": "order"
     },
     {
       "label": "ranking.ts",
@@ -2069,9 +2279,9 @@
       "source_file": "lib/ranking/ranking.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 1,
-      "norm_label": "ranking.ts",
-      "id": "ranking_ranking"
+      "id": "ranking_ranking",
+      "community": 17,
+      "norm_label": "ranking.ts"
     },
     {
       "label": "ATTEMPT_SCORES",
@@ -2079,9 +2289,9 @@
       "source_file": "lib/ranking/ranking.ts",
       "source_location": "L16",
       "_origin": "ast",
-      "community": 1,
-      "norm_label": "attempt_scores",
-      "id": "ranking_ranking_attempt_scores"
+      "id": "ranking_ranking_attempt_scores",
+      "community": 17,
+      "norm_label": "attempt_scores"
     },
     {
       "label": "scoreForAttempt()",
@@ -2089,9 +2299,9 @@
       "source_file": "lib/ranking/ranking.ts",
       "source_location": "L18",
       "_origin": "ast",
+      "id": "ranking_ranking_scoreforattempt",
       "community": 1,
-      "norm_label": "scoreforattempt()",
-      "id": "ranking_ranking_scoreforattempt"
+      "norm_label": "scoreforattempt()"
     },
     {
       "label": "checkPlacement()",
@@ -2099,9 +2309,9 @@
       "source_file": "lib/ranking/ranking.ts",
       "source_location": "L27",
       "_origin": "ast",
-      "community": 1,
-      "norm_label": "checkplacement()",
-      "id": "ranking_ranking_checkplacement"
+      "id": "ranking_ranking_checkplacement",
+      "community": 17,
+      "norm_label": "checkplacement()"
     },
     {
       "label": "isComplete()",
@@ -2109,9 +2319,9 @@
       "source_file": "lib/ranking/ranking.ts",
       "source_location": "L35",
       "_origin": "ast",
-      "community": 1,
-      "norm_label": "iscomplete()",
-      "id": "ranking_ranking_iscomplete"
+      "id": "ranking_ranking_iscomplete",
+      "community": 17,
+      "norm_label": "iscomplete()"
     },
     {
       "label": "pickRandomCondition()",
@@ -2119,9 +2329,9 @@
       "source_file": "lib/ranking/ranking.ts",
       "source_location": "L44",
       "_origin": "ast",
-      "community": 1,
-      "norm_label": "pickrandomcondition()",
-      "id": "ranking_ranking_pickrandomcondition"
+      "id": "ranking_ranking_pickrandomcondition",
+      "community": 17,
+      "norm_label": "pickrandomcondition()"
     },
     {
       "label": "shuffledPool()",
@@ -2129,9 +2339,9 @@
       "source_file": "lib/ranking/ranking.ts",
       "source_location": "L58",
       "_origin": "ast",
-      "community": 1,
-      "norm_label": "shuffledpool()",
-      "id": "ranking_ranking_shuffledpool"
+      "id": "ranking_ranking_shuffledpool",
+      "community": 17,
+      "norm_label": "shuffledpool()"
     },
     {
       "label": "grades.ts",
@@ -2139,9 +2349,9 @@
       "source_file": "lib/scoring/grades.ts",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "scoring_grades",
       "community": 0,
-      "norm_label": "grades.ts",
-      "id": "scoring_grades"
+      "norm_label": "grades.ts"
     },
     {
       "label": "GradeId",
@@ -2149,9 +2359,9 @@
       "source_file": "lib/scoring/grades.ts",
       "source_location": "L17",
       "_origin": "ast",
+      "id": "scoring_grades_gradeid",
       "community": 0,
-      "norm_label": "gradeid",
-      "id": "scoring_grades_gradeid"
+      "norm_label": "gradeid"
     },
     {
       "label": "GradeTier",
@@ -2159,9 +2369,9 @@
       "source_file": "lib/scoring/grades.ts",
       "source_location": "L19",
       "_origin": "ast",
+      "id": "scoring_grades_gradetier",
       "community": 0,
-      "norm_label": "gradetier",
-      "id": "scoring_grades_gradetier"
+      "norm_label": "gradetier"
     },
     {
       "label": "GRADE_TIERS",
@@ -2169,9 +2379,9 @@
       "source_file": "lib/scoring/grades.ts",
       "source_location": "L29",
       "_origin": "ast",
+      "id": "scoring_grades_grade_tiers",
       "community": 0,
-      "norm_label": "grade_tiers",
-      "id": "scoring_grades_grade_tiers"
+      "norm_label": "grade_tiers"
     },
     {
       "label": "getGrade()",
@@ -2179,9 +2389,9 @@
       "source_file": "lib/scoring/grades.ts",
       "source_location": "L42",
       "_origin": "ast",
+      "id": "scoring_grades_getgrade",
       "community": 0,
-      "norm_label": "getgrade()",
-      "id": "scoring_grades_getgrade"
+      "norm_label": "getgrade()"
     },
     {
       "label": "scoring.test.ts",
@@ -2189,9 +2399,9 @@
       "source_file": "lib/scoring/scoring.test.ts",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "scoring_scoring_test",
       "community": 0,
-      "norm_label": "scoring.test.ts",
-      "id": "scoring_scoring_test"
+      "norm_label": "scoring.test.ts"
     },
     {
       "label": "cats",
@@ -2199,9 +2409,9 @@
       "source_file": "lib/scoring/scoring.test.ts",
       "source_location": "L14",
       "_origin": "ast",
+      "id": "scoring_scoring_test_cats",
       "community": 0,
-      "norm_label": "cats",
-      "id": "scoring_scoring_test_cats"
+      "norm_label": "cats"
     },
     {
       "label": "makeChar()",
@@ -2209,9 +2419,9 @@
       "source_file": "lib/scoring/scoring.test.ts",
       "source_location": "L19",
       "_origin": "ast",
+      "id": "scoring_scoring_test_makechar",
       "community": 0,
-      "norm_label": "makechar()",
-      "id": "scoring_scoring_test_makechar"
+      "norm_label": "makechar()"
     },
     {
       "label": "scoring.ts",
@@ -2219,9 +2429,9 @@
       "source_file": "lib/scoring/scoring.ts",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "scoring_scoring",
       "community": 0,
-      "norm_label": "scoring.ts",
-      "id": "scoring_scoring"
+      "norm_label": "scoring.ts"
     },
     {
       "label": "Selection",
@@ -2229,9 +2439,9 @@
       "source_file": "lib/scoring/scoring.ts",
       "source_location": "L14",
       "_origin": "ast",
+      "id": "scoring_scoring_selection",
       "community": 0,
-      "norm_label": "selection",
-      "id": "scoring_scoring_selection"
+      "norm_label": "selection"
     },
     {
       "label": "computeCategoryScore()",
@@ -2239,9 +2449,9 @@
       "source_file": "lib/scoring/scoring.ts",
       "source_location": "L19",
       "_origin": "ast",
+      "id": "scoring_scoring_computecategoryscore",
       "community": 0,
-      "norm_label": "computecategoryscore()",
-      "id": "scoring_scoring_computecategoryscore"
+      "norm_label": "computecategoryscore()"
     },
     {
       "label": "computeTotalScore()",
@@ -2249,9 +2459,9 @@
       "source_file": "lib/scoring/scoring.ts",
       "source_location": "L32",
       "_origin": "ast",
+      "id": "scoring_scoring_computetotalscore",
       "community": 0,
-      "norm_label": "computetotalscore()",
-      "id": "scoring_scoring_computetotalscore"
+      "norm_label": "computetotalscore()"
     },
     {
       "label": "CategoryBreakdown",
@@ -2259,9 +2469,9 @@
       "source_file": "lib/scoring/scoring.ts",
       "source_location": "L50",
       "_origin": "ast",
+      "id": "scoring_scoring_categorybreakdown",
       "community": 0,
-      "norm_label": "categorybreakdown",
-      "id": "scoring_scoring_categorybreakdown"
+      "norm_label": "categorybreakdown"
     },
     {
       "label": "computeBreakdown()",
@@ -2269,9 +2479,9 @@
       "source_file": "lib/scoring/scoring.ts",
       "source_location": "L59",
       "_origin": "ast",
+      "id": "scoring_scoring_computebreakdown",
       "community": 0,
-      "norm_label": "computebreakdown()",
-      "id": "scoring_scoring_computebreakdown"
+      "norm_label": "computebreakdown()"
     },
     {
       "label": "evaluateBuild()",
@@ -2279,9 +2489,9 @@
       "source_file": "lib/scoring/scoring.ts",
       "source_location": "L77",
       "_origin": "ast",
+      "id": "scoring_scoring_evaluatebuild",
       "community": 0,
-      "norm_label": "evaluatebuild()",
-      "id": "scoring_scoring_evaluatebuild"
+      "norm_label": "evaluatebuild()"
     },
     {
       "label": "next.config.ts",
@@ -2289,9 +2499,19 @@
       "source_file": "next.config.ts",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "next_config",
       "community": 14,
-      "norm_label": "next.config.ts",
-      "id": "next_config"
+      "norm_label": "next.config.ts"
+    },
+    {
+      "label": "nextConfig",
+      "file_type": "code",
+      "source_file": "next.config.ts",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "next_config_nextconfig",
+      "community": 14,
+      "norm_label": "nextconfig"
     },
     {
       "label": "package.json",
@@ -2299,9 +2519,9 @@
       "source_file": "package.json",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "package",
       "community": 3,
-      "norm_label": "package.json",
-      "id": "package"
+      "norm_label": "package.json"
     },
     {
       "label": "name",
@@ -2309,9 +2529,9 @@
       "source_file": "package.json",
       "source_location": "L2",
       "_origin": "ast",
+      "id": "package_name",
       "community": 3,
-      "norm_label": "name",
-      "id": "package_name"
+      "norm_label": "name"
     },
     {
       "label": "version",
@@ -2319,9 +2539,9 @@
       "source_file": "package.json",
       "source_location": "L3",
       "_origin": "ast",
+      "id": "package_version",
       "community": 3,
-      "norm_label": "version",
-      "id": "package_version"
+      "norm_label": "version"
     },
     {
       "label": "private",
@@ -2329,9 +2549,9 @@
       "source_file": "package.json",
       "source_location": "L4",
       "_origin": "ast",
+      "id": "package_private",
       "community": 3,
-      "norm_label": "private",
-      "id": "package_private"
+      "norm_label": "private"
     },
     {
       "label": "description",
@@ -2339,9 +2559,9 @@
       "source_file": "package.json",
       "source_location": "L5",
       "_origin": "ast",
+      "id": "package_description",
       "community": 3,
-      "norm_label": "description",
-      "id": "package_description"
+      "norm_label": "description"
     },
     {
       "label": "scripts",
@@ -2349,9 +2569,9 @@
       "source_file": "package.json",
       "source_location": "L6",
       "_origin": "ast",
+      "id": "package_scripts",
       "community": 3,
-      "norm_label": "scripts",
-      "id": "package_scripts"
+      "norm_label": "scripts"
     },
     {
       "label": "dev",
@@ -2359,9 +2579,9 @@
       "source_file": "package.json",
       "source_location": "L7",
       "_origin": "ast",
+      "id": "package_scripts_dev",
       "community": 3,
-      "norm_label": "dev",
-      "id": "package_scripts_dev"
+      "norm_label": "dev"
     },
     {
       "label": "build",
@@ -2369,9 +2589,9 @@
       "source_file": "package.json",
       "source_location": "L8",
       "_origin": "ast",
+      "id": "package_scripts_build",
       "community": 3,
-      "norm_label": "build",
-      "id": "package_scripts_build"
+      "norm_label": "build"
     },
     {
       "label": "start",
@@ -2379,9 +2599,9 @@
       "source_file": "package.json",
       "source_location": "L9",
       "_origin": "ast",
+      "id": "package_scripts_start",
       "community": 3,
-      "norm_label": "start",
-      "id": "package_scripts_start"
+      "norm_label": "start"
     },
     {
       "label": "lint",
@@ -2389,9 +2609,9 @@
       "source_file": "package.json",
       "source_location": "L10",
       "_origin": "ast",
+      "id": "package_scripts_lint",
       "community": 3,
-      "norm_label": "lint",
-      "id": "package_scripts_lint"
+      "norm_label": "lint"
     },
     {
       "label": "test",
@@ -2399,9 +2619,9 @@
       "source_file": "package.json",
       "source_location": "L11",
       "_origin": "ast",
+      "id": "package_scripts_test",
       "community": 3,
-      "norm_label": "test",
-      "id": "package_scripts_test"
+      "norm_label": "test"
     },
     {
       "label": "test:watch",
@@ -2409,9 +2629,9 @@
       "source_file": "package.json",
       "source_location": "L12",
       "_origin": "ast",
+      "id": "package_scripts_test_watch",
       "community": 3,
-      "norm_label": "test:watch",
-      "id": "package_scripts_test_watch"
+      "norm_label": "test:watch"
     },
     {
       "label": "db:push",
@@ -2419,9 +2639,9 @@
       "source_file": "package.json",
       "source_location": "L13",
       "_origin": "ast",
+      "id": "package_scripts_db_push",
       "community": 3,
-      "norm_label": "db:push",
-      "id": "package_scripts_db_push"
+      "norm_label": "db:push"
     },
     {
       "label": "db:generate",
@@ -2429,9 +2649,9 @@
       "source_file": "package.json",
       "source_location": "L14",
       "_origin": "ast",
+      "id": "package_scripts_db_generate",
       "community": 3,
-      "norm_label": "db:generate",
-      "id": "package_scripts_db_generate"
+      "norm_label": "db:generate"
     },
     {
       "label": "db:seed",
@@ -2439,9 +2659,9 @@
       "source_file": "package.json",
       "source_location": "L15",
       "_origin": "ast",
+      "id": "package_scripts_db_seed",
       "community": 3,
-      "norm_label": "db:seed",
-      "id": "package_scripts_db_seed"
+      "norm_label": "db:seed"
     },
     {
       "label": "db:studio",
@@ -2449,9 +2669,9 @@
       "source_file": "package.json",
       "source_location": "L16",
       "_origin": "ast",
+      "id": "package_scripts_db_studio",
       "community": 3,
-      "norm_label": "db:studio",
-      "id": "package_scripts_db_studio"
+      "norm_label": "db:studio"
     },
     {
       "label": "postinstall",
@@ -2459,9 +2679,9 @@
       "source_file": "package.json",
       "source_location": "L17",
       "_origin": "ast",
+      "id": "package_scripts_postinstall",
       "community": 3,
-      "norm_label": "postinstall",
-      "id": "package_scripts_postinstall"
+      "norm_label": "postinstall"
     },
     {
       "label": "prisma",
@@ -2469,9 +2689,9 @@
       "source_file": "package.json",
       "source_location": "L19",
       "_origin": "ast",
+      "id": "package_prisma",
       "community": 3,
-      "norm_label": "prisma",
-      "id": "package_prisma"
+      "norm_label": "prisma"
     },
     {
       "label": "seed",
@@ -2479,9 +2699,9 @@
       "source_file": "package.json",
       "source_location": "L20",
       "_origin": "ast",
+      "id": "package_prisma_seed",
       "community": 3,
-      "norm_label": "seed",
-      "id": "package_prisma_seed"
+      "norm_label": "seed"
     },
     {
       "label": "dependencies",
@@ -2489,9 +2709,9 @@
       "source_file": "package.json",
       "source_location": "L22",
       "_origin": "ast",
+      "id": "package_dependencies",
       "community": 3,
-      "norm_label": "dependencies",
-      "id": "package_dependencies"
+      "norm_label": "dependencies"
     },
     {
       "label": "@dnd-kit/core",
@@ -2499,9 +2719,9 @@
       "source_file": "package.json",
       "source_location": "L23",
       "_origin": "ast",
+      "id": "package_dependencies_dnd_kit_core",
       "community": 3,
-      "norm_label": "@dnd-kit/core",
-      "id": "package_dependencies_dnd_kit_core"
+      "norm_label": "@dnd-kit/core"
     },
     {
       "label": "@dnd-kit/utilities",
@@ -2509,9 +2729,9 @@
       "source_file": "package.json",
       "source_location": "L24",
       "_origin": "ast",
+      "id": "package_dependencies_dnd_kit_utilities",
       "community": 3,
-      "norm_label": "@dnd-kit/utilities",
-      "id": "package_dependencies_dnd_kit_utilities"
+      "norm_label": "@dnd-kit/utilities"
     },
     {
       "label": "@prisma/client",
@@ -2519,9 +2739,9 @@
       "source_file": "package.json",
       "source_location": "L25",
       "_origin": "ast",
+      "id": "package_dependencies_prisma_client",
       "community": 3,
-      "norm_label": "@prisma/client",
-      "id": "package_dependencies_prisma_client"
+      "norm_label": "@prisma/client"
     },
     {
       "label": "framer-motion",
@@ -2529,9 +2749,9 @@
       "source_file": "package.json",
       "source_location": "L26",
       "_origin": "ast",
+      "id": "package_dependencies_framer_motion",
       "community": 3,
-      "norm_label": "framer-motion",
-      "id": "package_dependencies_framer_motion"
+      "norm_label": "framer-motion"
     },
     {
       "label": "next",
@@ -2539,9 +2759,9 @@
       "source_file": "package.json",
       "source_location": "L27",
       "_origin": "ast",
+      "id": "package_dependencies_next",
       "community": 3,
-      "norm_label": "next",
-      "id": "package_dependencies_next"
+      "norm_label": "next"
     },
     {
       "label": "react",
@@ -2549,9 +2769,9 @@
       "source_file": "package.json",
       "source_location": "L28",
       "_origin": "ast",
+      "id": "package_dependencies_react",
       "community": 3,
-      "norm_label": "react",
-      "id": "package_dependencies_react"
+      "norm_label": "react"
     },
     {
       "label": "react-dom",
@@ -2559,9 +2779,9 @@
       "source_file": "package.json",
       "source_location": "L29",
       "_origin": "ast",
+      "id": "package_dependencies_react_dom",
       "community": 3,
-      "norm_label": "react-dom",
-      "id": "package_dependencies_react_dom"
+      "norm_label": "react-dom"
     },
     {
       "label": "devDependencies",
@@ -2569,9 +2789,9 @@
       "source_file": "package.json",
       "source_location": "L31",
       "_origin": "ast",
+      "id": "package_devdependencies",
       "community": 3,
-      "norm_label": "devdependencies",
-      "id": "package_devdependencies"
+      "norm_label": "devdependencies"
     },
     {
       "label": "@types/node",
@@ -2579,9 +2799,9 @@
       "source_file": "package.json",
       "source_location": "L32",
       "_origin": "ast",
+      "id": "package_devdependencies_types_node",
       "community": 3,
-      "norm_label": "@types/node",
-      "id": "package_devdependencies_types_node"
+      "norm_label": "@types/node"
     },
     {
       "label": "@types/react",
@@ -2589,9 +2809,9 @@
       "source_file": "package.json",
       "source_location": "L33",
       "_origin": "ast",
+      "id": "package_devdependencies_types_react",
       "community": 3,
-      "norm_label": "@types/react",
-      "id": "package_devdependencies_types_react"
+      "norm_label": "@types/react"
     },
     {
       "label": "@types/react-dom",
@@ -2599,9 +2819,9 @@
       "source_file": "package.json",
       "source_location": "L34",
       "_origin": "ast",
+      "id": "package_devdependencies_types_react_dom",
       "community": 3,
-      "norm_label": "@types/react-dom",
-      "id": "package_devdependencies_types_react_dom"
+      "norm_label": "@types/react-dom"
     },
     {
       "label": "autoprefixer",
@@ -2609,9 +2829,9 @@
       "source_file": "package.json",
       "source_location": "L35",
       "_origin": "ast",
+      "id": "package_devdependencies_autoprefixer",
       "community": 3,
-      "norm_label": "autoprefixer",
-      "id": "package_devdependencies_autoprefixer"
+      "norm_label": "autoprefixer"
     },
     {
       "label": "postcss",
@@ -2619,9 +2839,19 @@
       "source_file": "package.json",
       "source_location": "L36",
       "_origin": "ast",
+      "id": "package_devdependencies_postcss",
       "community": 3,
-      "norm_label": "postcss",
-      "id": "package_devdependencies_postcss"
+      "norm_label": "postcss"
+    },
+    {
+      "label": "prisma",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L37",
+      "_origin": "ast",
+      "id": "package_devdependencies_prisma",
+      "community": 3,
+      "norm_label": "prisma"
     },
     {
       "label": "tailwindcss",
@@ -2629,9 +2859,9 @@
       "source_file": "package.json",
       "source_location": "L38",
       "_origin": "ast",
+      "id": "package_devdependencies_tailwindcss",
       "community": 3,
-      "norm_label": "tailwindcss",
-      "id": "package_devdependencies_tailwindcss"
+      "norm_label": "tailwindcss"
     },
     {
       "label": "tsx",
@@ -2639,9 +2869,9 @@
       "source_file": "package.json",
       "source_location": "L39",
       "_origin": "ast",
+      "id": "package_devdependencies_tsx",
       "community": 3,
-      "norm_label": "tsx",
-      "id": "package_devdependencies_tsx"
+      "norm_label": "tsx"
     },
     {
       "label": "typescript",
@@ -2649,9 +2879,9 @@
       "source_file": "package.json",
       "source_location": "L40",
       "_origin": "ast",
+      "id": "package_devdependencies_typescript",
       "community": 3,
-      "norm_label": "typescript",
-      "id": "package_devdependencies_typescript"
+      "norm_label": "typescript"
     },
     {
       "label": "vitest",
@@ -2659,9 +2889,9 @@
       "source_file": "package.json",
       "source_location": "L41",
       "_origin": "ast",
+      "id": "package_devdependencies_vitest",
       "community": 3,
-      "norm_label": "vitest",
-      "id": "package_devdependencies_vitest"
+      "norm_label": "vitest"
     },
     {
       "label": "postcss.config.mjs",
@@ -2669,9 +2899,9 @@
       "source_file": "postcss.config.mjs",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "postcss_config",
       "community": 11,
-      "norm_label": "postcss.config.mjs",
-      "id": "postcss_config"
+      "norm_label": "postcss.config.mjs"
     },
     {
       "label": "config",
@@ -2679,9 +2909,9 @@
       "source_file": "postcss.config.mjs",
       "source_location": "L2",
       "_origin": "ast",
+      "id": "postcss_config_config",
       "community": 11,
-      "norm_label": "config",
-      "id": "postcss_config_config"
+      "norm_label": "config"
     },
     {
       "label": "seed.ts",
@@ -2689,9 +2919,9 @@
       "source_file": "prisma/seed.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 0,
-      "norm_label": "seed.ts",
-      "id": "prisma_seed"
+      "id": "prisma_seed",
+      "community": 5,
+      "norm_label": "seed.ts"
     },
     {
       "label": "prisma",
@@ -2699,9 +2929,9 @@
       "source_file": "prisma/seed.ts",
       "source_location": "L16",
       "_origin": "ast",
-      "community": 0,
-      "norm_label": "prisma",
-      "id": "prisma_seed_prisma"
+      "id": "prisma_seed_prisma",
+      "community": 5,
+      "norm_label": "prisma"
     },
     {
       "label": "main()",
@@ -2709,9 +2939,9 @@
       "source_file": "prisma/seed.ts",
       "source_location": "L18",
       "_origin": "ast",
-      "community": 0,
-      "norm_label": "main()",
-      "id": "prisma_seed_main"
+      "id": "prisma_seed_main",
+      "community": 5,
+      "norm_label": "main()"
     },
     {
       "label": "tailwind.config.ts",
@@ -2719,9 +2949,9 @@
       "source_file": "tailwind.config.ts",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "tailwind_config",
       "community": 12,
-      "norm_label": "tailwind.config.ts",
-      "id": "tailwind_config"
+      "norm_label": "tailwind.config.ts"
     },
     {
       "label": "config",
@@ -2729,9 +2959,9 @@
       "source_file": "tailwind.config.ts",
       "source_location": "L7",
       "_origin": "ast",
+      "id": "tailwind_config_config",
       "community": 12,
-      "norm_label": "config",
-      "id": "tailwind_config_config"
+      "norm_label": "config"
     },
     {
       "label": "tsconfig.json",
@@ -2739,9 +2969,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "tsconfig",
       "community": 7,
-      "norm_label": "tsconfig.json",
-      "id": "tsconfig"
+      "norm_label": "tsconfig.json"
     },
     {
       "label": "compilerOptions",
@@ -2749,9 +2979,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L2",
       "_origin": "ast",
+      "id": "tsconfig_compileroptions",
       "community": 7,
-      "norm_label": "compileroptions",
-      "id": "tsconfig_compileroptions"
+      "norm_label": "compileroptions"
     },
     {
       "label": "target",
@@ -2759,9 +2989,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L3",
       "_origin": "ast",
+      "id": "tsconfig_compileroptions_target",
       "community": 7,
-      "norm_label": "target",
-      "id": "tsconfig_compileroptions_target"
+      "norm_label": "target"
     },
     {
       "label": "lib",
@@ -2769,9 +2999,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L4",
       "_origin": "ast",
+      "id": "tsconfig_compileroptions_lib",
       "community": 7,
-      "norm_label": "lib",
-      "id": "tsconfig_compileroptions_lib"
+      "norm_label": "lib"
     },
     {
       "label": "allowJs",
@@ -2779,9 +3009,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L5",
       "_origin": "ast",
+      "id": "tsconfig_compileroptions_allowjs",
       "community": 7,
-      "norm_label": "allowjs",
-      "id": "tsconfig_compileroptions_allowjs"
+      "norm_label": "allowjs"
     },
     {
       "label": "skipLibCheck",
@@ -2789,9 +3019,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L6",
       "_origin": "ast",
+      "id": "tsconfig_compileroptions_skiplibcheck",
       "community": 7,
-      "norm_label": "skiplibcheck",
-      "id": "tsconfig_compileroptions_skiplibcheck"
+      "norm_label": "skiplibcheck"
     },
     {
       "label": "strict",
@@ -2799,9 +3029,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L7",
       "_origin": "ast",
+      "id": "tsconfig_compileroptions_strict",
       "community": 7,
-      "norm_label": "strict",
-      "id": "tsconfig_compileroptions_strict"
+      "norm_label": "strict"
     },
     {
       "label": "noEmit",
@@ -2809,9 +3039,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L8",
       "_origin": "ast",
+      "id": "tsconfig_compileroptions_noemit",
       "community": 7,
-      "norm_label": "noemit",
-      "id": "tsconfig_compileroptions_noemit"
+      "norm_label": "noemit"
     },
     {
       "label": "esModuleInterop",
@@ -2819,9 +3049,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L9",
       "_origin": "ast",
+      "id": "tsconfig_compileroptions_esmoduleinterop",
       "community": 7,
-      "norm_label": "esmoduleinterop",
-      "id": "tsconfig_compileroptions_esmoduleinterop"
+      "norm_label": "esmoduleinterop"
     },
     {
       "label": "module",
@@ -2829,9 +3059,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L10",
       "_origin": "ast",
+      "id": "tsconfig_compileroptions_module",
       "community": 7,
-      "norm_label": "module",
-      "id": "tsconfig_compileroptions_module"
+      "norm_label": "module"
     },
     {
       "label": "moduleResolution",
@@ -2839,9 +3069,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L11",
       "_origin": "ast",
+      "id": "tsconfig_compileroptions_moduleresolution",
       "community": 7,
-      "norm_label": "moduleresolution",
-      "id": "tsconfig_compileroptions_moduleresolution"
+      "norm_label": "moduleresolution"
     },
     {
       "label": "resolveJsonModule",
@@ -2849,9 +3079,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L12",
       "_origin": "ast",
+      "id": "tsconfig_compileroptions_resolvejsonmodule",
       "community": 7,
-      "norm_label": "resolvejsonmodule",
-      "id": "tsconfig_compileroptions_resolvejsonmodule"
+      "norm_label": "resolvejsonmodule"
     },
     {
       "label": "isolatedModules",
@@ -2859,9 +3089,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L13",
       "_origin": "ast",
+      "id": "tsconfig_compileroptions_isolatedmodules",
       "community": 7,
-      "norm_label": "isolatedmodules",
-      "id": "tsconfig_compileroptions_isolatedmodules"
+      "norm_label": "isolatedmodules"
     },
     {
       "label": "jsx",
@@ -2869,9 +3099,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L14",
       "_origin": "ast",
+      "id": "tsconfig_compileroptions_jsx",
       "community": 7,
-      "norm_label": "jsx",
-      "id": "tsconfig_compileroptions_jsx"
+      "norm_label": "jsx"
     },
     {
       "label": "incremental",
@@ -2879,9 +3109,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L15",
       "_origin": "ast",
+      "id": "tsconfig_compileroptions_incremental",
       "community": 7,
-      "norm_label": "incremental",
-      "id": "tsconfig_compileroptions_incremental"
+      "norm_label": "incremental"
     },
     {
       "label": "plugins",
@@ -2889,9 +3119,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L16",
       "_origin": "ast",
+      "id": "tsconfig_compileroptions_plugins",
       "community": 7,
-      "norm_label": "plugins",
-      "id": "tsconfig_compileroptions_plugins"
+      "norm_label": "plugins"
     },
     {
       "label": "paths",
@@ -2899,9 +3129,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L17",
       "_origin": "ast",
+      "id": "tsconfig_compileroptions_paths",
       "community": 7,
-      "norm_label": "paths",
-      "id": "tsconfig_compileroptions_paths"
+      "norm_label": "paths"
     },
     {
       "label": "@/*",
@@ -2909,9 +3139,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L18",
       "_origin": "ast",
+      "id": "tsconfig_paths",
       "community": 7,
-      "norm_label": "@/*",
-      "id": "tsconfig_paths"
+      "norm_label": "@/*"
     },
     {
       "label": "include",
@@ -2919,9 +3149,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L21",
       "_origin": "ast",
+      "id": "tsconfig_include",
       "community": 7,
-      "norm_label": "include",
-      "id": "tsconfig_include"
+      "norm_label": "include"
     },
     {
       "label": "exclude",
@@ -2929,9 +3159,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L22",
       "_origin": "ast",
+      "id": "tsconfig_exclude",
       "community": 7,
-      "norm_label": "exclude",
-      "id": "tsconfig_exclude"
+      "norm_label": "exclude"
     },
     {
       "label": "vitest.config.ts",
@@ -2939,9 +3169,169 @@
       "source_file": "vitest.config.ts",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "vitest_config",
       "community": 15,
-      "norm_label": "vitest.config.ts",
-      "id": "vitest_config"
+      "norm_label": "vitest.config.ts"
+    },
+    {
+      "label": "README.md",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "readme",
+      "community": 18,
+      "norm_label": "readme.md"
+    },
+    {
+      "label": "JJK Arcade \u2014 Plateforme de mini-jeux Jujutsu Kaisen",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "readme_jjk_arcade_plateforme_de_mini_jeux_jujutsu_kaisen",
+      "community": 18,
+      "norm_label": "jjk arcade \u2014 plateforme de mini-jeux jujutsu kaisen"
+    },
+    {
+      "label": "\u2728 Le jeu : Build the Perfect Sorcerer",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "readme_le_jeu_build_the_perfect_sorcerer",
+      "community": 18,
+      "norm_label": "\u2728 le jeu : build the perfect sorcerer"
+    },
+    {
+      "label": "\ud83e\uddf1 Stack",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L33",
+      "_origin": "ast",
+      "id": "readme_stack",
+      "community": 18,
+      "norm_label": "\ud83e\uddf1 stack"
+    },
+    {
+      "label": "\ud83d\ude80 D\u00e9marrage local",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L41",
+      "_origin": "ast",
+      "id": "readme_d\u00e9marrage_local",
+      "community": 18,
+      "norm_label": "\ud83d\ude80 demarrage local"
+    },
+    {
+      "label": "\ud83d\udcc1 Architecture",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L55",
+      "_origin": "ast",
+      "id": "readme_architecture",
+      "community": 18,
+      "norm_label": "\ud83d\udcc1 architecture"
+    },
+    {
+      "label": "Ajouter un personnage",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L79",
+      "_origin": "ast",
+      "id": "readme_ajouter_un_personnage",
+      "community": 18,
+      "norm_label": "ajouter un personnage"
+    },
+    {
+      "label": "Ajouter une cat\u00e9gorie",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L84",
+      "_origin": "ast",
+      "id": "readme_ajouter_une_cat\u00e9gorie",
+      "community": 18,
+      "norm_label": "ajouter une categorie"
+    },
+    {
+      "label": "Ajouter un jeu (syst\u00e8me pluggable)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L89",
+      "_origin": "ast",
+      "id": "readme_ajouter_un_jeu_syst\u00e8me_pluggable",
+      "community": 18,
+      "norm_label": "ajouter un jeu (systeme pluggable)"
+    },
+    {
+      "label": "\ud83d\udd3a Le jeu : JJK Pyramid",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L94",
+      "_origin": "ast",
+      "id": "readme_le_jeu_jjk_pyramid",
+      "community": 18,
+      "norm_label": "\ud83d\udd3a le jeu : jjk pyramid"
+    },
+    {
+      "label": "Ajouter une condition (JJK Pyramid)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L107",
+      "_origin": "ast",
+      "id": "readme_ajouter_une_condition_jjk_pyramid",
+      "community": 18,
+      "norm_label": "ajouter une condition (jjk pyramid)"
+    },
+    {
+      "label": "\u2601\ufe0f D\u00e9ploiement Vercel",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L115",
+      "_origin": "ast",
+      "id": "readme_d\u00e9ploiement_vercel",
+      "community": 18,
+      "norm_label": "\u2601\ufe0f deploiement vercel"
+    },
+    {
+      "label": "\ud83d\uddc4\ufe0f (Optionnel) Leaderboard global \u2014 Neon + Prisma",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L125",
+      "_origin": "ast",
+      "id": "readme_optionnel_leaderboard_global_neon_prisma",
+      "community": 18,
+      "norm_label": "\ud83d\uddc4\ufe0f (optionnel) leaderboard global \u2014 neon + prisma"
+    },
+    {
+      "label": "\u2705 Tests",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L142",
+      "_origin": "ast",
+      "id": "readme_tests",
+      "community": 18,
+      "norm_label": "\u2705 tests"
+    },
+    {
+      "label": "README.md",
+      "file_type": "document",
+      "source_file": "public/assets/README.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "assets_readme",
+      "community": 19,
+      "norm_label": "readme.md"
+    },
+    {
+      "label": "Assets",
+      "file_type": "document",
+      "source_file": "public/assets/README.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "assets_readme_assets",
+      "community": 19,
+      "norm_label": "assets"
     },
     {
       "label": "JJK Arcade Platform",
@@ -3163,86 +3553,6 @@
       "community": 9,
       "norm_label": "character svg naming convention",
       "id": "assets_readme_character_svg_convention"
-    },
-    {
-      "label": "ImageDropzone.tsx",
-      "file_type": "code",
-      "source_file": "app/admin/ImageDropzone.tsx",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "admin_imagedropzone",
-      "community": 5,
-      "norm_label": "imagedropzone.tsx"
-    },
-    {
-      "label": "ImageDropzone()",
-      "file_type": "code",
-      "source_file": "app/admin/ImageDropzone.tsx",
-      "source_location": "L19",
-      "_origin": "ast",
-      "id": "admin_imagedropzone_imagedropzone",
-      "community": 5,
-      "norm_label": "imagedropzone()"
-    },
-    {
-      "label": "route.ts",
-      "file_type": "code",
-      "source_file": "app/api/characters/[id]/image/route.ts",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "image_route",
-      "community": 2,
-      "norm_label": "route.ts"
-    },
-    {
-      "label": "ALLOWED_MIME",
-      "file_type": "code",
-      "source_file": "app/api/characters/[id]/image/route.ts",
-      "source_location": "L17",
-      "_origin": "ast",
-      "id": "image_route_allowed_mime",
-      "community": 2,
-      "norm_label": "allowed_mime"
-    },
-    {
-      "label": "Params",
-      "file_type": "code",
-      "source_file": "app/api/characters/[id]/image/route.ts",
-      "source_location": "L26",
-      "_origin": "ast",
-      "id": "image_route_params",
-      "community": 2,
-      "norm_label": "params"
-    },
-    {
-      "label": "GET()",
-      "file_type": "code",
-      "source_file": "app/api/characters/[id]/image/route.ts",
-      "source_location": "L28",
-      "_origin": "ast",
-      "id": "image_route_get",
-      "community": 2,
-      "norm_label": "get()"
-    },
-    {
-      "label": "POST()",
-      "file_type": "code",
-      "source_file": "app/api/characters/[id]/image/route.ts",
-      "source_location": "L48",
-      "_origin": "ast",
-      "id": "image_route_post",
-      "community": 2,
-      "norm_label": "post()"
-    },
-    {
-      "label": "DELETE()",
-      "file_type": "code",
-      "source_file": "app/api/characters/[id]/image/route.ts",
-      "source_location": "L88",
-      "_origin": "ast",
-      "id": "image_route_delete",
-      "community": 2,
-      "norm_label": "delete()"
     }
   ],
   "links": [
@@ -3621,6 +3931,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/admin/AdminDashboard.tsx",
+      "source_location": "L31",
+      "weight": 1.0,
+      "source": "admin_admindashboard",
+      "target": "admin_admindashboard_tab",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/AdminDashboard.tsx",
       "source_location": "L13",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -3634,9 +3954,9 @@
       "source_file": "app/admin/AdminDashboard.tsx",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_admindashboard",
-      "target": "admin_imagedropzone",
-      "confidence_score": 1.0
+      "target": "admin_imagedropzone"
     },
     {
       "relation": "imports",
@@ -3645,8 +3965,30 @@
       "source_file": "app/admin/AdminDashboard.tsx",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_admindashboard",
-      "target": "admin_imagedropzone_imagedropzone",
+      "target": "admin_imagedropzone_imagedropzone"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/AdminDashboard.tsx",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "admin_admindashboard",
+      "target": "admin_leaderboardadmin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/AdminDashboard.tsx",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "admin_admindashboard",
+      "target": "admin_leaderboardadmin_leaderboardadmin",
       "confidence_score": 1.0
     },
     {
@@ -3795,6 +4137,144 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "app/admin/ImageDropzone.tsx",
+      "source_location": "L19",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "admin_imagedropzone",
+      "target": "admin_imagedropzone_imagedropzone"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/ImageDropzone.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "admin_imagedropzone",
+      "target": "admin_imagedropzone_imagedropzoneprops",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/LeaderboardAdmin.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "admin_leaderboardadmin",
+      "target": "admin_actions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/LeaderboardAdmin.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "admin_leaderboardadmin",
+      "target": "admin_actions_deletescoreaction",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/LeaderboardAdmin.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "admin_leaderboardadmin",
+      "target": "admin_actions_updatescoreaction",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/LeaderboardAdmin.tsx",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "admin_leaderboardadmin",
+      "target": "admin_leaderboardadmin_feedback",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/LeaderboardAdmin.tsx",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "admin_leaderboardadmin",
+      "target": "admin_leaderboardadmin_leaderboardadmin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/LeaderboardAdmin.tsx",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "admin_leaderboardadmin",
+      "target": "admin_leaderboardadmin_leaderboardadminprops",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/LeaderboardAdmin.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "admin_leaderboardadmin",
+      "target": "games_registry",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/LeaderboardAdmin.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "admin_leaderboardadmin",
+      "target": "games_registry_getgame",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/LeaderboardAdmin.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "admin_leaderboardadmin",
+      "target": "leaderboard_store",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/LeaderboardAdmin.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "admin_leaderboardadmin",
+      "target": "leaderboard_store_adminscore",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "field",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/LeaderboardAdmin.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "admin_leaderboardadmin_leaderboardadminprops",
+      "target": "leaderboard_store_adminscore",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "app/admin/actions.ts",
       "source_location": "L9",
       "weight": 1.0,
@@ -3816,6 +4296,26 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/admin/actions.ts",
+      "source_location": "L117",
+      "weight": 1.0,
+      "source": "admin_actions",
+      "target": "admin_actions_deletescoreaction",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "admin_actions",
+      "target": "admin_actions_games",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/actions.ts",
       "source_location": "L14",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -3831,6 +4331,16 @@
       "confidence_score": 1.0,
       "source": "admin_actions",
       "target": "admin_actions_tiers"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L90",
+      "weight": 1.0,
+      "source": "admin_actions",
+      "target": "admin_actions_updatescoreaction",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -3886,6 +4396,61 @@
       "confidence_score": 1.0,
       "source": "admin_actions",
       "target": "auth_session_getadminuser"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "admin_actions",
+      "target": "leaderboard_store",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "admin_actions",
+      "target": "leaderboard_store_admindeletescore",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "admin_actions",
+      "target": "leaderboard_store_adminupdatescore",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "admin_actions",
+      "target": "leaderboard_store_leaderboardgame",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "admin_actions",
+      "target": "leaderboard_store_max_score",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -3987,6 +4552,50 @@
       "target": "auth_session_getadminuser"
     },
     {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L95",
+      "weight": 1.0,
+      "source": "admin_actions_updatescoreaction",
+      "target": "auth_session_getadminuser"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L107",
+      "weight": 1.0,
+      "source": "admin_actions_updatescoreaction",
+      "target": "leaderboard_store_adminupdatescore"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L121",
+      "weight": 1.0,
+      "source": "admin_actions_deletescoreaction",
+      "target": "auth_session_getadminuser"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L125",
+      "weight": 1.0,
+      "source": "admin_actions_deletescoreaction",
+      "target": "leaderboard_store_admindeletescore"
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/admin/page.tsx",
@@ -4083,6 +4692,28 @@
       "target": "content_queries_getcategories"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/page.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "admin_page",
+      "target": "leaderboard_store",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/page.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "admin_page",
+      "target": "leaderboard_store_listallscores",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -4125,6 +4756,122 @@
       "weight": 1.0,
       "source": "admin_page_adminpage",
       "target": "content_queries_getcategories"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/admin/page.tsx",
+      "source_location": "L69",
+      "weight": 1.0,
+      "source": "admin_page_adminpage",
+      "target": "leaderboard_store_listallscores"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/characters/[id]/image/route.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "image_route",
+      "target": "auth_session",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/characters/[id]/image/route.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "image_route",
+      "target": "auth_session_getadminuser"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/characters/[id]/image/route.ts",
+      "source_location": "L17",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "image_route",
+      "target": "image_route_allowed_mime"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/characters/[id]/image/route.ts",
+      "source_location": "L88",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "image_route",
+      "target": "image_route_delete"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/characters/[id]/image/route.ts",
+      "source_location": "L28",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "image_route",
+      "target": "image_route_get"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/characters/[id]/image/route.ts",
+      "source_location": "L26",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "image_route",
+      "target": "image_route_params"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/characters/[id]/image/route.ts",
+      "source_location": "L48",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "image_route",
+      "target": "image_route_post"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/characters/[id]/image/route.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "image_route",
+      "target": "lib_prisma",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/api/characters/[id]/image/route.ts",
+      "source_location": "L49",
+      "weight": 1.0,
+      "source": "image_route_post",
+      "target": "auth_session_getadminuser"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/api/characters/[id]/image/route.ts",
+      "source_location": "L89",
+      "weight": 1.0,
+      "source": "image_route_delete",
+      "target": "auth_session_getadminuser"
     },
     {
       "relation": "contains",
@@ -5436,16 +6183,6 @@
       "weight": 1.0,
       "source": "app_layout_rootlayout",
       "target": "auth_session_getcurrentuser"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "app/page.tsx",
-      "source_location": "L14",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "app_page",
-      "target": "app_page_highlights"
     },
     {
       "relation": "contains",
@@ -7221,6 +7958,17 @@
       "target": "roster_categories_categories"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "data/roster/characters.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "data_roster_characters_ts_roster_characters",
+      "target": "data_roster_characters_ts_roster_characters",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "data/roster/characters.ts",
@@ -7617,6 +8365,16 @@
       "target": "auth_session_destroysession"
     },
     {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/auth/admin-emails.ts",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "auth_admin_emails",
+      "target": "auth_admin_emails_adminemails",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "lib/auth/admin-emails.ts",
@@ -7626,6 +8384,17 @@
       "context": "call",
       "source": "auth_admin_emails_isadminemail",
       "target": "auth_admin_emails"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/auth/admin-emails.ts",
+      "source_location": "L19",
+      "weight": 1.0,
+      "source": "auth_admin_emails_isadminemail",
+      "target": "auth_admin_emails_adminemails",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -7731,17 +8500,6 @@
       "weight": 1.0,
       "source": "leaderboard_actions_submitscoreaction",
       "target": "auth_session_getcurrentuser"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "app/api/characters/[id]/image/route.ts",
-      "source_location": "L4",
-      "weight": 1.0,
-      "source": "image_route",
-      "target": "auth_session_getadminuser",
-      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -8474,6 +9232,36 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "lib/leaderboard/store.ts",
+      "source_location": "L108",
+      "weight": 1.0,
+      "source": "leaderboard_store",
+      "target": "leaderboard_store_admindeletescore",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/leaderboard/store.ts",
+      "source_location": "L76",
+      "weight": 1.0,
+      "source": "leaderboard_store",
+      "target": "leaderboard_store_adminscore",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/leaderboard/store.ts",
+      "source_location": "L103",
+      "weight": 1.0,
+      "source": "leaderboard_store",
+      "target": "leaderboard_store_adminupdatescore",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/leaderboard/store.ts",
       "source_location": "L12",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -8489,6 +9277,16 @@
       "confidence_score": 1.0,
       "source": "leaderboard_store",
       "target": "leaderboard_store_leaderboardgame"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/leaderboard/store.ts",
+      "source_location": "L87",
+      "weight": 1.0,
+      "source": "leaderboard_store",
+      "target": "leaderboard_store_listallscores",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -8965,6 +9763,16 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "next.config.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "next_config",
+      "target": "next_config_nextconfig",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "package.json",
       "source_location": "L22",
       "weight": 1.0,
@@ -9261,6 +10069,16 @@
       "confidence_score": 1.0,
       "source": "package_devdependencies",
       "target": "package_devdependencies_postcss"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L37",
+      "weight": 1.0,
+      "source": "package_devdependencies",
+      "target": "package_devdependencies_prisma",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -9563,6 +10381,146 @@
       "target": "tsconfig_paths"
     },
     {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "readme",
+      "target": "readme_jjk_arcade_plateforme_de_mini_jeux_jujutsu_kaisen",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L55",
+      "weight": 1.0,
+      "source": "readme_jjk_arcade_plateforme_de_mini_jeux_jujutsu_kaisen",
+      "target": "readme_architecture",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L41",
+      "weight": 1.0,
+      "source": "readme_jjk_arcade_plateforme_de_mini_jeux_jujutsu_kaisen",
+      "target": "readme_d\u00e9marrage_local",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L115",
+      "weight": 1.0,
+      "source": "readme_jjk_arcade_plateforme_de_mini_jeux_jujutsu_kaisen",
+      "target": "readme_d\u00e9ploiement_vercel",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "readme_jjk_arcade_plateforme_de_mini_jeux_jujutsu_kaisen",
+      "target": "readme_le_jeu_build_the_perfect_sorcerer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L94",
+      "weight": 1.0,
+      "source": "readme_jjk_arcade_plateforme_de_mini_jeux_jujutsu_kaisen",
+      "target": "readme_le_jeu_jjk_pyramid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L125",
+      "weight": 1.0,
+      "source": "readme_jjk_arcade_plateforme_de_mini_jeux_jujutsu_kaisen",
+      "target": "readme_optionnel_leaderboard_global_neon_prisma",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L33",
+      "weight": 1.0,
+      "source": "readme_jjk_arcade_plateforme_de_mini_jeux_jujutsu_kaisen",
+      "target": "readme_stack",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L142",
+      "weight": 1.0,
+      "source": "readme_jjk_arcade_plateforme_de_mini_jeux_jujutsu_kaisen",
+      "target": "readme_tests",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L89",
+      "weight": 1.0,
+      "source": "readme_architecture",
+      "target": "readme_ajouter_un_jeu_syst\u00e8me_pluggable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L79",
+      "weight": 1.0,
+      "source": "readme_architecture",
+      "target": "readme_ajouter_un_personnage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L84",
+      "weight": 1.0,
+      "source": "readme_architecture",
+      "target": "readme_ajouter_une_cat\u00e9gorie",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L107",
+      "weight": 1.0,
+      "source": "readme_le_jeu_jjk_pyramid",
+      "target": "readme_ajouter_une_condition_jjk_pyramid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/assets/README.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "assets_readme",
+      "target": "assets_readme_assets",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "conceptually_related_to",
       "confidence": "INFERRED",
       "confidence_score": 0.85,
@@ -9801,68 +10759,8 @@
       "weight": 1.0,
       "source": "assets_readme_original_assets_policy",
       "target": "assets_readme_character_svg_convention"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "app/admin/ImageDropzone.tsx",
-      "source_location": "L19",
-      "weight": 1.0,
-      "source": "admin_imagedropzone",
-      "target": "admin_imagedropzone_imagedropzone",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "app/api/characters/[id]/image/route.ts",
-      "source_location": "L17",
-      "weight": 1.0,
-      "source": "image_route",
-      "target": "image_route_allowed_mime",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "app/api/characters/[id]/image/route.ts",
-      "source_location": "L88",
-      "weight": 1.0,
-      "source": "image_route",
-      "target": "image_route_delete",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "app/api/characters/[id]/image/route.ts",
-      "source_location": "L28",
-      "weight": 1.0,
-      "source": "image_route",
-      "target": "image_route_get",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "app/api/characters/[id]/image/route.ts",
-      "source_location": "L26",
-      "weight": 1.0,
-      "source": "image_route",
-      "target": "image_route_params",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "app/api/characters/[id]/image/route.ts",
-      "source_location": "L48",
-      "weight": 1.0,
-      "source": "image_route",
-      "target": "image_route_post",
-      "confidence_score": 1.0
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "593e8bcc07fe5b61679a9d127fecd89be9e49e84"
+  "built_at_commit": "6a042489844472c233bce16ed089746b976efa27"
 }
