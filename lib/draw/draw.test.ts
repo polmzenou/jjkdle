@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import type { CategoryConfig, CategoryId } from "@/data/roster/categories";
 import type { Character } from "@/data/roster/characters";
+import { CATEGORIES } from "@/data/roster/categories";
+import { ROSTER } from "@/data/roster/characters";
 import {
   eligibleFor,
   drawCategory,
@@ -163,6 +165,31 @@ describe("drawAllOne / redrawUnlockedOne", () => {
         seededRng(seed + 1000),
       );
       expect(next.speed?.id).not.toBe(current.speed?.id);
+    }
+  });
+});
+
+describe("minRating", () => {
+  it("ne tire que des personnages notés au-dessus du seuil", () => {
+    // speed : a=90, b=70, c=60, d=40, e=30 → seuil 80 ⇒ seul 'a' qualifie.
+    for (let seed = 0; seed < 40; seed++) {
+      const c = drawOne("speed", roster, seededRng(seed), undefined, 80);
+      expect(c?.id).toBe("a");
+    }
+  });
+
+  it("retombe sur le pool complet si aucun perso n'atteint le seuil", () => {
+    const c = drawOne("speed", roster, seededRng(1), undefined, 200);
+    expect(c).not.toBeNull(); // jamais bloqué : la case reste jouable
+  });
+
+  it("sur le roster réel, ne renvoie que des profils au-dessus du seuil", () => {
+    for (let seed = 0; seed < 100; seed++) {
+      const draw = drawAllOne(CATEGORIES, ROSTER, seededRng(seed), 90);
+      for (const category of CATEGORIES) {
+        const c = draw[category.id];
+        if (c) expect(c.ratings[category.id] ?? 0).toBeGreaterThanOrEqual(90);
+      }
     }
   });
 });
