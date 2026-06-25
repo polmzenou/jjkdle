@@ -68,3 +68,43 @@ export async function topEntries(
     score: r.best,
   }));
 }
+
+// ──────────────────────────────────────────────────────────────────────────
+// Administration du leaderboard (vue /admin)
+// ──────────────────────────────────────────────────────────────────────────
+
+export interface AdminScore {
+  id: string;
+  pseudo: string;
+  /** Id du jeu (ex. "builder", "ranking"). */
+  game: string;
+  score: number;
+  /** Date du dernier record (ISO). */
+  date: string;
+}
+
+/** Tous les scores (tous jeux), pour l'admin. Groupé par jeu puis score décroissant. */
+export async function listAllScores(): Promise<AdminScore[]> {
+  const rows = await prisma.score.findMany({
+    orderBy: [{ gameId: "asc" }, { best: "desc" }, { updatedAt: "asc" }],
+    include: { user: { select: { username: true } } },
+  });
+
+  return rows.map((r) => ({
+    id: r.id,
+    pseudo: r.user.username,
+    game: r.gameId,
+    score: r.best,
+    date: r.updatedAt.toISOString(),
+  }));
+}
+
+/** Met à jour le score (best) d'une entrée. */
+export async function adminUpdateScore(id: string, best: number): Promise<void> {
+  await prisma.score.update({ where: { id }, data: { best } });
+}
+
+/** Supprime une entrée de score. */
+export async function adminDeleteScore(id: string): Promise<void> {
+  await prisma.score.delete({ where: { id } });
+}

@@ -11,24 +11,6 @@ const STATS = [
   { value: "S", label: "grade max à atteindre" },
 ];
 
-const HIGHLIGHTS = [
-  {
-    glyph: "⚡",
-    title: "Joue en un clic",
-    text: "Pas d'inscription, pas de téléchargement. Tu ouvres, tu joues. Tout tourne directement dans ton navigateur.",
-  },
-  {
-    glyph: "🏆",
-    title: "Tes scores te suivent",
-    text: "Chaque jeu garde ton meilleur score en local. Reviens battre ton propre record quand tu veux.",
-  },
-  {
-    glyph: "🩸",
-    title: "100 % univers JJK",
-    text: "Un roster fidèle de Jujutsu Kaisen, des sorciers aux fléaux, pour tester ta vraie connaissance de la série.",
-  },
-];
-
 /** Landing : présente le site, puis met en scène les jeux (showcase). */
 export default function HomePage() {
   return (
@@ -85,31 +67,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Points forts ── */}
-      <section className="mx-auto w-full max-w-5xl px-6 py-12">
-        <div className="grid gap-4 sm:grid-cols-3">
-          {HIGHLIGHTS.map((h) => (
-            <div
-              key={h.title}
-              className="rounded-2xl border border-white/10 bg-void-800/40 p-6 backdrop-blur transition-colors hover:border-white/20"
-            >
-              <span className="text-3xl">{h.glyph}</span>
-              <h3 className="mt-4 font-display text-lg font-bold text-white">
-                {h.title}
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-white/55">
-                {h.text}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* ── Showcase des jeux ── */}
       <section className="mx-auto w-full max-w-5xl px-6 py-16 sm:py-24">
         <div className="mb-14 text-center">
           <h2 className="font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            En images
+            Liste des jeux
           </h2>
           <p className="mx-auto mt-3 max-w-md text-white/55">
             Un aperçu de ce qui t'attend dans l'arcade.

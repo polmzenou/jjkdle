@@ -9,6 +9,7 @@ import { CharacterImage } from "@/components/CharacterImage";
 import { ImageDropzone } from "./ImageDropzone";
 import { saveCharacterAction, deleteCharacterAction } from "./actions";
 import { logoutAction } from "@/lib/auth/actions";
+import { LeaderboardAdmin } from "./LeaderboardAdmin";
 
 const TIERS: CharacterTier[] = ["s", "1", "2", "3", "4", "4minus"];
 
@@ -27,6 +28,8 @@ interface AdminDashboardProps {
   categories: CategoryConfig[];
 }
 
+type Tab = "roster" | "leaderboard";
+
 function slugify(s: string): string {
   return s
     .toLowerCase()
@@ -39,6 +42,7 @@ function slugify(s: string): string {
 export function AdminDashboard({ roster, categories }: AdminDashboardProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [tab, setTab] = useState<Tab>("roster");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ ok: boolean; msg: string } | null>(
     null,
@@ -221,9 +225,16 @@ export function AdminDashboard({ roster, categories }: AdminDashboardProps) {
       <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-2xl font-black uppercase tracking-wider text-white">
-            Admin · <span className="text-domain-light">Roster</span>
+            Admin ·{" "}
+            <span className="text-domain-light">
+              {tab === "roster" ? "Roster" : "Leaderboard"}
+            </span>
           </h1>
-          <p className="text-sm text-white/45">{roster.length} personnages</p>
+          <p className="text-sm text-white/45">
+            {tab === "roster"
+              ? `${roster.length} personnages`
+              : `${scores.length} scores`}
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Link
@@ -475,6 +486,8 @@ export function AdminDashboard({ roster, categories }: AdminDashboardProps) {
           </div>
         </section>
       </div>
+        </>
+      )}
     </main>
   );
 }

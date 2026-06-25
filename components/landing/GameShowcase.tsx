@@ -72,7 +72,6 @@ export function GameShowcase() {
                 className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.25em]"
                 style={{ color: accent }}
               >
-                <span className="text-base">{game.glyph}</span>
                 Jeu #{String(i + 1).padStart(2, "0")}
               </span>
 
