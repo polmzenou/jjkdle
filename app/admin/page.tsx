@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { readRoster } from "@/lib/admin/roster-store";
 import { getCategories } from "@/lib/content/queries";
 import { listAllScores } from "@/lib/leaderboard/store";
+import { listUsers } from "@/lib/auth/users";
 import type { Character } from "@/data/roster/characters";
 import { AdminDashboard } from "./AdminDashboard";
 
@@ -64,9 +65,10 @@ export default async function AdminPage() {
   } catch {
     roster = [];
   }
-  const [categories, scores] = await Promise.all([
+  const [categories, scores, users] = await Promise.all([
     getCategories(),
     listAllScores(),
+    listUsers(),
   ]);
 
   return (
@@ -74,6 +76,8 @@ export default async function AdminPage() {
       roster={roster}
       categories={categories}
       scores={scores}
+      users={users}
+      currentUserId={user.id}
     />
   );
 }
