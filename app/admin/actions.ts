@@ -11,8 +11,6 @@ import {
   MAX_SCORE,
   type LeaderboardGame,
 } from "@/lib/leaderboard/store";
-import { adminSetUserRole, adminDeleteUser } from "@/lib/auth/users";
-import type { Role } from "@prisma/client";
 import type { Character, CharacterTier } from "@/data/roster/characters";
 import { CATEGORY_BY_ID, type CategoryId } from "@/data/roster/categories";
 
@@ -20,7 +18,6 @@ export type ActionResult = { ok: boolean; error?: string };
 
 const TIERS: CharacterTier[] = ["4minus", "4", "3", "2", "1", "s"];
 const GAMES: LeaderboardGame[] = ["builder", "ranking"];
-const ROLES: Role[] = ["PLAYER", "ADMIN"];
 
 /** Valide + enregistre (ajout ou édition) un personnage en base. */
 export async function saveCharacterAction(

@@ -32,8 +32,6 @@ interface AdminDashboardProps {
   scores: AdminScore[];
   users: AdminUser[];
   currentUserId: string;
-  users: AdminUser[];
-  currentUserId: string;
 }
 
 type Tab = "roster" | "leaderboard" | "users";
@@ -58,8 +56,6 @@ export function AdminDashboard({
   roster,
   categories,
   scores,
-  users,
-  currentUserId,
   users,
   currentUserId,
 }: AdminDashboardProps) {
