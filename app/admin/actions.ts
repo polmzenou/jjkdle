@@ -1,8 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import type { Role } from "@prisma/client";
 import { getAdminUser } from "@/lib/auth/session";
 import { upsertCharacter, deleteCharacter } from "@/lib/admin/roster-store";
+import { getUserRole, setUserRole, deleteUser } from "@/lib/admin/users";
 import {
   adminUpdateScore,
   adminDeleteScore,
@@ -127,6 +129,81 @@ export async function deleteScoreAction(
     return { ok: false, error: `Échec de suppression : ${(e as Error).message}` };
   }
   revalidatePath(`/games/${game}`);
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Utilisateurs (gestion des rôles)
+// ──────────────────────────────────────────────────────────────────────────
+
+/**
+ * Change le rôle d'un utilisateur.
+ * Règle : un administrateur ne peut PAS être rétrogradé (ADMIN → PLAYER refusé),
+ * quel que soit l'admin qui le demande. La promotion PLAYER → ADMIN reste permise.
+ */
+export async function setUserRoleAction(
+  userId: string,
+  role: Role,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  if (role !== "ADMIN" && role !== "PLAYER") {
+    return { ok: false, error: "Rôle invalide." };
+  }
+
+  const current = await getUserRole(userId);
+  if (!current) {
+    return { ok: false, error: "Utilisateur introuvable." };
+  }
+
+  // Protection : on ne rétrograde jamais un administrateur.
+  if (current === "ADMIN" && role === "PLAYER") {
+    return {
+      ok: false,
+      error: "Les administrateurs ne peuvent pas être rétrogradés.",
+    };
+  }
+
+  if (current === role) {
+    return { ok: true }; // aucun changement
+  }
+
+  try {
+    await setUserRole(userId, role);
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+/**
+ * Supprime un compte joueur. Règle : on ne peut PAS supprimer un administrateur
+ * (comme pour la rétrogradation). Cascade DB : sessions + scores.
+ */
+export async function deleteUserAction(userId: string): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+
+  const current = await getUserRole(userId);
+  if (!current) {
+    return { ok: false, error: "Utilisateur introuvable." };
+  }
+  if (current === "ADMIN") {
+    return {
+      ok: false,
+      error: "Un administrateur ne peut pas être supprimé.",
+    };
+  }
+
+  try {
+    await deleteUser(userId);
+  } catch (e) {
+    return { ok: false, error: `Échec de suppression : ${(e as Error).message}` };
+  }
   revalidatePath("/admin");
   return { ok: true };
 }

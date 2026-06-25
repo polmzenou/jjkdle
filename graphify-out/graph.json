@@ -117,7 +117,7 @@
       "label": "TIERS",
       "file_type": "code",
       "source_file": "app/admin/AdminDashboard.tsx",
-      "source_location": "L15",
+      "source_location": "L17",
       "_origin": "ast",
       "id": "admin_admindashboard_tiers",
       "community": 16,
@@ -127,7 +127,7 @@
       "label": "CatField",
       "file_type": "code",
       "source_file": "app/admin/AdminDashboard.tsx",
-      "source_location": "L17",
+      "source_location": "L19",
       "_origin": "ast",
       "id": "admin_admindashboard_catfield",
       "community": 16,
@@ -137,7 +137,7 @@
       "label": "FormState",
       "file_type": "code",
       "source_file": "app/admin/AdminDashboard.tsx",
-      "source_location": "L18",
+      "source_location": "L20",
       "_origin": "ast",
       "id": "admin_admindashboard_formstate",
       "community": 16,
@@ -147,27 +147,47 @@
       "label": "AdminDashboardProps",
       "file_type": "code",
       "source_file": "app/admin/AdminDashboard.tsx",
-      "source_location": "L27",
+      "source_location": "L29",
       "_origin": "ast",
       "id": "admin_admindashboard_admindashboardprops",
-      "community": 0,
+      "community": 16,
       "norm_label": "admindashboardprops"
     },
     {
       "label": "Tab",
       "file_type": "code",
       "source_file": "app/admin/AdminDashboard.tsx",
-      "source_location": "L33",
+      "source_location": "L37",
       "_origin": "ast",
       "id": "admin_admindashboard_tab",
       "community": 16,
       "norm_label": "tab"
     },
     {
+      "label": "TAB_LABELS",
+      "file_type": "code",
+      "source_file": "app/admin/AdminDashboard.tsx",
+      "source_location": "L39",
+      "_origin": "ast",
+      "id": "admin_admindashboard_tab_labels",
+      "community": 16,
+      "norm_label": "tab_labels"
+    },
+    {
+      "label": "TAB_ORDER",
+      "file_type": "code",
+      "source_file": "app/admin/AdminDashboard.tsx",
+      "source_location": "L44",
+      "_origin": "ast",
+      "id": "admin_admindashboard_tab_order",
+      "community": 16,
+      "norm_label": "tab_order"
+    },
+    {
       "label": "slugify()",
       "file_type": "code",
       "source_file": "app/admin/AdminDashboard.tsx",
-      "source_location": "L35",
+      "source_location": "L46",
       "_origin": "ast",
       "id": "admin_admindashboard_slugify",
       "community": 16,
@@ -177,17 +197,17 @@
       "label": "AdminDashboard()",
       "file_type": "code",
       "source_file": "app/admin/AdminDashboard.tsx",
-      "source_location": "L44",
+      "source_location": "L55",
       "_origin": "ast",
       "id": "admin_admindashboard_admindashboard",
-      "community": 16,
+      "community": 4,
       "norm_label": "admindashboard()"
     },
     {
       "label": "Field()",
       "file_type": "code",
       "source_file": "app/admin/AdminDashboard.tsx",
-      "source_location": "L524",
+      "source_location": "L540",
       "_origin": "ast",
       "id": "admin_admindashboard_field",
       "community": 16,
@@ -264,6 +284,46 @@
       "norm_label": "leaderboardadmin()"
     },
     {
+      "label": "UserAdmin.tsx",
+      "file_type": "code",
+      "source_file": "app/admin/UserAdmin.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "admin_useradmin",
+      "community": 16,
+      "norm_label": "useradmin.tsx"
+    },
+    {
+      "label": "UserAdminProps",
+      "file_type": "code",
+      "source_file": "app/admin/UserAdmin.tsx",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "admin_useradmin_useradminprops",
+      "community": 16,
+      "norm_label": "useradminprops"
+    },
+    {
+      "label": "Feedback",
+      "file_type": "code",
+      "source_file": "app/admin/UserAdmin.tsx",
+      "source_location": "L14",
+      "_origin": "ast",
+      "id": "admin_useradmin_feedback",
+      "community": 16,
+      "norm_label": "feedback"
+    },
+    {
+      "label": "UserAdmin()",
+      "file_type": "code",
+      "source_file": "app/admin/UserAdmin.tsx",
+      "source_location": "L21",
+      "_origin": "ast",
+      "id": "admin_useradmin_useradmin",
+      "community": 16,
+      "norm_label": "useradmin()"
+    },
+    {
       "label": "actions.ts",
       "file_type": "code",
       "source_file": "app/admin/actions.ts",
@@ -277,7 +337,7 @@
       "label": "ActionResult",
       "file_type": "code",
       "source_file": "app/admin/actions.ts",
-      "source_location": "L15",
+      "source_location": "L17",
       "_origin": "ast",
       "id": "admin_actions_actionresult",
       "community": 16,
@@ -287,7 +347,7 @@
       "label": "TIERS",
       "file_type": "code",
       "source_file": "app/admin/actions.ts",
-      "source_location": "L17",
+      "source_location": "L19",
       "_origin": "ast",
       "id": "admin_actions_tiers",
       "community": 16,
@@ -297,7 +357,7 @@
       "label": "GAMES",
       "file_type": "code",
       "source_file": "app/admin/actions.ts",
-      "source_location": "L18",
+      "source_location": "L20",
       "_origin": "ast",
       "id": "admin_actions_games",
       "community": 16,
@@ -307,7 +367,7 @@
       "label": "saveCharacterAction()",
       "file_type": "code",
       "source_file": "app/admin/actions.ts",
-      "source_location": "L21",
+      "source_location": "L23",
       "_origin": "ast",
       "id": "admin_actions_savecharacteraction",
       "community": 16,
@@ -317,7 +377,7 @@
       "label": "deleteCharacterAction()",
       "file_type": "code",
       "source_file": "app/admin/actions.ts",
-      "source_location": "L72",
+      "source_location": "L74",
       "_origin": "ast",
       "id": "admin_actions_deletecharacteraction",
       "community": 16,
@@ -327,7 +387,7 @@
       "label": "updateScoreAction()",
       "file_type": "code",
       "source_file": "app/admin/actions.ts",
-      "source_location": "L90",
+      "source_location": "L92",
       "_origin": "ast",
       "id": "admin_actions_updatescoreaction",
       "community": 16,
@@ -337,11 +397,31 @@
       "label": "deleteScoreAction()",
       "file_type": "code",
       "source_file": "app/admin/actions.ts",
-      "source_location": "L117",
+      "source_location": "L119",
       "_origin": "ast",
       "id": "admin_actions_deletescoreaction",
       "community": 16,
       "norm_label": "deletescoreaction()"
+    },
+    {
+      "label": "setUserRoleAction()",
+      "file_type": "code",
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L145",
+      "_origin": "ast",
+      "id": "admin_actions_setuserroleaction",
+      "community": 16,
+      "norm_label": "setuserroleaction()"
+    },
+    {
+      "label": "deleteUserAction()",
+      "file_type": "code",
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L186",
+      "_origin": "ast",
+      "id": "admin_actions_deleteuseraction",
+      "community": 16,
+      "norm_label": "deleteuseraction()"
     },
     {
       "label": "page.tsx",
@@ -357,7 +437,7 @@
       "label": "metadata",
       "file_type": "code",
       "source_file": "app/admin/page.tsx",
-      "source_location": "L10",
+      "source_location": "L11",
       "_origin": "ast",
       "id": "admin_page_metadata",
       "community": 4,
@@ -367,7 +447,7 @@
       "label": "AccessDenied()",
       "file_type": "code",
       "source_file": "app/admin/page.tsx",
-      "source_location": "L19",
+      "source_location": "L20",
       "_origin": "ast",
       "id": "admin_page_accessdenied",
       "community": 4,
@@ -377,7 +457,7 @@
       "label": "AdminPage()",
       "file_type": "code",
       "source_file": "app/admin/page.tsx",
-      "source_location": "L34",
+      "source_location": "L35",
       "_origin": "ast",
       "id": "admin_page_adminpage",
       "community": 4,
@@ -630,7 +710,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "ranking_rankinggame_rankinggame",
-      "community": 4,
+      "community": 1,
       "norm_label": "rankinggame()"
     },
     {
@@ -1090,7 +1170,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "leaderboard_leaderboard_leaderboard",
-      "community": 4,
+      "community": 6,
       "norm_label": "leaderboard()"
     },
     {
@@ -1130,7 +1210,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "leaderboard_submitscore_submitscore",
-      "community": 1,
+      "community": 6,
       "norm_label": "submitscore()"
     },
     {
@@ -1554,6 +1634,66 @@
       "norm_label": "deletecharacter()"
     },
     {
+      "label": "users.ts",
+      "file_type": "code",
+      "source_file": "lib/admin/users.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "admin_users",
+      "community": 16,
+      "norm_label": "users.ts"
+    },
+    {
+      "label": "AdminUser",
+      "file_type": "code",
+      "source_file": "lib/admin/users.ts",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "admin_users_adminuser",
+      "community": 16,
+      "norm_label": "adminuser"
+    },
+    {
+      "label": "listUsers()",
+      "file_type": "code",
+      "source_file": "lib/admin/users.ts",
+      "source_location": "L20",
+      "_origin": "ast",
+      "id": "admin_users_listusers",
+      "community": 4,
+      "norm_label": "listusers()"
+    },
+    {
+      "label": "getUserRole()",
+      "file_type": "code",
+      "source_file": "lib/admin/users.ts",
+      "source_location": "L35",
+      "_origin": "ast",
+      "id": "admin_users_getuserrole",
+      "community": 16,
+      "norm_label": "getuserrole()"
+    },
+    {
+      "label": "setUserRole()",
+      "file_type": "code",
+      "source_file": "lib/admin/users.ts",
+      "source_location": "L44",
+      "_origin": "ast",
+      "id": "admin_users_setuserrole",
+      "community": 16,
+      "norm_label": "setuserrole()"
+    },
+    {
+      "label": "deleteUser()",
+      "file_type": "code",
+      "source_file": "lib/admin/users.ts",
+      "source_location": "L49",
+      "_origin": "ast",
+      "id": "admin_users_deleteuser",
+      "community": 16,
+      "norm_label": "deleteuser()"
+    },
+    {
       "label": "actions.ts",
       "file_type": "code",
       "source_file": "lib/auth/actions.ts",
@@ -1810,7 +1950,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "draw_draw_test",
-      "community": 17,
+      "community": 0,
       "norm_label": "draw.test.ts"
     },
     {
@@ -1820,7 +1960,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "draw_draw_test_char",
-      "community": 17,
+      "community": 0,
       "norm_label": "char()"
     },
     {
@@ -1830,7 +1970,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "draw_draw_test_roster",
-      "community": 17,
+      "community": 0,
       "norm_label": "roster"
     },
     {
@@ -1840,7 +1980,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "draw_draw_test_speed",
-      "community": 17,
+      "community": 0,
       "norm_label": "speed"
     },
     {
@@ -1850,7 +1990,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "draw_draw_test_domain",
-      "community": 17,
+      "community": 0,
       "norm_label": "domain"
     },
     {
@@ -1860,7 +2000,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "draw_draw",
-      "community": 17,
+      "community": 0,
       "norm_label": "draw.ts"
     },
     {
@@ -1870,7 +2010,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "draw_draw_rng",
-      "community": 17,
+      "community": 1,
       "norm_label": "rng"
     },
     {
@@ -1880,7 +2020,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "draw_draw_eligiblefor",
-      "community": 17,
+      "community": 0,
       "norm_label": "eligiblefor()"
     },
     {
@@ -1890,7 +2030,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "draw_draw_shuffle",
-      "community": 17,
+      "community": 1,
       "norm_label": "shuffle()"
     },
     {
@@ -1900,7 +2040,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "draw_draw_drawcategory",
-      "community": 17,
+      "community": 0,
       "norm_label": "drawcategory()"
     },
     {
@@ -1910,7 +2050,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "draw_draw_draw",
-      "community": 17,
+      "community": 0,
       "norm_label": "draw"
     },
     {
@@ -1920,7 +2060,7 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "draw_draw_drawall",
-      "community": 17,
+      "community": 0,
       "norm_label": "drawall()"
     },
     {
@@ -1930,7 +2070,7 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "draw_draw_redrawunlocked",
-      "community": 17,
+      "community": 0,
       "norm_label": "redrawunlocked()"
     },
     {
@@ -1940,7 +2080,7 @@
       "source_location": "L92",
       "_origin": "ast",
       "id": "draw_draw_singledraw",
-      "community": 17,
+      "community": 0,
       "norm_label": "singledraw"
     },
     {
@@ -1950,7 +2090,7 @@
       "source_location": "L102",
       "_origin": "ast",
       "id": "draw_draw_drawone",
-      "community": 17,
+      "community": 0,
       "norm_label": "drawone()"
     },
     {
@@ -1960,7 +2100,7 @@
       "source_location": "L123",
       "_origin": "ast",
       "id": "draw_draw_drawallone",
-      "community": 17,
+      "community": 0,
       "norm_label": "drawallone()"
     },
     {
@@ -1970,7 +2110,7 @@
       "source_location": "L140",
       "_origin": "ast",
       "id": "draw_draw_redrawunlockedone",
-      "community": 17,
+      "community": 0,
       "norm_label": "redrawunlockedone()"
     },
     {
@@ -1980,7 +2120,7 @@
       "source_location": "L162",
       "_origin": "ast",
       "id": "draw_draw_seededrng",
-      "community": 17,
+      "community": 0,
       "norm_label": "seededrng()"
     },
     {
@@ -3881,6 +4021,26 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/admin/AdminDashboard.tsx",
+      "source_location": "L39",
+      "weight": 1.0,
+      "source": "admin_admindashboard",
+      "target": "admin_admindashboard_tab_labels",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/AdminDashboard.tsx",
+      "source_location": "L44",
+      "weight": 1.0,
+      "source": "admin_admindashboard",
+      "target": "admin_admindashboard_tab_order",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/AdminDashboard.tsx",
       "source_location": "L13",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -3930,6 +4090,50 @@
       "confidence_score": 1.0,
       "source": "admin_admindashboard",
       "target": "admin_leaderboardadmin_leaderboardadmin"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/AdminDashboard.tsx",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "admin_admindashboard",
+      "target": "admin_useradmin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/AdminDashboard.tsx",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "admin_admindashboard",
+      "target": "admin_useradmin_useradmin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/AdminDashboard.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "admin_admindashboard",
+      "target": "admin_users",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/AdminDashboard.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "admin_admindashboard",
+      "target": "admin_users_adminuser",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -4026,9 +4230,9 @@
       "source_file": "app/admin/AdminDashboard.tsx",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_admindashboard",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports",
@@ -4073,6 +4277,17 @@
       "confidence_score": 1.0,
       "source": "admin_admindashboard_formstate",
       "target": "roster_characters_charactertier"
+    },
+    {
+      "relation": "references",
+      "context": "field",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/AdminDashboard.tsx",
+      "source_location": "L33",
+      "weight": 1.0,
+      "source": "admin_admindashboard_admindashboardprops",
+      "target": "admin_users_adminuser",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -4257,6 +4472,102 @@
       "target": "leaderboard_store_adminscore"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/UserAdmin.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "admin_useradmin",
+      "target": "admin_actions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/UserAdmin.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "admin_useradmin",
+      "target": "admin_actions_deleteuseraction",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/UserAdmin.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "admin_useradmin",
+      "target": "admin_actions_setuserroleaction",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/UserAdmin.tsx",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "admin_useradmin",
+      "target": "admin_useradmin_feedback",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/UserAdmin.tsx",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "admin_useradmin",
+      "target": "admin_useradmin_useradmin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/UserAdmin.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "admin_useradmin",
+      "target": "admin_useradmin_useradminprops",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/UserAdmin.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "admin_useradmin",
+      "target": "admin_users",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/UserAdmin.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "admin_useradmin",
+      "target": "admin_users_adminuser",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "field",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/UserAdmin.tsx",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "admin_useradmin_useradminprops",
+      "target": "admin_users_adminuser",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/admin/actions.ts",
@@ -4290,6 +4601,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/admin/actions.ts",
+      "source_location": "L186",
+      "weight": 1.0,
+      "source": "admin_actions",
+      "target": "admin_actions_deleteuseraction",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/actions.ts",
       "source_location": "L18",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -4305,6 +4626,16 @@
       "confidence_score": 1.0,
       "source": "admin_actions",
       "target": "admin_actions_savecharacteraction"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L145",
+      "weight": 1.0,
+      "source": "admin_actions",
+      "target": "admin_actions_setuserroleaction",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4358,6 +4689,50 @@
       "confidence_score": 1.0,
       "source": "admin_actions",
       "target": "admin_roster_store_upsertcharacter"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "admin_actions",
+      "target": "admin_users",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "admin_actions",
+      "target": "admin_users_deleteuser",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "admin_actions",
+      "target": "admin_users_getuserrole",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "admin_actions",
+      "target": "admin_users_setuserrole",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -4476,9 +4851,9 @@
       "source_file": "app/admin/actions.ts",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_actions",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports",
@@ -4591,6 +4966,72 @@
       "target": "leaderboard_store_admindeletescore"
     },
     {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L156",
+      "weight": 1.0,
+      "source": "admin_actions_setuserroleaction",
+      "target": "admin_users_getuserrole"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L174",
+      "weight": 1.0,
+      "source": "admin_actions_setuserroleaction",
+      "target": "admin_users_setuserrole"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L149",
+      "weight": 1.0,
+      "source": "admin_actions_setuserroleaction",
+      "target": "auth_session_getadminuser"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L203",
+      "weight": 1.0,
+      "source": "admin_actions_deleteuseraction",
+      "target": "admin_users_deleteuser"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L191",
+      "weight": 1.0,
+      "source": "admin_actions_deleteuseraction",
+      "target": "admin_users_getuserrole"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L187",
+      "weight": 1.0,
+      "source": "admin_actions_deleteuseraction",
+      "target": "auth_session_getadminuser"
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/admin/page.tsx",
@@ -4641,6 +5082,28 @@
       "confidence_score": 1.0,
       "source": "admin_page",
       "target": "admin_roster_store_readroster"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/page.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "admin_page",
+      "target": "admin_users",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/page.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "admin_page",
+      "target": "admin_users_listusers",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -4715,9 +5178,9 @@
       "source_file": "app/admin/page.tsx",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_page",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports",
@@ -4740,6 +5203,17 @@
       "weight": 1.0,
       "source": "admin_page_adminpage",
       "target": "admin_roster_store_readroster"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/admin/page.tsx",
+      "source_location": "L71",
+      "weight": 1.0,
+      "source": "admin_page_adminpage",
+      "target": "admin_users_listusers"
     },
     {
       "relation": "calls",
@@ -5157,9 +5631,9 @@
       "source_file": "app/games/builder/BuilderGame.tsx",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "builder_buildergame",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports",
@@ -5873,9 +6347,9 @@
       "source_file": "app/games/ranking/RankingGame.tsx",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ranking_rankinggame",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports",
@@ -6369,9 +6843,9 @@
       "source_file": "components/CategoryTile.tsx",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_categorytile",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports",
@@ -6465,9 +6939,9 @@
       "source_file": "components/CharacterImage.tsx",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_characterimage",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports",
@@ -7571,9 +8045,9 @@
       "source_file": "components/ranking/RosterContext.tsx",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ranking_rostercontext",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports",
@@ -7838,9 +8312,9 @@
       "source_file": "data/roster/characters.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "roster_characters",
-      "target": "roster_categories",
-      "confidence_score": 1.0
+      "target": "roster_categories"
     },
     {
       "relation": "imports_from",
@@ -7904,9 +8378,9 @@
       "source_file": "data/roster/characters.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "roster_characters",
-      "target": "roster_categories_categoryid",
-      "confidence_score": 1.0
+      "target": "roster_categories_categoryid"
     },
     {
       "relation": "references",
@@ -8025,9 +8499,9 @@
       "source_file": "lib/admin/roster-store.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_roster_store",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports_from",
@@ -8036,9 +8510,9 @@
       "source_file": "lib/content/queries.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "content_queries",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports_from",
@@ -8047,9 +8521,9 @@
       "source_file": "lib/draw/draw.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "draw_draw",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports_from",
@@ -8058,9 +8532,9 @@
       "source_file": "lib/draw/draw.test.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "draw_draw_test",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports_from",
@@ -8069,9 +8543,9 @@
       "source_file": "prisma/seed.ts",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "prisma_seed",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports_from",
@@ -8080,9 +8554,9 @@
       "source_file": "lib/ranking/ranking.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ranking_ranking_test",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports_from",
@@ -8101,9 +8575,9 @@
       "source_file": "data/roster/characters.ts",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "roster_characters",
-      "target": "roster_characters_character",
-      "confidence_score": 1.0
+      "target": "roster_characters_character"
     },
     {
       "relation": "contains",
@@ -8111,9 +8585,9 @@
       "source_file": "data/roster/characters.ts",
       "source_location": "L44",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "roster_characters",
-      "target": "roster_characters_character_by_id",
-      "confidence_score": 1.0
+      "target": "roster_characters_character_by_id"
     },
     {
       "relation": "contains",
@@ -8121,9 +8595,9 @@
       "source_file": "data/roster/characters.ts",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "roster_characters",
-      "target": "roster_characters_charactertier",
-      "confidence_score": 1.0
+      "target": "roster_characters_charactertier"
     },
     {
       "relation": "contains",
@@ -8131,9 +8605,9 @@
       "source_file": "data/roster/characters.ts",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "roster_characters",
-      "target": "roster_characters_roster",
-      "confidence_score": 1.0
+      "target": "roster_characters_roster"
     },
     {
       "relation": "imports_from",
@@ -8142,9 +8616,9 @@
       "source_file": "lib/scoring/scoring.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scoring_scoring",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports_from",
@@ -8153,9 +8627,9 @@
       "source_file": "lib/scoring/scoring.test.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scoring_scoring_test",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports",
@@ -8351,6 +8825,67 @@
       "weight": 1.0,
       "source": "admin_roster_store_readroster",
       "target": "content_queries_getroster"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/admin/users.ts",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "admin_users",
+      "target": "admin_users_adminuser",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/admin/users.ts",
+      "source_location": "L49",
+      "weight": 1.0,
+      "source": "admin_users",
+      "target": "admin_users_deleteuser",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/admin/users.ts",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "admin_users",
+      "target": "admin_users_getuserrole",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/admin/users.ts",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "admin_users",
+      "target": "admin_users_listusers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/admin/users.ts",
+      "source_location": "L44",
+      "weight": 1.0,
+      "source": "admin_users",
+      "target": "admin_users_setuserrole",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/admin/users.ts",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "admin_users",
+      "target": "lib_prisma",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -10911,5 +11446,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "c55ecac06ded17474b4b287e8bfff5ffa3e6fedb"
+  "built_at_commit": "6310eb6a13b82c9b5894262b2a8564f933695a3b"
 }
