@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth/session";
 import { readRoster } from "@/lib/admin/roster-store";
 import { getCategories } from "@/lib/content/queries";
+import { listAllScores } from "@/lib/leaderboard/store";
 import type { Character } from "@/data/roster/characters";
 import { AdminDashboard } from "./AdminDashboard";
 
@@ -63,9 +64,17 @@ export default async function AdminPage() {
   } catch {
     roster = [];
   }
-  const categories = await getCategories();
+  const [categories, scores] = await Promise.all([
+    getCategories(),
+    listAllScores(),
+  ]);
 
   return (
-    <AdminDashboard roster={roster} categories={categories} canWrite />
+    <AdminDashboard
+      roster={roster}
+      categories={categories}
+      scores={scores}
+      canWrite
+    />
   );
 }
