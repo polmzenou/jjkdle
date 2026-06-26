@@ -98,8 +98,6 @@ export type SingleDraw = Record<CategoryId, Character | null>;
  * `minRating`, s'il est fourni, restreint le tirage aux personnages dont la note
  * dans la catégorie atteint ce seuil (repli sur le pool complet si aucun ne le
  * satisfait — la case reste toujours jouable).
- * `worst`, s'il est vrai, fait l'inverse : on ne garde que les profils les plus
- * FAIBLES de la catégorie (easter egg de sabotage). Prioritaire sur `minRating`.
  */
 export function drawOne(
   categoryId: CategoryId,
@@ -107,15 +105,11 @@ export function drawOne(
   rng: Rng = Math.random,
   excludeId?: string,
   minRating?: number,
-  worst = false,
 ): Character | null {
   const pool = eligibleFor(categoryId, roster);
   if (pool.length === 0) return null;
   let working = pool;
-  if (worst) {
-    const min = Math.min(...pool.map((c) => c.ratings[categoryId] ?? 0));
-    working = pool.filter((c) => (c.ratings[categoryId] ?? 0) === min);
-  } else if (minRating !== undefined) {
+  if (minRating !== undefined) {
     const strong = pool.filter((c) => (c.ratings[categoryId] ?? 0) >= minRating);
     if (strong.length > 0) working = strong;
   }
@@ -150,14 +144,13 @@ export function redrawUnlockedOne(
   roster: Character[],
   rng: Rng = Math.random,
   minRating?: number,
-  worst = false,
 ): SingleDraw {
   const next = {} as SingleDraw;
   for (const category of categories) {
     next[category.id] = lockedIds.has(category.id)
       ? current[category.id]
       : // Exclut le perso affiché juste avant → jamais deux fois de suite.
-        drawOne(category.id, roster, rng, current[category.id]?.id, minRating, worst);
+        drawOne(category.id, roster, rng, current[category.id]?.id, minRating);
   }
   return next;
 }
