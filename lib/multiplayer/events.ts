@@ -23,6 +23,8 @@ export interface SerializedPlayer {
   /** Tirage courant : { [categoryId]: characterId | null }. */
   currentDraw: Record<string, string | null>;
   lockedThisRound: boolean;
+  /** Easter egg perso actif (ne propose que les meilleures cartes). */
+  curated: boolean;
   finalScore: number | null;
 }
 

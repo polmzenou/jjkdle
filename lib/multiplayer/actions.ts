@@ -41,6 +41,9 @@ export type MpResult = {
   needsAuth?: boolean;
 };
 
+/** Seuil de note du tirage "curated" (easter egg meilleures cartes), cf. builder solo. */
+const RATING_FLOOR = 90;
+
 /** Normalise un code de lobby saisi par l'utilisateur. */
 function normalizeCode(raw: string): string {
   return raw.trim().toUpperCase();
@@ -174,6 +177,8 @@ export async function startGameAction(codeRaw: string): Promise<MpResult> {
           selection: {},
           currentDraw: singleDrawToIds(drawAllOne(categories, roster)),
           lockedThisRound: false,
+          curated: false,
+          sabotaged: false,
           finalScore: null,
         },
       }),
@@ -277,17 +282,23 @@ export async function lockCategoryAction(
         categories,
         rosterMap,
       );
+      // Easter eggs : sabotage (pires cartes, prioritaire et à usage unique) ou
+      // curated perso (meilleures cartes, persistant).
       const nextDraw = redrawUnlockedOne(
         currentDraw,
         categories,
         lockedIdsOf(sel),
         roster,
+        Math.random,
+        !p.sabotaged && p.curated ? RATING_FLOOR : undefined,
+        p.sabotaged,
       );
       return prisma.lobbyPlayer.update({
         where: { id: p.id },
         data: {
           currentDraw: singleDrawToIds(nextDraw),
           lockedThisRound: false,
+          sabotaged: false, // consommé : un seul tour
         },
       });
     }),
@@ -310,7 +321,14 @@ export async function playAgainAction(codeRaw: string): Promise<MpResult> {
   await prisma.$transaction([
     prisma.lobbyPlayer.updateMany({
       where: { lobbyId: lobby.id },
-      data: { selection: {}, currentDraw: {}, lockedThisRound: false, finalScore: null },
+      data: {
+        selection: {},
+        currentDraw: {},
+        lockedThisRound: false,
+        curated: false,
+        sabotaged: false,
+        finalScore: null,
+      },
     }),
     prisma.lobby.update({
       where: { id: lobby.id },
@@ -319,5 +337,78 @@ export async function playAgainAction(codeRaw: string): Promise<MpResult> {
   ]);
 
   await broadcastState(code);
+  return { ok: true };
+}
+
+/**
+ * Easter egg (joueur principal) : bascule le mode "curated" — ne propose que
+ * les meilleures cartes — et re-tire aussitôt mes catégories non verrouillées,
+ * comme le bandeau secret du builder solo. L'état persiste pour les manches suivantes.
+ */
+export async function toggleCuratedAction(codeRaw: string): Promise<MpResult> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, needsAuth: true };
+
+  const code = normalizeCode(codeRaw);
+  const lobby = await findLobby(code);
+  if (!lobby) return { ok: false, error: "Lobby introuvable." };
+  if (lobby.status !== "PLAYING") return { ok: true };
+
+  const me = lobby.players.find((p) => p.userId === user.id);
+  if (!me) return { ok: false, error: "Tu n'es pas dans ce lobby." };
+
+  const nextCurated = !me.curated;
+  const [categories, roster] = await Promise.all([getCategories(), getRoster()]);
+  const rosterMap = buildRosterMap(roster);
+  const selection = (me.selection ?? {}) as SelectionIds;
+  const currentDraw = idsToSingleDraw(
+    (me.currentDraw ?? {}) as Record<string, string | null>,
+    categories,
+    rosterMap,
+  );
+  const nextDraw = redrawUnlockedOne(
+    currentDraw,
+    categories,
+    lockedIdsOf(selection),
+    roster,
+    Math.random,
+    nextCurated ? RATING_FLOOR : undefined,
+  );
+
+  await prisma.lobbyPlayer.update({
+    where: { id: me.id },
+    data: { curated: nextCurated, currentDraw: singleDrawToIds(nextDraw) },
+  });
+
+  await broadcastState(code);
+  return { ok: true };
+}
+
+/**
+ * Easter egg ultra caché : sabote un adversaire. Au tour suivant, sa proposition
+ * ne contiendra que les pires cartes. Drapeau à usage unique (consommé à l'avance
+ * de manche), silencieux : rien n'est diffusé pour ne pas trahir le sabotage.
+ */
+export async function sabotagePlayerAction(
+  codeRaw: string,
+  targetUserId: string,
+): Promise<MpResult> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, needsAuth: true };
+  if (targetUserId === user.id) return { ok: true }; // jamais soi-même
+
+  const code = normalizeCode(codeRaw);
+  const lobby = await findLobby(code);
+  if (!lobby) return { ok: false, error: "Lobby introuvable." };
+  if (lobby.status !== "PLAYING") return { ok: true };
+
+  const me = lobby.players.find((p) => p.userId === user.id);
+  const target = lobby.players.find((p) => p.userId === targetUserId);
+  if (!me || !target) return { ok: true };
+
+  await prisma.lobbyPlayer.update({
+    where: { id: target.id },
+    data: { sabotaged: true },
+  });
   return { ok: true };
 }
