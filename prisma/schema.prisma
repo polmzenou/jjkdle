@@ -24,16 +24,17 @@ enum Role {
 /// Compte utilisateur. Le jeu se joue sans compte ; le compte sert au
 /// leaderboard (enregistrement des scores) et, pour les ADMIN, à l'édition du roster.
 model User {
-  id           String    @id @default(cuid())
-  username     String    @unique
-  email        String    @unique
+  id           String   @id @default(cuid())
+  username     String   @unique
+  email        String   @unique
   passwordHash String
-  role         Role      @default(PLAYER)
-  createdAt    DateTime  @default(now())
+  role         Role     @default(PLAYER)
+  createdAt    DateTime @default(now())
 
   sessions     Session[]
   scores       Score[]
   lobbyPlayers LobbyPlayer[]
+  draftScores  JujutsuDraftScore[]
 }
 
 /// Session d'authentification (token aléatoire stocké en cookie httpOnly).
@@ -46,6 +47,30 @@ model Session {
   createdAt DateTime @default(now())
 
   @@index([userId])
+}
+
+/// Issue d'une partie de Jujutsu Draft.
+enum DraftOutcome {
+  VICTORY
+  DEFEAT
+}
+
+/// Meilleur score de Jujutsu Draft d'un utilisateur (un enregistrement par
+/// utilisateur — upsert quand un meilleur résultat est obtenu). `globalScore`
+/// est le score global caché recalculé côté serveur (anti-triche) ; `draft`
+/// est le snapshot des persos choisis par catégorie au moment du record.
+model JujutsuDraftScore {
+  id            String       @id @default(cuid())
+  userId        String       @unique
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  enemiesKilled Int
+  globalScore   Int
+  outcome       DraftOutcome
+  draft         Json
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([enemiesKilled, globalScore])
 }
 
 /// Meilleur score d'un utilisateur pour un jeu donné (un enregistrement par
@@ -82,17 +107,36 @@ model Category {
 /// Personnage du roster. `ratings` est un objet JSON
 /// { [categoryId]: note 0-100 } — la présence d'une clé = éligible à la catégorie.
 model Character {
-  id       String  @id
-  name     String
-  title    String
-  tier     String
+  id        String  @id
+  name      String
+  title     String
+  tier      String
   /// URL d'affichage : chemin statique (/assets/...) OU route API d'une image uploadée.
-  image    String?
+  image     String?
   /// Image uploadée via /admin (binaire en base, servie par /api/characters/[id]/image).
   imageData Bytes?
   imageMime String?
-  ratings  Json
-  position Int     @default(0)
+  ratings   Json
+  position  Int     @default(0)
+
+  @@index([position])
+}
+
+/// Personnage du jeu "Jujutsu Draft" (roster propre, éditable depuis /admin).
+/// `excellenceCategory` et `tier` sont des chaînes validées côté action.
+model DraftCharacter {
+  id                 String  @id
+  name               String
+  /// URL d'affichage : chemin statique (/assets/...) OU route API d'une image uploadée.
+  image              String?
+  /// Image uploadée via /admin (binaire en base, servie par /api/draft-characters/[id]/image).
+  imageData          Bytes?
+  imageMime          String?
+  excellenceCategory String
+  tier               String
+  cost               Int
+  statValue          Int
+  position           Int     @default(0)
 
   @@index([position])
 }

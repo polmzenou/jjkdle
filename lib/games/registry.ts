@@ -29,6 +29,17 @@ export const GAMES: Game[] = [
     previewImage: "/assets/pyramid-screen.png",
     status: "live",
   },
+  {
+    id: "jujutsu-draft",
+    title: "Jujutsu Draft",
+    description:
+      "Drafte 1 sorcier par catégorie sous budget, place chacun au bon endroit, puis affronte une série de boss de plus en plus forts. Va le plus loin possible.",
+    route: "/games/jujutsu-draft",
+    glyph: "⚔️",
+    tags: ["draft", "combat", "roster JJK"],
+    accent: "#f59e0b",
+    status: "live",
+  },
   // Exemple de jeu futur (grisé sur le hub) :
   // {
   //   id: "domain-clash",

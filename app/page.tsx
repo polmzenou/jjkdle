@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { GameShowcase } from "@/components/landing/GameShowcase";
+import { MangaDecor } from "@/components/landing/MangaDecor";
 import { GAMES } from "@/lib/games/registry";
 
 const liveCount = GAMES.filter((g) => g.status !== "coming-soon").length;
@@ -15,11 +16,17 @@ const STATS = [
 export default function HomePage() {
   return (
     <main className="flex flex-col">
+      {/* Couche décorative manga / JJK (kanji, ofuda, lignes de concentration) */}
+      <MangaDecor />
+
       {/* ── Hero ── */}
       <section className="relative mx-auto flex w-full max-w-5xl flex-col items-center px-6 pb-24 pt-16 text-center sm:pt-24">
         <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 text-xs font-medium uppercase tracking-[0.25em] text-domain-light backdrop-blur">
           <span className="h-1.5 w-1.5 animate-glow-pulse rounded-full bg-domain-light" />
           Jujutsu Kaisen · Fan Arcade
+          <span aria-hidden className="font-display text-sm leading-none text-domain-light/70">
+            呪
+          </span>
         </span>
 
         <h1 className="mt-8 flex justify-center">
@@ -70,6 +77,11 @@ export default function HomePage() {
       {/* ── Showcase des jeux ── */}
       <section className="mx-auto w-full max-w-5xl px-6 py-16 sm:py-24">
         <div className="mb-14 text-center">
+          <span className="mb-3 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.3em] text-domain-light/70">
+            <span aria-hidden className="h-px w-6 bg-gradient-to-r from-transparent to-domain-light/60" />
+            遊技 · Arcade
+            <span aria-hidden className="h-px w-6 bg-gradient-to-l from-transparent to-domain-light/60" />
+          </span>
           <h2 className="font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
             Liste des jeux
           </h2>
@@ -92,6 +104,14 @@ export default function HomePage() {
                 "radial-gradient(120% 100% at 50% 0%, rgba(124,58,237,0.45) 0%, transparent 60%)",
             }}
           />
+          {/* Kanji filigrane "戦" (combat) */}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -right-4 -top-10 select-none font-display font-black leading-none text-white/[0.04] sm:-right-2"
+            style={{ fontSize: "clamp(9rem, 22vw, 18rem)" }}
+          >
+            戦
+          </span>
           <h2 className="relative font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
             Prêt à libérer ton énergie maudite ?
           </h2>

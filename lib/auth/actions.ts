@@ -3,7 +3,7 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { hashPassword, verifyPassword } from "./password";
-import { createSession, destroySession } from "./session";
+import { createSession, destroySession, getCurrentUser } from "./session";
 import { isAdminEmail } from "./admin-emails";
 
 export type AuthResult = { ok: boolean; error?: string };
@@ -116,4 +116,94 @@ export async function loginAction(input: {
 /** Déconnexion. */
 export async function logoutAction(): Promise<void> {
   await destroySession();
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Gestion du compte (vue /account). Toute modification exige la confirmation
+// du mot de passe actuel. L'utilisateur cible est résolu côté serveur via la
+// session — jamais une donnée fournie par le client.
+// ──────────────────────────────────────────────────────────────────────────
+
+/** Change le pseudo, après vérification du mot de passe actuel. */
+export async function updateUsernameAction(input: {
+  username: string;
+  currentPassword: string;
+}): Promise<AuthResult> {
+  const sessionUser = await getCurrentUser();
+  if (!sessionUser) return { ok: false, error: "Tu n'es pas connecté." };
+
+  const username = String(input.username ?? "").trim();
+  const currentPassword = String(input.currentPassword ?? "");
+
+  if (!USERNAME_RE.test(username)) {
+    return {
+      ok: false,
+      error:
+        "Pseudo invalide (3 à 24 caractères : lettres, chiffres, tirets, underscores).",
+    };
+  }
+  if (username === sessionUser.username) {
+    return { ok: false, error: "C'est déjà ton pseudo actuel." };
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: sessionUser.id } });
+  if (!user) return { ok: false, error: "Compte introuvable." };
+
+  const valid = await verifyPassword(currentPassword, user.passwordHash);
+  if (!valid) return { ok: false, error: "Mot de passe actuel incorrect." };
+
+  // Unicité du pseudo (hors compte courant).
+  const taken = await prisma.user.findFirst({
+    where: { username, NOT: { id: user.id } },
+    select: { id: true },
+  });
+  if (taken) return { ok: false, error: "Ce pseudo est déjà pris." };
+
+  try {
+    await prisma.user.update({ where: { id: user.id }, data: { username } });
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+      return { ok: false, error: "Ce pseudo est déjà pris." };
+    }
+    return { ok: false, error: "Échec de la mise à jour. Réessaie." };
+  }
+
+  return { ok: true };
+}
+
+/** Change le mot de passe, après vérification du mot de passe actuel. */
+export async function updatePasswordAction(input: {
+  currentPassword: string;
+  newPassword: string;
+}): Promise<AuthResult> {
+  const sessionUser = await getCurrentUser();
+  if (!sessionUser) return { ok: false, error: "Tu n'es pas connecté." };
+
+  const currentPassword = String(input.currentPassword ?? "");
+  const newPassword = String(input.newPassword ?? "");
+
+  if (newPassword.length < MIN_PASSWORD) {
+    return {
+      ok: false,
+      error: `Nouveau mot de passe trop court (${MIN_PASSWORD} caractères minimum).`,
+    };
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: sessionUser.id } });
+  if (!user) return { ok: false, error: "Compte introuvable." };
+
+  const valid = await verifyPassword(currentPassword, user.passwordHash);
+  if (!valid) return { ok: false, error: "Mot de passe actuel incorrect." };
+
+  if (await verifyPassword(newPassword, user.passwordHash)) {
+    return {
+      ok: false,
+      error: "Le nouveau mot de passe doit être différent de l'actuel.",
+    };
+  }
+
+  const passwordHash = await hashPassword(newPassword);
+  await prisma.user.update({ where: { id: user.id }, data: { passwordHash } });
+
+  return { ok: true };
 }

@@ -98,9 +98,16 @@ function UserMenu({ user }: { user: NavUser }) {
           Admin
         </Link>
       )}
-      <span className="hidden max-w-[10rem] truncate text-sm font-semibold text-white sm:inline">
-        {user.username}
-      </span>
+      <Link
+        href="/account"
+        aria-label="Mon compte"
+        className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-sm font-semibold text-white/80 transition-colors hover:border-white/25 hover:text-white"
+      >
+        <span aria-hidden>👤</span>
+        <span className="hidden max-w-[8rem] truncate sm:inline">
+          {user.username}
+        </span>
+      </Link>
       <button
         type="button"
         onClick={logout}

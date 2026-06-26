@@ -164,10 +164,30 @@
       "norm_label": "tab"
     },
     {
-      "label": "slugify()",
+      "label": "TAB_LABELS",
       "file_type": "code",
       "source_file": "app/admin/AdminDashboard.tsx",
       "source_location": "L39",
+      "_origin": "ast",
+      "id": "admin_admindashboard_tab_labels",
+      "community": 16,
+      "norm_label": "tab_labels"
+    },
+    {
+      "label": "TAB_ORDER",
+      "file_type": "code",
+      "source_file": "app/admin/AdminDashboard.tsx",
+      "source_location": "L44",
+      "_origin": "ast",
+      "id": "admin_admindashboard_tab_order",
+      "community": 16,
+      "norm_label": "tab_order"
+    },
+    {
+      "label": "slugify()",
+      "file_type": "code",
+      "source_file": "app/admin/AdminDashboard.tsx",
+      "source_location": "L46",
       "_origin": "ast",
       "id": "admin_admindashboard_slugify",
       "community": 16,
@@ -177,7 +197,7 @@
       "label": "AdminDashboard()",
       "file_type": "code",
       "source_file": "app/admin/AdminDashboard.tsx",
-      "source_location": "L48",
+      "source_location": "L55",
       "_origin": "ast",
       "id": "admin_admindashboard_admindashboard",
       "community": 4,
@@ -264,44 +284,44 @@
       "norm_label": "leaderboardadmin()"
     },
     {
-      "label": "UsersAdmin.tsx",
+      "label": "UserAdmin.tsx",
       "file_type": "code",
-      "source_file": "app/admin/UsersAdmin.tsx",
+      "source_file": "app/admin/UserAdmin.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "admin_usersadmin",
+      "id": "admin_useradmin",
       "community": 16,
-      "norm_label": "usersadmin.tsx"
+      "norm_label": "useradmin.tsx"
     },
     {
-      "label": "UsersAdminProps",
+      "label": "UserAdminProps",
       "file_type": "code",
-      "source_file": "app/admin/UsersAdmin.tsx",
+      "source_file": "app/admin/UserAdmin.tsx",
       "source_location": "L8",
       "_origin": "ast",
-      "id": "admin_usersadmin_usersadminprops",
+      "id": "admin_useradmin_useradminprops",
       "community": 16,
-      "norm_label": "usersadminprops"
+      "norm_label": "useradminprops"
     },
     {
       "label": "Feedback",
       "file_type": "code",
-      "source_file": "app/admin/UsersAdmin.tsx",
+      "source_file": "app/admin/UserAdmin.tsx",
       "source_location": "L14",
       "_origin": "ast",
-      "id": "admin_usersadmin_feedback",
+      "id": "admin_useradmin_feedback",
       "community": 16,
       "norm_label": "feedback"
     },
     {
-      "label": "UsersAdmin()",
+      "label": "UserAdmin()",
       "file_type": "code",
-      "source_file": "app/admin/UsersAdmin.tsx",
-      "source_location": "L17",
+      "source_file": "app/admin/UserAdmin.tsx",
+      "source_location": "L21",
       "_origin": "ast",
-      "id": "admin_usersadmin_usersadmin",
+      "id": "admin_useradmin_useradmin",
       "community": 16,
-      "norm_label": "usersadmin()"
+      "norm_label": "useradmin()"
     },
     {
       "label": "actions.ts",
@@ -344,20 +364,10 @@
       "norm_label": "games"
     },
     {
-      "label": "ROLES",
-      "file_type": "code",
-      "source_file": "app/admin/actions.ts",
-      "source_location": "L21",
-      "_origin": "ast",
-      "id": "admin_actions_roles",
-      "community": 16,
-      "norm_label": "roles"
-    },
-    {
       "label": "saveCharacterAction()",
       "file_type": "code",
       "source_file": "app/admin/actions.ts",
-      "source_location": "L24",
+      "source_location": "L23",
       "_origin": "ast",
       "id": "admin_actions_savecharacteraction",
       "community": 16,
@@ -367,7 +377,7 @@
       "label": "deleteCharacterAction()",
       "file_type": "code",
       "source_file": "app/admin/actions.ts",
-      "source_location": "L75",
+      "source_location": "L74",
       "_origin": "ast",
       "id": "admin_actions_deletecharacteraction",
       "community": 16,
@@ -377,7 +387,7 @@
       "label": "updateScoreAction()",
       "file_type": "code",
       "source_file": "app/admin/actions.ts",
-      "source_location": "L93",
+      "source_location": "L92",
       "_origin": "ast",
       "id": "admin_actions_updatescoreaction",
       "community": 16,
@@ -387,7 +397,7 @@
       "label": "deleteScoreAction()",
       "file_type": "code",
       "source_file": "app/admin/actions.ts",
-      "source_location": "L120",
+      "source_location": "L119",
       "_origin": "ast",
       "id": "admin_actions_deletescoreaction",
       "community": 16,
@@ -397,7 +407,7 @@
       "label": "setUserRoleAction()",
       "file_type": "code",
       "source_file": "app/admin/actions.ts",
-      "source_location": "L142",
+      "source_location": "L145",
       "_origin": "ast",
       "id": "admin_actions_setuserroleaction",
       "community": 16,
@@ -407,7 +417,7 @@
       "label": "deleteUserAction()",
       "file_type": "code",
       "source_file": "app/admin/actions.ts",
-      "source_location": "L166",
+      "source_location": "L186",
       "_origin": "ast",
       "id": "admin_actions_deleteuseraction",
       "community": 16,
@@ -700,7 +710,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "ranking_rankinggame_rankinggame",
-      "community": 4,
+      "community": 1,
       "norm_label": "rankinggame()"
     },
     {
@@ -1160,7 +1170,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "leaderboard_leaderboard_leaderboard",
-      "community": 4,
+      "community": 6,
       "norm_label": "leaderboard()"
     },
     {
@@ -1200,7 +1210,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "leaderboard_submitscore_submitscore",
-      "community": 0,
+      "community": 6,
       "norm_label": "submitscore()"
     },
     {
@@ -1580,7 +1590,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "roster_characters_character_by_id",
-      "community": 0,
+      "community": 1,
       "norm_label": "character_by_id"
     },
     {
@@ -1622,6 +1632,66 @@
       "id": "admin_roster_store_deletecharacter",
       "community": 16,
       "norm_label": "deletecharacter()"
+    },
+    {
+      "label": "users.ts",
+      "file_type": "code",
+      "source_file": "lib/admin/users.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "admin_users",
+      "community": 16,
+      "norm_label": "users.ts"
+    },
+    {
+      "label": "AdminUser",
+      "file_type": "code",
+      "source_file": "lib/admin/users.ts",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "admin_users_adminuser",
+      "community": 16,
+      "norm_label": "adminuser"
+    },
+    {
+      "label": "listUsers()",
+      "file_type": "code",
+      "source_file": "lib/admin/users.ts",
+      "source_location": "L20",
+      "_origin": "ast",
+      "id": "admin_users_listusers",
+      "community": 4,
+      "norm_label": "listusers()"
+    },
+    {
+      "label": "getUserRole()",
+      "file_type": "code",
+      "source_file": "lib/admin/users.ts",
+      "source_location": "L35",
+      "_origin": "ast",
+      "id": "admin_users_getuserrole",
+      "community": 16,
+      "norm_label": "getuserrole()"
+    },
+    {
+      "label": "setUserRole()",
+      "file_type": "code",
+      "source_file": "lib/admin/users.ts",
+      "source_location": "L44",
+      "_origin": "ast",
+      "id": "admin_users_setuserrole",
+      "community": 16,
+      "norm_label": "setuserrole()"
+    },
+    {
+      "label": "deleteUser()",
+      "file_type": "code",
+      "source_file": "lib/admin/users.ts",
+      "source_location": "L49",
+      "_origin": "ast",
+      "id": "admin_users_deleteuser",
+      "community": 16,
+      "norm_label": "deleteuser()"
     },
     {
       "label": "actions.ts",
@@ -1762,56 +1832,6 @@
       "id": "auth_session_destroysession",
       "community": 2,
       "norm_label": "destroysession()"
-    },
-    {
-      "label": "users.ts",
-      "file_type": "code",
-      "source_file": "lib/auth/users.ts",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "auth_users",
-      "community": 16,
-      "norm_label": "users.ts"
-    },
-    {
-      "label": "AdminUser",
-      "file_type": "code",
-      "source_file": "lib/auth/users.ts",
-      "source_location": "L9",
-      "_origin": "ast",
-      "id": "auth_users_adminuser",
-      "community": 16,
-      "norm_label": "adminuser"
-    },
-    {
-      "label": "listUsers()",
-      "file_type": "code",
-      "source_file": "lib/auth/users.ts",
-      "source_location": "L21",
-      "_origin": "ast",
-      "id": "auth_users_listusers",
-      "community": 4,
-      "norm_label": "listusers()"
-    },
-    {
-      "label": "adminSetUserRole()",
-      "file_type": "code",
-      "source_file": "lib/auth/users.ts",
-      "source_location": "L37",
-      "_origin": "ast",
-      "id": "auth_users_adminsetuserrole",
-      "community": 16,
-      "norm_label": "adminsetuserrole()"
-    },
-    {
-      "label": "adminDeleteUser()",
-      "file_type": "code",
-      "source_file": "lib/auth/users.ts",
-      "source_location": "L42",
-      "_origin": "ast",
-      "id": "auth_users_admindeleteuser",
-      "community": 16,
-      "norm_label": "admindeleteuser()"
     },
     {
       "label": "bestScore.ts",
@@ -3000,7 +3020,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "prisma_seed",
-      "community": 1,
+      "community": 0,
       "norm_label": "seed.ts"
     },
     {
@@ -3010,7 +3030,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "prisma_seed_prisma",
-      "community": 1,
+      "community": 0,
       "norm_label": "prisma"
     },
     {
@@ -3020,7 +3040,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "prisma_seed_main",
-      "community": 1,
+      "community": 0,
       "norm_label": "main()"
     },
     {
@@ -4001,6 +4021,26 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/admin/AdminDashboard.tsx",
+      "source_location": "L39",
+      "weight": 1.0,
+      "source": "admin_admindashboard",
+      "target": "admin_admindashboard_tab_labels",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/AdminDashboard.tsx",
+      "source_location": "L44",
+      "weight": 1.0,
+      "source": "admin_admindashboard",
+      "target": "admin_admindashboard_tab_order",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/AdminDashboard.tsx",
       "source_location": "L13",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -4059,7 +4099,7 @@
       "source_location": "L15",
       "weight": 1.0,
       "source": "admin_admindashboard",
-      "target": "admin_usersadmin",
+      "target": "admin_useradmin",
       "confidence_score": 1.0
     },
     {
@@ -4070,7 +4110,29 @@
       "source_location": "L15",
       "weight": 1.0,
       "source": "admin_admindashboard",
-      "target": "admin_usersadmin_usersadmin",
+      "target": "admin_useradmin_useradmin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/AdminDashboard.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "admin_admindashboard",
+      "target": "admin_users",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/AdminDashboard.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "admin_admindashboard",
+      "target": "admin_users_adminuser",
       "confidence_score": 1.0
     },
     {
@@ -4094,28 +4156,6 @@
       "confidence_score": 1.0,
       "source": "admin_admindashboard",
       "target": "auth_actions_logoutaction"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "app/admin/AdminDashboard.tsx",
-      "source_location": "L10",
-      "weight": 1.0,
-      "source": "admin_admindashboard",
-      "target": "auth_users",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "app/admin/AdminDashboard.tsx",
-      "source_location": "L10",
-      "weight": 1.0,
-      "source": "admin_admindashboard",
-      "target": "auth_users_adminuser",
-      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -4190,9 +4230,9 @@
       "source_file": "app/admin/AdminDashboard.tsx",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_admindashboard",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports",
@@ -4245,9 +4285,8 @@
       "source_file": "app/admin/AdminDashboard.tsx",
       "source_location": "L33",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "admin_admindashboard_admindashboardprops",
-      "target": "auth_users_adminuser",
+      "target": "admin_users_adminuser",
       "confidence_score": 1.0
     },
     {
@@ -4436,10 +4475,10 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
-      "source_file": "app/admin/UsersAdmin.tsx",
+      "source_file": "app/admin/UserAdmin.tsx",
       "source_location": "L6",
       "weight": 1.0,
-      "source": "admin_usersadmin",
+      "source": "admin_useradmin",
       "target": "admin_actions",
       "confidence_score": 1.0
     },
@@ -4447,10 +4486,10 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
-      "source_file": "app/admin/UsersAdmin.tsx",
+      "source_file": "app/admin/UserAdmin.tsx",
       "source_location": "L6",
       "weight": 1.0,
-      "source": "admin_usersadmin",
+      "source": "admin_useradmin",
       "target": "admin_actions_deleteuseraction",
       "confidence_score": 1.0
     },
@@ -4458,74 +4497,74 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
-      "source_file": "app/admin/UsersAdmin.tsx",
+      "source_file": "app/admin/UserAdmin.tsx",
       "source_location": "L6",
       "weight": 1.0,
-      "source": "admin_usersadmin",
+      "source": "admin_useradmin",
       "target": "admin_actions_setuserroleaction",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "app/admin/UsersAdmin.tsx",
+      "source_file": "app/admin/UserAdmin.tsx",
       "source_location": "L14",
       "weight": 1.0,
-      "source": "admin_usersadmin",
-      "target": "admin_usersadmin_feedback",
+      "source": "admin_useradmin",
+      "target": "admin_useradmin_feedback",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "app/admin/UsersAdmin.tsx",
-      "source_location": "L17",
+      "source_file": "app/admin/UserAdmin.tsx",
+      "source_location": "L21",
       "weight": 1.0,
-      "source": "admin_usersadmin",
-      "target": "admin_usersadmin_usersadmin",
+      "source": "admin_useradmin",
+      "target": "admin_useradmin_useradmin",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "app/admin/UsersAdmin.tsx",
+      "source_file": "app/admin/UserAdmin.tsx",
       "source_location": "L8",
       "weight": 1.0,
-      "source": "admin_usersadmin",
-      "target": "admin_usersadmin_usersadminprops",
+      "source": "admin_useradmin",
+      "target": "admin_useradmin_useradminprops",
       "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
-      "source_file": "app/admin/UsersAdmin.tsx",
+      "source_file": "app/admin/UserAdmin.tsx",
       "source_location": "L5",
       "weight": 1.0,
-      "source": "admin_usersadmin",
-      "target": "auth_users",
+      "source": "admin_useradmin",
+      "target": "admin_users",
       "confidence_score": 1.0
     },
     {
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
-      "source_file": "app/admin/UsersAdmin.tsx",
+      "source_file": "app/admin/UserAdmin.tsx",
       "source_location": "L5",
       "weight": 1.0,
-      "source": "admin_usersadmin",
-      "target": "auth_users_adminuser",
+      "source": "admin_useradmin",
+      "target": "admin_users_adminuser",
       "confidence_score": 1.0
     },
     {
       "relation": "references",
       "context": "field",
       "confidence": "EXTRACTED",
-      "source_file": "app/admin/UsersAdmin.tsx",
+      "source_file": "app/admin/UserAdmin.tsx",
       "source_location": "L9",
       "weight": 1.0,
-      "source": "admin_usersadmin_usersadminprops",
-      "target": "auth_users_adminuser",
+      "source": "admin_useradmin_useradminprops",
+      "target": "admin_users_adminuser",
       "confidence_score": 1.0
     },
     {
@@ -4562,7 +4601,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/admin/actions.ts",
-      "source_location": "L166",
+      "source_location": "L186",
       "weight": 1.0,
       "source": "admin_actions",
       "target": "admin_actions_deleteuseraction",
@@ -4582,16 +4621,6 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/admin/actions.ts",
-      "source_location": "L21",
-      "weight": 1.0,
-      "source": "admin_actions",
-      "target": "admin_actions_roles",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "app/admin/actions.ts",
       "source_location": "L14",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -4602,7 +4631,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/admin/actions.ts",
-      "source_location": "L142",
+      "source_location": "L145",
       "weight": 1.0,
       "source": "admin_actions",
       "target": "admin_actions_setuserroleaction",
@@ -4666,6 +4695,50 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "app/admin/actions.ts",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "admin_actions",
+      "target": "admin_users",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "admin_actions",
+      "target": "admin_users_deleteuser",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "admin_actions",
+      "target": "admin_users_getuserrole",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "admin_actions",
+      "target": "admin_users_setuserrole",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/actions.ts",
       "source_location": "L4",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -4682,39 +4755,6 @@
       "confidence_score": 1.0,
       "source": "admin_actions",
       "target": "auth_session_getadminuser"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "app/admin/actions.ts",
-      "source_location": "L12",
-      "weight": 1.0,
-      "source": "admin_actions",
-      "target": "auth_users",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "app/admin/actions.ts",
-      "source_location": "L12",
-      "weight": 1.0,
-      "source": "admin_actions",
-      "target": "auth_users_admindeleteuser",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "app/admin/actions.ts",
-      "source_location": "L12",
-      "weight": 1.0,
-      "source": "admin_actions",
-      "target": "auth_users_adminsetuserrole",
-      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -4811,9 +4851,9 @@
       "source_file": "app/admin/actions.ts",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_actions",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports",
@@ -4931,7 +4971,29 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/admin/actions.ts",
-      "source_location": "L146",
+      "source_location": "L156",
+      "weight": 1.0,
+      "source": "admin_actions_setuserroleaction",
+      "target": "admin_users_getuserrole"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L174",
+      "weight": 1.0,
+      "source": "admin_actions_setuserroleaction",
+      "target": "admin_users_setuserrole"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L149",
       "weight": 1.0,
       "source": "admin_actions_setuserroleaction",
       "target": "auth_session_getadminuser"
@@ -4942,10 +5004,10 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/admin/actions.ts",
-      "source_location": "L157",
+      "source_location": "L203",
       "weight": 1.0,
-      "source": "admin_actions_setuserroleaction",
-      "target": "auth_users_adminsetuserrole"
+      "source": "admin_actions_deleteuseraction",
+      "target": "admin_users_deleteuser"
     },
     {
       "relation": "calls",
@@ -4953,21 +5015,21 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/admin/actions.ts",
-      "source_location": "L167",
+      "source_location": "L191",
+      "weight": 1.0,
+      "source": "admin_actions_deleteuseraction",
+      "target": "admin_users_getuserrole"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/admin/actions.ts",
+      "source_location": "L187",
       "weight": 1.0,
       "source": "admin_actions_deleteuseraction",
       "target": "auth_session_getadminuser"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "app/admin/actions.ts",
-      "source_location": "L175",
-      "weight": 1.0,
-      "source": "admin_actions_deleteuseraction",
-      "target": "auth_users_admindeleteuser"
     },
     {
       "relation": "contains",
@@ -5026,6 +5088,28 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "app/admin/page.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "admin_page",
+      "target": "admin_users",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/page.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "admin_page",
+      "target": "admin_users_listusers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/page.tsx",
       "source_location": "L3",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -5042,28 +5126,6 @@
       "confidence_score": 1.0,
       "source": "admin_page",
       "target": "auth_session_getcurrentuser"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "app/admin/page.tsx",
-      "source_location": "L7",
-      "weight": 1.0,
-      "source": "admin_page",
-      "target": "auth_users",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "app/admin/page.tsx",
-      "source_location": "L7",
-      "weight": 1.0,
-      "source": "admin_page",
-      "target": "auth_users_listusers",
-      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -5116,9 +5178,9 @@
       "source_file": "app/admin/page.tsx",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_page",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports",
@@ -5148,10 +5210,10 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/admin/page.tsx",
-      "source_location": "L34",
+      "source_location": "L71",
       "weight": 1.0,
       "source": "admin_page_adminpage",
-      "target": "auth_session_getcurrentuser"
+      "target": "admin_users_listusers"
     },
     {
       "relation": "calls",
@@ -5159,10 +5221,10 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/admin/page.tsx",
-      "source_location": "L71",
+      "source_location": "L34",
       "weight": 1.0,
       "source": "admin_page_adminpage",
-      "target": "auth_users_listusers"
+      "target": "auth_session_getcurrentuser"
     },
     {
       "relation": "calls",
@@ -5569,9 +5631,9 @@
       "source_file": "app/games/builder/BuilderGame.tsx",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "builder_buildergame",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports",
@@ -6285,9 +6347,9 @@
       "source_file": "app/games/ranking/RankingGame.tsx",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ranking_rankinggame",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports",
@@ -6781,9 +6843,9 @@
       "source_file": "components/CategoryTile.tsx",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_categorytile",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports",
@@ -6877,9 +6939,9 @@
       "source_file": "components/CharacterImage.tsx",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_characterimage",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports",
@@ -7983,9 +8045,9 @@
       "source_file": "components/ranking/RosterContext.tsx",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ranking_rostercontext",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports",
@@ -8250,9 +8312,9 @@
       "source_file": "data/roster/characters.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "roster_characters",
-      "target": "roster_categories",
-      "confidence_score": 1.0
+      "target": "roster_categories"
     },
     {
       "relation": "imports_from",
@@ -8316,9 +8378,9 @@
       "source_file": "data/roster/characters.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "roster_characters",
-      "target": "roster_categories_categoryid",
-      "confidence_score": 1.0
+      "target": "roster_categories_categoryid"
     },
     {
       "relation": "references",
@@ -8437,9 +8499,9 @@
       "source_file": "lib/admin/roster-store.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_roster_store",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports_from",
@@ -8448,9 +8510,9 @@
       "source_file": "lib/content/queries.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "content_queries",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports_from",
@@ -8459,9 +8521,9 @@
       "source_file": "lib/draw/draw.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "draw_draw",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports_from",
@@ -8470,9 +8532,9 @@
       "source_file": "lib/draw/draw.test.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "draw_draw_test",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports_from",
@@ -8481,9 +8543,9 @@
       "source_file": "prisma/seed.ts",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "prisma_seed",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports_from",
@@ -8492,9 +8554,9 @@
       "source_file": "lib/ranking/ranking.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ranking_ranking_test",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports_from",
@@ -8513,9 +8575,9 @@
       "source_file": "data/roster/characters.ts",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "roster_characters",
-      "target": "roster_characters_character",
-      "confidence_score": 1.0
+      "target": "roster_characters_character"
     },
     {
       "relation": "contains",
@@ -8523,9 +8585,9 @@
       "source_file": "data/roster/characters.ts",
       "source_location": "L44",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "roster_characters",
-      "target": "roster_characters_character_by_id",
-      "confidence_score": 1.0
+      "target": "roster_characters_character_by_id"
     },
     {
       "relation": "contains",
@@ -8533,9 +8595,9 @@
       "source_file": "data/roster/characters.ts",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "roster_characters",
-      "target": "roster_characters_charactertier",
-      "confidence_score": 1.0
+      "target": "roster_characters_charactertier"
     },
     {
       "relation": "contains",
@@ -8543,9 +8605,9 @@
       "source_file": "data/roster/characters.ts",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "roster_characters",
-      "target": "roster_characters_roster",
-      "confidence_score": 1.0
+      "target": "roster_characters_roster"
     },
     {
       "relation": "imports_from",
@@ -8554,9 +8616,9 @@
       "source_file": "lib/scoring/scoring.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scoring_scoring",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports_from",
@@ -8565,9 +8627,9 @@
       "source_file": "lib/scoring/scoring.test.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scoring_scoring_test",
-      "target": "roster_characters",
-      "confidence_score": 1.0
+      "target": "roster_characters"
     },
     {
       "relation": "imports",
@@ -8763,6 +8825,67 @@
       "weight": 1.0,
       "source": "admin_roster_store_readroster",
       "target": "content_queries_getroster"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/admin/users.ts",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "admin_users",
+      "target": "admin_users_adminuser",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/admin/users.ts",
+      "source_location": "L49",
+      "weight": 1.0,
+      "source": "admin_users",
+      "target": "admin_users_deleteuser",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/admin/users.ts",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "admin_users",
+      "target": "admin_users_getuserrole",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/admin/users.ts",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "admin_users",
+      "target": "admin_users_listusers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/admin/users.ts",
+      "source_location": "L44",
+      "weight": 1.0,
+      "source": "admin_users",
+      "target": "admin_users_setuserrole",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/admin/users.ts",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "admin_users",
+      "target": "lib_prisma",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -9061,57 +9184,6 @@
       "weight": 1.0,
       "source": "leaderboard_actions_submitscoreaction",
       "target": "auth_session_getcurrentuser"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/auth/users.ts",
-      "source_location": "L42",
-      "weight": 1.0,
-      "source": "auth_users",
-      "target": "auth_users_admindeleteuser",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/auth/users.ts",
-      "source_location": "L37",
-      "weight": 1.0,
-      "source": "auth_users",
-      "target": "auth_users_adminsetuserrole",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/auth/users.ts",
-      "source_location": "L9",
-      "weight": 1.0,
-      "source": "auth_users",
-      "target": "auth_users_adminuser",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/auth/users.ts",
-      "source_location": "L21",
-      "weight": 1.0,
-      "source": "auth_users",
-      "target": "auth_users_listusers",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/auth/users.ts",
-      "source_location": "L2",
-      "weight": 1.0,
-      "source": "auth_users",
-      "target": "lib_prisma",
-      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -11374,5 +11446,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "c07be2b36a0e3a1cf8e308294f8ff440dbdfcb67"
+  "built_at_commit": "6310eb6a13b82c9b5894262b2a8564f933695a3b"
 }

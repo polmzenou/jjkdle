@@ -3,9 +3,11 @@ import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth/session";
 import { readRoster } from "@/lib/admin/roster-store";
 import { getCategories } from "@/lib/content/queries";
+import { listDraftCharacters } from "@/lib/games/draft/queries";
 import { listAllScores } from "@/lib/leaderboard/store";
-import { listUsers } from "@/lib/auth/users";
+import { listUsers } from "@/lib/admin/users";
 import type { Character } from "@/data/roster/characters";
+import type { DraftCharacter } from "@/lib/games/draft/types";
 import { AdminDashboard } from "./AdminDashboard";
 
 export const metadata: Metadata = {
@@ -65,6 +67,12 @@ export default async function AdminPage() {
   } catch {
     roster = [];
   }
+  let draftRoster: DraftCharacter[] = [];
+  try {
+    draftRoster = await listDraftCharacters();
+  } catch {
+    draftRoster = [];
+  }
   const [categories, scores, users] = await Promise.all([
     getCategories(),
     listAllScores(),
@@ -74,6 +82,7 @@ export default async function AdminPage() {
   return (
     <AdminDashboard
       roster={roster}
+      draftRoster={draftRoster}
       categories={categories}
       scores={scores}
       users={users}

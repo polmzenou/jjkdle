@@ -12,6 +12,7 @@ import { PrismaClient } from "@prisma/client";
 import { CATEGORIES } from "../data/roster/categories";
 import { ROSTER } from "../data/roster/characters";
 import { CONDITIONS } from "../data/ranking/conditions";
+import { DRAFT_ROSTER } from "../lib/games/draft/roster";
 
 const prisma = new PrismaClient();
 
@@ -66,6 +67,25 @@ async function main() {
     });
   }
   console.log(`✓ ${CONDITIONS.length} conditions Pyramid`);
+
+  // ── Roster "Jujutsu Draft" ──
+  for (const [position, ch] of DRAFT_ROSTER.entries()) {
+    const data = {
+      name: ch.name,
+      image: ch.image ?? null,
+      excellenceCategory: ch.excellenceCategory,
+      tier: ch.tier,
+      cost: ch.cost,
+      statValue: ch.statValue,
+      position,
+    };
+    await prisma.draftCharacter.upsert({
+      where: { id: ch.id },
+      create: { id: ch.id, ...data },
+      update: data,
+    });
+  }
+  console.log(`✓ ${DRAFT_ROSTER.length} personnages Jujutsu Draft`);
 }
 
 main()

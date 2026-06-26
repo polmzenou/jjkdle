@@ -1,16 +1,26 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import type { Role } from "@prisma/client";
 import { getAdminUser } from "@/lib/auth/session";
 import { upsertCharacter, deleteCharacter } from "@/lib/admin/roster-store";
+import { getUserRole, setUserRole, deleteUser } from "@/lib/admin/users";
 import {
   adminUpdateScore,
   adminDeleteScore,
   MAX_SCORE,
   type LeaderboardGame,
 } from "@/lib/leaderboard/store";
-import { adminSetUserRole, adminDeleteUser } from "@/lib/auth/users";
-import type { Role } from "@prisma/client";
+import {
+  upsertDraftCharacter,
+  deleteDraftCharacter,
+} from "@/lib/admin/draft-store";
+import { DRAFT_CATEGORY_BY_ID } from "@/lib/games/draft/categories";
+import type {
+  DraftCharacter,
+  DraftCategoryId,
+  DraftTier,
+} from "@/lib/games/draft/types";
 import type { Character, CharacterTier } from "@/data/roster/characters";
 import { CATEGORY_BY_ID, type CategoryId } from "@/data/roster/categories";
 
@@ -18,7 +28,7 @@ export type ActionResult = { ok: boolean; error?: string };
 
 const TIERS: CharacterTier[] = ["4minus", "4", "3", "2", "1", "s"];
 const GAMES: LeaderboardGame[] = ["builder", "ranking"];
-const ROLES: Role[] = ["PLAYER", "ADMIN"];
+const DRAFT_TIERS: DraftTier[] = ["S", "A", "B", "C"];
 
 /** Valide + enregistre (ajout ou édition) un personnage en base. */
 export async function saveCharacterAction(
@@ -86,6 +96,84 @@ export async function deleteCharacterAction(id: string): Promise<ActionResult> {
 }
 
 // ──────────────────────────────────────────────────────────────────────────
+// Roster "Jujutsu Draft"
+// ──────────────────────────────────────────────────────────────────────────
+
+/** Valide + enregistre (ajout ou édition) un personnage du draft. */
+export async function saveDraftCharacterAction(
+  input: DraftCharacter,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+
+  const id = String(input.id ?? "").trim();
+  const name = String(input.name ?? "").trim();
+
+  if (!/^[a-z0-9-]+$/.test(id)) {
+    return {
+      ok: false,
+      error: "L'identifiant doit être en minuscules (lettres, chiffres, tirets).",
+    };
+  }
+  if (!name) return { ok: false, error: "Le nom est obligatoire." };
+  if (!(input.excellenceCategory in DRAFT_CATEGORY_BY_ID)) {
+    return { ok: false, error: "Catégorie d'excellence invalide." };
+  }
+  if (!DRAFT_TIERS.includes(input.tier)) {
+    return { ok: false, error: "Tier invalide (S, A, B ou C)." };
+  }
+
+  const cost = Math.round(Number(input.cost));
+  const statValue = Math.round(Number(input.statValue));
+  if (!Number.isFinite(cost) || cost < 0 || cost > 99) {
+    return { ok: false, error: "Coût invalide (0 à 99)." };
+  }
+  if (!Number.isFinite(statValue) || statValue < 0 || statValue > 99) {
+    return { ok: false, error: "StatValue invalide (0 à 99)." };
+  }
+
+  const image = String(input.image ?? "").trim();
+
+  const char: DraftCharacter = {
+    id,
+    name,
+    excellenceCategory: input.excellenceCategory as DraftCategoryId,
+    tier: input.tier,
+    cost,
+    statValue,
+    ...(image ? { image } : {}),
+  };
+
+  try {
+    await upsertDraftCharacter(char);
+  } catch (e) {
+    return { ok: false, error: `Échec d'écriture : ${(e as Error).message}` };
+  }
+
+  revalidatePath("/games/jujutsu-draft");
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+/** Supprime un personnage du roster draft. */
+export async function deleteDraftCharacterAction(
+  id: string,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  try {
+    await deleteDraftCharacter(id);
+  } catch (e) {
+    return { ok: false, error: `Échec de suppression : ${(e as Error).message}` };
+  }
+  revalidatePath("/games/jujutsu-draft");
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+// ──────────────────────────────────────────────────────────────────────────
 // Leaderboard (administration des scores)
 // ──────────────────────────────────────────────────────────────────────────
 
@@ -135,26 +223,44 @@ export async function deleteScoreAction(
 }
 
 // ──────────────────────────────────────────────────────────────────────────
-// Utilisateurs (administration des comptes)
+// Utilisateurs (gestion des rôles)
 // ──────────────────────────────────────────────────────────────────────────
 
-/** Change le rôle d'un utilisateur (interdit sur soi-même → anti-verrouillage). */
+/**
+ * Change le rôle d'un utilisateur.
+ * Règle : un administrateur ne peut PAS être rétrogradé (ADMIN → PLAYER refusé),
+ * quel que soit l'admin qui le demande. La promotion PLAYER → ADMIN reste permise.
+ */
 export async function setUserRoleAction(
-  id: string,
-  role: string,
+  userId: string,
+  role: Role,
 ): Promise<ActionResult> {
-  const admin = await getAdminUser();
-  if (!admin) {
+  if (!(await getAdminUser())) {
     return { ok: false, error: "Accès réservé aux administrateurs." };
   }
-  if (id === admin.id) {
-    return { ok: false, error: "Tu ne peux pas changer ton propre rôle." };
-  }
-  if (!ROLES.includes(role as Role)) {
+  if (role !== "ADMIN" && role !== "PLAYER") {
     return { ok: false, error: "Rôle invalide." };
   }
+
+  const current = await getUserRole(userId);
+  if (!current) {
+    return { ok: false, error: "Utilisateur introuvable." };
+  }
+
+  // Protection : on ne rétrograde jamais un administrateur.
+  if (current === "ADMIN" && role === "PLAYER") {
+    return {
+      ok: false,
+      error: "Les administrateurs ne peuvent pas être rétrogradés.",
+    };
+  }
+
+  if (current === role) {
+    return { ok: true }; // aucun changement
+  }
+
   try {
-    await adminSetUserRole(id, role as Role);
+    await setUserRole(userId, role);
   } catch (e) {
     return { ok: false, error: `Échec : ${(e as Error).message}` };
   }
@@ -162,17 +268,28 @@ export async function setUserRoleAction(
   return { ok: true };
 }
 
-/** Supprime un compte (cascade : sessions + scores). Interdit sur soi-même. */
-export async function deleteUserAction(id: string): Promise<ActionResult> {
-  const admin = await getAdminUser();
-  if (!admin) {
+/**
+ * Supprime un compte joueur. Règle : on ne peut PAS supprimer un administrateur
+ * (comme pour la rétrogradation). Cascade DB : sessions + scores.
+ */
+export async function deleteUserAction(userId: string): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
     return { ok: false, error: "Accès réservé aux administrateurs." };
   }
-  if (id === admin.id) {
-    return { ok: false, error: "Tu ne peux pas supprimer ton propre compte." };
+
+  const current = await getUserRole(userId);
+  if (!current) {
+    return { ok: false, error: "Utilisateur introuvable." };
   }
+  if (current === "ADMIN") {
+    return {
+      ok: false,
+      error: "Un administrateur ne peut pas être supprimé.",
+    };
+  }
+
   try {
-    await adminDeleteUser(id);
+    await deleteUser(userId);
   } catch (e) {
     return { ok: false, error: `Échec de suppression : ${(e as Error).message}` };
   }

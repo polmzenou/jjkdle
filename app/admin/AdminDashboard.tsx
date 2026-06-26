@@ -3,16 +3,18 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import type { CategoryConfig } from "@/data/roster/categories";
+import type { CategoryConfig, CategoryId } from "@/data/roster/categories";
 import type { Character, CharacterTier } from "@/data/roster/characters";
 import { CharacterImage } from "@/components/CharacterImage";
 import type { AdminScore } from "@/lib/leaderboard/store";
-import type { AdminUser } from "@/lib/auth/users";
+import type { AdminUser } from "@/lib/admin/users";
+import type { DraftCharacter } from "@/lib/games/draft/types";
 import { ImageDropzone } from "./ImageDropzone";
 import { saveCharacterAction, deleteCharacterAction } from "./actions";
 import { logoutAction } from "@/lib/auth/actions";
 import { LeaderboardAdmin } from "./LeaderboardAdmin";
-import { UsersAdmin } from "./UsersAdmin";
+import { UserAdmin } from "./UserAdmin";
+import { DraftRosterAdmin } from "./DraftRosterAdmin";
 
 const TIERS: CharacterTier[] = ["s", "1", "2", "3", "4", "4minus"];
 
@@ -28,13 +30,22 @@ interface FormState {
 
 interface AdminDashboardProps {
   roster: Character[];
+  draftRoster: DraftCharacter[];
   categories: CategoryConfig[];
   scores: AdminScore[];
   users: AdminUser[];
   currentUserId: string;
 }
 
-type Tab = "roster" | "leaderboard" | "users";
+type Tab = "roster" | "draft" | "leaderboard" | "users";
+
+const TAB_LABELS: Record<Tab, string> = {
+  roster: "Roster",
+  draft: "Jujutsu Draft",
+  leaderboard: "Leaderboard",
+  users: "Utilisateurs",
+};
+const TAB_ORDER: Tab[] = ["roster", "draft", "leaderboard", "users"];
 
 function slugify(s: string): string {
   return s
@@ -47,6 +58,7 @@ function slugify(s: string): string {
 
 export function AdminDashboard({
   roster,
+  draftRoster,
   categories,
   scores,
   users,
@@ -60,6 +72,7 @@ export function AdminDashboard({
     null,
   );
   const [query, setQuery] = useState("");
+  const [rosterCat, setRosterCat] = useState<CategoryId | "all">("all");
 
   // Image : fichier en attente d'upload, ou retrait demandé.
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -227,8 +240,9 @@ export function AdminDashboard({
 
   const filtered = roster.filter(
     (c) =>
-      c.name.toLowerCase().includes(query.toLowerCase()) ||
-      c.id.includes(query.toLowerCase()),
+      (rosterCat === "all" || c.ratings[rosterCat] !== undefined) &&
+      (c.name.toLowerCase().includes(query.toLowerCase()) ||
+        c.id.includes(query.toLowerCase())),
   );
 
   return (
@@ -237,21 +251,16 @@ export function AdminDashboard({
       <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-2xl font-black uppercase tracking-wider text-white">
-            Admin ·{" "}
-            <span className="text-domain-light">
-              {tab === "roster"
-                ? "Roster"
-                : tab === "leaderboard"
-                  ? "Leaderboard"
-                  : "Users"}
-            </span>
+            Admin · <span className="text-domain-light">{TAB_LABELS[tab]}</span>
           </h1>
           <p className="text-sm text-white/45">
             {tab === "roster"
               ? `${roster.length} personnages`
-              : tab === "leaderboard"
-                ? `${scores.length} scores`
-                : `${users.length} comptes`}
+              : tab === "draft"
+                ? `${draftRoster.length} personnages (draft)`
+                : tab === "leaderboard"
+                  ? `${scores.length} scores`
+                  : `${users.length} utilisateurs`}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -273,7 +282,7 @@ export function AdminDashboard({
 
       {/* Onglets */}
       <div className="mb-6 flex w-fit gap-1 rounded-xl border border-white/10 bg-void-800/40 p-1">
-        {(["roster", "leaderboard", "users"] as Tab[]).map((t) => (
+        {TAB_ORDER.map((t) => (
           <button
             key={t}
             type="button"
@@ -282,15 +291,17 @@ export function AdminDashboard({
               tab === t ? "bg-domain text-white" : "text-white/55 hover:text-white"
             }`}
           >
-            {t === "roster" ? "Roster" : t === "leaderboard" ? "Leaderboard" : "Users"}
+            {TAB_LABELS[t]}
           </button>
         ))}
       </div>
 
+      {tab === "draft" && <DraftRosterAdmin roster={draftRoster} />}
+
       {tab === "leaderboard" && <LeaderboardAdmin scores={scores} />}
 
       {tab === "users" && (
-        <UsersAdmin users={users} currentUserId={currentUserId} />
+        <UserAdmin users={users} currentUserId={currentUserId} />
       )}
 
       {tab === "roster" && (
@@ -453,15 +464,30 @@ export function AdminDashboard({
 
         {/* ── Listing ── */}
         <section className="rounded-2xl border border-white/10 bg-void-800/40 p-5">
-          <div className="mb-4 flex items-center gap-3">
+          <div className="mb-4 flex flex-wrap items-center gap-3">
             <h2 className="font-display text-lg font-bold text-white">
               Tous les personnages
             </h2>
+            <span className="rounded-full bg-domain/15 px-2 py-0.5 text-xs font-bold text-domain-light">
+              {filtered.length}/{roster.length}
+            </span>
+            <select
+              value={rosterCat}
+              onChange={(e) => setRosterCat(e.target.value as CategoryId | "all")}
+              className="ml-auto rounded-lg border border-white/10 bg-void-900 px-3 py-1.5 text-sm text-white outline-none focus:border-domain"
+            >
+              <option value="all">Toutes catégories</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.label}
+                </option>
+              ))}
+            </select>
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Rechercher…"
-              className="ml-auto w-40 rounded-lg border border-white/10 bg-void-900 px-3 py-1.5 text-sm text-white outline-none focus:border-domain"
+              className="w-40 rounded-lg border border-white/10 bg-void-900 px-3 py-1.5 text-sm text-white outline-none focus:border-domain"
             />
           </div>
 
