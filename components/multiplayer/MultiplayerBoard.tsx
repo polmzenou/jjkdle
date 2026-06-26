@@ -102,7 +102,9 @@ export function MultiplayerBoard({
   );
 
   return (
-    <div>
+    /* Duo : on borne et centre tout le plateau (le plein écran est réservé au
+       trio, qui a besoin de la largeur pour les deux ailes adverses). */
+    <div className={isTrio ? undefined : "mx-auto max-w-3xl"}>
       {/* En-tête : manche + progression */}
       <header className="mb-4 flex items-center justify-between">
         <span className="text-xs font-bold uppercase tracking-wider text-white/70">
@@ -149,9 +151,10 @@ export function MultiplayerBoard({
           </div>
         </div>
       ) : (
-        /* 2 joueurs : adversaire en haut, moi en dessous. */
+        /* 2 joueurs : adversaire (compact, plus étroit) en haut, mon deck
+           dessous. Le deck adverse est volontairement plus petit que le mien. */
         <>
-          <div className="mb-6">
+          <div className="mx-auto mb-6 max-w-md">
             <OpponentCard
               opponent={opponents[0]}
               categories={categories}
