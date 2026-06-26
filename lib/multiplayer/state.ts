@@ -87,7 +87,6 @@ export interface PlayerRow {
   selection: unknown;
   currentDraw: unknown;
   lockedThisRound: boolean;
-  curated: boolean;
   finalScore: number | null;
   user: { username: string };
 }
@@ -114,7 +113,6 @@ export function serializePlayer(player: PlayerRow): SerializedPlayer {
     selection: asRecord<SelectionIds>(player.selection),
     currentDraw: asRecord<DrawIds>(player.currentDraw),
     lockedThisRound: player.lockedThisRound,
-    curated: player.curated,
     finalScore: player.finalScore,
   };
 }
