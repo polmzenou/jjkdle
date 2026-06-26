@@ -59,7 +59,7 @@
 ## Import Cycles
 - 1-file cycle: `data/roster/characters.ts -> data/roster/characters.ts`
 
-## Communities (18 total, 5 thin omitted)
+## Communities (17 total, 4 thin omitted)
 
 ### Community 0 - "Builder, Draw & Scoring"
 Cohesion: 0.09
@@ -69,11 +69,11 @@ Nodes (42): BuilderGameProps, CategoryTile(), CategoryTileProps, CharacterImage(
 Cohesion: 0.08
 Nodes (33): Rng, shuffle(), formatScore(), prisma, AttemptsBar(), AttemptsBarProps, CharacterPool(), CharacterPoolProps (+25 more)
 
-### Community 2 - "Auth & Site Shell"
+### Community 2 - "Community 2"
 Cohesion: 0.09
 Nodes (27): inter, metadata, RootLayout(), spaceGrotesk, AuthResult, loginAction(), logoutAction(), registerAction() (+19 more)
 
-### Community 3 - "Dependencies & Tooling"
+### Community 3 - "Community 3"
 Cohesion: 0.05
 Nodes (37): dependencies, @dnd-kit/core, @dnd-kit/utilities, framer-motion, next, @prisma/client, react, react-dom (+29 more)
 
@@ -85,15 +85,15 @@ Nodes (19): AdminDashboard(), AdminPage(), metadata, readRoster(), listUsers(), 
 Cohesion: 0.16
 Nodes (17): GAMES, SubmitResult, submitScoreAction(), GAME_GLYPH, GAME_LABEL, Leaderboard(), LeaderboardProps, LeaderboardRow() (+9 more)
 
-### Community 7 - "TypeScript Config"
+### Community 7 - "Community 7"
 Cohesion: 0.10
 Nodes (19): compilerOptions, allowJs, esModuleInterop, incremental, isolatedModules, jsx, lib, module (+11 more)
 
-### Community 8 - "Game Registry & Showcase"
+### Community 8 - "Community 8"
 Cohesion: 0.21
 Nodes (8): STATS, GameCard(), GameCardProps, FEATURES, metadata, GAMES, Game, GameShowcase()
 
-### Community 9 - "Domain Concepts & Rationale"
+### Community 9 - "Community 9"
 Cohesion: 0.18
 Nodes (17): Character SVG Naming Convention, Original-Only Assets Policy, Best Score Persistence (httpOnly cookie), Build the Perfect Sorcerer (tap game), Draw Eligibility & Random Draw (seedable), Grade Tiers (Grade 4- to Grade S), JJK Arcade Platform, JJK Pyramid (ranking game) (+9 more)
 
@@ -108,7 +108,7 @@ Nodes (13): Ajouter un jeu (système pluggable), Ajouter un personnage, Ajouter 
 ## Knowledge Gaps
 - **122 isolated node(s):** `allow`, `metadata`, `metadata`, `TIERS`, `CatField` (+117 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **5 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **4 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
