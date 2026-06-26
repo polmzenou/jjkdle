@@ -49,9 +49,9 @@ export const BOSSES: Boss[] = [
   { id: "panda", name: "Panda", threshold: 130, image: "/assets/characters/Panda_Portrait_Anime.webp" },
   { id: "mahito", name: "Mahito", threshold: 178, image: "/assets/characters/Mahito_Portrait_Anime.webp" },
   { id: "geto", name: "Suguru Geto", threshold: 197, image: "/assets/characters/Suguru_Portrait_Anime.webp" },
-  { id: "sukuna", name: "Ryomen Sukuna", threshold: 213, image: "/assets/characters/Sukuna_Portrait_Anime.webp" },
-  { id: "gojo", name: "Satoru Gojo", threshold: 225, image: "/assets/characters/Satoru_Portrait_Anime.webp" },
-  { id: "yuji", name: "Yuji Itadori", threshold: 232, image: "/assets/characters/Yuji_Portrait_Modulo.webp" },
+  { id: "sukuna", name: "Ryomen Sukuna", threshold: 230, image: "/assets/characters/Sukuna_Portrait_Anime.webp" },
+  { id: "gojo", name: "Satoru Gojo", threshold: 235, image: "/assets/characters/Satoru_Portrait_Anime.webp" },
+  { id: "yuji", name: "Yuji Itadori", threshold: 250, image: "/assets/characters/Yuji_Portrait_Modulo.webp" },
 ];
 
 /** Contribution d'un perso placé dans `slotCategory`. */

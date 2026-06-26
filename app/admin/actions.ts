@@ -15,6 +15,11 @@ import {
   upsertDraftCharacter,
   deleteDraftCharacter,
 } from "@/lib/admin/draft-store";
+import {
+  adminUpdateDraftScore,
+  adminDeleteDraftScore,
+  DRAFT_MAX_KILLS,
+} from "@/lib/games/draft/store";
 import { DRAFT_CATEGORY_BY_ID } from "@/lib/games/draft/categories";
 import type {
   DraftCharacter,
@@ -28,6 +33,7 @@ export type ActionResult = { ok: boolean; error?: string };
 
 const TIERS: CharacterTier[] = ["4minus", "4", "3", "2", "1", "s"];
 const GAMES: LeaderboardGame[] = ["builder", "ranking"];
+const DRAFT_GAME = "jujutsu-draft";
 const DRAFT_TIERS: DraftTier[] = ["S", "A", "B", "C"];
 
 /** Valide + enregistre (ajout ou édition) un personnage en base. */
@@ -186,6 +192,23 @@ export async function updateScoreAction(
   if (!(await getAdminUser())) {
     return { ok: false, error: "Accès réservé aux administrateurs." };
   }
+
+  // Draft : table dédiée, métrique = ennemis vaincus (0 à DRAFT_MAX_KILLS).
+  if (game === DRAFT_GAME) {
+    const kills = Math.round(Number(scoreRaw));
+    if (!Number.isFinite(kills) || kills < 0 || kills > DRAFT_MAX_KILLS) {
+      return { ok: false, error: `Score invalide (0 à ${DRAFT_MAX_KILLS}).` };
+    }
+    try {
+      await adminUpdateDraftScore(id, kills);
+    } catch (e) {
+      return { ok: false, error: `Échec de modification : ${(e as Error).message}` };
+    }
+    revalidatePath("/games/jujutsu-draft");
+    revalidatePath("/admin");
+    return { ok: true };
+  }
+
   if (!GAMES.includes(game as LeaderboardGame)) {
     return { ok: false, error: "Jeu inconnu." };
   }
@@ -212,6 +235,18 @@ export async function deleteScoreAction(
   if (!(await getAdminUser())) {
     return { ok: false, error: "Accès réservé aux administrateurs." };
   }
+
+  if (game === DRAFT_GAME) {
+    try {
+      await adminDeleteDraftScore(id);
+    } catch (e) {
+      return { ok: false, error: `Échec de suppression : ${(e as Error).message}` };
+    }
+    revalidatePath("/games/jujutsu-draft");
+    revalidatePath("/admin");
+    return { ok: true };
+  }
+
   try {
     await adminDeleteScore(id);
   } catch (e) {

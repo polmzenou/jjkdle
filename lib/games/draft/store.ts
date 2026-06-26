@@ -1,7 +1,11 @@
 import { Prisma, type DraftOutcome } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import type { DraftSelection } from "./types";
-import type { UserScore } from "@/lib/leaderboard/store";
+import type { AdminScore, UserScore } from "@/lib/leaderboard/store";
+import { BOSSES } from "./scoring";
+
+/** Score max d'un draft = nombre de boss (tous vaincus → VICTORY). */
+export const DRAFT_MAX_KILLS = BOSSES.length;
 
 /**
  * Persistance du leaderboard « Jujutsu Draft » (Neon Postgres via Prisma).
@@ -81,6 +85,56 @@ export async function topDraftEntries(
     enemiesKilled: r.enemiesKilled,
     outcome: r.outcome,
   }));
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Administration du leaderboard Draft (vue /admin)
+// ──────────────────────────────────────────────────────────────────────────
+
+/**
+ * Tous les scores Draft au format `AdminScore` (mutualisé avec les autres
+ * leaderboards). `score` = ennemis vaincus (métrique de classement publique),
+ * trié comme le classement (ennemis vaincus, puis score global en départage).
+ */
+export async function listAllDraftScores(): Promise<AdminScore[]> {
+  const rows = await prisma.jujutsuDraftScore.findMany({
+    orderBy: [
+      { enemiesKilled: "desc" },
+      { globalScore: "desc" },
+      { updatedAt: "asc" },
+    ],
+    include: { user: { select: { username: true } } },
+  });
+
+  return rows.map((r) => ({
+    id: r.id,
+    pseudo: r.user.username,
+    game: "jujutsu-draft",
+    score: r.enemiesKilled,
+    date: r.updatedAt.toISOString(),
+  }));
+}
+
+/**
+ * Met à jour le nombre d'ennemis vaincus d'une entrée (et l'issue en
+ * conséquence : VICTORY si tous les boss tombent, sinon DEFEAT).
+ */
+export async function adminUpdateDraftScore(
+  id: string,
+  enemiesKilled: number,
+): Promise<void> {
+  await prisma.jujutsuDraftScore.update({
+    where: { id },
+    data: {
+      enemiesKilled,
+      outcome: enemiesKilled >= DRAFT_MAX_KILLS ? "VICTORY" : "DEFEAT",
+    },
+  });
+}
+
+/** Supprime une entrée du leaderboard Draft. */
+export async function adminDeleteDraftScore(id: string): Promise<void> {
+  await prisma.jujutsuDraftScore.delete({ where: { id } });
 }
 
 /** Meilleur nombre d'ennemis vaincus d'un utilisateur (ou null). */

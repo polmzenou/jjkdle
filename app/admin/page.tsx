@@ -4,7 +4,8 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { readRoster } from "@/lib/admin/roster-store";
 import { getCategories } from "@/lib/content/queries";
 import { listDraftCharacters } from "@/lib/games/draft/queries";
-import { listAllScores } from "@/lib/leaderboard/store";
+import { listAllScores, type AdminScore } from "@/lib/leaderboard/store";
+import { listAllDraftScores } from "@/lib/games/draft/store";
 import { listUsers } from "@/lib/admin/users";
 import type { Character } from "@/data/roster/characters";
 import type { DraftCharacter } from "@/lib/games/draft/types";
@@ -78,13 +79,19 @@ export default async function AdminPage() {
     listAllScores(),
     listUsers(),
   ]);
+  let draftScores: AdminScore[] = [];
+  try {
+    draftScores = await listAllDraftScores();
+  } catch {
+    draftScores = [];
+  }
 
   return (
     <AdminDashboard
       roster={roster}
       draftRoster={draftRoster}
       categories={categories}
-      scores={scores}
+      scores={[...scores, ...draftScores]}
       users={users}
       currentUserId={user.id}
     />
