@@ -13,6 +13,10 @@ interface CategoryTileProps {
   onTap: (category: CategoryConfig) => void;
   /** Change à chaque re-tirage → rejoue l'animation shuffle. */
   drawKey: number;
+  /** Lecture seule (ex. plateau adverse) : aucun clic ni effet de survol. */
+  readOnly?: boolean;
+  /** Variante réduite (ex. plateaux adverses affichés en plus petit). */
+  compact?: boolean;
 }
 
 export function CategoryTile({
@@ -21,19 +25,23 @@ export function CategoryTile({
   locked,
   onTap,
   drawKey,
+  readOnly = false,
+  compact = false,
 }: CategoryTileProps) {
   // Accent violet uniforme (plus de couleur selon le personnage).
   const accent = CARD_ACCENT;
   const empty = character === null;
+  // Interactif uniquement si non vide, non verrouillé et non en lecture seule.
+  const interactive = !empty && !locked && !readOnly;
 
   return (
     <motion.button
       type="button"
       layout
-      disabled={empty || locked}
-      onClick={() => onTap(category)}
-      whileHover={empty || locked ? undefined : { scale: 1.03, y: -3 }}
-      whileTap={empty || locked ? undefined : { scale: 0.97 }}
+      disabled={!interactive}
+      onClick={() => interactive && onTap(category)}
+      whileHover={interactive ? { scale: 1.03, y: -3 } : undefined}
+      whileTap={interactive ? { scale: 0.97 } : undefined}
       className="group relative aspect-[3/4] w-full overflow-hidden rounded-2xl border-2 bg-void-800 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-domain-light disabled:cursor-default"
       style={{
         borderColor: locked ? accent : "rgba(255,255,255,0.10)",
@@ -73,7 +81,9 @@ export function CategoryTile({
       {/* Badge "verrouillé" */}
       {locked && (
         <span
-          className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold text-white"
+          className={`absolute right-2 top-2 flex items-center justify-center rounded-full font-bold text-white ${
+            compact ? "h-5 w-5 text-xs" : "h-7 w-7 text-sm"
+          }`}
           style={{ background: accent }}
         >
           ✓
@@ -81,7 +91,7 @@ export function CategoryTile({
       )}
 
       {/* Halo au survol */}
-      {!locked && !empty && (
+      {interactive && (
         <span
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
@@ -90,11 +100,15 @@ export function CategoryTile({
       )}
 
       {/* Pied de carte : catégorie + nom + note */}
-      <div className="absolute inset-x-0 bottom-0 p-3">
-        <p className="font-display text-sm font-bold uppercase leading-tight tracking-wide text-white drop-shadow">
+      <div className={`absolute inset-x-0 bottom-0 ${compact ? "p-1.5" : "p-3"}`}>
+        <p
+          className={`font-display font-bold uppercase leading-tight tracking-wide text-white drop-shadow ${
+            compact ? "text-[10px]" : "text-sm"
+          }`}
+        >
           {category.label}
         </p>
-        {character && (
+        {character && !compact && (
           // Le nom seul : on n'affiche PAS la note pour ne pas donner d'indice.
           <p className="mt-0.5 truncate text-xs text-white/70">{character.name}</p>
         )}

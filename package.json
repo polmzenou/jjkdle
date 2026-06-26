@@ -25,6 +25,8 @@
     "@prisma/client": "^6.19.3",
     "framer-motion": "^11.3.0",
     "next": "^15.1.0",
+    "pusher": "^5.3.4",
+    "pusher-js": "^8.5.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

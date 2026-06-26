@@ -31,9 +31,10 @@ model User {
   role         Role     @default(PLAYER)
   createdAt    DateTime @default(now())
 
-  sessions    Session[]
-  scores      Score[]
-  draftScores JujutsuDraftScore[]
+  sessions     Session[]
+  scores       Score[]
+  lobbyPlayers LobbyPlayer[]
+  draftScores  JujutsuDraftScore[]
 }
 
 /// Session d'authentification (token aléatoire stocké en cookie httpOnly).
@@ -149,4 +150,57 @@ model RankingCondition {
   position Int      @default(0)
 
   @@index([position])
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Multijoueur — lobbys privés (builder uniquement pour l'instant).
+//
+// Le serveur est autoritatif : l'état de chaque partie vit ici, les Server
+// Actions le mutent puis déclenchent un événement Pusher rebroadcasté au lobby.
+// ──────────────────────────────────────────────────────────────────────────
+
+/// Cycle de vie d'un lobby.
+enum LobbyStatus {
+  WAITING // salon d'attente, on peut encore rejoindre
+  PLAYING // partie en cours (synchronisation lockstep par manche)
+  FINISHED // partie terminée, récap affiché
+}
+
+/// Lobby privé (partie multijoueur). `code` = code court partageable.
+model Lobby {
+  id         String      @id @default(cuid())
+  code       String      @unique
+  gameId     String      @default("builder")
+  hostId     String
+  status     LobbyStatus @default(WAITING)
+  /// Manche courante (0-indexée) : nombre de catégories déjà verrouillées par joueur.
+  roundIndex Int         @default(0)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  players LobbyPlayer[]
+
+  @@index([code])
+}
+
+/// Plateau d'un joueur dans un lobby (sa sélection verrouillée + son tirage courant).
+model LobbyPlayer {
+  id              String  @id @default(cuid())
+  lobbyId         String
+  lobby           Lobby   @relation(fields: [lobbyId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Ordre d'arrivée (l'hôte = 0) — sert au tri d'affichage.
+  joinOrder       Int
+  /// Sélection verrouillée : { [categoryId]: characterId }.
+  selection       Json    @default("{}")
+  /// Tirage courant proposé à ce joueur : { [categoryId]: characterId | null }.
+  currentDraw     Json    @default("{}")
+  /// A verrouillé une catégorie pour la manche en cours (lockstep).
+  lockedThisRound Boolean @default(false)
+  /// Score final (calculé à la fin via evaluateBuild).
+  finalScore      Int?
+
+  @@unique([lobbyId, userId])
+  @@index([lobbyId])
 }
