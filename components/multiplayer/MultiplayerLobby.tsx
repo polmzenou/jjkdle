@@ -9,7 +9,9 @@ import {
   leaveLobbyAction,
   lockCategoryAction,
   playAgainAction,
+  sabotagePlayerAction,
   startGameAction,
+  toggleCuratedAction,
 } from "@/lib/multiplayer/actions";
 import {
   EVENTS,
@@ -111,6 +113,19 @@ export function MultiplayerLobby({
     [code, currentUserId],
   );
 
+  // Easter egg perso : ne propose que les meilleures cartes (toggle serveur).
+  const handleToggleCurated = useCallback(() => {
+    void toggleCuratedAction(code);
+  }, [code]);
+
+  // Easter egg ultra caché : sabote un adversaire (pires cartes au tour suivant).
+  const handleSabotage = useCallback(
+    (targetUserId: string) => {
+      void sabotagePlayerAction(code, targetUserId);
+    },
+    [code],
+  );
+
   const handleStart = useCallback(() => {
     startTransition(async () => {
       const res = await startGameAction(code);
@@ -207,6 +222,8 @@ export function MultiplayerLobby({
           rosterMap={rosterMap}
           currentUserId={currentUserId}
           onLock={handleLock}
+          onToggleCurated={handleToggleCurated}
+          onSabotage={handleSabotage}
         />
       )}
 

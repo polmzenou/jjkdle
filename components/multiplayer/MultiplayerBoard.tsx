@@ -12,6 +12,10 @@ interface MultiplayerBoardProps {
   rosterMap: RosterMap;
   currentUserId: string;
   onLock: (categoryId: string) => void;
+  /** Easter egg perso : bascule le tirage "meilleures cartes". */
+  onToggleCurated: () => void;
+  /** Easter egg caché : sabote l'adversaire ciblé. */
+  onSabotage: (targetUserId: string) => void;
 }
 
 /** Nombre de catégories verrouillées par un joueur. */
@@ -26,17 +30,24 @@ function OpponentCard({
   rosterMap,
   total,
   compactCols,
+  onSabotage,
 }: {
   opponent: SerializedPlayer;
   categories: CategoryConfig[];
   rosterMap: RosterMap;
   total: number;
   compactCols?: number;
+  onSabotage: (targetUserId: string) => void;
 }) {
   return (
     <div className="rounded-2xl border border-white/10 bg-void-800/40 p-3">
       <div className="mb-2 flex items-center justify-between gap-2">
-        <span className="truncate text-sm font-semibold text-white/80">
+        {/* Easter egg ultra caché : cliquer le pseudo sabote l'adversaire
+            (pires cartes au tour suivant). Aucun indice visuel volontairement. */}
+        <span
+          onClick={() => onSabotage(opponent.userId)}
+          className="truncate text-sm font-semibold text-white/80"
+        >
           {opponent.username}
         </span>
         <span
@@ -65,6 +76,8 @@ export function MultiplayerBoard({
   rosterMap,
   currentUserId,
   onLock,
+  onToggleCurated,
+  onSabotage,
 }: MultiplayerBoardProps) {
   const me = lobby.players.find((p) => p.userId === currentUserId);
   const opponents = lobby.players.filter((p) => p.userId !== currentUserId);
@@ -81,9 +94,17 @@ export function MultiplayerBoard({
   const renderMyDeck = (cols?: number) => (
     <div className="rounded-2xl border border-domain/20 bg-void-800/30 p-4">
       <div className="mb-3 flex items-center justify-between">
-        <span className="text-sm font-semibold text-white">
+        {/* Easter egg : cliquer "Ton deck" bascule le tirage meilleures cartes
+            (le libellé se teinte quand c'est actif). */}
+        <button
+          type="button"
+          onClick={onToggleCurated}
+          className={`select-none text-sm font-semibold transition-colors ${
+            me.curated ? "text-domain-light" : "text-white"
+          }`}
+        >
           Ton deck <span className="text-white/40">({lockedCount(me)}/{total})</span>
-        </span>
+        </button>
         {!iLocked && (
           <span className="text-xs text-white/50">
             👆 Tape une catégorie pour la verrouiller
@@ -102,7 +123,9 @@ export function MultiplayerBoard({
   );
 
   return (
-    <div>
+    /* Duo : on borne et centre tout le plateau (le plein écran est réservé au
+       trio, qui a besoin de la largeur pour les deux ailes adverses). */
+    <div className={isTrio ? undefined : "mx-auto max-w-3xl"}>
       {/* En-tête : manche + progression */}
       <header className="mb-4 flex items-center justify-between">
         <span className="text-xs font-bold uppercase tracking-wider text-white/70">
@@ -133,6 +156,7 @@ export function MultiplayerBoard({
               rosterMap={rosterMap}
               total={total}
               compactCols={3}
+              onSabotage={onSabotage}
             />
           </div>
           <div className="order-3 w-full lg:order-none lg:flex-1">
@@ -145,18 +169,21 @@ export function MultiplayerBoard({
               rosterMap={rosterMap}
               total={total}
               compactCols={3}
+              onSabotage={onSabotage}
             />
           </div>
         </div>
       ) : (
-        /* 2 joueurs : adversaire en haut, moi en dessous. */
+        /* 2 joueurs : adversaire (compact, plus étroit) en haut, mon deck
+           dessous. Le deck adverse est volontairement plus petit que le mien. */
         <>
-          <div className="mb-6">
+          <div className="mx-auto mb-6 max-w-md">
             <OpponentCard
               opponent={opponents[0]}
               categories={categories}
               rosterMap={rosterMap}
               total={total}
+              onSabotage={onSabotage}
             />
           </div>
           {renderMyDeck()}
