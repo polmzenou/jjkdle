@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useAnimationControls } from "framer-motion";
 import { CharacterImage } from "@/components/CharacterImage";
 import type { CombatResult, DraftCharacter } from "@/lib/games/draft/types";
 
@@ -31,8 +31,12 @@ export function CombatScene({ result, avatar, onFinish }: CombatSceneProps) {
   const [playerHp, setPlayerHp] = useState(100);
   const [ko, setKo] = useState(false);
   const [flash, setFlash] = useState(false);
-  const [shakeKey, setShakeKey] = useState(0);
+  const shake = useAnimationControls();
   const finishedRef = useRef(false);
+
+  // Secousse d'écran sans remonter l'arène (sinon les barres de vie « sautent »).
+  const triggerShake = () =>
+    void shake.start({ x: [0, -5, 5, -3, 0], transition: { duration: 0.22 } });
 
   const finish = () => {
     if (finishedRef.current) return;
@@ -55,7 +59,7 @@ export function CombatScene({ result, avatar, onFinish }: CombatSceneProps) {
     for (let r = 1; r <= ROUNDS; r++) {
       timers.push(
         setTimeout(() => {
-          setShakeKey((k) => k + 1);
+          triggerShake();
           if (duel.survived) {
             setBossHp(Math.max(0, Math.round(100 - (100 * r) / ROUNDS)));
           } else {
@@ -70,7 +74,7 @@ export function CombatScene({ result, avatar, onFinish }: CombatSceneProps) {
     // Résolution du duel.
     timers.push(
       setTimeout(() => {
-        setShakeKey((k) => k + 1);
+        triggerShake();
         if (duel.survived) {
           setBossHp(0);
           if (bigHit) setFlash(true);
@@ -138,9 +142,7 @@ export function CombatScene({ result, avatar, onFinish }: CombatSceneProps) {
 
       {/* Arène */}
       <motion.div
-        key={shakeKey}
-        animate={{ x: [0, -5, 5, -3, 0] }}
-        transition={{ duration: 0.22 }}
+        animate={shake}
         className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-6"
       >
         {/* Joueur */}
@@ -215,6 +217,17 @@ export function Fighter({
   hpColor: string;
   align: "left" | "right";
 }) {
+  // La barre descend en douceur quand on encaisse, mais se RECHARGE
+  // instantanément (nouveau duel) pour éviter l'effet « la barre remonte au
+  // max avant de rebaisser ».
+  const prevHp = useRef(hp);
+  const refilling = hp > prevHp.current;
+  useEffect(() => {
+    prevHp.current = hp;
+  }, [hp]);
+
+  const lowHp = hp <= 30 && hp > 0;
+
   return (
     <div className={align === "right" ? "text-right" : "text-left"}>
       <div
@@ -231,8 +244,19 @@ export function Fighter({
         <motion.div
           className="h-full rounded-full"
           style={{ background: hpColor }}
-          animate={{ width: `${hp}%` }}
-          transition={{ duration: 0.3 }}
+          animate={{
+            width: `${hp}%`,
+            // Pulse rouge léger quand le perso est en danger.
+            opacity: lowHp ? [1, 0.55, 1] : 1,
+          }}
+          transition={{
+            width: refilling
+              ? { duration: 0 }
+              : { duration: 0.4, ease: "easeOut" },
+            opacity: lowHp
+              ? { duration: 0.7, repeat: Infinity, ease: "easeInOut" }
+              : { duration: 0.2 },
+          }}
         />
       </div>
     </div>

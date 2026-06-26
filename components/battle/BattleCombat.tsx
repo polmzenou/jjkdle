@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useAnimationControls } from "framer-motion";
 import { Fighter } from "@/components/draft/CombatScene";
 import type { SerializedLobby } from "@/lib/multiplayer/events";
 import type { RosterMap } from "@/lib/multiplayer/state";
@@ -48,8 +48,12 @@ export function BattleCombat({
   const [myHp, setMyHp] = useState(100);
   const [oppHp, setOppHp] = useState(100);
   const [flash, setFlash] = useState(false);
-  const [shakeKey, setShakeKey] = useState(0);
+  const shake = useAnimationControls();
   const finishedRef = useRef(false);
+
+  // Secousse d'écran sans remonter l'arène (sinon les barres de vie « sautent »).
+  const triggerShake = () =>
+    void shake.start({ x: [0, -5, 5, -3, 0], transition: { duration: 0.22 } });
 
   const finish = () => {
     if (finishedRef.current) return;
@@ -77,7 +81,7 @@ export function BattleCombat({
     for (let r = 1; r <= ROUNDS; r++) {
       timers.push(
         setTimeout(() => {
-          setShakeKey((k) => k + 1);
+          triggerShake();
           const hp = Math.max(0, Math.round(100 - (100 * r) / ROUNDS));
           if (iWin) setOppHp(hp);
           else if (iLose) setMyHp(hp);
@@ -93,7 +97,7 @@ export function BattleCombat({
     timers.push(
       setTimeout(
         () => {
-          setShakeKey((k) => k + 1);
+          triggerShake();
           if (iWin) {
             setOppHp(0);
             if (bigHit) setFlash(true);
@@ -159,9 +163,7 @@ export function BattleCombat({
       </div>
 
       <motion.div
-        key={shakeKey}
-        animate={{ x: [0, -5, 5, -3, 0] }}
-        transition={{ duration: 0.22 }}
+        animate={shake}
         className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-6"
       >
         <Fighter
