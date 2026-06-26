@@ -112,7 +112,6 @@ export function DraftBoard({
                       character={character}
                       selected={selected}
                       disabled={!affordable}
-                      matched={character.excellenceCategory === category.id}
                       onSelect={() => onSelect(category.id, character)}
                     />
                   );

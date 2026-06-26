@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import type { DraftCharacter, DraftCategoryId, DraftTier } from "./types";
 import { DRAFT_ROSTER } from "./roster";
+import { DRAFT_CATEGORIES } from "./categories";
+import { DRAW_PER_CATEGORY } from "./draw";
 
 /**
  * Lecture du roster « Jujutsu Draft » en base (source de vérité éditable depuis
@@ -60,7 +62,18 @@ export async function listDraftCharacters(): Promise<DraftCharacter[]> {
 export async function getDraftRoster(): Promise<DraftCharacter[]> {
   const roster = await listDraftCharacters();
   const cCount = roster.filter((c) => c.tier === "C").length;
-  if (roster.length < MIN_DRAFT_ROSTER || cCount < MIN_DRAFT_TIER_C) {
+  // Cloisonnement : chaque catégorie doit avoir assez de membres pour remplir
+  // une ligne (DRAW_PER_CATEGORY). Sinon, repli sur le roster maître équilibré.
+  const perCategoryOk = DRAFT_CATEGORIES.every(
+    (cat) =>
+      roster.filter((c) => c.excellenceCategory === cat.id).length >=
+      DRAW_PER_CATEGORY,
+  );
+  if (
+    roster.length < MIN_DRAFT_ROSTER ||
+    cCount < MIN_DRAFT_TIER_C ||
+    !perCategoryOk
+  ) {
     return DRAFT_ROSTER;
   }
   return roster;

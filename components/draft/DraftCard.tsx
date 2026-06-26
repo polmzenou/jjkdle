@@ -20,8 +20,6 @@ interface DraftCardProps {
   selected: boolean;
   /** Inabordable (budget) et non sélectionné → désactivé. */
   disabled: boolean;
-  /** Placé dans sa catégorie d'excellence ? (indice qualitatif, sans chiffre). */
-  matched: boolean;
   onSelect: () => void;
 }
 
@@ -30,7 +28,6 @@ export function DraftCard({
   character,
   selected,
   disabled,
-  matched,
   onSelect,
 }: DraftCardProps) {
   const accent = selected ? SELECTED_COLOR : CARD_ACCENT;
@@ -79,13 +76,6 @@ export function DraftCard({
       <p className="absolute inset-x-0 bottom-0 truncate p-1.5 text-center text-[11px] font-semibold text-white drop-shadow">
         {character.name}
       </p>
-
-      {/* Indice qualitatif « bon placement » — seulement une fois draftÉ. */}
-      {selected && matched && (
-        <span className="absolute inset-x-0 bottom-6 z-10 text-center text-[9px] font-bold uppercase tracking-wide text-emerald-300">
-          ★ bon placement
-        </span>
-      )}
     </motion.button>
   );
 }

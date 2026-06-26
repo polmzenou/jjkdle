@@ -20,6 +20,17 @@ describe("pickDraw", () => {
     }
   });
 
+  it("ne propose QUE des persos de la catégorie (cloisonnement)", () => {
+    for (const seed of seeds) {
+      const draw = pickDraw(seededRng(seed));
+      for (const cat of DRAFT_CATEGORIES) {
+        for (const c of draw[cat.id]) {
+          expect(c.excellenceCategory, `${c.id}@${cat.id}`).toBe(cat.id);
+        }
+      }
+    }
+  });
+
   it("ne propose jamais deux fois le même perso sur tout le plateau", () => {
     for (const seed of seeds) {
       const draw = pickDraw(seededRng(seed));

@@ -11,26 +11,16 @@ import { DRAFT_ROSTER_BY_ID } from "./roster";
 import type { DraftSelection } from "./types";
 
 /**
- * Simulation d'équilibrage : on construit des drafts types et on vérifie la
- * courbe de difficulté Panda → Yuji. Ces tests verrouillent la calibration des
- * seuils ; si un seuil ou un coût bouge, ils signalent la régression.
+ * Simulation d'équilibrage (tirage CLOISONNÉ : chaque perso est dans sa
+ * catégorie). Les équipes ci-dessous ont été mesurées par brute-force comme
+ * atteignant pile chaque palier de boss (1 → 6). Elles verrouillent la
+ * calibration : si un seuil/coût bouge, le test signale la régression.
+ *
+ * Scores mesurés : tier1=92, tier2=140, tier3=165, tier4=188, tier5=205, tier6=217.
  */
-
-// Archetypes (sélection = { categorieId: persoId }).
 const ARCHETYPES: Record<string, DraftSelection> = {
-  // Le pire draft jouable : 8 Tier C bon marché, tous MAL placés.
-  worst: {
-    "occult-energy": "mai",
-    "physical-strength": "manami",
-    speed: "shoko",
-    "battle-iq": "nitta",
-    "innate-technique": "miwa",
-    "domain-expansion": "charles",
-    "black-flash": "yorozu",
-    "cursed-tools": "utahime",
-  },
-  // Cheap mais BIEN placé (chaque Tier C dans sa catégorie).
-  cheapMatched: {
+  // 1 boss — équipe la moins chère possible (score plancher 92).
+  tier1: {
     "occult-energy": "miwa",
     "physical-strength": "mai",
     speed: "utahime",
@@ -40,49 +30,60 @@ const ARCHETYPES: Record<string, DraftSelection> = {
     "black-flash": "nitta",
     "cursed-tools": "yorozu",
   },
-  // Équilibré : 2 A + 3 B + 3 C bien placés.
-  balanced: {
-    "occult-energy": "choso",
-    "physical-strength": "maki",
+  // 2 boss (140).
+  tier2: {
+    "occult-energy": "yuta",
+    "physical-strength": "mai",
     speed: "divine-dog",
-    "battle-iq": "kenjaku",
+    "battle-iq": "shoko",
+    "innate-technique": "kurourushi",
+    "domain-expansion": "manami",
+    "black-flash": "toad",
+    "cursed-tools": "yorozu",
+  },
+  // 3 boss (165).
+  tier3: {
+    "occult-energy": "yuta",
+    "physical-strength": "todo",
+    speed: "utahime",
+    "battle-iq": "shoko",
+    "innate-technique": "kurourushi",
+    "domain-expansion": "manami",
+    "black-flash": "nitta",
+    "cursed-tools": "yorozu",
+  },
+  // 4 boss (188).
+  tier4: {
+    "occult-energy": "yuta",
+    "physical-strength": "todo",
+    speed: "nanami",
+    "battle-iq": "shoko",
+    "innate-technique": "kurourushi",
+    "domain-expansion": "fumihiko",
+    "black-flash": "nitta",
+    "cursed-tools": "yorozu",
+  },
+  // 5 boss (205).
+  tier5: {
+    "occult-energy": "yuta",
+    "physical-strength": "todo",
+    speed: "naoya",
+    "battle-iq": "shoko",
     "innate-technique": "dagon",
     "domain-expansion": "manami",
     "black-flash": "nitta",
     "cursed-tools": "yorozu",
   },
-  // Équilibré renforcé (atteint le palier Sukuna).
-  strong: {
-    "occult-energy": "choso",
+  // 6 boss — VICTORY (217).
+  tier6: {
+    "occult-energy": "yuta",
     "physical-strength": "maki",
-    speed: "divine-dog",
+    speed: "nanami",
     "battle-iq": "kenjaku",
     "innate-technique": "dagon",
-    "domain-expansion": "angel",
-    "black-flash": "nitta",
+    "domain-expansion": "yaga",
+    "black-flash": "inumaki",
     "cursed-tools": "yorozu",
-  },
-  // Optimisé : persos chers bien placés (bat Gojo, meurt sur Yuji).
-  optimized: {
-    "occult-energy": "mei-mei",
-    "physical-strength": "maki",
-    speed: "utahime",
-    "battle-iq": "mechamaru",
-    "innate-technique": "dagon",
-    "domain-expansion": "angel",
-    "black-flash": "toji",
-    "cursed-tools": "gakuganji",
-  },
-  // Parfait : optimum sous budget 100 (seul à battre Yuji).
-  perfect: {
-    "occult-energy": "mei-mei",
-    "physical-strength": "maki",
-    speed: "utahime",
-    "battle-iq": "mechamaru",
-    "innate-technique": "dagon",
-    "domain-expansion": "angel",
-    "black-flash": "toji",
-    "cursed-tools": "rika",
   },
 };
 
@@ -115,41 +116,27 @@ describe("courbe d'équilibrage Panda → Yuji", () => {
   const killed = (name: keyof typeof ARCHETYPES) =>
     evaluateDraft(ARCHETYPES[name]).enemiesKilled;
 
-  it("Panda tombe avec n'importe quel draft (même le pire)", () => {
-    expect(killed("worst")).toBe(1);
+  it("l'équipe la moins chère tombe pile sur Panda (1 boss)", () => {
+    expect(killed("tier1")).toBe(1);
   });
 
-  it("un draft cheap bien placé bat Mahito (2 boss)", () => {
-    expect(killed("cheapMatched")).toBe(2);
+  it("chaque palier d'équipe vainc un boss de plus", () => {
+    expect(killed("tier2")).toBe(2);
+    expect(killed("tier3")).toBe(3);
+    expect(killed("tier4")).toBe(4);
+    expect(killed("tier5")).toBe(5);
   });
 
-  it("un draft équilibré atteint Geto (3 boss)", () => {
-    expect(killed("balanced")).toBe(3);
-  });
-
-  it("un draft équilibré renforcé atteint Sukuna (4 boss)", () => {
-    expect(killed("strong")).toBe(4);
-  });
-
-  it("un draft optimisé bat Gojo mais meurt sur Yuji (5 boss)", () => {
-    expect(killed("optimized")).toBe(5);
-  });
-
-  it("seul un draft parfait bat Yuji (6 boss → VICTORY)", () => {
-    const res = evaluateDraft(ARCHETYPES.perfect);
+  it("l'équipe quasi-optimale bat Yuji (6 boss → VICTORY)", () => {
+    const res = evaluateDraft(ARCHETYPES.tier6);
     expect(res.enemiesKilled).toBe(BOSSES.length);
     expect(res.outcome).toBe("VICTORY");
   });
 
   it("la difficulté est strictement croissante selon la qualité du draft", () => {
-    const scores = [
-      "worst",
-      "cheapMatched",
-      "balanced",
-      "strong",
-      "optimized",
-      "perfect",
-    ].map((n) => computeGlobalScore(ARCHETYPES[n as keyof typeof ARCHETYPES]));
+    const scores = ["tier1", "tier2", "tier3", "tier4", "tier5", "tier6"].map(
+      (n) => computeGlobalScore(ARCHETYPES[n as keyof typeof ARCHETYPES]),
+    );
     for (let i = 1; i < scores.length; i++) {
       expect(scores[i]).toBeGreaterThan(scores[i - 1]);
     }

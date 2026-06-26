@@ -7,6 +7,8 @@ import {
   MAX_SCORE,
   type LeaderboardGame,
 } from "@/lib/leaderboard/store";
+import { getUserDraftScore } from "@/lib/games/draft/store";
+import { BOSSES } from "@/lib/games/draft/scoring";
 import { getGrade } from "@/lib/scoring/grades";
 import { GAMES } from "@/lib/games/registry";
 import { AccountForms } from "./AccountForms";
@@ -22,7 +24,12 @@ export default async function AccountPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  const scores = await getUserScores(user.id);
+  // Scores classiques (table Score) + score Draft (table dédiée).
+  const [classicScores, draftScore] = await Promise.all([
+    getUserScores(user.id),
+    getUserDraftScore(user.id),
+  ]);
+  const scores = draftScore ? [...classicScores, draftScore] : classicScores;
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-12 sm:py-16">
@@ -65,7 +72,10 @@ export default async function AccountPage() {
               const title = meta?.title ?? s.gameId;
               const glyph = meta?.glyph ?? "🎮";
               const accent = meta?.accent ?? "#7c3aed";
-              const max = MAX_SCORE[s.gameId as LeaderboardGame] ?? null;
+              const max =
+                s.gameId === "jujutsu-draft"
+                  ? BOSSES.length // 6 boss → "X / 6 ennemis"
+                  : MAX_SCORE[s.gameId as LeaderboardGame] ?? null;
               const pct = max ? Math.min(100, Math.round((s.best / max) * 100)) : null;
               const grade = s.gameId === "builder" ? getGrade(s.best) : null;
 

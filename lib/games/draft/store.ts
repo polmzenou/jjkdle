@@ -1,6 +1,7 @@
 import { Prisma, type DraftOutcome } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import type { DraftSelection } from "./types";
+import type { UserScore } from "@/lib/leaderboard/store";
 
 /**
  * Persistance du leaderboard « Jujutsu Draft » (Neon Postgres via Prisma).
@@ -91,4 +92,39 @@ export async function getUserDraftBest(
     select: { enemiesKilled: true },
   });
   return row?.enemiesKilled ?? null;
+}
+
+/**
+ * Score Draft de l'utilisateur au format `UserScore` (pour la vue /account).
+ * `best` = ennemis vaincus ; rang par enemiesKilled puis globalScore (départage).
+ * Renvoie null si l'utilisateur n'a jamais joué.
+ */
+export async function getUserDraftScore(
+  userId: string,
+): Promise<UserScore | null> {
+  const mine = await prisma.jujutsuDraftScore.findUnique({ where: { userId } });
+  if (!mine) return null;
+
+  const [better, totalPlayers] = await Promise.all([
+    prisma.jujutsuDraftScore.count({
+      where: {
+        OR: [
+          { enemiesKilled: { gt: mine.enemiesKilled } },
+          {
+            enemiesKilled: mine.enemiesKilled,
+            globalScore: { gt: mine.globalScore },
+          },
+        ],
+      },
+    }),
+    prisma.jujutsuDraftScore.count(),
+  ]);
+
+  return {
+    gameId: "jujutsu-draft",
+    best: mine.enemiesKilled,
+    rank: better + 1,
+    totalPlayers,
+    updatedAt: mine.updatedAt.toISOString(),
+  };
 }
