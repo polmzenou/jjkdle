@@ -1,16 +1,16 @@
 # Graph Report - jjkdle  (2026-06-26)
 
 ## Corpus Check
-- 129 files · ~322,474 words
+- 131 files · ~324,054 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 645 nodes · 1677 edges · 19 communities (15 shown, 4 thin omitted)
+- 658 nodes · 1720 edges · 23 communities (19 shown, 4 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 18 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `5c23e921`
+- Built from commit: `941aca35`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -31,8 +31,12 @@
 - [[_COMMUNITY_Community 13|Community 13]]
 - [[_COMMUNITY_Community 14|Community 14]]
 - [[_COMMUNITY_Community 16|Community 16]]
+- [[_COMMUNITY_Community 17|Community 17]]
 - [[_COMMUNITY_Community 18|Community 18]]
 - [[_COMMUNITY_Community 19|Community 19]]
+- [[_COMMUNITY_Community 20|Community 20]]
+- [[_COMMUNITY_Community 21|Community 21]]
+- [[_COMMUNITY_Community 22|Community 22]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `getCurrentUser` - 51 edges
@@ -41,9 +45,9 @@
 4. `SerializedLobby` - 24 edges
 5. `DraftCharacter` - 23 edges
 6. `findLobby()` - 23 edges
-7. `getAdminUser()` - 17 edges
-8. `getRoster()` - 17 edges
-9. `RosterMap` - 16 edges
+7. `RosterMap` - 19 edges
+8. `getAdminUser()` - 17 edges
+9. `getRoster()` - 17 edges
 10. `isPusherConfigured()` - 16 edges
 
 ## Surprising Connections (you probably didn't know these)
@@ -61,35 +65,35 @@
 ## Import Cycles
 - 1-file cycle: `data/roster/characters.ts -> data/roster/characters.ts`
 
-## Communities (19 total, 4 thin omitted)
+## Communities (23 total, 4 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.07
-Nodes (58): AdminDashboardProps, BuilderGame(), BuilderGameProps, CategoryTile(), CategoryTileProps, RankFooter(), RankFooterProps, ScoreReveal() (+50 more)
+Cohesion: 0.05
+Nodes (55): GauntletCardLog, GauntletDeck(), GauntletDeckProps, CharacterImage(), CharacterImageProps, initials(), Draw, drawAll() (+47 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.09
-Nodes (29): getCharacterMap(), getConditions(), SubmitScore(), cookieName(), getBestScore(), saveBestScore(), formatScore(), AttemptsBar() (+21 more)
+Cohesion: 0.16
+Nodes (10): AdminDashboard(), CatField, FormState, Tab, TAB_LABELS, TAB_ORDER, TIERS, ImageDropzone() (+2 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.07
-Nodes (29): AccountForms(), inter, metadata, RootLayout(), spaceGrotesk, AuthResult, loginAction(), logoutAction() (+21 more)
+Nodes (27): AccountForms(), inter, metadata, RootLayout(), spaceGrotesk, AuthResult, loginAction(), logoutAction() (+19 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.05
 Nodes (39): dependencies, @dnd-kit/core, @dnd-kit/utilities, framer-motion, next, @prisma/client, pusher, pusher-js (+31 more)
 
 ### Community 4 - "Community 4"
-Cohesion: 0.10
-Nodes (56): PageProps, PageProps, POST(), getCurrentUser, applyLeave(), broadcastBattle(), createBattleLobbyAction(), decideAction() (+48 more)
+Cohesion: 0.08
+Nodes (64): PageProps, PageProps, POST(), getCurrentUser, SessionUser, applyLeave(), broadcastBattle(), createBattleLobbyAction() (+56 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.06
-Nodes (58): DRAFT_TIERS, DraftRosterAdmin(), DraftRosterAdminProps, EMPTY_FORM, FormState, TIER_COLOR, CharacterImage(), CharacterImageProps (+50 more)
+Cohesion: 0.05
+Nodes (67): DRAFT_TIERS, DraftRosterAdmin(), DraftRosterAdminProps, EMPTY_FORM, FormState, TIER_COLOR, GET(), canSelect() (+59 more)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.07
-Nodes (42): AccountPage(), metadata, AdminDashboard(), AdminPage(), metadata, readRoster(), listUsers(), GET() (+34 more)
+Cohesion: 0.10
+Nodes (28): AccountPage(), metadata, GET(), getCharacterMap(), getConditions(), getUserDraftScore(), GAMES, SubmitResult (+20 more)
 
 ### Community 7 - "Community 7"
 Cohesion: 0.10
@@ -104,20 +108,36 @@ Cohesion: 0.18
 Nodes (17): Character SVG Naming Convention, Original-Only Assets Policy, Best Score Persistence (httpOnly cookie), Build the Perfect Sorcerer (tap game), Draw Eligibility & Random Draw (seedable), Grade Tiers (Grade 4- to Grade S), JJK Arcade Platform, JJK Pyramid (ranking game) (+9 more)
 
 ### Community 10 - "Community 10"
-Cohesion: 0.07
-Nodes (52): BattleCombat(), BattleCombatProps, Duel, BattleLobby(), BattleLobbyProps, BattleResult(), BattleResultProps, battleValueOf() (+44 more)
+Cohesion: 0.05
+Nodes (85): BattleCombat(), BattleCombatProps, BattleLobby(), BattleLobbyProps, BattleResult(), BattleResultProps, battleValueOf(), battleValues (+77 more)
 
 ### Community 13 - "Community 13"
 Cohesion: 0.22
 Nodes (4): byCat, CATEGORIES, prisma, scores
 
 ### Community 16 - "Community 16"
-Cohesion: 0.06
-Nodes (51): ActionResult, deleteCharacterAction(), deleteDraftCharacterAction(), deleteScoreAction(), deleteUserAction(), DRAFT_TIERS, GAMES, saveCharacterAction() (+43 more)
+Cohesion: 0.14
+Nodes (19): ActionResult, deleteCharacterAction(), deleteDraftCharacterAction(), deleteScoreAction(), DRAFT_TIERS, GAMES, saveCharacterAction(), saveDraftCharacterAction() (+11 more)
+
+### Community 17 - "Community 17"
+Cohesion: 0.21
+Nodes (9): ALLOWED_MIME, DELETE(), Params, POST(), ALLOWED_MIME, DELETE(), Params, POST() (+1 more)
 
 ### Community 18 - "Community 18"
 Cohesion: 0.14
 Nodes (13): Ajouter un jeu (système pluggable), Ajouter un personnage, Ajouter une catégorie, Ajouter une condition (JJK Pyramid), 📁 Architecture, 🚀 Démarrage local, ☁️ Déploiement Vercel, JJK Arcade — Plateforme de mini-jeux Jujutsu Kaisen (+5 more)
+
+### Community 20 - "Community 20"
+Cohesion: 0.26
+Nodes (10): deleteUserAction(), setUserRoleAction(), AdminDashboardProps, Feedback, UserAdmin(), UserAdminProps, AdminUser, deleteUser() (+2 more)
+
+### Community 21 - "Community 21"
+Cohesion: 0.33
+Nodes (7): AdminPage(), metadata, readRoster(), listUsers(), listDraftCharacters(), listAllDraftScores(), listAllScores()
+
+### Community 22 - "Community 22"
+Cohesion: 0.40
+Nodes (5): Feedback, LeaderboardAdmin(), LeaderboardAdminProps, getGame(), AdminScore
 
 ## Knowledge Gaps
 - **159 isolated node(s):** `metadata`, `metadata`, `metadata`, `TIERS`, `CatField` (+154 more)
@@ -127,17 +147,17 @@ Nodes (13): Ajouter un jeu (système pluggable), Ajouter un personnage, Ajouter 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `getCurrentUser` connect `Community 4` to `Community 1`, `Community 2`, `Community 5`, `Community 6`, `Community 16`?**
-  _High betweenness centrality (0.097) - this node is a cross-community bridge._
-- **Why does `Character` connect `Community 0` to `Community 1`, `Community 4`, `Community 5`, `Community 6`, `Community 10`, `Community 16`?**
+- **Why does `getCurrentUser` connect `Community 4` to `Community 2`, `Community 5`, `Community 6`, `Community 17`, `Community 21`?**
+  _High betweenness centrality (0.096) - this node is a cross-community bridge._
+- **Why does `Character` connect `Community 10` to `Community 0`, `Community 1`, `Community 16`, `Community 20`, `Community 21`?**
   _High betweenness centrality (0.064) - this node is a cross-community bridge._
-- **Why does `DraftCharacter` connect `Community 5` to `Community 16`, `Community 0`, `Community 6`?**
+- **Why does `DraftCharacter` connect `Community 5` to `Community 16`, `Community 1`, `Community 20`, `Community 21`?**
   _High betweenness centrality (0.023) - this node is a cross-community bridge._
 - **Are the 2 inferred relationships involving `getCurrentUser` (e.g. with `BattleLobbyPage()` and `LobbyPage()`) actually correct?**
   _`getCurrentUser` has 2 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `metadata`, `metadata`, `metadata` to the rest of the system?**
   _159 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.06574074074074074 - nodes in this community are weakly interconnected._
-- **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.09191583610188261 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05297334244702666 - nodes in this community are weakly interconnected._
+- **Should `Community 2` be split into smaller, more focused modules?**
+  _Cohesion score 0.06976744186046512 - nodes in this community are weakly interconnected._
