@@ -6,7 +6,8 @@ import { Fighter } from "@/components/draft/CombatScene";
 import type { SerializedLobby } from "@/lib/multiplayer/events";
 import type { RosterMap } from "@/lib/multiplayer/state";
 import { battleValueOf } from "@/lib/games/battle/battleValues";
-import { DECK_SIZE, type BattleState } from "@/lib/games/battle/types";
+import { buildDuelScript } from "@/lib/games/battle/combat";
+import type { BattleState } from "@/lib/games/battle/types";
 
 interface BattleCombatProps {
   lobby: SerializedLobby;
@@ -21,17 +22,12 @@ const ROUNDS = 4;
 /** Marge de battleValue à partir de laquelle le coup final devient un Black Flash. */
 const BLACK_FLASH_MARGIN = 30;
 
-interface Duel {
-  mine: { name: string; image?: string } | null;
-  theirs: { name: string; image?: string } | null;
-  myVal: number;
-  theirVal: number;
-}
-
 /**
- * Met en scène 5 duels séquentiels (mon perso i vs perso i de l'adversaire), en
- * réutilisant le composant `Fighter` du jeu Jujutsu Draft. Le vainqueur réel est
- * le cumul total (calculé côté serveur) ; cette animation ne fait que le raconter.
+ * Met en scène la séquence de duels (réutilise le `Fighter` de Jujutsu Draft).
+ * - Mode normal : 5 duels indépendants (perso i vs perso i).
+ * - Mode hardcore : gauntlet « le vainqueur reste » — le même combattant
+ *   enchaîne tant qu'il gagne. L'issue est PRÉ-CALCULÉE côté serveur ;
+ *   l'animation ne fait que la raconter.
  */
 export function BattleCombat({
   lobby,
@@ -40,22 +36,13 @@ export function BattleCombat({
   currentUserId,
   onFinish,
 }: BattleCombatProps) {
-  // L'état de combat est figé pendant l'animation → on calcule les duels une fois.
-  const duels: Duel[] = useMemo(() => {
+  // L'état de combat est figé pendant l'animation → on calcule le script une fois.
+  const duels = useMemo(() => {
     const opponent = lobby.players.find((p) => p.userId !== currentUserId);
     const myDeck = gameState.decks[currentUserId] ?? [];
     const oppDeck = opponent ? (gameState.decks[opponent.userId] ?? []) : [];
-    return Array.from({ length: DECK_SIZE }).map((_, i) => {
-      const mine = myDeck[i] ? rosterMap[myDeck[i]] : null;
-      const theirs = oppDeck[i] ? rosterMap[oppDeck[i]] : null;
-      return {
-        mine: mine ?? null,
-        theirs: theirs ?? null,
-        myVal: battleValueOf(mine),
-        theirVal: battleValueOf(theirs),
-      };
-    });
-  }, [lobby.players, gameState.decks, rosterMap, currentUserId]);
+    return buildDuelScript(myDeck, oppDeck, rosterMap, gameState.mode);
+  }, [lobby.players, gameState.decks, gameState.mode, rosterMap, currentUserId]);
 
   const [index, setIndex] = useState(0);
   const [myHp, setMyHp] = useState(100);
@@ -78,8 +65,12 @@ export function BattleCombat({
     setOppHp(100);
     setFlash(false);
 
-    const iWin = duel.myVal >= duel.theirVal;
-    const margin = Math.abs(duel.myVal - duel.theirVal);
+    const iWin = duel.outcome === "win";
+    const iLose = duel.outcome === "lose";
+    const margin = Math.abs(
+      battleValueOf(duel.mineId ? rosterMap[duel.mineId] : null) -
+        battleValueOf(duel.theirsId ? rosterMap[duel.theirsId] : null),
+    );
     const bigHit = iWin && margin >= BLACK_FLASH_MARGIN;
     const timers: ReturnType<typeof setTimeout>[] = [];
 
@@ -87,10 +78,13 @@ export function BattleCombat({
       timers.push(
         setTimeout(() => {
           setShakeKey((k) => k + 1);
-          if (iWin) {
-            setOppHp(Math.max(0, Math.round(100 - (100 * r) / ROUNDS)));
-          } else {
-            setMyHp(Math.max(0, Math.round(100 - (100 * r) / ROUNDS)));
+          const hp = Math.max(0, Math.round(100 - (100 * r) / ROUNDS));
+          if (iWin) setOppHp(hp);
+          else if (iLose) setMyHp(hp);
+          else {
+            // Double K.O. : les deux tombent.
+            setOppHp(hp);
+            setMyHp(hp);
           }
         }, r * ROUND_MS),
       );
@@ -103,7 +97,10 @@ export function BattleCombat({
           if (iWin) {
             setOppHp(0);
             if (bigHit) setFlash(true);
+          } else if (iLose) {
+            setMyHp(0);
           } else {
+            setOppHp(0);
             setMyHp(0);
           }
         },
@@ -128,6 +125,9 @@ export function BattleCombat({
   const duel = duels[index];
   if (!duel) return null;
 
+  const mine = duel.mineId ? rosterMap[duel.mineId] : null;
+  const theirs = duel.theirsId ? rosterMap[duel.theirsId] : null;
+
   return (
     <div className="relative mx-auto max-w-3xl overflow-hidden rounded-3xl border border-white/10 bg-void-800/60 p-6 backdrop-blur sm:p-10">
       <AnimatePresence>
@@ -148,8 +148,14 @@ export function BattleCombat({
 
       <div className="mb-6 text-center">
         <p className="font-display text-sm font-bold uppercase tracking-[0.2em] text-cursed-light">
-          Duel {index + 1} / {duels.length}
+          {gameState.mode === "hardcore" ? "Gauntlet" : "Duel"} {index + 1} /{" "}
+          {duels.length}
         </p>
+        {gameState.mode === "hardcore" && (
+          <p className="mt-1 text-[10px] uppercase tracking-wider text-white/40">
+            Hardcore · le vainqueur reste
+          </p>
+        )}
       </div>
 
       <motion.div
@@ -159,8 +165,8 @@ export function BattleCombat({
         className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-6"
       >
         <Fighter
-          name={duel.mine?.name ?? "—"}
-          image={duel.mine?.image}
+          name={mine?.name ?? "—"}
+          image={mine?.image}
           hp={myHp}
           hpColor="#22c55e"
           align="left"
@@ -169,8 +175,8 @@ export function BattleCombat({
           VS
         </span>
         <Fighter
-          name={duel.theirs?.name ?? "—"}
-          image={duel.theirs?.image}
+          name={theirs?.name ?? "—"}
+          image={theirs?.image}
           hp={oppHp}
           hpColor="#dc2626"
           align="right"

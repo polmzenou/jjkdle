@@ -17,13 +17,30 @@ export function mulberry32(seed: number): () => number {
 }
 
 /**
- * Tire une carte (id) dans `ids` de façon déterministe. Répétitions autorisées
- * (tirage à l'aveugle dans le roster complet à chaque tour).
+ * Mélange déterministe (Fisher-Yates) de `ids` à partir de la seule graine.
+ * Ne dépend PAS du curseur : la même graine produit toujours le même ordre, ce
+ * qui permet d'indexer le tirage par `drawCount` sans jamais retomber deux fois
+ * sur la même carte.
+ */
+export function shuffleIds(seed: number, ids: string[]): string[] {
+  const rand = mulberry32(seed >>> 0);
+  const out = ids.slice();
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
+/**
+ * Tire une carte (id) dans `ids` de façon déterministe et SANS DOUBLON : on
+ * parcourt un ordre mélangé fixé par la graine et on renvoie la `drawCount`-ième
+ * carte. Tant que `drawCount < ids.length`, chaque tirage est unique.
  */
 export function pickCard(seed: number, drawCount: number, ids: string[]): string {
-  const rand = mulberry32((seed + drawCount * 0x9e3779b9) >>> 0);
-  const index = Math.floor(rand() * ids.length);
-  return ids[Math.min(index, ids.length - 1)];
+  if (ids.length === 0) return ids[0];
+  const shuffled = shuffleIds(seed, ids);
+  return shuffled[drawCount % shuffled.length];
 }
 
 /** Graine aléatoire pour une nouvelle partie. */

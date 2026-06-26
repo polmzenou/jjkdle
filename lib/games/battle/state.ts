@@ -8,5 +8,6 @@ export function parseBattleState(value: unknown): BattleState | null {
   if (!value || typeof value !== "object") return null;
   const state = value as Partial<BattleState>;
   if (!state.phase || !state.decks) return null;
-  return state as BattleState;
+  // Compat. : anciens blobs sans `mode` → résolution cumulative par défaut.
+  return { mode: "normal", ...state } as BattleState;
 }

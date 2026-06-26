@@ -45,6 +45,7 @@ export function BattleLobby({
   const [lobby, setLobby] = useState<SerializedLobby>(initialLobby);
   const [gameState, setGameState] = useState<BattleState | null>(initialGameState);
   const [connError, setConnError] = useState<string | null>(null);
+  const [hardcore, setHardcore] = useState(false);
   const [pending, startTransition] = useTransition();
 
   const rosterMap = useMemo(() => buildRosterMap(roster), [roster]);
@@ -91,10 +92,10 @@ export function BattleLobby({
   // ── Actions ──
   const handleStart = useCallback(() => {
     startTransition(async () => {
-      const res = await startBattleAction(code);
+      const res = await startBattleAction(code, hardcore);
       if (!res.ok && res.error) setConnError(res.error);
     });
-  }, [code]);
+  }, [code, hardcore]);
 
   const handleDecide = useCallback(
     (decision: BattleDecision) => {
@@ -185,6 +186,25 @@ export function BattleLobby({
           onLeave={handleLeave}
           title="JJK Random Battle"
           maxPlayers={2}
+          hostExtra={
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-cursed/40 bg-cursed/5 px-4 py-3 text-left">
+              <input
+                type="checkbox"
+                checked={hardcore}
+                onChange={(e) => setHardcore(e.target.checked)}
+                className="h-4 w-4 accent-cursed"
+              />
+              <span>
+                <span className="block font-display text-sm font-bold uppercase tracking-wide text-cursed-light">
+                  Mode Hardcore
+                </span>
+                <span className="block text-xs text-white/50">
+                  Gauntlet « le vainqueur reste » : le plus fort élimine et continue
+                  jusqu'à tomber sur plus fort que lui.
+                </span>
+              </span>
+            </label>
+          }
         />
       )}
 

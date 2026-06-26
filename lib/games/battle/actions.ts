@@ -23,6 +23,7 @@ import {
   BATTLE_PLAYERS,
   DECK_SIZE,
   type BattleDecision,
+  type BattleMode,
   type BattleState,
   type BattleStatePayload,
 } from "./types";
@@ -94,7 +95,10 @@ export async function joinBattleLobbyAction(codeRaw: string): Promise<MpResult> 
 }
 
 /** Démarre la partie : init de l'état de draft (hôte commence). */
-export async function startBattleAction(codeRaw: string): Promise<MpResult> {
+export async function startBattleAction(
+  codeRaw: string,
+  hardcore = false,
+): Promise<MpResult> {
   const user = await getCurrentUser();
   if (!user) return { ok: false, needsAuth: true };
 
@@ -113,8 +117,10 @@ export async function startBattleAction(codeRaw: string): Promise<MpResult> {
   const decks: Record<string, string[]> = {};
   for (const p of lobby.players) decks[p.userId] = [];
 
+  const mode: BattleMode = hardcore ? "hardcore" : "normal";
   const state: BattleState = {
     phase: "DRAFT",
+    mode,
     seed,
     drawCount: 1, // 0 sert au tirage de la 1ère carte ci-dessous
     currentCardId: pickCard(seed, 0, ids),
@@ -191,7 +197,7 @@ export async function decideAction(
     );
 
     if (allFull) {
-      const result = computeBattleResult(decks, buildRosterMap(roster));
+      const result = computeBattleResult(decks, buildRosterMap(roster), state.mode);
       next = { ...state, decks, currentCardId: null, phase: "COMBAT", result };
     } else {
       // Tour suivant : on alterne, mais on saute l'adversaire si son deck est plein
@@ -200,6 +206,8 @@ export async function decideAction(
         (decks[opponent.userId]?.length ?? 0) >= DECK_SIZE
           ? user.id
           : opponent.userId;
+      // pickCard indexe un mélange fixé par la graine via drawCount → tirage
+      // sans doublon tant que drawCount < taille du roster (toujours le cas ici).
       next = {
         ...state,
         decks,

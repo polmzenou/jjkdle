@@ -16,10 +16,21 @@ export type BattlePhase = "DRAFT" | "COMBAT" | "RESULT";
 
 export type BattleDecision = "keep" | "give";
 
-/** Résultat de combat : cumul des battleValue, vainqueur (null si égalité). */
+/**
+ * Mode de résolution du combat :
+ * - `normal`   : le cumul des battleValue des 5 persos détermine le vainqueur.
+ * - `hardcore` : gauntlet « le vainqueur reste » — un perso plus fort élimine
+ *   l'adversaire et continue jusqu'à tomber sur plus fort que lui ; l'équipe
+ *   avec des survivants l'emporte.
+ */
+export type BattleMode = "normal" | "hardcore";
+
+/** Résultat de combat : vainqueur (null si égalité) + détails par mode. */
 export interface BattleResult {
-  /** userId -> cumul des battleValue de son deck. */
+  /** userId -> cumul des battleValue de son deck (toujours calculé, info). */
   scores: Record<string, number>;
+  /** userId -> persos restants (mode hardcore uniquement). */
+  survivors?: Record<string, number>;
   /** Gagnant ; null en cas d'égalité. */
   winnerUserId: string | null;
   tie: boolean;
@@ -28,6 +39,8 @@ export interface BattleResult {
 /** État de jeu autoritatif (blob `Lobby.gameState`). */
 export interface BattleState {
   phase: BattlePhase;
+  /** Mode de résolution choisi par l'hôte au démarrage. */
+  mode: BattleMode;
   /** Graine RNG fixée par l'hôte au démarrage (reproductibilité). */
   seed: number;
   /** Curseur RNG : nombre de cartes tirées (incrémenté côté serveur). */

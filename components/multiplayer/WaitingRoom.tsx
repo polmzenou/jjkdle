@@ -18,6 +18,8 @@ interface WaitingRoomProps {
   title?: string;
   /** Capacité du lobby (défaut : MAX_PLAYERS). 1v1 = 2 pour le battle. */
   maxPlayers?: number;
+  /** Contrôles supplémentaires (ex. options de partie), affichés à l'hôte. */
+  hostExtra?: React.ReactNode;
 }
 
 export function WaitingRoom({
@@ -28,6 +30,7 @@ export function WaitingRoom({
   onLeave,
   title = "Build the Perfect Sorcerer",
   maxPlayers = MAX_PLAYERS,
+  hostExtra,
 }: WaitingRoomProps) {
   const [copied, setCopied] = useState(false);
   const isHost = lobby.hostId === currentUserId;
@@ -123,6 +126,7 @@ export function WaitingRoom({
       </ul>
 
       <div className="mt-8 flex flex-col items-center gap-3">
+        {isHost && hostExtra}
         {isHost ? (
           <button
             type="button"
