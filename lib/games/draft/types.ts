@@ -14,7 +14,7 @@ export type DraftCategoryId =
   | "innate-technique"
   | "domain-expansion"
   | "black-flash"
-  | "cursed-tools";
+  | "teammate";
 
 /** Tier du draft (échelle propre, distincte du roster builder). */
 export type DraftTier = "S" | "A" | "B" | "C";

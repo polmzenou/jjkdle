@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { DraftCard } from "./DraftCard";
 import { DRAFT_CATEGORIES } from "@/lib/games/draft/categories";
 import { BUDGET } from "@/lib/games/draft/scoring";
@@ -9,6 +10,7 @@ import type {
   DraftCharacter,
   DraftPick,
   DraftSelection,
+  DraftTier,
 } from "@/lib/games/draft/types";
 
 interface DraftBoardProps {
@@ -17,6 +19,24 @@ interface DraftBoardProps {
   rosterById: Record<string, DraftCharacter>;
   onSelect: (categoryId: DraftCategoryId, character: DraftCharacter) => void;
   onLaunch: () => void;
+}
+
+/** Ordre d'affichage des cartes : du rang le plus haut au plus bas. */
+const TIER_RANK: Record<DraftTier, number> = { S: 0, A: 1, B: 2, C: 3 };
+
+function byRankDesc(cards: DraftCharacter[]): DraftCharacter[] {
+  return [...cards].sort(
+    (a, b) => TIER_RANK[a.tier] - TIER_RANK[b.tier] || b.statValue - a.statValue,
+  );
+}
+
+/** Étiquette verticale « Rang le plus haut / bas » bordant la ligne de choix. */
+function RankTag({ children }: { children: ReactNode }) {
+  return (
+    <span className="flex w-10 shrink-0 items-center justify-center rounded-lg border border-white/15 bg-void-900/40 px-1 text-center text-[9px] font-semibold uppercase leading-tight tracking-wide text-white/40 sm:w-12">
+      {children}
+    </span>
+  );
 }
 
 /**
@@ -80,42 +100,52 @@ export function DraftBoard({
         </div>
       </div>
 
-      {/* Catégories */}
-      <div className="space-y-6">
+      {/* Catégories — disposition en lignes (cf. maquette) */}
+      <div className="space-y-3">
         {DRAFT_CATEGORIES.map((category) => {
-          const picks = draw[category.id];
+          const picks = byRankDesc(draw[category.id]);
           const pickedId = selection[category.id];
 
           return (
-            <section key={category.id}>
-              <div className="mb-2 flex items-baseline justify-between gap-3">
-                <h3 className="font-display text-sm font-bold uppercase tracking-[0.15em] text-domain-light">
+            <section
+              key={category.id}
+              className="flex flex-col gap-3 rounded-2xl border border-white/15 bg-void-800/40 p-3 sm:flex-row sm:items-center sm:gap-4"
+            >
+              {/* Nom de la catégorie */}
+              <div className="sm:w-44 sm:shrink-0">
+                <h3 className="font-display text-sm font-bold uppercase tracking-[0.12em] text-domain-light">
                   {category.label}
                 </h3>
-                <span className="truncate text-[11px] text-white/35">
+                <p className="mt-0.5 text-[11px] leading-tight text-white/35">
                   {category.description}
-                </span>
+                </p>
               </div>
-              <div className="grid grid-cols-5 gap-2 sm:gap-3">
-                {picks.map((character) => {
-                  const selected = pickedId === character.id;
-                  const affordable = canSelect(
-                    selection,
-                    draw,
-                    category.id,
-                    character,
-                    rosterById,
-                  );
-                  return (
-                    <DraftCard
-                      key={character.id}
-                      character={character}
-                      selected={selected}
-                      disabled={!affordable}
-                      onSelect={() => onSelect(category.id, character)}
-                    />
-                  );
-                })}
+
+              {/* Ligne de choix : rang le plus haut → le plus bas */}
+              <div className="flex flex-1 items-stretch gap-2">
+                <RankTag>Rang le plus haut</RankTag>
+                <div className="grid flex-1 grid-cols-5 gap-2">
+                  {picks.map((character) => {
+                    const selected = pickedId === character.id;
+                    const affordable = canSelect(
+                      selection,
+                      draw,
+                      category.id,
+                      character,
+                      rosterById,
+                    );
+                    return (
+                      <DraftCard
+                        key={character.id}
+                        character={character}
+                        selected={selected}
+                        disabled={!affordable}
+                        onSelect={() => onSelect(category.id, character)}
+                      />
+                    );
+                  })}
+                </div>
+                <RankTag>Rang le plus bas</RankTag>
               </div>
             </section>
           );

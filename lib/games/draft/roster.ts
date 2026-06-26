@@ -94,13 +94,13 @@ export const DRAFT_ROSTER: DraftCharacter[] = [
   ch("toad", "Toad", "black-flash", "C", 8, 5, "Toad_EP35.webp"),
   ch("nitta", "Akari Nitta", "black-flash", "C", 6, 3),
 
-  // ── Armes maudites ──
-  ch("mahoraga", "Mahoraga", "cursed-tools", "S", 25, 28, "Mahoraga_EP41.webp"),
-  ch("rika", "Rika Orimoto", "cursed-tools", "A", 19, 17, "Rika_Portrait_Anime.webp"),
-  ch("gakuganji", "Yoshinobu Gakuganji", "cursed-tools", "B", 12, 9, "Yoshinobu_Portrait_Anime.webp"),
-  ch("larue", "Larue", "cursed-tools", "B", 13, 10),
-  ch("megumi", "Megumi Fushiguro", "cursed-tools", "C", 9, 6, "Megumi_Portrait_Anime.webp"),
-  ch("yorozu", "Yorozu", "cursed-tools", "C", 7, 4),
+  // ── Coéquipier ──
+  ch("mahoraga", "Mahoraga", "teammate", "S", 25, 28, "Mahoraga_EP41.webp"),
+  ch("rika", "Rika Orimoto", "teammate", "A", 19, 17, "Rika_Portrait_Anime.webp"),
+  ch("gakuganji", "Yoshinobu Gakuganji", "teammate", "B", 12, 9, "Yoshinobu_Portrait_Anime.webp"),
+  ch("larue", "Larue", "teammate", "B", 13, 10),
+  ch("megumi", "Megumi Fushiguro", "teammate", "C", 9, 6, "Megumi_Portrait_Anime.webp"),
+  ch("yorozu", "Yorozu", "teammate", "C", 7, 4),
 ];
 
 export const DRAFT_ROSTER_BY_ID: Record<string, DraftCharacter> =

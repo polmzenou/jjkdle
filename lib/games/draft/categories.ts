@@ -45,9 +45,9 @@ export const DRAFT_CATEGORIES: DraftCategory[] = [
     description: "Facilité à déclencher le Black Flash.",
   },
   {
-    id: "cursed-tools",
-    label: "Armes maudites",
-    description: "Maîtrise des armes et outils maudits.",
+    id: "teammate",
+    label: "Coéquipier",
+    description: "Valeur du sorcier comme coéquipier / soutien d'équipe.",
   },
 ];
 

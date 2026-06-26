@@ -16,7 +16,7 @@ import type { DraftSelection } from "./types";
  * atteignant pile chaque palier de boss (1 → 6). Elles verrouillent la
  * calibration : si un seuil/coût bouge, le test signale la régression.
  *
- * Scores mesurés : tier1=92, tier2=140, tier3=165, tier4=188, tier5=205, tier6=217.
+ * Scores mesurés : tier1=92, tier2=140, tier3=165, tier4=188, tier5=205, tier6=223.
  */
 const ARCHETYPES: Record<string, DraftSelection> = {
   // 1 boss — équipe la moins chère possible (score plancher 92).
@@ -28,7 +28,7 @@ const ARCHETYPES: Record<string, DraftSelection> = {
     "innate-technique": "charles",
     "domain-expansion": "manami",
     "black-flash": "nitta",
-    "cursed-tools": "yorozu",
+    teammate: "yorozu",
   },
   // 2 boss (140).
   tier2: {
@@ -39,7 +39,7 @@ const ARCHETYPES: Record<string, DraftSelection> = {
     "innate-technique": "kurourushi",
     "domain-expansion": "manami",
     "black-flash": "toad",
-    "cursed-tools": "yorozu",
+    teammate: "yorozu",
   },
   // 3 boss (165).
   tier3: {
@@ -50,7 +50,7 @@ const ARCHETYPES: Record<string, DraftSelection> = {
     "innate-technique": "kurourushi",
     "domain-expansion": "manami",
     "black-flash": "nitta",
-    "cursed-tools": "yorozu",
+    teammate: "yorozu",
   },
   // 4 boss (188).
   tier4: {
@@ -61,7 +61,7 @@ const ARCHETYPES: Record<string, DraftSelection> = {
     "innate-technique": "kurourushi",
     "domain-expansion": "fumihiko",
     "black-flash": "nitta",
-    "cursed-tools": "yorozu",
+    teammate: "yorozu",
   },
   // 5 boss (205).
   tier5: {
@@ -72,18 +72,18 @@ const ARCHETYPES: Record<string, DraftSelection> = {
     "innate-technique": "dagon",
     "domain-expansion": "manami",
     "black-flash": "nitta",
-    "cursed-tools": "yorozu",
+    teammate: "yorozu",
   },
-  // 6 boss — VICTORY (217).
+  // 6 boss — VICTORY (223, optimum brute-force sous budget).
   tier6: {
-    "occult-energy": "yuta",
+    "occult-energy": "choso",
     "physical-strength": "maki",
-    speed: "nanami",
-    "battle-iq": "kenjaku",
+    speed: "divine-dog",
+    "battle-iq": "mechamaru",
     "innate-technique": "dagon",
-    "domain-expansion": "yaga",
+    "domain-expansion": "angel",
     "black-flash": "inumaki",
-    "cursed-tools": "yorozu",
+    teammate: "rika",
   },
 };
 

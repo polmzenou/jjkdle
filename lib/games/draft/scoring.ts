@@ -38,15 +38,15 @@ export const CATEGORY_BONUS = 0.5;
  *   Geto   165  → équipe correcte
  *   Sukuna 188  → bonne équipe (≈ médiane)
  *   Gojo   205  → très bonne équipe
- *   Yuji   217  → quasi-optimum (budget optimisé)
+ *   Yuji   220  → optimum quasi pur (à 3 pts du plafond 223 : draft impeccable)
  */
 export const BOSSES: Boss[] = [
   { id: "panda", name: "Panda", threshold: 90, image: "/assets/characters/Panda_Portrait_Anime.webp" },
   { id: "mahito", name: "Mahito", threshold: 140, image: "/assets/characters/Mahito_Portrait_Anime.webp" },
   { id: "geto", name: "Suguru Geto", threshold: 165, image: "/assets/characters/Suguru_Portrait_Anime.webp" },
   { id: "sukuna", name: "Ryomen Sukuna", threshold: 188, image: "/assets/characters/Sukuna_Portrait_Anime.webp" },
-  { id: "gojo", name: "Satoru Gojo", threshold: 205, image: "/assets/characters/Satoru_Portrait_Anime.webp" },
-  { id: "yuji", name: "Yuji Itadori", threshold: 217, image: "/assets/characters/Yuji_Portrait_Anime_2.webp" },
+  { id: "gojo", name: "Satoru Gojo", threshold: 210, image: "/assets/characters/Satoru_Portrait_Anime.webp" },
+  { id: "yuji", name: "Yuji Itadori", threshold: 223, image: "/assets/characters/Yuji_Portrait_Modulo.webp" },
 ];
 
 /** Contribution d'un perso placé dans `slotCategory`. */
