@@ -4,17 +4,32 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createLobbyAction, joinLobbyAction } from "@/lib/multiplayer/actions";
 
+type LobbyActionResult = { ok: boolean; error?: string; code?: string };
+
+interface MpHubFormProps {
+  /** Action de création (défaut : builder). */
+  createAction?: () => Promise<LobbyActionResult>;
+  /** Action de rejoindre (défaut : builder). */
+  joinAction?: (code: string) => Promise<LobbyActionResult>;
+  /** Base de route du lobby (défaut : "/games/multiplayer"). */
+  basePath?: string;
+}
+
 /**
  * Hub multijoueur : créer un lobby privé ou en rejoindre un via son code.
- * Builder uniquement pour l'instant.
+ * Réutilisable par plusieurs jeux via `createAction`/`joinAction`/`basePath`.
  */
-export function MpHubForm() {
+export function MpHubForm({
+  createAction = createLobbyAction,
+  joinAction = joinLobbyAction,
+  basePath = "/games/multiplayer",
+}: MpHubFormProps = {}) {
   const router = useRouter();
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  function go(action: () => Promise<{ ok: boolean; error?: string; code?: string }>) {
+  function go(action: () => Promise<LobbyActionResult>) {
     setError(null);
     startTransition(async () => {
       const res = await action();
@@ -22,7 +37,7 @@ export function MpHubForm() {
         setError(res.error ?? "Une erreur est survenue.");
         return;
       }
-      router.push(`/games/multiplayer/${res.code}`);
+      router.push(`${basePath}/${res.code}`);
     });
   }
 
@@ -31,7 +46,7 @@ export function MpHubForm() {
       <button
         type="button"
         disabled={pending}
-        onClick={() => go(() => createLobbyAction())}
+        onClick={() => go(() => createAction())}
         className="w-full rounded-2xl bg-domain px-6 py-4 font-display text-lg font-bold uppercase tracking-wide text-white shadow-glow transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-60"
       >
         Créer un lobby privé
@@ -46,7 +61,7 @@ export function MpHubForm() {
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          if (code.trim()) go(() => joinLobbyAction(code));
+          if (code.trim()) go(() => joinAction(code));
         }}
         className="space-y-3"
       >

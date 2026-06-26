@@ -16,6 +16,7 @@ type CharacterRow = {
   tier: string;
   image: string | null;
   ratings: unknown;
+  battleValue: number | null;
 };
 
 function toCharacter(row: CharacterRow): Character {
@@ -26,6 +27,7 @@ function toCharacter(row: CharacterRow): Character {
     tier: row.tier as CharacterTier,
     ...(row.image ? { image: row.image } : {}),
     ratings: (row.ratings ?? {}) as Partial<Record<CategoryId, number>>,
+    ...(row.battleValue != null ? { battleValue: row.battleValue } : {}),
   };
 }
 
@@ -54,6 +56,7 @@ export async function getRoster(): Promise<Character[]> {
       tier: true,
       image: true,
       ratings: true,
+      battleValue: true,
     },
   });
   return rows.map(toCharacter);

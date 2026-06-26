@@ -117,6 +117,9 @@ model Character {
   imageData Bytes?
   imageMime String?
   ratings   Json
+  /// Score de combat pour le jeu "JJK Random Battle" (cumul de fin de partie).
+  /// Optionnel : le builder l'ignore ; fallback 30 côté battle si null.
+  battleValue Int?
   position  Int     @default(0)
 
   @@index([position])
@@ -175,6 +178,9 @@ model Lobby {
   status     LobbyStatus @default(WAITING)
   /// Manche courante (0-indexée) : nombre de catégories déjà verrouillées par joueur.
   roundIndex Int         @default(0)
+  /// État de jeu autoritatif pour les modes hors builder (ex. "JJK Random Battle").
+  /// Blob JSON spécifique au gameId ; vide ({}) pour le builder.
+  gameState  Json        @default("{}")
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
 

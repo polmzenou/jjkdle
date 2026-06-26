@@ -24,6 +24,7 @@ interface FormState {
   name: string;
   title: string;
   tier: CharacterTier;
+  battleValue: string;
   image: string;
   cats: Record<string, CatField>;
 }
@@ -84,6 +85,7 @@ export function AdminDashboard({
       name: "",
       title: "",
       tier: "3",
+      battleValue: "",
       image: "",
       cats: Object.fromEntries(
         categories.map((c) => [c.id, { enabled: false, value: "" }]),
@@ -130,6 +132,7 @@ export function AdminDashboard({
       name: c.name,
       title: c.title ?? "",
       tier: c.tier,
+      battleValue: c.battleValue?.toString() ?? "",
       image: c.image ?? "",
       cats: Object.fromEntries(
         categories.map((cat) => {
@@ -166,6 +169,9 @@ export function AdminDashboard({
       name: form.name.trim(),
       title: form.title.trim(),
       tier: form.tier,
+      ...(form.battleValue.trim() !== ""
+        ? { battleValue: Number(form.battleValue) }
+        : {}),
       ...(image ? { image } : {}),
       ratings,
     };
@@ -397,6 +403,20 @@ export function AdminDashboard({
                 </option>
               ))}
             </select>
+          </Field>
+
+          <Field label="Battle value (combat — 0 à 100)">
+            <input
+              type="number"
+              min={0}
+              max={100}
+              value={form.battleValue}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, battleValue: e.target.value }))
+              }
+              className={inputCls}
+              placeholder="ex. 50 (vide = secours 30)"
+            />
           </Field>
 
           {/* Catégories */}

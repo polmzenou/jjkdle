@@ -201,7 +201,8 @@ export function CombatScene({ result, avatar, onFinish }: CombatSceneProps) {
   );
 }
 
-function Fighter({
+/** Carte combattant (portrait + barre de vie). Réutilisée par « JJK Random Battle ». */
+export function Fighter({
   name,
   image,
   hp,

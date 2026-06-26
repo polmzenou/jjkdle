@@ -69,6 +69,15 @@ export async function saveCharacterAction(
 
   const image = String(input.image ?? "").trim();
 
+  // battleValue : optionnel, entier borné 0–100 (cohérent avec le barème fourni).
+  let battleValue: number | undefined;
+  if (input.battleValue != null && `${input.battleValue}` !== "") {
+    const n = Number(input.battleValue);
+    if (Number.isFinite(n)) {
+      battleValue = Math.max(0, Math.min(100, Math.round(n)));
+    }
+  }
+
   const char: Character = {
     id,
     name,
@@ -76,6 +85,7 @@ export async function saveCharacterAction(
     tier: input.tier,
     ...(image ? { image } : {}),
     ratings,
+    ...(battleValue != null ? { battleValue } : {}),
   };
 
   try {

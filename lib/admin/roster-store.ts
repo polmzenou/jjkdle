@@ -23,6 +23,7 @@ export async function upsertCharacter(char: Character): Promise<void> {
     tier: char.tier,
     image: char.image ?? null,
     ratings: char.ratings,
+    battleValue: char.battleValue ?? null,
   };
 
   const existing = await prisma.character.findUnique({

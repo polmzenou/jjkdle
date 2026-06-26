@@ -35,6 +35,12 @@ export interface Character {
   image?: string;
   /** Notes 0–100 par catégorie. Clé présente = éligible à la catégorie. */
   ratings: Partial<Record<CategoryId, number>>;
+  /**
+   * Score de combat utilisé par le jeu « JJK Random Battle » (cumul de fin de
+   * partie). Optionnel : absent côté builder, qui l'ignore complètement. Si non
+   * défini, le battle applique une valeur de secours (30).
+   */
+  battleValue?: number;
 }
 
 // Le JSON est validé/écrit par la couche admin ; cast direct vers le type métier.

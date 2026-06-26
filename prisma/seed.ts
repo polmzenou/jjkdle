@@ -42,6 +42,7 @@ async function main() {
       tier: ch.tier,
       image: ch.image ?? null,
       ratings: ch.ratings,
+      battleValue: ch.battleValue ?? null,
       position,
     };
     await prisma.character.upsert({

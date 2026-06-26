@@ -39,8 +39,12 @@ export function findLobby(code: string): Promise<LobbyWithPlayers | null> {
   });
 }
 
-/** Crée un lobby avec un code unique et l'hôte comme premier joueur. */
-export async function createLobby(hostId: string): Promise<LobbyWithPlayers> {
+/** Crée un lobby avec un code unique et l'hôte comme premier joueur.
+ * `gameId` discrimine le jeu (défaut "builder", "battle" pour JJK Random Battle). */
+export async function createLobby(
+  hostId: string,
+  gameId = "builder",
+): Promise<LobbyWithPlayers> {
   // Quelques tentatives en cas de collision improbable du code.
   for (let attempt = 0; attempt < 5; attempt++) {
     const code = randomCode();
@@ -49,6 +53,7 @@ export async function createLobby(hostId: string): Promise<LobbyWithPlayers> {
     return prisma.lobby.create({
       data: {
         code,
+        gameId,
         hostId,
         players: { create: { userId: hostId, joinOrder: 0 } },
       },

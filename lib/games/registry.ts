@@ -41,6 +41,18 @@ export const GAMES: Game[] = [
     previewImage: "/assets/draft-screen.png",
     status: "live",
   },
+  {
+    id: "battle",
+    title: "JJK Random Battle",
+    description:
+      "Affronte un ami en 1v1 : drafte une carte tirée au hasard à tour de rôle (garde-la ou refile-la), compose ton équipe de 5, puis laisse parler le combat. Le cumul le plus fort gagne.",
+    route: "/games/battle",
+    glyph: "⚡",
+    tags: ["1v1", "multijoueur", "draft", "roster JJK"],
+    accent: "#dc2626",
+    previewImage: "/assets/battle-screen.png",
+    status: "live",
+  },
   // Exemple de jeu futur (grisé sur le hub) :
   // {
   //   id: "domain-clash",

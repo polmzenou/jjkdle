@@ -14,6 +14,10 @@ interface WaitingRoomProps {
   pending: boolean;
   onStart: () => void;
   onLeave: () => void;
+  /** Titre affiché (défaut : builder). */
+  title?: string;
+  /** Capacité du lobby (défaut : MAX_PLAYERS). 1v1 = 2 pour le battle. */
+  maxPlayers?: number;
 }
 
 export function WaitingRoom({
@@ -22,6 +26,8 @@ export function WaitingRoom({
   pending,
   onStart,
   onLeave,
+  title = "Build the Perfect Sorcerer",
+  maxPlayers = MAX_PLAYERS,
 }: WaitingRoomProps) {
   const [copied, setCopied] = useState(false);
   const isHost = lobby.hostId === currentUserId;
@@ -63,7 +69,7 @@ export function WaitingRoom({
     <div className="mx-auto max-w-lg text-center">
       <p className="text-sm uppercase tracking-[0.3em] text-white/40">Salon d'attente</p>
       <h1 className="mt-2 font-display text-3xl font-bold text-white">
-        Build the Perfect Sorcerer
+        {title}
       </h1>
 
       {/* Code partageable */}
@@ -80,7 +86,7 @@ export function WaitingRoom({
         </span>
       </button>
       <p className="mt-2 text-xs text-white/40">
-        Partage ce code pour inviter (jusqu'à {MAX_PLAYERS} joueurs).
+        Partage ce code pour inviter (jusqu'à {maxPlayers} joueurs).
       </p>
 
       {/* Liste des joueurs */}
@@ -106,7 +112,7 @@ export function WaitingRoom({
             )}
           </motion.li>
         ))}
-        {Array.from({ length: MAX_PLAYERS - lobby.players.length }).map((_, i) => (
+        {Array.from({ length: Math.max(0, maxPlayers - lobby.players.length) }).map((_, i) => (
           <li
             key={`empty-${i}`}
             className="rounded-xl border border-dashed border-white/10 px-4 py-3 text-sm text-white/30"

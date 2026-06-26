@@ -38,8 +38,8 @@ export const CATEGORY_BONUS = 0.5;
  *   Panda  130 → battu par ~100 % (échauffement, tombe avec presque tout)
  *   Mahito 178 → ~89 %
  *   Geto   197 → ~66 %  (équipe correcte)
- *   Sukuna 213 → ~33 %  ← gap +16 pts : la moitié du field y reste
- *   Gojo   225 → ~6 %   (très bon draft)
+ *   Sukuna 230 → ~33 %  ← gap +16 pts : la moitié du field y reste
+ *   Gojo   235 → ~6 %   (très bon draft)
  *   Yuji   232 → ~0,4 % (draft quasi optimal — plafond 240)
  *
  * NB : le roster maître en code (`roster.ts`) n'est qu'un REPLI (max ≈ 223) ;
@@ -51,7 +51,7 @@ export const BOSSES: Boss[] = [
   { id: "geto", name: "Suguru Geto", threshold: 197, image: "/assets/characters/Suguru_Portrait_Anime.webp" },
   { id: "sukuna", name: "Ryomen Sukuna", threshold: 230, image: "/assets/characters/Sukuna_Portrait_Anime.webp" },
   { id: "gojo", name: "Satoru Gojo", threshold: 235, image: "/assets/characters/Satoru_Portrait_Anime.webp" },
-  { id: "yuji", name: "Yuji Itadori", threshold: 250, image: "/assets/characters/Yuji_Portrait_Modulo.webp" },
+  { id: "yuji", name: "Yuji Itadori", threshold: 240, image: "/assets/characters/Yuji_Portrait_Modulo.webp" },
 ];
 
 /** Contribution d'un perso placé dans `slotCategory`. */
