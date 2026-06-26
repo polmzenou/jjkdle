@@ -198,6 +198,11 @@ model LobbyPlayer {
   currentDraw     Json    @default("{}")
   /// A verrouillé une catégorie pour la manche en cours (lockstep).
   lockedThisRound Boolean @default(false)
+  /// Easter egg perso : ne propose que les meilleures cartes (reste actif).
+  curated         Boolean @default(false)
+  /// Easter egg (caché) : un adversaire l'a saboté → pires cartes au tour suivant.
+  /// Drapeau à usage unique, consommé (remis à false) lors de l'avance de manche.
+  sabotaged       Boolean @default(false)
   /// Score final (calculé à la fin via evaluateBuild).
   finalScore      Int?
 
