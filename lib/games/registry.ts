@@ -38,6 +38,7 @@ export const GAMES: Game[] = [
     glyph: "⚔️",
     tags: ["draft", "combat", "roster JJK"],
     accent: "#f59e0b",
+    previewImage: "/assets/draft-screen.png",
     status: "live",
   },
   // Exemple de jeu futur (grisé sur le hub) :

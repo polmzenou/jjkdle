@@ -27,26 +27,31 @@ export const COST_COEF = 0.4;
 export const CATEGORY_BONUS = 0.5;
 
 /**
- * Seuils cachés des boss — CALIBRÉS PAR SIMULATION (cf. scoring.test.ts).
+ * Seuils cachés des boss — CALIBRÉS PAR SIMULATION sur le ROSTER RÉEL (base
+ * Neon, éditable en /admin), via `scripts/calibrate.mjs` (brute-force des
+ * ~85 M équipes légales). À RELANCER après une grosse retouche du roster.
  *
- * Tirage CLOISONNÉ (chaque perso est toujours dans sa catégorie d'excellence →
- * bonus toujours appliqué). Distribution mesurée sur toutes les équipes légales
- * (budget ≤ 100) : min **92** (équipe la moins chère), médiane ≈ 186, max
- * **223** (optimum). Seuils placés pour une courbe régulière sur [92, 223] :
- *   Panda   90  → tombe avec n'importe quelle équipe (même la moins chère, 92)
- *   Mahito 140  → un brin au-dessus du plancher
- *   Geto   165  → équipe correcte
- *   Sukuna 188  → bonne équipe (≈ médiane)
- *   Gojo   205  → très bonne équipe
- *   Yuji   220  → optimum quasi pur (à 3 pts du plafond 223 : draft impeccable)
+ * Distribution mesurée (budget ≤ 100) : min **104**, médiane ≈ 205, max **240**.
+ * Le « % battu » est la part d'équipes légales qui dépassent le seuil → mesure
+ * de difficulté. Courbe voulue : chaque boss élimine une bonne part du field,
+ * avec un VRAI gap Geto → Sukuna, et un Yuji quasi-mur final.
+ *   Panda  130 → battu par ~100 % (échauffement, tombe avec presque tout)
+ *   Mahito 178 → ~89 %
+ *   Geto   197 → ~66 %  (équipe correcte)
+ *   Sukuna 213 → ~33 %  ← gap +16 pts : la moitié du field y reste
+ *   Gojo   225 → ~6 %   (très bon draft)
+ *   Yuji   232 → ~0,4 % (draft quasi optimal — plafond 240)
+ *
+ * NB : le roster maître en code (`roster.ts`) n'est qu'un REPLI (max ≈ 223) ;
+ * ces seuils visent le roster de prod. Cf. `scoring.test.ts` pour la courbe.
  */
 export const BOSSES: Boss[] = [
-  { id: "panda", name: "Panda", threshold: 90, image: "/assets/characters/Panda_Portrait_Anime.webp" },
-  { id: "mahito", name: "Mahito", threshold: 140, image: "/assets/characters/Mahito_Portrait_Anime.webp" },
-  { id: "geto", name: "Suguru Geto", threshold: 165, image: "/assets/characters/Suguru_Portrait_Anime.webp" },
-  { id: "sukuna", name: "Ryomen Sukuna", threshold: 188, image: "/assets/characters/Sukuna_Portrait_Anime.webp" },
-  { id: "gojo", name: "Satoru Gojo", threshold: 210, image: "/assets/characters/Satoru_Portrait_Anime.webp" },
-  { id: "yuji", name: "Yuji Itadori", threshold: 223, image: "/assets/characters/Yuji_Portrait_Modulo.webp" },
+  { id: "panda", name: "Panda", threshold: 130, image: "/assets/characters/Panda_Portrait_Anime.webp" },
+  { id: "mahito", name: "Mahito", threshold: 178, image: "/assets/characters/Mahito_Portrait_Anime.webp" },
+  { id: "geto", name: "Suguru Geto", threshold: 197, image: "/assets/characters/Suguru_Portrait_Anime.webp" },
+  { id: "sukuna", name: "Ryomen Sukuna", threshold: 213, image: "/assets/characters/Sukuna_Portrait_Anime.webp" },
+  { id: "gojo", name: "Satoru Gojo", threshold: 225, image: "/assets/characters/Satoru_Portrait_Anime.webp" },
+  { id: "yuji", name: "Yuji Itadori", threshold: 232, image: "/assets/characters/Yuji_Portrait_Modulo.webp" },
 ];
 
 /** Contribution d'un perso placé dans `slotCategory`. */
