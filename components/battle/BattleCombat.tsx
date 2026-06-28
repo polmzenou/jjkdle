@@ -5,7 +5,6 @@ import { AnimatePresence, motion, useAnimationControls } from "framer-motion";
 import { Fighter } from "@/components/draft/CombatScene";
 import type { SerializedLobby } from "@/lib/multiplayer/events";
 import type { RosterMap } from "@/lib/multiplayer/state";
-import { battleValueOf } from "@/lib/games/battle/battleValues";
 import { buildDuelScript } from "@/lib/games/battle/combat";
 import type { BattleState } from "@/lib/games/battle/types";
 
@@ -19,15 +18,29 @@ interface BattleCombatProps {
 
 const ROUND_MS = 460;
 const ROUNDS = 4;
-/** Marge de battleValue à partir de laquelle le coup final devient un Black Flash. */
+/** Écart de HP à partir duquel le coup gagnant devient un Black Flash. */
 const BLACK_FLASH_MARGIN = 30;
+
+/** Pourcentage de remplissage de la barre (HP courant / HP max). */
+function pct(hp: number, max: number): number {
+  return max > 0 ? Math.max(0, Math.min(100, (hp / max) * 100)) : 0;
+}
+
+/** Couleur de la barre selon le remplissage : vire à l'orange puis rouge néon. */
+function hpColor(percent: number, base: string): string {
+  if (percent <= 25) return "#ef4444"; // rouge néon : danger
+  if (percent <= 50) return "#f59e0b"; // orange : entamé
+  return base;
+}
 
 /**
  * Met en scène la séquence de duels (réutilise le `Fighter` de Jujutsu Draft).
- * - Mode normal : 5 duels indépendants (perso i vs perso i).
- * - Mode hardcore : gauntlet « le vainqueur reste » — le même combattant
- *   enchaîne tant qu'il gagne. L'issue est PRÉ-CALCULÉE côté serveur ;
- *   l'animation ne fait que la raconter.
+ * - Mode normal : 5 duels indépendants (perso i vs perso i), issue = cumul de
+ *   battleValue ; les barres descendent de plein → 0 (purement visuel).
+ * - Mode hardcore : gauntlet « le vainqueur reste » avec HP persistants — le
+ *   champion encaisse les HP du perdant et continue affaibli, sa barre reste
+ *   réduite d'un duel à l'autre. L'issue est PRÉ-CALCULÉE côté serveur ;
+ *   l'animation ne fait que la raconter (mêmes entrées → même script).
  */
 export function BattleCombat({
   lobby,
@@ -45,8 +58,9 @@ export function BattleCombat({
   }, [lobby.players, gameState.decks, gameState.mode, rosterMap, currentUserId]);
 
   const [index, setIndex] = useState(0);
-  const [myHp, setMyHp] = useState(100);
-  const [oppHp, setOppHp] = useState(100);
+  // HP courants (valeurs absolues) de chaque combattant en lice.
+  const [myHp, setMyHp] = useState(0);
+  const [oppHp, setOppHp] = useState(0);
   const [flash, setFlash] = useState(false);
   const shake = useAnimationControls();
   const finishedRef = useRef(false);
@@ -65,48 +79,39 @@ export function BattleCombat({
     const duel = duels[index];
     if (!duel) return;
 
-    setMyHp(100);
-    setOppHp(100);
+    // Les barres partent des HP d'ENTRÉE (le champion qui reste garde ses HP).
+    setMyHp(duel.mineHpStart);
+    setOppHp(duel.theirsHpStart);
     setFlash(false);
 
-    const iWin = duel.outcome === "win";
-    const iLose = duel.outcome === "lose";
-    const margin = Math.abs(
-      battleValueOf(duel.mineId ? rosterMap[duel.mineId] : null) -
-        battleValueOf(duel.theirsId ? rosterMap[duel.theirsId] : null),
-    );
-    const bigHit = iWin && margin >= BLACK_FLASH_MARGIN;
+    const bigHit =
+      duel.outcome === "win" &&
+      duel.mineHpStart - duel.theirsHpStart >= BLACK_FLASH_MARGIN;
     const timers: ReturnType<typeof setTimeout>[] = [];
 
+    // Interpolation linéaire start → end sur les rounds (les DEUX côtés bougent :
+    // le vainqueur encaisse aussi les HP du perdant).
     for (let r = 1; r <= ROUNDS; r++) {
       timers.push(
         setTimeout(() => {
           triggerShake();
-          const hp = Math.max(0, Math.round(100 - (100 * r) / ROUNDS));
-          if (iWin) setOppHp(hp);
-          else if (iLose) setMyHp(hp);
-          else {
-            // Double K.O. : les deux tombent.
-            setOppHp(hp);
-            setMyHp(hp);
-          }
+          const t = r / ROUNDS;
+          setMyHp(duel.mineHpStart + (duel.mineHpEnd - duel.mineHpStart) * t);
+          setOppHp(
+            duel.theirsHpStart + (duel.theirsHpEnd - duel.theirsHpStart) * t,
+          );
         }, r * ROUND_MS),
       );
     }
 
+    // Coup final : on cale exactement sur les HP de fin (le perdant tombe à 0).
     timers.push(
       setTimeout(
         () => {
           triggerShake();
-          if (iWin) {
-            setOppHp(0);
-            if (bigHit) setFlash(true);
-          } else if (iLose) {
-            setMyHp(0);
-          } else {
-            setOppHp(0);
-            setMyHp(0);
-          }
+          setMyHp(duel.mineHpEnd);
+          setOppHp(duel.theirsHpEnd);
+          if (bigHit) setFlash(true);
         },
         (ROUNDS + 1) * ROUND_MS,
       ),
@@ -131,6 +136,10 @@ export function BattleCombat({
 
   const mine = duel.mineId ? rosterMap[duel.mineId] : null;
   const theirs = duel.theirsId ? rosterMap[duel.theirsId] : null;
+  const isHardcore = gameState.mode === "hardcore";
+
+  const myPct = pct(myHp, duel.mineMaxHp);
+  const oppPct = pct(oppHp, duel.theirsMaxHp);
 
   return (
     <div className="relative mx-auto max-w-3xl overflow-hidden rounded-3xl border border-white/10 bg-void-800/60 p-6 backdrop-blur sm:p-10">
@@ -152,12 +161,11 @@ export function BattleCombat({
 
       <div className="mb-6 text-center">
         <p className="font-display text-sm font-bold uppercase tracking-[0.2em] text-cursed-light">
-          {gameState.mode === "hardcore" ? "Gauntlet" : "Duel"} {index + 1} /{" "}
-          {duels.length}
+          {isHardcore ? "Gauntlet" : "Duel"} {index + 1} / {duels.length}
         </p>
-        {gameState.mode === "hardcore" && (
+        {isHardcore && (
           <p className="mt-1 text-[10px] uppercase tracking-wider text-white/40">
-            Hardcore · le vainqueur reste
+            Hardcore · le vainqueur reste (PV persistants)
           </p>
         )}
       </div>
@@ -169,9 +177,11 @@ export function BattleCombat({
         <Fighter
           name={mine?.name ?? "—"}
           image={mine?.image}
-          hp={myHp}
-          hpColor="#22c55e"
+          hp={myPct}
+          hpColor={hpColor(myPct, "#22c55e")}
           align="left"
+          hpValue={isHardcore ? myHp : undefined}
+          hpMax={isHardcore ? duel.mineMaxHp : undefined}
         />
         <span className="animate-glow-pulse font-display text-2xl font-black text-white/70">
           VS
@@ -179,9 +189,11 @@ export function BattleCombat({
         <Fighter
           name={theirs?.name ?? "—"}
           image={theirs?.image}
-          hp={oppHp}
-          hpColor="#dc2626"
+          hp={oppPct}
+          hpColor={hpColor(oppPct, "#dc2626")}
           align="right"
+          hpValue={isHardcore ? oppHp : undefined}
+          hpMax={isHardcore ? duel.theirsMaxHp : undefined}
         />
       </motion.div>
 

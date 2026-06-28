@@ -55,12 +55,13 @@ function hardcoreResult(
 ): BattleResult {
   const [a, b] = Object.keys(decks);
   // Gauntlet à deux joueurs : on attend exactement 2 decks.
-  const { aRemaining, bRemaining } = gauntletSurvivors(
+  const { aRemaining, bRemaining, aFinalHp, bFinalHp } = gauntletSurvivors(
     decks[a] ?? [],
     decks[b] ?? [],
     roster,
   );
   const survivors = { [a]: aRemaining, [b]: bRemaining };
+  const survivorHp = { [a]: aFinalHp, [b]: bFinalHp };
 
   let winnerUserId: string | null = null;
   let tie = false;
@@ -68,5 +69,5 @@ function hardcoreResult(
   else if (bRemaining > 0 && aRemaining === 0) winnerUserId = b;
   else tie = true; // double K.O. final : aucune équipe ne survit
 
-  return { scores, survivors, winnerUserId, tie };
+  return { scores, survivors, survivorHp, winnerUserId, tie };
 }

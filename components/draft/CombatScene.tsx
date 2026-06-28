@@ -210,12 +210,18 @@ export function Fighter({
   hp,
   hpColor,
   align,
+  hpValue,
+  hpMax,
 }: {
   name: string;
   image?: string;
   hp: number;
   hpColor: string;
   align: "left" | "right";
+  /** Valeur numérique des HP courants à afficher (optionnel — Battle l'utilise). */
+  hpValue?: number;
+  /** HP max (= battleValue) affiché à côté de la valeur courante. */
+  hpMax?: number;
 }) {
   // La barre descend en douceur quand on encaisse, mais se RECHARGE
   // instantanément (nouveau duel) pour éviter l'effet « la barre remonte au
@@ -240,6 +246,17 @@ export function Fighter({
       <p className="mt-2 truncate font-display text-sm font-bold text-white">
         {name}
       </p>
+      {hpValue !== undefined && (
+        <p
+          className="mt-0.5 font-display text-xs font-bold tabular-nums"
+          style={{ color: hpColor }}
+        >
+          {Math.max(0, Math.round(hpValue))}
+          {hpMax !== undefined && (
+            <span className="text-white/35"> / {Math.round(hpMax)} PV</span>
+          )}
+        </p>
+      )}
       <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-white/10">
         <motion.div
           className="h-full rounded-full"

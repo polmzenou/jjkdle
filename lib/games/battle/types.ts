@@ -31,6 +31,8 @@ export interface BattleResult {
   scores: Record<string, number>;
   /** userId -> persos restants (mode hardcore uniquement). */
   survivors?: Record<string, number>;
+  /** userId -> HP restants du champion survivant (mode hardcore uniquement). */
+  survivorHp?: Record<string, number>;
   /** Gagnant ; null en cas d'égalité. */
   winnerUserId: string | null;
   tie: boolean;

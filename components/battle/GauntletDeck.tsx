@@ -31,14 +31,24 @@ export function GauntletDeck({ title, log, rosterMap, accent }: GauntletDeckProp
           return (
             <li key={`${entry.cardId}-${i}`} className="flex items-center gap-3">
               {/* Le perso de l'équipe */}
-              <div
-                className="relative aspect-[3/4] w-12 shrink-0 overflow-hidden rounded-lg border bg-void-900 sm:w-14"
-                style={{
-                  borderColor: `${accent}88`,
-                  opacity: entry.eliminated ? 0.45 : 1,
-                }}
-              >
-                <CharacterImage character={character} />
+              <div className="shrink-0">
+                <div
+                  className="relative aspect-[3/4] w-12 overflow-hidden rounded-lg border bg-void-900 sm:w-14"
+                  style={{
+                    borderColor: `${accent}88`,
+                    opacity: entry.eliminated ? 0.45 : 1,
+                  }}
+                >
+                  <CharacterImage character={character} />
+                </div>
+                {entry.remainingHp !== undefined && (
+                  <p
+                    className="mt-1 text-center font-display text-[10px] font-bold tabular-nums text-emerald-400"
+                    title="Points de vie restants"
+                  >
+                    {Math.round(entry.remainingHp)}/{Math.round(entry.maxHp)} PV
+                  </p>
+                )}
               </div>
 
               {/* Les persos qu'il a battus, en ligne */}
