@@ -18,6 +18,8 @@ const LINKS = [
 export type NavUser = {
   username: string;
   isAdmin: boolean;
+  /** ADMIN ou VIP : accès aux boutons « OUAIS » / « Vider le cache ». */
+  canSyncImages: boolean;
 };
 
 /**
@@ -143,7 +145,7 @@ function UserMenu({
 
   return (
     <div className="ml-1 flex items-center gap-2">
-      {user.isAdmin && (
+      {user.canSyncImages && (
         <button
           type="button"
           onClick={syncImages}
@@ -153,7 +155,7 @@ function UserMenu({
           {pending ? "…" : "OUAIS"}
         </button>
       )}
-      {user.isAdmin && cachedImageCount > 0 && (
+      {user.canSyncImages && cachedImageCount > 0 && (
         <button
           type="button"
           onClick={clearCache}

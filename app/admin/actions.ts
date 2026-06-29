@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import type { Role } from "@prisma/client";
-import { getAdminUser } from "@/lib/auth/session";
+import { getAdminUser, getAdminOrVipUser } from "@/lib/auth/session";
 import { upsertCharacter, deleteCharacter, readRoster } from "@/lib/admin/roster-store";
 import {
   refreshAllRosterImages,
@@ -163,7 +163,7 @@ export async function deleteCharacterAction(id: string): Promise<ActionResult> {
  * Bouton « OUAIS » : récupère automatiquement une image depuis l'API booru pour
  * les personnages FÉMININS du roster (gender === FEMALE en base) et met leur URL
  * d'image en cache. Le roster Jujutsu Draft n'a pas d'attribut de genre : il est
- * donc exclu. Réservé ADMIN.
+ * donc exclu. Réservé ADMIN et VIP.
  */
 export async function refreshRosterImagesFromApiAction(): Promise<ImageRefreshResult> {
   const fail = (error: string): ImageRefreshResult => ({
@@ -176,8 +176,8 @@ export async function refreshRosterImagesFromApiAction(): Promise<ImageRefreshRe
     total: 0,
   });
 
-  if (!(await getAdminUser())) {
-    return fail("Accès réservé aux administrateurs.");
+  if (!(await getAdminOrVipUser())) {
+    return fail("Accès réservé aux administrateurs et VIP.");
   }
 
   let roster: Character[];
@@ -203,8 +203,8 @@ export async function refreshRosterImagesFromApiAction(): Promise<ImageRefreshRe
 
 /** Vide le cache d'images « OUAIS » : les persos retombent sur l'image en base. */
 export async function clearImageCacheAction(): Promise<ActionResult> {
-  if (!(await getAdminUser())) {
-    return { ok: false, error: "Accès réservé aux administrateurs." };
+  if (!(await getAdminOrVipUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs et VIP." };
   }
   clearImageCache();
   revalidatePath("/", "layout");

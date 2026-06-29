@@ -30,10 +30,15 @@ export default async function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const user = await getCurrentUser();
   const navUser = user
-    ? { username: user.username, isAdmin: user.role === "ADMIN" }
+    ? {
+        username: user.username,
+        isAdmin: user.role === "ADMIN",
+        // ADMIN et VIP peuvent lancer/vider la synchro d'images.
+        canSyncImages: user.role === "ADMIN" || user.role === "VIP",
+      }
     : null;
-  // Compteur du cache d'images (pour afficher « Vider le cache » côté admin).
-  const cachedImageCount = navUser?.isAdmin ? getCachedImageCount() : 0;
+  // Compteur du cache d'images (pour afficher « Vider le cache »).
+  const cachedImageCount = navUser?.canSyncImages ? getCachedImageCount() : 0;
 
   return (
     <html lang="fr" className={`${inter.variable} ${spaceGrotesk.variable}`}>
