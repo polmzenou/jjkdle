@@ -55,6 +55,73 @@ enum DraftOutcome {
   DEFEAT
 }
 
+// ──────────────────────────────────────────────────────────────────────────
+// Attributs JJKdle (jeu de déduction quotidien). Listes fermées = enums.
+// Remplis via /admin (non seedés). Colonnes ajoutées au model Character ci-dessous,
+// toutes nullable → le builder/battle/ranking ne sont pas impactés.
+// ──────────────────────────────────────────────────────────────────────────
+
+/// Race / nature du personnage (JJKdle).
+enum JjkRace {
+  HUMAN
+  CURSED_SPIRIT // fléau
+  SHIKIGAMI
+  CURSED_CORPSE
+  OTHER
+}
+
+/// Genre (JJKdle).
+enum JjkGender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+/// Grade hiérarchique JJK. L'ORDRE DES VALEURS EST SIGNIFIANT (croissant) :
+/// il sert à l'indice ↑/↓ (la cible est d'un grade plus haut / plus bas).
+enum JjkGrade {
+  GRADE_4
+  SEMI_GRADE_3
+  GRADE_3
+  SEMI_GRADE_2
+  GRADE_2
+  SEMI_GRADE_1
+  GRADE_1
+  SPECIAL_GRADE
+}
+
+/// Affiliation principale (mono-valeur). Étendre si le roster l'exige.
+enum JjkAffiliation {
+  TOKYO_SCHOOL
+  KYOTO_SCHOOL
+  CULLING_GAME
+  SHIBUYA
+  CURSED_SPIRITS_FACTION
+  OTHER
+}
+
+/// Clan d'origine. NONE = pas de clan (≠ null = attribut non renseigné).
+enum JjkClan {
+  ZENIN
+  KAMO
+  GOJO
+  NONE
+}
+
+/// Arc de première apparition. L'ORDRE DES VALEURS EST SIGNIFIANT (chronologique) :
+/// il sert à l'indice ↑/↓ (apparu plus tard / plus tôt dans l'histoire).
+enum JjkArc {
+  FEARSOME_WOMB
+  VS_MAHITO
+  KYOTO_GOODWILL_EVENT
+  DEATH_PAINTINGS
+  SHIBUYA_INCIDENT
+  ITADORI_EXTERMINATION
+  PERFECT_PREPARATION
+  CULLING_GAME
+  SHINJUKU_SHOWDOWN
+}
+
 /// Meilleur score de Jujutsu Draft d'un utilisateur (un enregistrement par
 /// utilisateur — upsert quand un meilleur résultat est obtenu). `globalScore`
 /// est le score global caché recalculé côté serveur (anti-triche) ; `draft`
@@ -121,6 +188,20 @@ model Character {
   /// Optionnel : le builder l'ignore ; fallback 30 côté battle si null.
   battleValue Int?
   position  Int     @default(0)
+
+  // ── Attributs JJKdle (remplis via /admin, non seedés). Nullable = "non renseigné".
+  // Un personnage n'entre dans le pool quotidien que si TOUS ces champs sont remplis.
+  race          JjkRace?
+  gender        JjkGender?
+  grade         JjkGrade?
+  affiliation   JjkAffiliation?
+  clan          JjkClan? // NONE = pas de clan (≠ null = non renseigné)
+  appearanceArc JjkArc?
+  hasDomain     Boolean? // nullable pour distinguer "non" (false) de "non renseigné" (null)
+  /// Énergie occulte "lore" (indice numérique ↑/↓). DÉDUPLIQUÉE VOLONTAIREMENT de la
+  /// note builder ratings["cursed-energy"] (échelle gameplay 0–100) : la valeur lore
+  /// peut différer et ne doit pas coupler JJKdle au barème du builder.
+  cursedEnergy  Int?
 
   @@index([position])
 }
