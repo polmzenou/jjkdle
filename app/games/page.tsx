@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { GameCard } from "@/components/GameCard";
+import { MultiplayerPicker } from "@/components/multiplayer/MultiplayerPicker";
 import { GAMES } from "@/lib/games/registry";
 
 export const metadata: Metadata = {
@@ -14,6 +14,11 @@ const FEATURES = ["Sans compte", "Best score local"];
 /** Hub : liste tous les jeux du registre (système pluggable). */
 export default function GamesPage() {
   const liveCount = GAMES.filter((g) => g.status !== "coming-soon").length;
+  // Jeux proposés dans la modale multi : ceux qui déclarent un mode multi et ne
+  // sont pas "multi uniquement" (ces derniers ont déjà leur propre carte).
+  const multiplayerGames = GAMES.filter(
+    (g) => g.multiplayer && !g.multiplayerOnly,
+  );
 
   return (
     <main className="mx-auto flex min-h-screen max-w-5xl flex-col px-6 py-14 sm:py-20">
@@ -64,25 +69,9 @@ export default function GamesPage() {
         </div>
       </section>
 
-      {/* ── Mode multijoueur (Builder) ── */}
+      {/* ── Mode multijoueur (modale multi-jeux) ── */}
       <section className="mt-12">
-        <Link
-          href="/games/multiplayer"
-          className="group flex flex-col items-center gap-4 rounded-3xl border border-domain/30 bg-gradient-to-br from-domain/15 to-cursed/10 p-8 text-center transition-transform hover:scale-[1.01] sm:flex-row sm:text-left"
-        >
-          <span className="text-4xl">⚔️</span>
-          <div className="flex-1">
-            <h3 className="font-display text-xl font-bold text-white">
-              Multijoueur — Build the Perfect Sorcerer
-            </h3>
-            <p className="mt-1 text-sm text-white/60">
-              Lobby privé, jusqu'à 3 joueurs, en temps réel. Le meilleur build l'emporte.
-            </p>
-          </div>
-          <span className="rounded-xl bg-domain px-5 py-2.5 font-display text-sm font-bold uppercase tracking-wide text-white shadow-glow transition-transform group-hover:scale-105">
-            Jouer en ligne
-          </span>
-        </Link>
+        <MultiplayerPicker games={multiplayerGames} />
       </section>
 
       <footer className="mt-auto pt-20 text-center text-xs text-white/30">
