@@ -19,6 +19,7 @@ interface GameCardProps {
  */
 export function GameCard({ game, index }: GameCardProps) {
   const isComingSoon = game.status === "coming-soon";
+  const isMultiplayerOnly = game.multiplayerOnly === true;
   const accent = game.accent ?? "#7c3aed";
   const accentVars = { "--accent": accent } as CSSProperties;
 
@@ -64,12 +65,28 @@ export function GameCard({ game, index }: GameCardProps) {
         }}
       />
 
+      {/* Badge "multijoueur uniquement" (coin haut-droit), sinon numéro filigrane */}
+      {isMultiplayerOnly ? (
+        <span
+          className="absolute right-4 top-4 z-20 inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider"
+          style={{
+            color: accent,
+            borderColor: `${accent}66`,
+            backgroundColor: `${accent}1a`,
+          }}
+        >
+          ⚡ Multi uniquement
+        </span>
+      ) : null}
+
       {/* Contenu */}
       <div className="relative z-10 flex h-full flex-col p-7">
-        {/* Numéro en filigrane (un peu plus visible au survol) */}
-        <span className="pointer-events-none absolute right-5 top-4 font-display text-5xl font-black leading-none text-white/[0.06] transition-colors duration-300 group-hover/card:text-white/[0.13]">
-          {String(index + 1).padStart(2, "0")}
-        </span>
+        {/* Numéro en filigrane (masqué quand un badge occupe le coin) */}
+        {!isMultiplayerOnly && (
+          <span className="pointer-events-none absolute right-5 top-4 font-display text-5xl font-black leading-none text-white/[0.06] transition-colors duration-300 group-hover/card:text-white/[0.13]">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+        )}
 
         <h2 className="pr-12 font-display text-2xl font-bold tracking-tight text-white">
           {game.title}
