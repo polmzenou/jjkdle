@@ -22,6 +22,8 @@ import {
 } from "@/lib/cosmetics/unlock";
 import { getTitleGrantKeys, getFrameGrantKeys } from "@/lib/cosmetics/grants";
 import { getRoster } from "@/lib/content/queries";
+import { BADGES } from "@/lib/badges/definitions";
+import { GAMES } from "@/lib/games/registry";
 import { prisma } from "@/lib/prisma";
 import { AccountForms } from "./AccountForms";
 import { ProfileEditor, type AvatarChoice } from "./ProfileEditor";
@@ -90,72 +92,142 @@ export default async function AccountPage() {
     ...(jjkdleScore ? [jjkdleScore] : []),
   ];
 
+  // ── Stats résumées (dérivées de données déjà chargées, aucune requête en plus) ──
+  const streak = profile?.jjkdleStreak ?? 0;
+  const bestStreak = profile?.jjkdleBestStreak ?? 0;
+  const badgeTotal = BADGES.length;
+  const badgeCount = badgeKeys.length;
+  const badgePct = badgeTotal > 0 ? Math.round((badgeCount / badgeTotal) * 100) : 0;
+  const bestRanked = scores.length
+    ? scores.reduce((best, s) => (s.rank < best.rank ? s : best))
+    : null;
+  const bestRankGame = bestRanked
+    ? GAMES.find((g) => g.id === bestRanked.gameId)?.title ?? bestRanked.gameId
+    : null;
+
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 py-12 sm:py-16">
-      <header className="mb-10">
+    <main className="mx-auto w-full max-w-4xl px-5 py-10 sm:px-6 sm:py-16">
+      <header className="mb-12">
         <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.3em] text-domain-light/70">
           <span aria-hidden className="h-px w-6 bg-gradient-to-r from-transparent to-domain-light/60" />
           管理 · Mon compte
         </span>
 
-        {/* Bannière + avatar + niveau */}
-        <div
-          className="relative mt-4 overflow-hidden rounded-2xl border border-white/10 p-5"
-          style={{ background: banner.gradient }}
-        >
-          <div className="flex flex-wrap items-center gap-4">
-            <UserAvatar
-              username={user.username}
-              image={profile?.avatarCharacter?.image}
-              level={profile?.level ?? 1}
-              frameKey={profile?.equippedFrameKey}
-              size={72}
+        {/* Carte hero : bannière + avatar en débordement + identité + niveau */}
+        <div className="mt-4 overflow-hidden rounded-3xl border border-white/10 bg-void-800/40 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.6)] backdrop-blur">
+          {/* Bande bannière */}
+          <div
+            className="relative h-28 sm:h-36"
+            style={{ background: banner.gradient }}
+          >
+            <span
+              aria-hidden
+              className="absolute inset-0 bg-gradient-to-t from-void-800/80 via-transparent to-transparent"
             />
-            <div className="min-w-0">
-              <h1 className="font-display text-3xl font-black tracking-tight text-white drop-shadow sm:text-4xl">
-                {user.username}
-                {user.role === "VIP" && <VipBadge className="ml-2 text-sm" />}
-              </h1>
-              {profile?.equippedTitleKey && (
-                <TitleBadge titleKey={profile.equippedTitleKey} className="mt-1.5 text-sm" />
-              )}
-              {(profile?.jjkdleStreak ?? 0) > 0 && (
-                <p className="mt-1 text-sm font-bold text-white/85">
-                  🔥 {profile?.jjkdleStreak} jour{(profile?.jjkdleStreak ?? 0) > 1 ? "s" : ""} de streak JJKdle
-                </p>
-              )}
+          </div>
+
+          {/* Identité (avatar chevauche la bannière) */}
+          <div className="px-5 pb-6 sm:px-8">
+            <div className="-mt-12 flex flex-wrap items-end gap-4 sm:-mt-14 sm:gap-5">
+              <UserAvatar
+                username={user.username}
+                image={profile?.avatarCharacter?.image}
+                level={profile?.level ?? 1}
+                frameKey={profile?.equippedFrameKey}
+                size={104}
+                className="rounded-full ring-4 ring-void-800"
+              />
+              <div className="min-w-0 pb-1">
+                <h1 className="flex flex-wrap items-center gap-x-2 font-display text-3xl font-black tracking-tight text-white drop-shadow sm:text-4xl">
+                  {user.username}
+                  {user.role === "VIP" && <VipBadge className="text-sm" />}
+                </h1>
+                {profile?.equippedTitleKey && (
+                  <TitleBadge titleKey={profile.equippedTitleKey} className="mt-2 text-sm" />
+                )}
+              </div>
+            </div>
+
+            {/* Barre de niveau intégrée */}
+            <div className="mt-6">
+              <LevelBar totalXp={profile?.totalXp ?? 0} />
             </div>
           </div>
         </div>
 
-        <div className="mt-4 rounded-2xl border border-white/10 bg-void-800/60 p-5 backdrop-blur">
-          <LevelBar totalXp={profile?.totalXp ?? 0} />
-        </div>
-
-        <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2">
+        {/* Actions profil (boutons pilule) */}
+        <div className="mt-4 flex flex-wrap gap-3">
           <Link
             href={`/u/${encodeURIComponent(user.username)}`}
-            className="inline-flex items-center gap-1.5 text-sm text-domain-light underline-offset-2 hover:underline"
+            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-void-800/60 px-4 py-2 text-sm font-medium text-white/80 backdrop-blur transition-colors hover:border-domain/50 hover:text-white"
           >
             Voir mon profil public <span aria-hidden>↗</span>
           </Link>
           <Link
             href="/account/customize"
-            className="inline-flex items-center gap-1.5 text-sm text-domain-light underline-offset-2 hover:underline"
+            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-void-800/60 px-4 py-2 text-sm font-medium text-white/80 backdrop-blur transition-colors hover:border-domain/50 hover:text-white"
           >
             🎛️ Customiser mon profil
           </Link>
         </div>
       </header>
 
+      {/* ── Cartes statistiques ── */}
+      <section className="mb-12 grid gap-4 sm:grid-cols-3">
+        <div className="rounded-2xl border border-white/10 bg-void-800/60 p-5 backdrop-blur">
+          <p className="text-xs font-bold uppercase tracking-wider text-white/45">
+            🔥 Streak JJKdle
+          </p>
+          <p className="mt-3 font-display text-3xl font-black text-white">
+            {streak}
+            <span className="ml-1.5 align-baseline text-base font-bold text-white/45">
+              jour{streak > 1 ? "s" : ""}
+            </span>
+          </p>
+          <p className="mt-1 text-xs text-white/40">record : {bestStreak}</p>
+        </div>
+
+        <div className="rounded-2xl border border-white/10 bg-void-800/60 p-5 backdrop-blur">
+          <p className="text-xs font-bold uppercase tracking-wider text-white/45">
+            🎖️ Badges
+          </p>
+          <p className="mt-3 font-display text-3xl font-black text-white">
+            {badgeCount}
+            <span className="ml-1.5 align-baseline text-base font-bold text-white/45">
+              / {badgeTotal}
+            </span>
+          </p>
+          <p className="mt-1 text-xs text-white/40">{badgePct} % débloqués</p>
+        </div>
+
+        <div className="rounded-2xl border border-white/10 bg-void-800/60 p-5 backdrop-blur">
+          <p className="text-xs font-bold uppercase tracking-wider text-white/45">
+            🏆 Meilleur rang
+          </p>
+          {bestRanked ? (
+            <>
+              <p className="mt-3 font-display text-3xl font-black text-white">
+                #{bestRanked.rank}
+              </p>
+              <p className="mt-1 truncate text-xs text-white/40">{bestRankGame}</p>
+            </>
+          ) : (
+            <>
+              <p className="mt-3 font-display text-3xl font-black text-white/30">—</p>
+              <p className="mt-1 text-xs text-white/40">Pas encore classé</p>
+            </>
+          )}
+        </div>
+      </section>
+
       {/* ── Récap des scores ── */}
       <section className="mb-12">
-        <h2 className="mb-4 font-display text-lg font-bold uppercase tracking-wider text-white/80">
+        <h2 className="mb-5 font-display text-xl font-bold uppercase tracking-wider text-white/85">
           🏆 Mes scores
         </h2>
 
         {scores.length === 0 ? (
-          <div className="rounded-2xl border border-white/10 bg-void-800/60 px-6 py-10 text-center backdrop-blur">
+          <div className="rounded-2xl border border-white/10 bg-void-800/60 px-6 py-12 text-center backdrop-blur">
             <p className="text-white/55">
               Tu n'as pas encore de score enregistré.
             </p>
@@ -174,7 +246,7 @@ export default async function AccountPage() {
 
       {/* ── Badges ── */}
       <section className="mb-12">
-        <h2 className="mb-4 font-display text-lg font-bold uppercase tracking-wider text-white/80">
+        <h2 className="mb-5 font-display text-xl font-bold uppercase tracking-wider text-white/85">
           🎖️ Mes badges
         </h2>
         <BadgeShelf unlockedKeys={badgeKeys} />
@@ -182,7 +254,7 @@ export default async function AccountPage() {
 
       {/* ── Personnalisation ── */}
       <section className="mb-12 space-y-4">
-        <h2 className="mb-4 font-display text-lg font-bold uppercase tracking-wider text-white/80">
+        <h2 className="mb-5 font-display text-xl font-bold uppercase tracking-wider text-white/85">
           🎨 Personnalisation
         </h2>
         <ProfileEditor
@@ -207,7 +279,7 @@ export default async function AccountPage() {
 
       {/* ── Infos & édition ── */}
       <section>
-        <h2 className="mb-4 font-display text-lg font-bold uppercase tracking-wider text-white/80">
+        <h2 className="mb-5 font-display text-xl font-bold uppercase tracking-wider text-white/85">
           ⚙️ Mon compte
         </h2>
 
