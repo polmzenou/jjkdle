@@ -16,8 +16,17 @@ import { VipBadge } from "@/components/VipBadge";
 import { UserAvatar } from "@/components/UserAvatar";
 import { LevelBar } from "@/components/LevelBar";
 import { BadgeShelf } from "@/components/badges/BadgeShelf";
+import { TitleBadge } from "@/components/TitleBadge";
+import { TitleSelector } from "@/components/profile/TitleSelector";
+import { FrameSelector } from "@/components/profile/FrameSelector";
 import { bannerStyle } from "@/lib/profile/banners";
 import { getUserBadgeKeys } from "@/lib/badges/evaluate";
+import {
+  buildUnlockContext,
+  getUnlockedTitleKeys,
+  getUnlockedFrameKeys,
+} from "@/lib/cosmetics/unlock";
+import { getTitleGrantKeys, getFrameGrantKeys } from "@/lib/cosmetics/grants";
 import { getRoster } from "@/lib/content/queries";
 import { prisma } from "@/lib/prisma";
 import { AccountForms } from "./AccountForms";
@@ -36,26 +45,44 @@ export default async function AccountPage() {
 
   // Scores classiques (table Score) + scores des jeux à table dédiée
   // (Draft, et JJKdle = score du jour). + profil/progression + badges + roster.
-  const [classicScores, draftScore, jjkdleScore, profile, badgeKeys, roster] =
-    await Promise.all([
-      getUserScores(user.id),
-      getUserDraftScore(user.id),
-      getUserJjkdleScore(user.id),
-      prisma.user.findUnique({
-        where: { id: user.id },
-        select: {
-          bannerKey: true,
-          avatarCharacterId: true,
-          totalXp: true,
-          level: true,
-          jjkdleStreak: true,
-          jjkdleBestStreak: true,
-          avatarCharacter: { select: { name: true, image: true } },
-        },
-      }),
-      getUserBadgeKeys(user.id),
-      getRoster(),
-    ]);
+  const [
+    classicScores,
+    draftScore,
+    jjkdleScore,
+    profile,
+    badgeKeys,
+    roster,
+    unlockCtx,
+    titleGrantKeys,
+    frameGrantKeys,
+  ] = await Promise.all([
+    getUserScores(user.id),
+    getUserDraftScore(user.id),
+    getUserJjkdleScore(user.id),
+    prisma.user.findUnique({
+      where: { id: user.id },
+      select: {
+        bannerKey: true,
+        avatarCharacterId: true,
+        totalXp: true,
+        level: true,
+        jjkdleStreak: true,
+        jjkdleBestStreak: true,
+        equippedTitleKey: true,
+        equippedFrameKey: true,
+        avatarCharacter: { select: { name: true, image: true } },
+      },
+    }),
+    getUserBadgeKeys(user.id),
+    getRoster(),
+    buildUnlockContext(user.id),
+    getTitleGrantKeys(user.id),
+    getFrameGrantKeys(user.id),
+  ]);
+
+  const isAdmin = user.role === "ADMIN";
+  const unlockedTitleKeys = [...getUnlockedTitleKeys(unlockCtx, titleGrantKeys)];
+  const unlockedFrameKeys = [...getUnlockedFrameKeys(unlockCtx, frameGrantKeys)];
 
   const avatarChoices: AvatarChoice[] = roster.map((c) => ({
     id: c.id,
@@ -87,6 +114,7 @@ export default async function AccountPage() {
               username={user.username}
               image={profile?.avatarCharacter?.image}
               level={profile?.level ?? 1}
+              frameKey={profile?.equippedFrameKey}
               size={72}
             />
             <div className="min-w-0">
@@ -94,6 +122,9 @@ export default async function AccountPage() {
                 {user.username}
                 {user.role === "VIP" && <VipBadge className="ml-2 text-sm" />}
               </h1>
+              {profile?.equippedTitleKey && (
+                <TitleBadge titleKey={profile.equippedTitleKey} className="mt-1.5 text-sm" />
+              )}
               {(profile?.jjkdleStreak ?? 0) > 0 && (
                 <p className="mt-1 text-sm font-bold text-white/85">
                   🔥 {profile?.jjkdleStreak} jour{(profile?.jjkdleStreak ?? 0) > 1 ? "s" : ""} de streak JJKdle
@@ -224,7 +255,7 @@ export default async function AccountPage() {
       </section>
 
       {/* ── Personnalisation ── */}
-      <section className="mb-12">
+      <section className="mb-12 space-y-4">
         <h2 className="mb-4 font-display text-lg font-bold uppercase tracking-wider text-white/80">
           🎨 Personnalisation
         </h2>
@@ -233,6 +264,18 @@ export default async function AccountPage() {
           roster={avatarChoices}
           initialBannerKey={profile?.bannerKey ?? "default"}
           initialAvatarId={profile?.avatarCharacterId ?? null}
+          level={profile?.level ?? 1}
+          isAdmin={isAdmin}
+        />
+        <TitleSelector
+          unlockedKeys={unlockedTitleKeys}
+          equippedKey={profile?.equippedTitleKey ?? null}
+        />
+        <FrameSelector
+          username={user.username}
+          avatarImage={profile?.avatarCharacter?.image}
+          unlockedKeys={unlockedFrameKeys}
+          equippedKey={profile?.equippedFrameKey ?? null}
         />
       </section>
 

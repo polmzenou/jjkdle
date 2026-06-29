@@ -4,7 +4,12 @@ import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { CharacterImage } from "@/components/CharacterImage";
 import { UserAvatar } from "@/components/UserAvatar";
-import { BANNER_PALETTE, bannerStyle, type BannerKey } from "@/lib/profile/banners";
+import {
+  BANNER_PALETTE,
+  bannerStyle,
+  isBannerUnlocked,
+  type BannerKey,
+} from "@/lib/profile/banners";
 
 /** Forme minimale d'un personnage pour le sélecteur d'avatar. */
 export interface AvatarChoice {
@@ -18,6 +23,10 @@ interface ProfileEditorProps {
   roster: AvatarChoice[];
   initialBannerKey: string;
   initialAvatarId: string | null;
+  /** Niveau du joueur (déblocage des bannières). */
+  level: number;
+  /** Admin : toutes les bannières débloquées (bypass du niveau requis). */
+  isAdmin: boolean;
 }
 
 const BANNER_KEYS = Object.keys(BANNER_PALETTE) as BannerKey[];
@@ -32,6 +41,8 @@ export function ProfileEditor({
   roster,
   initialBannerKey,
   initialAvatarId,
+  level,
+  isAdmin,
 }: ProfileEditorProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -101,25 +112,40 @@ export function ProfileEditor({
         </p>
       )}
 
-      {/* Sélecteur de bannière */}
+      {/* Sélecteur de bannière (verrouillage par niveau) */}
       <div className="mt-5">
         <p className="mb-2 text-xs uppercase tracking-wider text-white/45">Bannière</p>
         <div className="flex flex-wrap gap-2">
           {BANNER_KEYS.map((key) => {
+            const banner = BANNER_PALETTE[key];
             const selected = key === bannerKey;
+            const unlocked = isBannerUnlocked(key, level, isAdmin);
+            const lockLabel = `Niveau ${banner.requiredLevel} requis`;
             return (
               <button
                 key={key}
                 type="button"
-                disabled={pending}
-                onClick={() => pickBanner(key)}
-                title={BANNER_PALETTE[key].label}
+                disabled={pending || !unlocked}
+                onClick={() => unlocked && pickBanner(key)}
+                title={unlocked ? banner.label : `${banner.label} — ${lockLabel}`}
                 aria-pressed={selected}
-                className={`h-10 w-16 rounded-lg border-2 transition-transform disabled:opacity-50 ${
-                  selected ? "border-white scale-105" : "border-white/10 hover:border-white/40"
+                aria-disabled={!unlocked}
+                className={`relative h-10 w-16 overflow-hidden rounded-lg border-2 transition-transform ${
+                  !unlocked
+                    ? "cursor-not-allowed border-white/10 opacity-50"
+                    : selected
+                      ? "border-white scale-105"
+                      : "border-white/10 hover:border-white/40 disabled:opacity-50"
                 }`}
-                style={{ background: BANNER_PALETTE[key].gradient }}
-              />
+                style={{ background: banner.gradient }}
+              >
+                {!unlocked && (
+                  <span className="absolute inset-0 flex flex-col items-center justify-center bg-void-900/55 text-[9px] font-bold leading-none text-white/90">
+                    <span aria-hidden className="text-xs">🔒</span>
+                    <span className="mt-0.5">Niv. {banner.requiredLevel}</span>
+                  </span>
+                )}
+              </button>
             );
           })}
         </div>

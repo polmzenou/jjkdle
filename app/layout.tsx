@@ -34,7 +34,12 @@ export default async function RootLayout({
   const profile = user
     ? await prisma.user.findUnique({
         where: { id: user.id },
-        select: { level: true, avatarCharacter: { select: { image: true } } },
+        select: {
+          level: true,
+          equippedTitleKey: true,
+          equippedFrameKey: true,
+          avatarCharacter: { select: { image: true } },
+        },
       })
     : null;
   const navUser = user
@@ -46,6 +51,8 @@ export default async function RootLayout({
         canSyncImages: user.role === "ADMIN" || user.role === "VIP",
         avatarImage: profile?.avatarCharacter?.image ?? null,
         level: profile?.level ?? 1,
+        titleKey: profile?.equippedTitleKey ?? null,
+        frameKey: profile?.equippedFrameKey ?? null,
       }
     : null;
   // Compteur du cache d'images (pour afficher « Vider le cache »).

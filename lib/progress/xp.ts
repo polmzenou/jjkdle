@@ -12,6 +12,14 @@ import type { UserStatsContext } from "./context";
  * bonus admin (`User.xpBonus`) est ajouté par-dessus dans recomputeUserProgress.
  */
 
+/**
+ * Niveau « maximum » conceptuel, utilisé par les paliers cosmétiques (dernière
+ * bannière, titre/cadre légendaires « niveau max »). La courbe d'XP reste
+ * infinie : ce cap ne borne pas la progression, il sert uniquement de seuil de
+ * déblocage partagé (bannières, titres, cadres).
+ */
+export const MAX_LEVEL = 50;
+
 /** Poids par jeu (documentés, ajustables). Objectif : grandeurs comparables. */
 export const XP_WEIGHTS = {
   builder: 1, // score 0–1000

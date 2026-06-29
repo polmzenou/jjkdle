@@ -6,6 +6,7 @@ import { bannerStyle } from "@/lib/profile/banners";
 import { UserAvatar } from "@/components/UserAvatar";
 import { LevelBar } from "@/components/LevelBar";
 import { VipBadge } from "@/components/VipBadge";
+import { TitleBadge } from "@/components/TitleBadge";
 import { BadgeShelf } from "@/components/badges/BadgeShelf";
 
 export const dynamic = "force-dynamic";
@@ -21,6 +22,8 @@ async function getPublicProfile(username: string) {
       totalXp: true,
       bannerKey: true,
       jjkdleStreak: true,
+      equippedTitleKey: true,
+      equippedFrameKey: true,
       avatarCharacter: { select: { name: true, image: true } },
       badges: { select: { badgeKey: true } },
     },
@@ -76,6 +79,7 @@ export default async function PublicProfilePage({
             username={profile.username}
             image={profile.avatarCharacter?.image}
             level={profile.level}
+            frameKey={profile.equippedFrameKey}
             size={72}
           />
           <div className="min-w-0">
@@ -83,6 +87,9 @@ export default async function PublicProfilePage({
               {profile.username}
               {profile.role === "VIP" && <VipBadge className="ml-2 text-sm" />}
             </h1>
+            {profile.equippedTitleKey && (
+              <TitleBadge titleKey={profile.equippedTitleKey} className="mt-1.5 text-sm" />
+            )}
             {profile.jjkdleStreak > 0 && (
               <p className="mt-1 text-sm font-bold text-white/85">
                 🔥 {profile.jjkdleStreak} jour{profile.jjkdleStreak > 1 ? "s" : ""} de streak JJKdle

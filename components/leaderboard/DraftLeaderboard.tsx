@@ -5,6 +5,7 @@ import {
 import Link from "next/link";
 import type { LeaderboardScope } from "@/lib/leaderboard/store";
 import { VipBadge } from "@/components/VipBadge";
+import { TitleBadge } from "@/components/TitleBadge";
 import { UserAvatar } from "@/components/UserAvatar";
 import { ScopeToggle } from "./ScopeToggle";
 
@@ -101,6 +102,7 @@ function DraftRow({
         username={entry.pseudo}
         image={entry.avatarImage}
         level={entry.level}
+        frameKey={entry.frameKey}
         size={32}
       />
 
@@ -115,6 +117,7 @@ function DraftRow({
           {entry.pseudo}
         </Link>
         {entry.role === "VIP" && <VipBadge className="ml-1.5" />}
+        {entry.titleKey && <TitleBadge titleKey={entry.titleKey} className="ml-1.5" />}
         {entry.outcome === "VICTORY" && (
           <span className="ml-2 align-middle text-xs text-emerald-300">★ clear</span>
         )}

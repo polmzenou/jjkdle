@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { Logo } from "@/components/Logo";
 import { VipBadge } from "@/components/VipBadge";
+import { TitleBadge } from "@/components/TitleBadge";
 import { UserAvatar } from "@/components/UserAvatar";
 import { logoutAction } from "@/lib/auth/actions";
 import {
@@ -27,6 +28,10 @@ export type NavUser = {
   avatarImage: string | null;
   /** Niveau du compte (pastille sur l'avatar). */
   level: number;
+  /** Clé du titre équipé (ou null) — affiché à côté du pseudo. */
+  titleKey: string | null;
+  /** Clé du cadre équipé (ou null) — bordure autour de l'avatar. */
+  frameKey: string | null;
 };
 
 /**
@@ -190,12 +195,14 @@ function UserMenu({
           username={user.username}
           image={user.avatarImage}
           level={user.level}
+          frameKey={user.frameKey}
           size={28}
         />
         <span className="hidden max-w-[8rem] truncate sm:inline">
           {user.username}
         </span>
         {user.isVip && <VipBadge />}
+        {user.titleKey && <TitleBadge titleKey={user.titleKey} className="hidden sm:inline-flex" />}
       </Link>
       <button
         type="button"

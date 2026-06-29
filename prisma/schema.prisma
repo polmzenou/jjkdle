@@ -39,6 +39,12 @@ model User {
   avatarCharacterId String?
   avatarCharacter   Character? @relation("UserAvatar", fields: [avatarCharacterId], references: [id], onDelete: SetNull)
 
+  // Titre + cadre équipés (au plus un de chaque, ou aucun). Comme bannerKey, ce
+  // sont des CLÉS vers des catalogues définis en code (lib/titles, lib/frames) —
+  // source de vérité = code, pas de table. Validés serveur à l'équipement.
+  equippedTitleKey String? // clé ∈ TITLES (lib/titles/definitions.ts) ou null
+  equippedFrameKey String? // clé ∈ FRAMES (lib/frames/definitions.ts) ou null
+
   // ── Progression (cache recalculé en fin de partie ; source = scores) ──
   totalXp Int @default(0)
   xpBonus Int @default(0) // ajustement manuel admin (additif, persistant)
@@ -55,6 +61,8 @@ model User {
   draftScores  JujutsuDraftScore[]
   jjkdleScores JjkdleScore[]
   badges       UserBadge[]
+  titleGrants  UserTitleGrant[]
+  frameGrants  UserFrameGrant[]
 }
 
 /// Déblocage d'un badge par un utilisateur. La métadonnée du badge (nom,
@@ -66,8 +74,42 @@ model UserBadge {
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   badgeKey   String
   unlockedAt DateTime @default(now())
+  /// Id de l'admin ayant octroyé MANUELLEMENT le badge. null = débloqué par règle
+  /// dérivée (cf. lib/badges/evaluate). Sert à tracer l'origine, sans changer la
+  /// logique : un badge dérivé encore mérité se re-débloque même après retrait.
+  grantedBy  String?
 
   @@unique([userId, badgeKey])
+  @@index([userId])
+}
+
+/// Octroi MANUEL d'un titre par un admin (cf. §5). Séparé du déblocage dérivé
+/// (lib/cosmetics/unlock) pour pouvoir l'accorder/retirer sans toucher aux stats.
+/// `titleKey` réfère une clé de TITLES (lib/titles/definitions.ts). Un titre est
+/// considéré débloqué si la règle dérivée est vraie OU un grant existe OU admin.
+model UserTitleGrant {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  titleKey  String
+  grantedBy String // id de l'admin ayant octroyé
+  grantedAt DateTime @default(now())
+
+  @@unique([userId, titleKey])
+  @@index([userId])
+}
+
+/// Octroi MANUEL d'un cadre par un admin (cf. §5). Même logique que
+/// UserTitleGrant. `frameKey` réfère une clé de FRAMES (lib/frames/definitions.ts).
+model UserFrameGrant {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  frameKey  String
+  grantedBy String
+  grantedAt DateTime @default(now())
+
+  @@unique([userId, frameKey])
   @@index([userId])
 }
 

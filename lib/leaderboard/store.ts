@@ -28,14 +28,20 @@ export interface LeaderboardEntry {
   avatarImage: string | null;
   /** Niveau du compte. */
   level: number;
+  /** Clé du titre équipé (ou null) — affiché sous le pseudo. */
+  titleKey: string | null;
+  /** Clé du cadre équipé (ou null) — bordure autour de l'avatar. */
+  frameKey: string | null;
 }
 
-/** Sélection Prisma commune pour décorer une ligne (avatar + niveau + rôle). */
+/** Sélection Prisma commune pour décorer une ligne (avatar + niveau + rôle + cosmétiques). */
 export const USER_DECOR_SELECT = {
   username: true,
   role: true,
   level: true,
   avatarCharacter: { select: { image: true } },
+  equippedTitleKey: true,
+  equippedFrameKey: true,
 } as const;
 
 /** Filtre `where` de portée (vide pour all-time, borne lundi pour weekly). */
@@ -105,6 +111,8 @@ export async function topEntries(
     role: r.user.role,
     avatarImage: r.user.avatarCharacter?.image ?? null,
     level: r.user.level,
+    titleKey: r.user.equippedTitleKey,
+    frameKey: r.user.equippedFrameKey,
   }));
 }
 

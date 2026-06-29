@@ -7,6 +7,7 @@ import {
 import Link from "next/link";
 import { formatScore } from "@/lib/format";
 import { VipBadge } from "@/components/VipBadge";
+import { TitleBadge } from "@/components/TitleBadge";
 import { UserAvatar } from "@/components/UserAvatar";
 import { ScopeToggle } from "./ScopeToggle";
 
@@ -115,15 +116,16 @@ function LeaderboardRow({
         {rank}
       </span>
 
-      {/* Avatar + niveau */}
+      {/* Avatar + niveau + cadre */}
       <UserAvatar
         username={entry.pseudo}
         image={entry.avatarImage}
         level={entry.level}
+        frameKey={entry.frameKey}
         size={32}
       />
 
-      {/* Pseudo */}
+      {/* Pseudo + titre */}
       <p
         className="min-w-0 flex-1 truncate font-semibold"
         style={{ color: isPodium ? medal!.color : "#fff" }}
@@ -135,6 +137,7 @@ function LeaderboardRow({
           {entry.pseudo}
         </Link>
         {entry.role === "VIP" && <VipBadge className="ml-1.5" />}
+        {entry.titleKey && <TitleBadge titleKey={entry.titleKey} className="ml-1.5" />}
       </p>
 
       {/* Score */}

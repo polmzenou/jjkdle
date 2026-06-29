@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { AdminUser } from "@/lib/admin/users";
 import { BADGES } from "@/lib/badges/definitions";
+import { TITLES } from "@/lib/titles/definitions";
+import { FRAMES } from "@/lib/frames/definitions";
+import { rarityStyle, type Rarity } from "@/lib/profile/rarity";
 import {
   setUserRoleAction,
   deleteUserAction,
@@ -12,6 +15,10 @@ import {
   adminSetXpBonusAction,
   adminGrantBadgeAction,
   adminRevokeBadgeAction,
+  adminGrantTitleAction,
+  adminRevokeTitleAction,
+  adminGrantFrameAction,
+  adminRevokeFrameAction,
 } from "./actions";
 
 interface UserAdminProps {
@@ -281,6 +288,33 @@ function ProgressionPanel({
       );
     });
 
+  // ── Titres & cadres : octroi/retrait manuel (couche « grant »). ──
+  const autoTitles = new Set(user.autoTitleKeys);
+  const grantedTitles = new Set(user.titleGrantKeys);
+  const autoFrames = new Set(user.autoFrameKeys);
+  const grantedFrames = new Set(user.frameGrantKeys);
+
+  const grantTitle = (key: string) =>
+    run(async () => {
+      const res = await adminGrantTitleAction(user.id, key);
+      onResult(res.ok, res.ok ? `Titre « ${key} » octroyé à ${user.username}.` : res.error ?? "Échec.");
+    });
+  const revokeTitle = (key: string) =>
+    run(async () => {
+      const res = await adminRevokeTitleAction(user.id, key);
+      onResult(res.ok, res.ok ? `Octroi du titre « ${key} » retiré.` : res.error ?? "Échec.");
+    });
+  const grantFrame = (key: string) =>
+    run(async () => {
+      const res = await adminGrantFrameAction(user.id, key);
+      onResult(res.ok, res.ok ? `Cadre « ${key} » octroyé à ${user.username}.` : res.error ?? "Échec.");
+    });
+  const revokeFrame = (key: string) =>
+    run(async () => {
+      const res = await adminRevokeFrameAction(user.id, key);
+      onResult(res.ok, res.ok ? `Octroi du cadre « ${key} » retiré.` : res.error ?? "Échec.");
+    });
+
   const fieldCls =
     "w-24 rounded-md border border-white/10 bg-void-900 px-2 py-1 text-sm text-white outline-none focus:border-domain";
   const btnCls =
@@ -360,6 +394,109 @@ function ProgressionPanel({
             );
           })}
         </div>
+      </div>
+
+      {/* Titres */}
+      <CosmeticManager
+        label="Titres"
+        items={TITLES}
+        autoKeys={autoTitles}
+        grantedKeys={grantedTitles}
+        equippedKey={user.equippedTitleKey}
+        pending={pending}
+        onGrant={grantTitle}
+        onRevoke={revokeTitle}
+      />
+
+      {/* Cadres */}
+      <CosmeticManager
+        label="Cadres"
+        items={FRAMES}
+        autoKeys={autoFrames}
+        grantedKeys={grantedFrames}
+        equippedKey={user.equippedFrameKey}
+        pending={pending}
+        onGrant={grantFrame}
+        onRevoke={revokeFrame}
+      />
+    </div>
+  );
+}
+
+/**
+ * Gestion admin d'une catégorie cosmétique (titres ou cadres) pour un joueur.
+ * Pour chaque item : état (auto / octroyé / verrouillé) + bouton Octroyer ou
+ * Retirer. « Retirer » est désactivé si le déblocage est AUTO (le retrait du
+ * grant n'aurait aucun effet) — cf. spec §5.
+ */
+function CosmeticManager({
+  label,
+  items,
+  autoKeys,
+  grantedKeys,
+  equippedKey,
+  pending,
+  onGrant,
+  onRevoke,
+}: {
+  label: string;
+  items: ReadonlyArray<{ key: string; name: string; rarity: Rarity }>;
+  autoKeys: Set<string>;
+  grantedKeys: Set<string>;
+  equippedKey: string | null;
+  pending: boolean;
+  onGrant: (key: string) => void;
+  onRevoke: (key: string) => void;
+}) {
+  return (
+    <div>
+      <p className="mb-2 text-[11px] uppercase tracking-wider text-white/45">{label}</p>
+      <div className="space-y-1.5">
+        {items.map((it) => {
+          const auto = autoKeys.has(it.key);
+          const granted = grantedKeys.has(it.key);
+          const unlocked = auto || granted;
+          const { color } = rarityStyle(it.rarity);
+          const status = auto ? "débloqué (auto)" : granted ? "octroyé (admin)" : "verrouillé";
+          return (
+            <div
+              key={it.key}
+              className="flex items-center gap-2 rounded-lg bg-void-700/40 px-2.5 py-1.5"
+            >
+              <span className="text-sm font-semibold" style={{ color: unlocked ? color : "#ffffff70" }}>
+                {it.name}
+              </span>
+              {equippedKey === it.key && (
+                <span className="text-[10px] font-bold text-domain-light">★ équipé</span>
+              )}
+              <span className="ml-auto text-[10px] text-white/40">{status}</span>
+              {granted ? (
+                <button
+                  type="button"
+                  disabled={pending || auto}
+                  onClick={() => onRevoke(it.key)}
+                  title={
+                    auto
+                      ? "Déblocage automatique : le retrait du grant n'aurait aucun effet."
+                      : undefined
+                  }
+                  className="rounded-md border border-cursed/30 px-2 py-0.5 text-[11px] font-bold text-cursed-light hover:bg-cursed/10 disabled:opacity-30"
+                >
+                  Retirer
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  disabled={pending}
+                  onClick={() => onGrant(it.key)}
+                  className="rounded-md border border-domain/40 bg-domain/10 px-2 py-0.5 text-[11px] font-bold text-domain-light hover:bg-domain/20 disabled:opacity-40"
+                >
+                  Octroyer
+                </button>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

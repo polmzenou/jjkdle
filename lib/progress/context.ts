@@ -23,6 +23,12 @@ export interface UserStatsContext {
   jjkdleStreak: number;
   /** Meilleur streak JJKdle atteint. */
   jjkdleBestStreak: number;
+  /**
+   * Plus petit nombre d'essais JJKdle jamais réalisé (tous jours confondus).
+   * 0 = jamais résolu. `=== 1` ⇒ perso du jour trouvé du premier coup (titres
+   * IDLE_MASTER / cadre IDLE_LEGEND).
+   */
+  jjkdleBestAttempts: number;
   /** Nombre de jeux distincts où l'utilisateur a au moins un score. */
   gamesPlayed: number;
   /** A déjà enregistré une partie sur Build the Perfect Sorcerer. */
@@ -39,7 +45,7 @@ export interface UserStatsContext {
 export async function buildUserStatsContext(
   userId: string,
 ): Promise<UserStatsContext> {
-  const [user, scores, draft, jjkdleCount] = await Promise.all([
+  const [user, scores, draft, jjkdleAgg] = await Promise.all([
     prisma.user.findUnique({
       where: { id: userId },
       select: { role: true, jjkdleStreak: true, jjkdleBestStreak: true },
@@ -52,10 +58,16 @@ export async function buildUserStatsContext(
       where: { userId },
       select: { enemiesKilled: true, outcome: true },
     }),
-    prisma.jjkdleScore.count({ where: { userId } }),
+    // _count = nb de jours joués ; _min.attempts = meilleure perf (essais).
+    prisma.jjkdleScore.aggregate({
+      where: { userId },
+      _count: { _all: true },
+      _min: { attempts: true },
+    }),
   ]);
 
   const bestByGame = new Map(scores.map((s) => [s.gameId, s.best]));
+  const jjkdleCount = jjkdleAgg._count._all;
 
   // Jeux distincts joués : ids présents dans Score + draft + jjkdle.
   const played = new Set<string>(bestByGame.keys());
@@ -70,6 +82,7 @@ export async function buildUserStatsContext(
     draftVictory: draft?.outcome === "VICTORY",
     jjkdleStreak: user?.jjkdleStreak ?? 0,
     jjkdleBestStreak: user?.jjkdleBestStreak ?? 0,
+    jjkdleBestAttempts: jjkdleAgg._min.attempts ?? 0,
     gamesPlayed: played.size,
     playedBuilder: played.has("builder"),
     playedRanking: played.has("ranking"),

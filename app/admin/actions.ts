@@ -21,6 +21,14 @@ import { buildUserStatsContext } from "@/lib/progress/context";
 import { computeTotalXp, levelToMinXp } from "@/lib/progress/xp";
 import { recomputeUserProgress } from "@/lib/progress/recompute";
 import { isBadgeKey } from "@/lib/badges/definitions";
+import { isTitleKey } from "@/lib/titles/definitions";
+import { isFrameKey } from "@/lib/frames/definitions";
+import {
+  grantTitle,
+  revokeTitle,
+  grantFrame,
+  revokeFrame,
+} from "@/lib/cosmetics/grants";
 import {
   adminUpdateScore,
   adminDeleteScore,
@@ -537,19 +545,20 @@ export async function adminSetLevelAction(
   return { ok: true };
 }
 
-/** Accorde un badge à un joueur (idempotent). */
+/** Accorde un badge à un joueur (idempotent). `targetUserId` peut être l'admin. */
 export async function adminGrantBadgeAction(
   userId: string,
   badgeKey: string,
 ): Promise<ActionResult> {
-  if (!(await getAdminUser())) {
+  const admin = await getAdminUser();
+  if (!admin) {
     return { ok: false, error: "Accès réservé aux administrateurs." };
   }
   if (!isBadgeKey(badgeKey)) {
     return { ok: false, error: "Badge inconnu." };
   }
   try {
-    await grantBadge(userId, badgeKey);
+    await grantBadge(userId, badgeKey, admin.id);
   } catch (e) {
     return { ok: false, error: `Échec : ${(e as Error).message}` };
   }
@@ -571,6 +580,90 @@ export async function adminRevokeBadgeAction(
   }
   try {
     await revokeBadge(userId, badgeKey);
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Titres & cadres (octroi/retrait MANUEL admin — couche « grant », cf. §5).
+//
+// Le retrait d'un grant n'enlève PAS un déblocage dérivé : si le joueur remplit
+// toujours la condition naturelle (ou est admin), l'item reste débloqué. Ces
+// actions n'agissent que sur la table de grant.
+// ──────────────────────────────────────────────────────────────────────────
+
+/** Octroie un titre à un joueur (idempotent). `userId` peut être l'admin lui-même. */
+export async function adminGrantTitleAction(
+  userId: string,
+  titleKey: string,
+): Promise<ActionResult> {
+  const admin = await getAdminUser();
+  if (!admin) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  if (!isTitleKey(titleKey)) {
+    return { ok: false, error: "Titre inconnu." };
+  }
+  try {
+    await grantTitle(userId, titleKey, admin.id);
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+/** Retire l'octroi manuel d'un titre (no-op s'il n'existe pas). */
+export async function adminRevokeTitleAction(
+  userId: string,
+  titleKey: string,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  try {
+    await revokeTitle(userId, titleKey);
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+/** Octroie un cadre à un joueur (idempotent). */
+export async function adminGrantFrameAction(
+  userId: string,
+  frameKey: string,
+): Promise<ActionResult> {
+  const admin = await getAdminUser();
+  if (!admin) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  if (!isFrameKey(frameKey)) {
+    return { ok: false, error: "Cadre inconnu." };
+  }
+  try {
+    await grantFrame(userId, frameKey, admin.id);
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+/** Retire l'octroi manuel d'un cadre (no-op s'il n'existe pas). */
+export async function adminRevokeFrameAction(
+  userId: string,
+  frameKey: string,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  try {
+    await revokeFrame(userId, frameKey);
   } catch (e) {
     return { ok: false, error: `Échec : ${(e as Error).message}` };
   }

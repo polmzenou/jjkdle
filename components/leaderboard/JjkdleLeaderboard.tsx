@@ -6,6 +6,7 @@ import {
 import Link from "next/link";
 import type { LeaderboardScope } from "@/lib/leaderboard/store";
 import { VipBadge } from "@/components/VipBadge";
+import { TitleBadge } from "@/components/TitleBadge";
 import { UserAvatar } from "@/components/UserAvatar";
 import { ScopeToggle } from "./ScopeToggle";
 
@@ -109,6 +110,7 @@ function JjkdleRow({
         username={entry.pseudo}
         image={entry.avatarImage}
         level={entry.level}
+        frameKey={entry.frameKey}
         size={32}
       />
 
@@ -123,6 +125,7 @@ function JjkdleRow({
           {entry.pseudo}
         </Link>
         {entry.role === "VIP" && <VipBadge className="ml-1.5" />}
+        {entry.titleKey && <TitleBadge titleKey={entry.titleKey} className="ml-1.5" />}
       </p>
 
       <span

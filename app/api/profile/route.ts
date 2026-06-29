@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { isBannerKey } from "@/lib/profile/banners";
+import {
+  isBannerKey,
+  isBannerUnlocked,
+  bannerRequiredLevel,
+} from "@/lib/profile/banners";
 
 export const dynamic = "force-dynamic";
 
@@ -40,6 +44,22 @@ export async function PATCH(req: Request) {
       return NextResponse.json(
         { ok: false, error: "Bannière inconnue." },
         { status: 400 },
+      );
+    }
+    // Déblocage par niveau, re-vérifié serveur (anti-tamper). Les admins
+    // ignorent le palier (bypass total, cohérent avec titres/cadres).
+    const me = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { level: true, role: true },
+    });
+    const isAdmin = me?.role === "ADMIN";
+    if (!isBannerUnlocked(bannerKey, me?.level ?? 1, isAdmin)) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: `Bannière verrouillée — niveau ${bannerRequiredLevel(bannerKey)} requis.`,
+        },
+        { status: 403 },
       );
     }
     data.bannerKey = bannerKey;

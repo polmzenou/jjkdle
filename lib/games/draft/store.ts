@@ -33,6 +33,10 @@ export interface DraftLeaderboardEntry {
   avatarImage: string | null;
   /** Niveau du compte. */
   level: number;
+  /** Clé du titre équipé (ou null). */
+  titleKey: string | null;
+  /** Clé du cadre équipé (ou null). */
+  frameKey: string | null;
 }
 
 export interface SaveDraftInput {
@@ -101,6 +105,8 @@ export async function topDraftEntries(
     role: r.user.role,
     avatarImage: r.user.avatarCharacter?.image ?? null,
     level: r.user.level,
+    titleKey: r.user.equippedTitleKey,
+    frameKey: r.user.equippedFrameKey,
   }));
 }
 
