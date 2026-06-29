@@ -6,6 +6,7 @@ import { getCategories } from "@/lib/content/queries";
 import { listDraftCharacters } from "@/lib/games/draft/queries";
 import { listAllScores, type AdminScore } from "@/lib/leaderboard/store";
 import { listAllDraftScores } from "@/lib/games/draft/store";
+import { listAllJjkdleScores } from "@/lib/games/jjkdle/leaderboard";
 import { listUsers } from "@/lib/admin/users";
 import type { Character } from "@/data/roster/characters";
 import type { DraftCharacter } from "@/lib/games/draft/types";
@@ -85,13 +86,19 @@ export default async function AdminPage() {
   } catch {
     draftScores = [];
   }
+  let jjkdleScores: AdminScore[] = [];
+  try {
+    jjkdleScores = await listAllJjkdleScores();
+  } catch {
+    jjkdleScores = [];
+  }
 
   return (
     <AdminDashboard
       roster={roster}
       draftRoster={draftRoster}
       categories={categories}
-      scores={[...scores, ...draftScores]}
+      scores={[...scores, ...draftScores, ...jjkdleScores]}
       users={users}
       currentUserId={user.id}
     />

@@ -25,6 +25,10 @@ import {
   adminDeleteDraftScore,
   DRAFT_MAX_KILLS,
 } from "@/lib/games/draft/store";
+import {
+  adminUpdateJjkdleScore,
+  adminDeleteJjkdleScore,
+} from "@/lib/games/jjkdle/leaderboard";
 import { DRAFT_CATEGORY_BY_ID } from "@/lib/games/draft/categories";
 import type {
   DraftCharacter,
@@ -33,12 +37,22 @@ import type {
 } from "@/lib/games/draft/types";
 import type { Character, CharacterTier } from "@/data/roster/characters";
 import { CATEGORY_BY_ID, type CategoryId } from "@/data/roster/categories";
+import {
+  RACES,
+  GENDERS,
+  GRADES_ORDER,
+  AFFILIATIONS,
+  CLANS,
+  ARCS_ORDER,
+} from "@/lib/games/jjkdle/attributes";
 
 export type ActionResult = { ok: boolean; error?: string };
 
 const TIERS: CharacterTier[] = ["4minus", "4", "3", "2", "1", "s"];
 const GAMES: LeaderboardGame[] = ["builder", "ranking"];
 const DRAFT_GAME = "jujutsu-draft";
+const JJKDLE_GAME = "jjkdle";
+const JJKDLE_MAX_ATTEMPTS = 999; // garde-fou : nombre d'essais réaliste
 const DRAFT_TIERS: DraftTier[] = ["S", "A", "B", "C"];
 
 /** Valide + enregistre (ajout ou édition) un personnage en base. */
@@ -83,6 +97,34 @@ export async function saveCharacterAction(
     }
   }
 
+  // ── Attributs JJKdle : chaque enum validé contre ses valeurs ; omis si vide.
+  const jjkdle: Partial<
+    Pick<
+      Character,
+      | "race"
+      | "gender"
+      | "grade"
+      | "affiliation"
+      | "clan"
+      | "appearanceArc"
+      | "hasDomain"
+      | "cursedEnergy"
+    >
+  > = {};
+  if (input.race && RACES.includes(input.race)) jjkdle.race = input.race;
+  if (input.gender && GENDERS.includes(input.gender)) jjkdle.gender = input.gender;
+  if (input.grade && GRADES_ORDER.includes(input.grade)) jjkdle.grade = input.grade;
+  if (input.affiliation && AFFILIATIONS.includes(input.affiliation))
+    jjkdle.affiliation = input.affiliation;
+  if (input.clan && CLANS.includes(input.clan)) jjkdle.clan = input.clan;
+  if (input.appearanceArc && ARCS_ORDER.includes(input.appearanceArc))
+    jjkdle.appearanceArc = input.appearanceArc;
+  if (typeof input.hasDomain === "boolean") jjkdle.hasDomain = input.hasDomain;
+  if (input.cursedEnergy != null && `${input.cursedEnergy}` !== "") {
+    const ce = Number(input.cursedEnergy);
+    if (Number.isFinite(ce) && ce >= 0) jjkdle.cursedEnergy = Math.round(ce);
+  }
+
   const char: Character = {
     id,
     name,
@@ -91,6 +133,7 @@ export async function saveCharacterAction(
     ...(image ? { image } : {}),
     ratings,
     ...(battleValue != null ? { battleValue } : {}),
+    ...jjkdle,
   };
 
   try {
@@ -266,6 +309,22 @@ export async function updateScoreAction(
     return { ok: true };
   }
 
+  // JJKdle : table dédiée, métrique = nombre d'essais (≥ 1, moins = mieux).
+  if (game === JJKDLE_GAME) {
+    const attempts = Math.round(Number(scoreRaw));
+    if (!Number.isFinite(attempts) || attempts < 1 || attempts > JJKDLE_MAX_ATTEMPTS) {
+      return { ok: false, error: `Nombre d'essais invalide (1 à ${JJKDLE_MAX_ATTEMPTS}).` };
+    }
+    try {
+      await adminUpdateJjkdleScore(id, attempts);
+    } catch (e) {
+      return { ok: false, error: `Échec de modification : ${(e as Error).message}` };
+    }
+    revalidatePath("/games/jjkdle");
+    revalidatePath("/admin");
+    return { ok: true };
+  }
+
   if (!GAMES.includes(game as LeaderboardGame)) {
     return { ok: false, error: "Jeu inconnu." };
   }
@@ -304,6 +363,17 @@ export async function deleteScoreAction(
     return { ok: true };
   }
 
+  if (game === JJKDLE_GAME) {
+    try {
+      await adminDeleteJjkdleScore(id);
+    } catch (e) {
+      return { ok: false, error: `Échec de suppression : ${(e as Error).message}` };
+    }
+    revalidatePath("/games/jjkdle");
+    revalidatePath("/admin");
+    return { ok: true };
+  }
+
   try {
     await adminDeleteScore(id);
   } catch (e) {
@@ -330,7 +400,7 @@ export async function setUserRoleAction(
   if (!(await getAdminUser())) {
     return { ok: false, error: "Accès réservé aux administrateurs." };
   }
-  if (role !== "ADMIN" && role !== "PLAYER") {
+  if (role !== "ADMIN" && role !== "PLAYER" && role !== "VIP") {
     return { ok: false, error: "Rôle invalide." };
   }
 
@@ -339,8 +409,8 @@ export async function setUserRoleAction(
     return { ok: false, error: "Utilisateur introuvable." };
   }
 
-  // Protection : on ne rétrograde jamais un administrateur.
-  if (current === "ADMIN" && role === "PLAYER") {
+  // Protection : on ne rétrograde/modifie jamais un administrateur.
+  if (current === "ADMIN" && role !== "ADMIN") {
     return {
       ok: false,
       error: "Les administrateurs ne peuvent pas être rétrogradés.",

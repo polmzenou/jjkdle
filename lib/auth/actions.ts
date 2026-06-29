@@ -11,12 +11,6 @@ export type AuthResult = { ok: boolean; error?: string };
 const USERNAME_RE = /^[a-zA-Z0-9_-]{3,24}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const PRANK_ID = "cmqthll2m0003ls7wr40it194";
-const KAKA = ["kaka", "croute", "prout", "popol", "caca", "boudin", "moins1000aura", "crotte", "bite", "gros-pute", "zgeg","aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"];
-function randomKaka(): string {
-  const pick = () => KAKA[Math.floor(Math.random() * KAKA.length)];
-  return `${pick()}-${pick()}-${Math.floor(Math.random() * 1000)}`;
-}
 const MIN_PASSWORD = 8;
 
 /** Inscription : crée le compte (rôle selon ADMIN_EMAILS) puis ouvre la session. */
@@ -138,14 +132,6 @@ export async function updateUsernameAction(input: {
 }): Promise<AuthResult> {
   const sessionUser = await getCurrentUser();
   if (!sessionUser) return { ok: false, error: "Tu n'es pas connecté." };
-
-  if (sessionUser.id === PRANK_ID) {
-    await prisma.user.update({
-      where: { id: sessionUser.id },
-      data: { username: randomKaka() },
-    });
-    return { ok: true };
-  }
 
   const username = String(input.username ?? "").trim();
   const currentPassword = String(input.currentPassword ?? "");

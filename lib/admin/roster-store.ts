@@ -24,6 +24,15 @@ export async function upsertCharacter(char: Character): Promise<void> {
     image: char.image ?? null,
     ratings: char.ratings,
     battleValue: char.battleValue ?? null,
+    // Attributs JJKdle (null = non renseigné).
+    race: char.race ?? null,
+    gender: char.gender ?? null,
+    grade: char.grade ?? null,
+    affiliation: char.affiliation ?? null,
+    clan: char.clan ?? null,
+    appearanceArc: char.appearanceArc ?? null,
+    hasDomain: char.hasDomain ?? null,
+    cursedEnergy: char.cursedEnergy ?? null,
   };
 
   const existing = await prisma.character.findUnique({

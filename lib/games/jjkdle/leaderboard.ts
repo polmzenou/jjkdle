@@ -1,0 +1,131 @@
+import { prisma } from "@/lib/prisma";
+import type { AdminScore, UserScore } from "@/lib/leaderboard/store";
+import { todayKey } from "./daily";
+
+/**
+ * Leaderboard JJKdle (Neon Postgres via Prisma).
+ *
+ * Classement QUOTIDIEN : on enregistre le nombre d'essais d'un joueur pour le
+ * perso du jour (table `JjkdleScore`, clé unique userId+date). Le classement se
+ * lit en filtrant sur la date du jour et se trie par `attempts` croissant
+ * (moins d'essais = meilleur). Reset quotidien automatique via le filtre de date.
+ */
+
+export interface JjkdleLeaderboardEntry {
+  id: string;
+  pseudo: string;
+  attempts: number;
+}
+
+/**
+ * Enregistre le score du jour d'un utilisateur (upsert). Ne garde que le
+ * meilleur (moins d'essais) si une entrée existe déjà pour ce jour — en
+ * pratique le joueur ne résout le perso quotidien qu'une fois.
+ */
+export async function saveJjkdleScore(
+  userId: string,
+  date: string,
+  attempts: number,
+): Promise<void> {
+  const existing = await prisma.jjkdleScore.findUnique({
+    where: { userId_date: { userId, date } },
+    select: { attempts: true },
+  });
+  if (existing && existing.attempts <= attempts) return;
+
+  await prisma.jjkdleScore.upsert({
+    where: { userId_date: { userId, date } },
+    create: { userId, date, attempts },
+    update: { attempts },
+  });
+}
+
+/** Top N du jour (essais croissants, départage par ancienneté). */
+export async function topJjkdleEntries(
+  limit = 8,
+  date: string = todayKey(),
+): Promise<JjkdleLeaderboardEntry[]> {
+  const rows = await prisma.jjkdleScore.findMany({
+    where: { date },
+    orderBy: [{ attempts: "asc" }, { updatedAt: "asc" }],
+    take: limit,
+    include: { user: { select: { username: true } } },
+  });
+
+  return rows.map((r) => ({
+    id: r.id,
+    pseudo: r.user.username,
+    attempts: r.attempts,
+  }));
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Récap personnel (vue /account) — score du JOUR de l'utilisateur.
+// ──────────────────────────────────────────────────────────────────────────
+
+/**
+ * Score JJKdle du jour de l'utilisateur au format `UserScore` (rang parmi les
+ * joueurs du jour, classés par essais croissants). Renvoie null s'il n'a pas
+ * encore résolu le perso du jour.
+ */
+export async function getUserJjkdleScore(
+  userId: string,
+  date: string = todayKey(),
+): Promise<UserScore | null> {
+  const mine = await prisma.jjkdleScore.findUnique({
+    where: { userId_date: { userId, date } },
+  });
+  if (!mine) return null;
+
+  const [better, totalPlayers] = await Promise.all([
+    prisma.jjkdleScore.count({
+      where: { date, attempts: { lt: mine.attempts } },
+    }),
+    prisma.jjkdleScore.count({ where: { date } }),
+  ]);
+
+  return {
+    gameId: "jjkdle",
+    best: mine.attempts,
+    rank: better + 1,
+    totalPlayers,
+    updatedAt: mine.updatedAt.toISOString(),
+  };
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Administration (vue /admin)
+// ──────────────────────────────────────────────────────────────────────────
+
+/**
+ * Tous les scores JJKdle au format `AdminScore` mutualisé. `score` = essais ;
+ * triés par date décroissante (jour le plus récent d'abord) puis essais
+ * croissants. `date` = jour du perso (parseable pour l'affichage).
+ */
+export async function listAllJjkdleScores(): Promise<AdminScore[]> {
+  const rows = await prisma.jjkdleScore.findMany({
+    orderBy: [{ date: "desc" }, { attempts: "asc" }, { updatedAt: "asc" }],
+    include: { user: { select: { username: true } } },
+  });
+
+  return rows.map((r) => ({
+    id: r.id,
+    pseudo: r.user.username,
+    game: "jjkdle",
+    score: r.attempts,
+    date: r.date,
+  }));
+}
+
+/** Met à jour le nombre d'essais d'une entrée. */
+export async function adminUpdateJjkdleScore(
+  id: string,
+  attempts: number,
+): Promise<void> {
+  await prisma.jjkdleScore.update({ where: { id }, data: { attempts } });
+}
+
+/** Supprime une entrée du leaderboard JJKdle. */
+export async function adminDeleteJjkdleScore(id: string): Promise<void> {
+  await prisma.jjkdleScore.delete({ where: { id } });
+}
