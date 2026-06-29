@@ -7,7 +7,12 @@ import {
   shuffledPool,
   MAX_ATTEMPTS,
 } from "./ranking";
-import { CONDITIONS, SLOT_COUNT } from "@/data/ranking/conditions";
+import {
+  CONDITIONS,
+  CONDITION_DEFS,
+  SLOT_COUNT,
+  criterionValue,
+} from "@/data/ranking/conditions";
 import { CHARACTER_BY_ID } from "@/data/roster/characters";
 import { seededRng } from "@/lib/draw/draw";
 
@@ -83,6 +88,38 @@ describe("intégrité des données", () => {
       for (const id of c.order) {
         expect(CHARACTER_BY_ID[id], `${id} (condition ${c.id})`).toBeDefined();
       }
+    }
+  });
+
+  it("ids de condition tous uniques", () => {
+    const ids = CONDITIONS.map((c) => c.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it("chaque consigne porte un pool et un critère", () => {
+    for (const c of CONDITIONS) {
+      expect(c.pool, c.id).toBeTruthy();
+      expect(c.category, c.id).toBeTruthy();
+    }
+  });
+
+  // Garde-fou clé : une consigne dérivée d'une stat doit avoir 8 valeurs
+  // DISTINCTES, sinon deux persos seraient interchangeables → puzzle injuste.
+  it("les consignes dérivées ont 8 valeurs de critère distinctes et définies", () => {
+    for (const def of CONDITION_DEFS) {
+      if (def.criterion === "lore") continue;
+      const values = def.ids.map((id) => {
+        const v = criterionValue(CHARACTER_BY_ID[id], def.criterion);
+        expect(
+          v,
+          `${id} n'a pas de valeur "${def.criterion}" (condition ${def.id})`,
+        ).toBeTypeOf("number");
+        return v;
+      });
+      expect(
+        new Set(values).size,
+        `valeurs en doublon pour "${def.criterion}" (condition ${def.id}) : ${values.join(", ")}`,
+      ).toBe(SLOT_COUNT);
     }
   });
 });
