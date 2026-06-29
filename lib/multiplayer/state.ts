@@ -88,7 +88,7 @@ export interface PlayerRow {
   currentDraw: unknown;
   lockedThisRound: boolean;
   finalScore: number | null;
-  user: { username: string };
+  user: { username: string; avatarCharacter: { image: string | null } | null };
 }
 
 export interface LobbyRow {
@@ -109,6 +109,7 @@ export function serializePlayer(player: PlayerRow): SerializedPlayer {
   return {
     userId: player.userId,
     username: player.user.username,
+    avatarImage: player.user.avatarCharacter?.image ?? null,
     joinOrder: player.joinOrder,
     selection: asRecord<SelectionIds>(player.selection),
     currentDraw: asRecord<DrawIds>(player.currentDraw),

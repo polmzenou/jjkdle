@@ -7,6 +7,7 @@ import {
   MIN_PLAYERS,
   type SerializedLobby,
 } from "@/lib/multiplayer/events";
+import { UserAvatar } from "@/components/UserAvatar";
 
 interface WaitingRoomProps {
   lobby: SerializedLobby;
@@ -102,10 +103,11 @@ export function WaitingRoom({
             animate={{ opacity: 1, y: 0 }}
             className="flex items-center justify-between rounded-xl border border-white/10 bg-void-800/50 px-4 py-3"
           >
-            <span className="font-semibold text-white">
+            <span className="flex items-center gap-2.5 font-semibold text-white">
+              <UserAvatar username={p.username} image={p.avatarImage} size={32} />
               {p.username}
               {p.userId === currentUserId && (
-                <span className="ml-2 text-xs text-white/40">(toi)</span>
+                <span className="ml-1 text-xs text-white/40">(toi)</span>
               )}
             </span>
             {p.userId === lobby.hostId && (

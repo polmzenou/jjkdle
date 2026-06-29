@@ -7,11 +7,18 @@ import type { Prisma } from "@prisma/client";
  * diffusion Pusher) vit dans `actions.ts` ; ce module ne fait que lire/écrire.
  */
 
-/** Inclut les joueurs (ordonnés) + leur username pour la sérialisation. */
+/** Inclut les joueurs (ordonnés) + leur username + avatar pour la sérialisation. */
 export const lobbyInclude = {
   players: {
     orderBy: { joinOrder: "asc" },
-    include: { user: { select: { username: true } } },
+    include: {
+      user: {
+        select: {
+          username: true,
+          avatarCharacter: { select: { image: true } },
+        },
+      },
+    },
   },
 } satisfies Prisma.LobbyInclude;
 

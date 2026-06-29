@@ -1,6 +1,7 @@
 "use client";
 
 import { CharacterImage } from "@/components/CharacterImage";
+import { UserAvatar } from "@/components/UserAvatar";
 import type { RosterMap } from "@/lib/multiplayer/state";
 import type { GauntletCardLog } from "@/lib/games/battle/combat";
 
@@ -11,6 +12,8 @@ interface GauntletDeckProps {
   rosterMap: RosterMap;
   /** Couleur d'accent de la bordure des persos. */
   accent: string;
+  /** Avatar du joueur à afficher à côté du titre (optionnel). */
+  avatar?: { username: string; image: string | null };
 }
 
 /**
@@ -18,11 +21,14 @@ interface GauntletDeckProps {
  * chacun, en petit et en ligne, tous les persos adverses qu'il a battus. Les
  * persos tombés sont grisés.
  */
-export function GauntletDeck({ title, log, rosterMap, accent }: GauntletDeckProps) {
+export function GauntletDeck({ title, log, rosterMap, accent, avatar }: GauntletDeckProps) {
   return (
     <div className="rounded-2xl border border-white/10 bg-void-800/40 p-4 text-left">
-      <p className="mb-3 truncate font-display text-sm font-bold text-white">
-        {title}
+      <p className="mb-3 flex min-w-0 items-center gap-2 font-display text-sm font-bold text-white">
+        {avatar && (
+          <UserAvatar username={avatar.username} image={avatar.image} size={26} />
+        )}
+        <span className="truncate">{title}</span>
       </p>
       <ul className="flex flex-col gap-2">
         {log.map((entry, i) => {

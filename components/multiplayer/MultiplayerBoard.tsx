@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import type { CategoryConfig } from "@/data/roster/categories";
 import type { RosterMap } from "@/lib/multiplayer/state";
 import type { SerializedLobby, SerializedPlayer } from "@/lib/multiplayer/events";
+import { UserAvatar } from "@/components/UserAvatar";
 import { PlayerBoard } from "./PlayerBoard";
 
 interface MultiplayerBoardProps {
@@ -36,8 +37,9 @@ function OpponentCard({
   return (
     <div className="rounded-2xl border border-white/10 bg-void-800/40 p-3">
       <div className="mb-2 flex items-center justify-between gap-2">
-        <span className="truncate text-sm font-semibold text-white/80">
-          {opponent.username}
+        <span className="flex min-w-0 items-center gap-2 text-sm font-semibold text-white/80">
+          <UserAvatar username={opponent.username} image={opponent.avatarImage} size={26} />
+          <span className="truncate">{opponent.username}</span>
         </span>
         <span
           className={`shrink-0 text-xs font-bold ${

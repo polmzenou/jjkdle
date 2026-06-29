@@ -64,6 +64,7 @@ export function DraftPhase({
           rosterMap={rosterMap}
           accent="#7c3aed"
           showCount
+          avatar={me ? { username: me.username, image: me.avatarImage } : undefined}
         />
 
         {/* Carte centrale */}
@@ -128,6 +129,9 @@ export function DraftPhase({
           rosterMap={rosterMap}
           accent="#dc2626"
           showCount
+          avatar={
+            opponent ? { username: opponent.username, image: opponent.avatarImage } : undefined
+          }
         />
       </div>
     </div>
