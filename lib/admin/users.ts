@@ -14,6 +14,14 @@ export interface AdminUser {
   role: Role;
   /** Date d'inscription (ISO). */
   createdAt: string;
+  /** Niveau du compte (dérivé de l'XP, cache). */
+  level: number;
+  /** XP totale (dérivée des scores + bonus admin). */
+  totalXp: number;
+  /** Ajustement manuel admin (additif, persistant). */
+  xpBonus: number;
+  /** Clés des badges débloqués. */
+  badgeKeys: string[];
 }
 
 /** Liste tous les comptes (admins d'abord, puis par ancienneté). */
@@ -26,9 +34,42 @@ export async function listUsers(): Promise<AdminUser[]> {
       email: true,
       role: true,
       createdAt: true,
+      level: true,
+      totalXp: true,
+      xpBonus: true,
+      badges: { select: { badgeKey: true } },
     },
   });
-  return rows.map((u) => ({ ...u, createdAt: u.createdAt.toISOString() }));
+  return rows.map((u) => ({
+    id: u.id,
+    username: u.username,
+    email: u.email,
+    role: u.role,
+    createdAt: u.createdAt.toISOString(),
+    level: u.level,
+    totalXp: u.totalXp,
+    xpBonus: u.xpBonus,
+    badgeKeys: u.badges.map((b) => b.badgeKey),
+  }));
+}
+
+/** Met à jour le bonus d'XP manuel d'un utilisateur. */
+export async function setUserXpBonus(id: string, xpBonus: number): Promise<void> {
+  await prisma.user.update({ where: { id }, data: { xpBonus } });
+}
+
+/** Accorde un badge (idempotent). */
+export async function grantBadge(userId: string, badgeKey: string): Promise<void> {
+  await prisma.userBadge.upsert({
+    where: { userId_badgeKey: { userId, badgeKey } },
+    create: { userId, badgeKey },
+    update: {},
+  });
+}
+
+/** Retire un badge. */
+export async function revokeBadge(userId: string, badgeKey: string): Promise<void> {
+  await prisma.userBadge.deleteMany({ where: { userId, badgeKey } });
 }
 
 /** Rôle courant d'un utilisateur (ou null s'il n'existe pas). */

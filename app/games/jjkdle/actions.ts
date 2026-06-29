@@ -12,6 +12,8 @@ import {
 import { compareGuess } from "@/lib/games/jjkdle/scoring";
 import { isStateFresh } from "@/lib/games/jjkdle/game";
 import { saveJjkdleScore } from "@/lib/games/jjkdle/leaderboard";
+import { updateJjkdleStreak } from "@/lib/progress/streak";
+import { recomputeUserProgress } from "@/lib/progress/recompute";
 import {
   readState,
   writeState,
@@ -125,6 +127,8 @@ export async function submitJjkdleScoreAction(): Promise<{
   ok: boolean;
   error?: string;
   needsAuth?: boolean;
+  newBadges?: string[];
+  streak?: number;
 }> {
   const user = await getCurrentUser();
   if (!user) {
@@ -147,12 +151,15 @@ export async function submitJjkdleScoreAction(): Promise<{
 
   try {
     await saveJjkdleScore(user.id, state.date, state.guesses.length);
+    // Streak AVANT le recompute (le badge JJKDLE_STREAK_7 en dépend).
+    // `updateJjkdleStreak` est idempotent : un 2ᵉ appel le même jour est un no-op.
+    const { streak } = await updateJjkdleStreak(user.id);
+    const { newBadges } = await recomputeUserProgress(user.id);
+    revalidatePath("/games/jjkdle");
+    return { ok: true, newBadges, streak };
   } catch (e) {
     return { ok: false, error: `Échec d'enregistrement : ${(e as Error).message}` };
   }
-
-  revalidatePath("/games/jjkdle");
-  return { ok: true };
 }
 
 /**

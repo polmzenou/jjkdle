@@ -1,7 +1,13 @@
 import { Prisma, type DraftOutcome, type Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import type { DraftSelection } from "./types";
-import type { AdminScore, UserScore } from "@/lib/leaderboard/store";
+import {
+  USER_DECOR_SELECT,
+  scopeWhere,
+  type AdminScore,
+  type LeaderboardScope,
+  type UserScore,
+} from "@/lib/leaderboard/store";
 import { BOSSES } from "./scoring";
 
 /** Score max d'un draft = nombre de boss (tous vaincus → VICTORY). */
@@ -23,6 +29,10 @@ export interface DraftLeaderboardEntry {
   outcome: DraftOutcome;
   /** Rôle du joueur (pour afficher le tag VIP à côté du pseudo). */
   role: Role;
+  /** Image de l'avatar choisi (ou null = initiales). */
+  avatarImage: string | null;
+  /** Niveau du compte. */
+  level: number;
 }
 
 export interface SaveDraftInput {
@@ -70,15 +80,17 @@ export async function saveDraftScore(
 /** Top N : plus d'ennemis vaincus d'abord, départage par score puis ancienneté. */
 export async function topDraftEntries(
   limit = 8,
+  scope: LeaderboardScope = "all-time",
 ): Promise<DraftLeaderboardEntry[]> {
   const rows = await prisma.jujutsuDraftScore.findMany({
+    where: scopeWhere(scope),
     orderBy: [
       { enemiesKilled: "desc" },
       { globalScore: "desc" },
       { updatedAt: "asc" },
     ],
     take: limit,
-    include: { user: { select: { username: true, role: true } } },
+    include: { user: { select: USER_DECOR_SELECT } },
   });
 
   return rows.map((r) => ({
@@ -87,6 +99,8 @@ export async function topDraftEntries(
     enemiesKilled: r.enemiesKilled,
     outcome: r.outcome,
     role: r.user.role,
+    avatarImage: r.user.avatarCharacter?.image ?? null,
+    level: r.user.level,
   }));
 }
 

@@ -3,7 +3,15 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { AdminUser } from "@/lib/admin/users";
-import { setUserRoleAction, deleteUserAction } from "./actions";
+import { BADGES } from "@/lib/badges/definitions";
+import {
+  setUserRoleAction,
+  deleteUserAction,
+  adminSetLevelAction,
+  adminSetXpBonusAction,
+  adminGrantBadgeAction,
+  adminRevokeBadgeAction,
+} from "./actions";
 
 interface UserAdminProps {
   users: AdminUser[];
@@ -22,6 +30,7 @@ export function UserAdmin({ users, currentUserId }: UserAdminProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [feedback, setFeedback] = useState<Feedback>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const promote = (u: AdminUser) => {
     if (!window.confirm(`Promouvoir « ${u.username} » administrateur ?`)) return;
@@ -105,94 +114,244 @@ export function UserAdmin({ users, currentUserId }: UserAdminProps) {
           {users.map((u) => {
             const isAdmin = u.role === "ADMIN";
             const isVip = u.role === "VIP";
+            const expanded = expandedId === u.id;
             return (
               <div
                 key={u.id}
-                className="flex items-center gap-3 rounded-xl border border-white/5 bg-void-700/30 px-3 py-2.5"
+                className="rounded-xl border border-white/5 bg-void-700/30"
               >
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-white">
-                    {u.username}
-                    {u.id === currentUserId && (
-                      <span className="ml-1.5 text-[11px] font-normal text-white/40">
-                        (vous)
-                      </span>
-                    )}
-                  </p>
-                  <p className="truncate text-[11px] text-white/35">{u.email}</p>
-                </div>
-
-                {/* Badge de rôle */}
-                <span
-                  className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide ${
-                    isAdmin
-                      ? "bg-domain/20 text-domain-light"
-                      : isVip
-                        ? "bg-amber-400/15 text-amber-300"
-                        : "bg-white/5 text-white/55"
-                  }`}
-                >
-                  {isAdmin ? "Admin" : isVip ? "VIP" : "Joueur"}
-                </span>
-
-                {/* Actions */}
-                <div className="flex shrink-0 items-center justify-end gap-1.5">
-                  {isAdmin ? (
-                    <span
-                      className="text-[11px] text-white/30"
-                      title="Un administrateur ne peut être ni rétrogradé ni supprimé."
-                    >
-                      🔒 protégé
-                    </span>
-                  ) : (
-                    <>
-                      {isVip ? (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setRole(u, "PLAYER", `« ${u.username} » n'est plus VIP.`)
-                          }
-                          disabled={pending}
-                          className="rounded-md border border-amber-400/40 bg-amber-400/10 px-2.5 py-1 text-xs font-bold text-amber-300 hover:bg-amber-400/20 disabled:opacity-40"
-                        >
-                          Retirer VIP
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setRole(u, "VIP", `« ${u.username} » est désormais VIP.`)
-                          }
-                          disabled={pending}
-                          className="rounded-md border border-amber-400/40 bg-amber-400/10 px-2.5 py-1 text-xs font-bold text-amber-300 hover:bg-amber-400/20 disabled:opacity-40"
-                        >
-                          Passer VIP
-                        </button>
+                <div className="flex flex-wrap items-center gap-3 px-3 py-2.5">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-white">
+                      {u.username}
+                      {u.id === currentUserId && (
+                        <span className="ml-1.5 text-[11px] font-normal text-white/40">
+                          (vous)
+                        </span>
                       )}
-                      <button
-                        type="button"
-                        onClick={() => promote(u)}
-                        disabled={pending}
-                        className="rounded-md border border-domain/40 bg-domain/10 px-2.5 py-1 text-xs font-bold text-domain-light hover:bg-domain/20 disabled:opacity-40"
+                      <span className="ml-2 align-middle text-[11px] font-normal text-domain-light">
+                        Niv. {u.level}
+                      </span>
+                    </p>
+                    <p className="truncate text-[11px] text-white/35">{u.email}</p>
+                  </div>
+
+                  {/* Badge de rôle */}
+                  <span
+                    className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide ${
+                      isAdmin
+                        ? "bg-domain/20 text-domain-light"
+                        : isVip
+                          ? "bg-amber-400/15 text-amber-300"
+                          : "bg-white/5 text-white/55"
+                    }`}
+                  >
+                    {isAdmin ? "Admin" : isVip ? "VIP" : "Joueur"}
+                  </span>
+
+                  {/* Actions */}
+                  <div className="flex shrink-0 items-center justify-end gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setExpandedId(expanded ? null : u.id)}
+                      className="rounded-md border border-white/15 px-2.5 py-1 text-xs font-bold text-white/70 hover:text-white"
+                    >
+                      Progression {expanded ? "▲" : "▼"}
+                    </button>
+                    {isAdmin ? (
+                      <span
+                        className="text-[11px] text-white/30"
+                        title="Un administrateur ne peut être ni rétrogradé ni supprimé."
                       >
-                        Promouvoir admin
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => remove(u)}
-                        disabled={pending}
-                        className="rounded-md border border-cursed/30 px-2.5 py-1 text-xs text-cursed-light hover:bg-cursed/10 disabled:opacity-40"
-                      >
-                        Suppr.
-                      </button>
-                    </>
-                  )}
+                        🔒 protégé
+                      </span>
+                    ) : (
+                      <>
+                        {isVip ? (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setRole(u, "PLAYER", `« ${u.username} » n'est plus VIP.`)
+                            }
+                            disabled={pending}
+                            className="rounded-md border border-amber-400/40 bg-amber-400/10 px-2.5 py-1 text-xs font-bold text-amber-300 hover:bg-amber-400/20 disabled:opacity-40"
+                          >
+                            Retirer VIP
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setRole(u, "VIP", `« ${u.username} » est désormais VIP.`)
+                            }
+                            disabled={pending}
+                            className="rounded-md border border-amber-400/40 bg-amber-400/10 px-2.5 py-1 text-xs font-bold text-amber-300 hover:bg-amber-400/20 disabled:opacity-40"
+                          >
+                            Passer VIP
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => promote(u)}
+                          disabled={pending}
+                          className="rounded-md border border-domain/40 bg-domain/10 px-2.5 py-1 text-xs font-bold text-domain-light hover:bg-domain/20 disabled:opacity-40"
+                        >
+                          Promouvoir admin
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => remove(u)}
+                          disabled={pending}
+                          className="rounded-md border border-cursed/30 px-2.5 py-1 text-xs text-cursed-light hover:bg-cursed/10 disabled:opacity-40"
+                        >
+                          Suppr.
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
+
+                {expanded && (
+                  <ProgressionPanel
+                    user={u}
+                    pending={pending}
+                    onResult={(ok, msg) => {
+                      setFeedback({ ok, msg });
+                      if (ok) router.refresh();
+                    }}
+                    run={startTransition}
+                  />
+                )}
               </div>
             );
           })}
         </div>
       </section>
+    </div>
+  );
+}
+
+/** Panneau dépliable d'édition de la progression d'un joueur (XP, niveau, badges). */
+function ProgressionPanel({
+  user,
+  pending,
+  onResult,
+  run,
+}: {
+  user: AdminUser;
+  pending: boolean;
+  onResult: (ok: boolean, msg: string) => void;
+  run: (cb: () => void) => void;
+}) {
+  const [level, setLevel] = useState(String(user.level));
+  const [xpBonus, setXpBonus] = useState(String(user.xpBonus));
+  const owned = new Set(user.badgeKeys);
+
+  const applyLevel = () =>
+    run(async () => {
+      const res = await adminSetLevelAction(user.id, Number(level));
+      onResult(res.ok, res.ok ? `Niveau de « ${user.username} » fixé à ${level}.` : res.error ?? "Échec.");
+    });
+
+  const applyXp = () =>
+    run(async () => {
+      const res = await adminSetXpBonusAction(user.id, Number(xpBonus));
+      onResult(res.ok, res.ok ? `Bonus d'XP de « ${user.username} » mis à jour.` : res.error ?? "Échec.");
+    });
+
+  const toggleBadge = (key: string, has: boolean) =>
+    run(async () => {
+      const res = has
+        ? await adminRevokeBadgeAction(user.id, key)
+        : await adminGrantBadgeAction(user.id, key);
+      onResult(
+        res.ok,
+        res.ok
+          ? `Badge « ${key} » ${has ? "retiré à" : "accordé à"} ${user.username}.`
+          : res.error ?? "Échec.",
+      );
+    });
+
+  const fieldCls =
+    "w-24 rounded-md border border-white/10 bg-void-900 px-2 py-1 text-sm text-white outline-none focus:border-domain";
+  const btnCls =
+    "rounded-md border border-domain/40 bg-domain/10 px-2.5 py-1 text-xs font-bold text-domain-light hover:bg-domain/20 disabled:opacity-40";
+
+  return (
+    <div className="space-y-4 border-t border-white/5 px-3 py-3">
+      {/* XP totale + niveau actuel */}
+      <p className="text-[11px] text-white/40">
+        XP totale : <b className="text-white/70">{user.totalXp.toLocaleString("fr-FR")}</b>{" "}
+        · niveau actuel : <b className="text-white/70">{user.level}</b>
+      </p>
+
+      <div className="flex flex-wrap items-end gap-4">
+        <label className="block">
+          <span className="mb-1 block text-[11px] uppercase tracking-wider text-white/45">
+            Fixer le niveau
+          </span>
+          <div className="flex gap-2">
+            <input
+              type="number"
+              min={1}
+              max={999}
+              value={level}
+              onChange={(e) => setLevel(e.target.value)}
+              className={fieldCls}
+            />
+            <button type="button" onClick={applyLevel} disabled={pending} className={btnCls}>
+              Appliquer
+            </button>
+          </div>
+        </label>
+
+        <label className="block">
+          <span className="mb-1 block text-[11px] uppercase tracking-wider text-white/45">
+            Bonus d&apos;XP (± additif)
+          </span>
+          <div className="flex gap-2">
+            <input
+              type="number"
+              value={xpBonus}
+              onChange={(e) => setXpBonus(e.target.value)}
+              className={fieldCls}
+            />
+            <button type="button" onClick={applyXp} disabled={pending} className={btnCls}>
+              Appliquer
+            </button>
+          </div>
+        </label>
+      </div>
+
+      {/* Badges */}
+      <div>
+        <p className="mb-2 text-[11px] uppercase tracking-wider text-white/45">
+          Badges
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {BADGES.map((b) => {
+            const has = owned.has(b.key);
+            return (
+              <button
+                key={b.key}
+                type="button"
+                disabled={pending}
+                onClick={() => toggleBadge(b.key, has)}
+                title={b.description}
+                className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold transition-colors disabled:opacity-40 ${
+                  has
+                    ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-300"
+                    : "border-white/10 text-white/45 hover:text-white"
+                }`}
+              >
+                <span aria-hidden>{b.iconKey}</span>
+                {b.name}
+                <span className="text-[10px]">{has ? "✓" : "+"}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }

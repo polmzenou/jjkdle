@@ -34,11 +34,41 @@ model User {
   role         Role     @default(PLAYER)
   createdAt    DateTime @default(now())
 
+  // ── Customisation profil (ensembles fermés, aucun upload) ──
+  bannerKey         String     @default("default") // clé ∈ BANNER_PALETTE (lib/profile/banners.ts)
+  avatarCharacterId String?
+  avatarCharacter   Character? @relation("UserAvatar", fields: [avatarCharacterId], references: [id], onDelete: SetNull)
+
+  // ── Progression (cache recalculé en fin de partie ; source = scores) ──
+  totalXp Int @default(0)
+  xpBonus Int @default(0) // ajustement manuel admin (additif, persistant)
+  level   Int @default(1)
+
+  // ── Streak quotidien JJKdle (jour de réf. = Europe/Paris, cf. todayKey) ──
+  jjkdleStreak       Int     @default(0)
+  jjkdleBestStreak   Int     @default(0)
+  jjkdleLastPlayedAt String? // clé "YYYY-MM-DD" du dernier daily complété
+
   sessions     Session[]
   scores       Score[]
   lobbyPlayers LobbyPlayer[]
   draftScores  JujutsuDraftScore[]
   jjkdleScores JjkdleScore[]
+  badges       UserBadge[]
+}
+
+/// Déblocage d'un badge par un utilisateur. La métadonnée du badge (nom,
+/// description, icône, règle) vit dans le code (lib/badges/definitions.ts) ;
+/// seule la possession est persistée. `badgeKey` réfère une clé de BADGES.
+model UserBadge {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badgeKey   String
+  unlockedAt DateTime @default(now())
+
+  @@unique([userId, badgeKey])
+  @@index([userId])
 }
 
 /// Session d'authentification (token aléatoire stocké en cookie httpOnly).
@@ -230,6 +260,9 @@ model Character {
   /// note builder ratings["cursed-energy"] (échelle gameplay 0–100) : la valeur lore
   /// peut différer et ne doit pas coupler JJKdle au barème du builder.
   cursedEnergy  Int?
+
+  /// Utilisateurs ayant choisi ce personnage comme avatar de profil.
+  avatarUsers User[] @relation("UserAvatar")
 
   @@index([position])
 }

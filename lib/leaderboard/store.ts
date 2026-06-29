@@ -1,5 +1,6 @@
 import type { Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { getWeekBounds } from "@/lib/date";
 
 /**
  * Leaderboard global (Neon Postgres via Prisma).
@@ -10,12 +11,43 @@ import { prisma } from "@/lib/prisma";
 
 export type LeaderboardGame = "builder" | "ranking";
 
+/**
+ * Portée du classement. `weekly` filtre sur `updatedAt >= lundi` : comme la
+ * table `Score` ne garde que le MEILLEUR score (upsert), l'hebdo n'affiche que
+ * les joueurs ayant (re)battu leur record cette semaine (limite assumée).
+ */
+export type LeaderboardScope = "all-time" | "weekly";
+
 export interface LeaderboardEntry {
   id: string;
   pseudo: string;
   score: number;
   /** Rôle du joueur (pour afficher le tag VIP à côté du pseudo). */
   role: Role;
+  /** Image de l'avatar choisi (ou null = initiales). */
+  avatarImage: string | null;
+  /** Niveau du compte. */
+  level: number;
+}
+
+/** Sélection Prisma commune pour décorer une ligne (avatar + niveau + rôle). */
+export const USER_DECOR_SELECT = {
+  username: true,
+  role: true,
+  level: true,
+  avatarCharacter: { select: { image: true } },
+} as const;
+
+/** Filtre `where` de portée (vide pour all-time, borne lundi pour weekly). */
+export function scopeWhere(scope: LeaderboardScope) {
+  return scope === "weekly"
+    ? { updatedAt: { gte: getWeekBounds().start } }
+    : {};
+}
+
+/** Normalise un paramètre d'URL (?scope=) en portée valide (défaut all-time). */
+export function parseScope(value: unknown): LeaderboardScope {
+  return value === "weekly" ? "weekly" : "all-time";
 }
 
 /** Score maximum atteignable par jeu (sert à valider les soumissions). */
@@ -57,12 +89,13 @@ export async function saveScore(
 export async function topEntries(
   limit = 8,
   game?: LeaderboardGame,
+  scope: LeaderboardScope = "all-time",
 ): Promise<LeaderboardEntry[]> {
   const rows = await prisma.score.findMany({
-    where: game ? { gameId: game } : undefined,
+    where: { ...(game ? { gameId: game } : {}), ...scopeWhere(scope) },
     orderBy: [{ best: "desc" }, { updatedAt: "asc" }],
     take: limit,
-    include: { user: { select: { username: true, role: true } } },
+    include: { user: { select: USER_DECOR_SELECT } },
   });
 
   return rows.map((r) => ({
@@ -70,6 +103,8 @@ export async function topEntries(
     pseudo: r.user.username,
     score: r.best,
     role: r.user.role,
+    avatarImage: r.user.avatarCharacter?.image ?? null,
+    level: r.user.level,
   }));
 }
 

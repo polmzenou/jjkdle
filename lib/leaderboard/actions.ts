@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth/session";
+import { recomputeUserProgress } from "@/lib/progress/recompute";
 import { saveScore, MAX_SCORE, type LeaderboardGame } from "./store";
 
 export type SubmitResult = {
@@ -9,6 +10,8 @@ export type SubmitResult = {
   error?: string;
   /** true si l'erreur vient d'une absence de connexion (UI propose /login). */
   needsAuth?: boolean;
+  /** Badges nouvellement débloqués par cette soumission (toast). */
+  newBadges?: string[];
 };
 
 const GAMES: LeaderboardGame[] = ["builder", "ranking"];
@@ -42,10 +45,10 @@ export async function submitScoreAction(
 
   try {
     await saveScore(user.id, game, score);
+    const { newBadges } = await recomputeUserProgress(user.id);
+    revalidatePath(`/games/${game}`);
+    return { ok: true, newBadges };
   } catch (e) {
     return { ok: false, error: `Échec d'enregistrement : ${(e as Error).message}` };
   }
-
-  revalidatePath(`/games/${game}`);
-  return { ok: true };
 }

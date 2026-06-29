@@ -13,7 +13,15 @@ import { BOSSES } from "@/lib/games/draft/scoring";
 import { getGrade } from "@/lib/scoring/grades";
 import { GAMES } from "@/lib/games/registry";
 import { VipBadge } from "@/components/VipBadge";
+import { UserAvatar } from "@/components/UserAvatar";
+import { LevelBar } from "@/components/LevelBar";
+import { BadgeShelf } from "@/components/badges/BadgeShelf";
+import { bannerStyle } from "@/lib/profile/banners";
+import { getUserBadgeKeys } from "@/lib/badges/evaluate";
+import { getRoster } from "@/lib/content/queries";
+import { prisma } from "@/lib/prisma";
 import { AccountForms } from "./AccountForms";
+import { ProfileEditor, type AvatarChoice } from "./ProfileEditor";
 
 export const metadata: Metadata = {
   title: "Mon compte — JJK Arcade",
@@ -27,12 +35,34 @@ export default async function AccountPage() {
   if (!user) redirect("/login");
 
   // Scores classiques (table Score) + scores des jeux à table dédiée
-  // (Draft, et JJKdle = score du jour).
-  const [classicScores, draftScore, jjkdleScore] = await Promise.all([
-    getUserScores(user.id),
-    getUserDraftScore(user.id),
-    getUserJjkdleScore(user.id),
-  ]);
+  // (Draft, et JJKdle = score du jour). + profil/progression + badges + roster.
+  const [classicScores, draftScore, jjkdleScore, profile, badgeKeys, roster] =
+    await Promise.all([
+      getUserScores(user.id),
+      getUserDraftScore(user.id),
+      getUserJjkdleScore(user.id),
+      prisma.user.findUnique({
+        where: { id: user.id },
+        select: {
+          bannerKey: true,
+          avatarCharacterId: true,
+          totalXp: true,
+          level: true,
+          jjkdleStreak: true,
+          jjkdleBestStreak: true,
+          avatarCharacter: { select: { name: true, image: true } },
+        },
+      }),
+      getUserBadgeKeys(user.id),
+      getRoster(),
+    ]);
+
+  const avatarChoices: AvatarChoice[] = roster.map((c) => ({
+    id: c.id,
+    name: c.name,
+    ...(c.image ? { image: c.image } : {}),
+  }));
+  const banner = bannerStyle(profile?.bannerKey);
   const scores = [
     ...classicScores,
     ...(draftScore ? [draftScore] : []),
@@ -46,13 +76,36 @@ export default async function AccountPage() {
           <span aria-hidden className="h-px w-6 bg-gradient-to-r from-transparent to-domain-light/60" />
           管理 · Mon compte
         </span>
-        <h1 className="mt-3 font-display text-3xl font-black tracking-tight text-white sm:text-4xl">
-          Salut, {user.username}
-          {user.role === "VIP" && <VipBadge className="ml-2 text-sm" />}
-        </h1>
-        <p className="mt-2 text-white/55">
-          Retrouve ici tes scores et gère les infos de ton compte.
-        </p>
+
+        {/* Bannière + avatar + niveau */}
+        <div
+          className="relative mt-4 overflow-hidden rounded-2xl border border-white/10 p-5"
+          style={{ background: banner.gradient }}
+        >
+          <div className="flex flex-wrap items-center gap-4">
+            <UserAvatar
+              username={user.username}
+              image={profile?.avatarCharacter?.image}
+              level={profile?.level ?? 1}
+              size={72}
+            />
+            <div className="min-w-0">
+              <h1 className="font-display text-3xl font-black tracking-tight text-white drop-shadow sm:text-4xl">
+                {user.username}
+                {user.role === "VIP" && <VipBadge className="ml-2 text-sm" />}
+              </h1>
+              {(profile?.jjkdleStreak ?? 0) > 0 && (
+                <p className="mt-1 text-sm font-bold text-white/85">
+                  🔥 {profile?.jjkdleStreak} jour{(profile?.jjkdleStreak ?? 0) > 1 ? "s" : ""} de streak JJKdle
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 rounded-2xl border border-white/10 bg-void-800/60 p-5 backdrop-blur">
+          <LevelBar totalXp={profile?.totalXp ?? 0} />
+        </div>
       </header>
 
       {/* ── Récap des scores ── */}
@@ -153,6 +206,27 @@ export default async function AccountPage() {
             })}
           </div>
         )}
+      </section>
+
+      {/* ── Badges ── */}
+      <section className="mb-12">
+        <h2 className="mb-4 font-display text-lg font-bold uppercase tracking-wider text-white/80">
+          🎖️ Mes badges
+        </h2>
+        <BadgeShelf unlockedKeys={badgeKeys} />
+      </section>
+
+      {/* ── Personnalisation ── */}
+      <section className="mb-12">
+        <h2 className="mb-4 font-display text-lg font-bold uppercase tracking-wider text-white/80">
+          🎨 Personnalisation
+        </h2>
+        <ProfileEditor
+          username={user.username}
+          roster={avatarChoices}
+          initialBannerKey={profile?.bannerKey ?? "default"}
+          initialAvatarId={profile?.avatarCharacterId ?? null}
+        />
       </section>
 
       {/* ── Infos & édition ── */}

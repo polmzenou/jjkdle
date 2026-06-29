@@ -1,6 +1,11 @@
 import type { Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import type { AdminScore, UserScore } from "@/lib/leaderboard/store";
+import {
+  USER_DECOR_SELECT,
+  type AdminScore,
+  type UserScore,
+} from "@/lib/leaderboard/store";
+import { weekDateKeys } from "@/lib/date";
 import { todayKey } from "./daily";
 
 /**
@@ -18,6 +23,12 @@ export interface JjkdleLeaderboardEntry {
   attempts: number;
   /** Rôle du joueur (pour afficher le tag VIP à côté du pseudo). */
   role: Role;
+  /** Image de l'avatar choisi (ou null = initiales). */
+  avatarImage: string | null;
+  /** Niveau du compte. */
+  level: number;
+  /** Jours résolus cette semaine (présent seulement pour la portée weekly). */
+  daysSolved?: number;
 }
 
 /**
@@ -52,7 +63,7 @@ export async function topJjkdleEntries(
     where: { date },
     orderBy: [{ attempts: "asc" }, { updatedAt: "asc" }],
     take: limit,
-    include: { user: { select: { username: true, role: true } } },
+    include: { user: { select: USER_DECOR_SELECT } },
   });
 
   return rows.map((r) => ({
@@ -60,7 +71,57 @@ export async function topJjkdleEntries(
     pseudo: r.user.username,
     attempts: r.attempts,
     role: r.user.role,
+    avatarImage: r.user.avatarCharacter?.image ?? null,
+    level: r.user.level,
   }));
+}
+
+/**
+ * Top N HEBDOMADAIRE : agrège les jours de la semaine courante (lundi→dimanche,
+ * Europe/Paris). Classement par jours résolus décroissant, puis total d'essais
+ * croissant (plus régulier + plus efficace = meilleur).
+ */
+export async function topJjkdleWeeklyEntries(
+  limit = 8,
+): Promise<JjkdleLeaderboardEntry[]> {
+  const dates = weekDateKeys();
+  const rows = await prisma.jjkdleScore.findMany({
+    where: { date: { in: dates } },
+    select: { userId: true, attempts: true },
+  });
+
+  // Agrégation par joueur : nb de jours résolus + total d'essais.
+  const byUser = new Map<string, { days: number; total: number }>();
+  for (const r of rows) {
+    const acc = byUser.get(r.userId) ?? { days: 0, total: 0 };
+    acc.days += 1;
+    acc.total += r.attempts;
+    byUser.set(r.userId, acc);
+  }
+
+  const ranked = [...byUser.entries()]
+    .sort((a, b) => b[1].days - a[1].days || a[1].total - b[1].total)
+    .slice(0, limit);
+  if (ranked.length === 0) return [];
+
+  const users = await prisma.user.findMany({
+    where: { id: { in: ranked.map(([id]) => id) } },
+    select: { id: true, ...USER_DECOR_SELECT },
+  });
+  const userById = new Map(users.map((u) => [u.id, u]));
+
+  return ranked.map(([userId, agg]) => {
+    const u = userById.get(userId);
+    return {
+      id: userId,
+      pseudo: u?.username ?? "—",
+      attempts: agg.total,
+      role: u?.role ?? "PLAYER",
+      avatarImage: u?.avatarCharacter?.image ?? null,
+      level: u?.level ?? 1,
+      daysSolved: agg.days,
+    };
+  });
 }
 
 // ──────────────────────────────────────────────────────────────────────────

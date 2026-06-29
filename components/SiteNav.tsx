@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { Logo } from "@/components/Logo";
 import { VipBadge } from "@/components/VipBadge";
+import { UserAvatar } from "@/components/UserAvatar";
 import { logoutAction } from "@/lib/auth/actions";
 import {
   refreshRosterImagesFromApiAction,
@@ -22,6 +23,10 @@ export type NavUser = {
   isVip: boolean;
   /** ADMIN ou VIP : accès aux boutons « OUAIS » / « Vider le cache ». */
   canSyncImages: boolean;
+  /** Image de l'avatar choisi (personnage du roster), ou null = initiales. */
+  avatarImage: string | null;
+  /** Niveau du compte (pastille sur l'avatar). */
+  level: number;
 };
 
 /**
@@ -179,9 +184,14 @@ function UserMenu({
       <Link
         href="/account"
         aria-label="Mon compte"
-        className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-sm font-semibold text-white/80 transition-colors hover:border-white/25 hover:text-white"
+        className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] py-1 pl-1 pr-3 text-sm font-semibold text-white/80 transition-colors hover:border-white/25 hover:text-white"
       >
-        <span aria-hidden>👤</span>
+        <UserAvatar
+          username={user.username}
+          image={user.avatarImage}
+          level={user.level}
+          size={28}
+        />
         <span className="hidden max-w-[8rem] truncate sm:inline">
           {user.username}
         </span>
