@@ -320,7 +320,7 @@ export async function setUserRoleAction(
   if (!(await getAdminUser())) {
     return { ok: false, error: "Accès réservé aux administrateurs." };
   }
-  if (role !== "ADMIN" && role !== "PLAYER") {
+  if (role !== "ADMIN" && role !== "PLAYER" && role !== "VIP") {
     return { ok: false, error: "Rôle invalide." };
   }
 
@@ -329,8 +329,8 @@ export async function setUserRoleAction(
     return { ok: false, error: "Utilisateur introuvable." };
   }
 
-  // Protection : on ne rétrograde jamais un administrateur.
-  if (current === "ADMIN" && role === "PLAYER") {
+  // Protection : on ne rétrograde/modifie jamais un administrateur.
+  if (current === "ADMIN" && role !== "ADMIN") {
     return {
       ok: false,
       error: "Les administrateurs ne peuvent pas être rétrogradés.",

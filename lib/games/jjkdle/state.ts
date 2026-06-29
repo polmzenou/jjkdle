@@ -17,13 +17,15 @@ const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365;
 
 export interface JjkdleState {
   mode: GameMode;
-  /** Clé "YYYY-MM-DD" de la partie (mode daily) ; "" en mode admin. */
+  /** Clé "YYYY-MM-DD" de la partie (sert à expirer l'état au changement de jour). */
   date: string;
   /** Id du perso mystère (SECRET — jamais renvoyé au client tant que non gagné). */
   targetId: string;
   /** Ids des persos déjà proposés, dans l'ordre. */
   guesses: string[];
   status: GameStatus;
+  /** Nombre de parties bonus VIP déjà jouées aujourd'hui (mode "vip" uniquement). */
+  replays?: number;
 }
 
 /** Lit l'état brut depuis le cookie (null si absent/illisible). */

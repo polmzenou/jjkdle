@@ -5,8 +5,13 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { CharacterImage } from "@/components/CharacterImage";
-import type { GameMode, GameStatus, GuessRow as GuessRowData } from "@/lib/games/jjkdle/types";
-import { guessAction, newAdminGameAction } from "./actions";
+import {
+  VIP_MAX_REPLAYS,
+  type GameMode,
+  type GameStatus,
+  type GuessRow as GuessRowData,
+} from "@/lib/games/jjkdle/types";
+import { guessAction, newAdminGameAction, newVipGameAction } from "./actions";
 import { CharacterSearch } from "./CharacterSearch";
 import { GuessHeader, GuessRow } from "./GuessRow";
 
@@ -26,6 +31,8 @@ interface JJKdleGameProps {
   initialStatus: GameStatus;
   mode: GameMode;
   isAdmin: boolean;
+  isVip: boolean;
+  vipReplaysUsed: number;
   msUntilMidnight: number;
   initialRevealed: Revealed;
 }
@@ -37,6 +44,8 @@ export function JJKdleGame({
   initialStatus,
   mode,
   isAdmin,
+  isVip,
+  vipReplaysUsed,
   msUntilMidnight,
   initialRevealed,
 }: JJKdleGameProps) {
@@ -47,16 +56,24 @@ export function JJKdleGame({
   const [revealed, setRevealed] = useState<Revealed>(initialRevealed);
   const [error, setError] = useState<string | null>(null);
   const [lastGuessId, setLastGuessId] = useState<string | null>(null);
+  const [vipUsed, setVipUsed] = useState(vipReplaysUsed);
 
   const guessedIds = useMemo(
     () => new Set(rows.map((r) => r.characterId)),
     [rows],
   );
 
-  // En mode daily, une fois gagné, on bloque les propositions. En mode admin,
-  // gagné aussi → on attend "Nouvelle partie".
+  // En mode daily, une fois gagné, on bloque les propositions. En mode bonus
+  // (admin / VIP), gagné aussi → on attend une nouvelle partie.
   const locked = status === "won";
   const poolEmpty = eligibleCount === 0;
+
+  // Capacité à relancer : admin = illimité ; VIP = plafonné à VIP_MAX_REPLAYS/jour.
+  const isPrivileged = isAdmin || isVip;
+  const canReplay = isAdmin || (isVip && vipUsed < VIP_MAX_REPLAYS);
+  const replayLabel = isAdmin
+    ? "🔄 Nouvelle partie (admin)"
+    : `🔄 Partie bonus VIP (${vipUsed}/${VIP_MAX_REPLAYS})`;
 
   const handlePick = useCallback(
     (id: string) => {
@@ -76,21 +93,22 @@ export function JJKdleGame({
     [],
   );
 
-  const handleNewAdminGame = useCallback(() => {
+  const handleReplay = useCallback(() => {
     setError(null);
     startTransition(async () => {
-      const res = await newAdminGameAction();
+      const res = isAdmin ? await newAdminGameAction() : await newVipGameAction();
       if (!res.ok) {
         setError(res.error ?? "Échec.");
         return;
       }
+      if (!isAdmin) setVipUsed((n) => n + 1);
       setRows([]);
       setStatus("playing");
       setRevealed(null);
       setLastGuessId(null);
       router.refresh();
     });
-  }, [router]);
+  }, [router, isAdmin]);
 
   // Affichage : proposition la plus récente en haut.
   const displayRows = useMemo(() => [...rows].reverse(), [rows]);
@@ -113,10 +131,11 @@ export function JJKdleGame({
               attempts={rows.length}
               rows={rows}
               mode={mode}
-              isAdmin={isAdmin}
+              showReplay={isPrivileged}
+              replayLabel={replayLabel}
+              replayDisabled={pending || !canReplay}
+              onReplay={handleReplay}
               msUntilMidnight={msUntilMidnight}
-              onNewGame={handleNewAdminGame}
-              pending={pending}
             />
           ) : (
             <div className="mt-6">
@@ -132,15 +151,15 @@ export function JJKdleGame({
             </div>
           )}
 
-          {/* Mode admin : bouton nouvelle partie toujours dispo */}
-          {isAdmin && status !== "won" && rows.length > 0 && (
+          {/* Partie bonus en cours (admin / VIP) : relancer sans attendre la victoire */}
+          {isPrivileged && status !== "won" && rows.length > 0 && (
             <button
               type="button"
-              onClick={handleNewAdminGame}
-              disabled={pending}
+              onClick={handleReplay}
+              disabled={pending || !canReplay}
               className="mt-3 rounded-lg border border-white/10 px-3 py-1.5 text-xs text-white/60 hover:text-white disabled:opacity-40"
             >
-              🔄 Nouvelle partie (admin)
+              {replayLabel}
             </button>
           )}
 
@@ -179,7 +198,9 @@ function Header({ attempts, mode }: { attempts: number; mode: GameMode }) {
         <p className="text-sm text-white/45">
           {mode === "admin"
             ? "Mode admin illimité — perso aléatoire."
-            : "Devine le personnage mystère du jour."}
+            : mode === "vip"
+              ? "Partie bonus VIP — perso aléatoire."
+              : "Devine le personnage mystère du jour."}
         </p>
       </div>
       <div className="rounded-xl border border-white/10 bg-void-800/50 px-4 py-2 text-center">
@@ -199,19 +220,21 @@ function VictoryPanel({
   attempts,
   rows,
   mode,
-  isAdmin,
+  showReplay,
+  replayLabel,
+  replayDisabled,
+  onReplay,
   msUntilMidnight,
-  onNewGame,
-  pending,
 }: {
   revealed: Revealed;
   attempts: number;
   rows: GuessRowData[];
   mode: GameMode;
-  isAdmin: boolean;
+  showReplay: boolean;
+  replayLabel: string;
+  replayDisabled: boolean;
+  onReplay: () => void;
   msUntilMidnight: number;
-  onNewGame: () => void;
-  pending: boolean;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -257,14 +280,14 @@ function VictoryPanel({
         >
           {copied ? "Copié ✓" : "Partager"}
         </button>
-        {isAdmin && (
+        {showReplay && (
           <button
             type="button"
-            onClick={onNewGame}
-            disabled={pending}
+            onClick={onReplay}
+            disabled={replayDisabled}
             className="rounded-xl border border-white/15 px-4 py-2.5 font-display font-bold uppercase tracking-wide text-white/80 hover:text-white disabled:opacity-40"
           >
-            🔄 Nouvelle partie (admin)
+            {replayLabel}
           </button>
         )}
       </div>

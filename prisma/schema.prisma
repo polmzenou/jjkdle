@@ -16,8 +16,11 @@ datasource db {
 }
 
 /// Rôle d'un utilisateur. PLAYER par défaut ; ADMIN donne accès à /admin.
+/// VIP : joueur privilégié — peut rejouer JJKdle un nombre limité de fois par
+/// jour (cf. VIP_MAX_REPLAYS), sans accès à l'admin.
 enum Role {
   PLAYER
+  VIP
   ADMIN
 }
 

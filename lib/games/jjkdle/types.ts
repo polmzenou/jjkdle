@@ -33,7 +33,10 @@ export interface GuessRow {
 }
 
 export type GameStatus = "playing" | "won";
-export type GameMode = "daily" | "admin";
+export type GameMode = "daily" | "admin" | "vip";
+
+/** Nombre maximum de parties bonus quotidiennes pour un joueur VIP. */
+export const VIP_MAX_REPLAYS = 8;
 
 /** Résultat renvoyé au client après une proposition. */
 export interface GuessResult {

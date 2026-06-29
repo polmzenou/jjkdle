@@ -37,6 +37,19 @@ export function UserAdmin({ users, currentUserId }: UserAdminProps) {
     });
   };
 
+  const setRole = (u: AdminUser, role: "PLAYER" | "VIP", msg: string) => {
+    setFeedback(null);
+    startTransition(async () => {
+      const res = await setUserRoleAction(u.id, role);
+      if (res.ok) {
+        setFeedback({ ok: true, msg });
+        router.refresh();
+      } else {
+        setFeedback({ ok: false, msg: res.error ?? "Échec." });
+      }
+    });
+  };
+
   const remove = (u: AdminUser) => {
     if (
       !window.confirm(
@@ -91,6 +104,7 @@ export function UserAdmin({ users, currentUserId }: UserAdminProps) {
         <div className="space-y-2">
           {users.map((u) => {
             const isAdmin = u.role === "ADMIN";
+            const isVip = u.role === "VIP";
             return (
               <div
                 key={u.id}
@@ -113,10 +127,12 @@ export function UserAdmin({ users, currentUserId }: UserAdminProps) {
                   className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide ${
                     isAdmin
                       ? "bg-domain/20 text-domain-light"
-                      : "bg-white/5 text-white/55"
+                      : isVip
+                        ? "bg-amber-400/15 text-amber-300"
+                        : "bg-white/5 text-white/55"
                   }`}
                 >
-                  {isAdmin ? "Admin" : "Joueur"}
+                  {isAdmin ? "Admin" : isVip ? "VIP" : "Joueur"}
                 </span>
 
                 {/* Actions */}
@@ -130,6 +146,29 @@ export function UserAdmin({ users, currentUserId }: UserAdminProps) {
                     </span>
                   ) : (
                     <>
+                      {isVip ? (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setRole(u, "PLAYER", `« ${u.username} » n'est plus VIP.`)
+                          }
+                          disabled={pending}
+                          className="rounded-md border border-amber-400/40 bg-amber-400/10 px-2.5 py-1 text-xs font-bold text-amber-300 hover:bg-amber-400/20 disabled:opacity-40"
+                        >
+                          Retirer VIP
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setRole(u, "VIP", `« ${u.username} » est désormais VIP.`)
+                          }
+                          disabled={pending}
+                          className="rounded-md border border-amber-400/40 bg-amber-400/10 px-2.5 py-1 text-xs font-bold text-amber-300 hover:bg-amber-400/20 disabled:opacity-40"
+                        >
+                          Passer VIP
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() => promote(u)}

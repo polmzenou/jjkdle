@@ -1,7 +1,7 @@
 "use server";
 
 import { getRoster } from "@/lib/content/queries";
-import { getAdminUser } from "@/lib/auth/session";
+import { getAdminUser, getCurrentUser } from "@/lib/auth/session";
 import {
   eligibleRoster,
   pickDailyTarget,
@@ -15,7 +15,7 @@ import {
   writeState,
   type JjkdleState,
 } from "@/lib/games/jjkdle/state";
-import type { GuessResult } from "@/lib/games/jjkdle/types";
+import { VIP_MAX_REPLAYS, type GuessResult } from "@/lib/games/jjkdle/types";
 
 /**
  * Server Actions JJKdle — résolution AUTORITATIVE côté serveur.
@@ -111,4 +111,51 @@ export async function newAdminGameAction(): Promise<{ ok: boolean; error?: strin
     status: "playing",
   });
   return { ok: true };
+}
+
+/**
+ * Mode VIP : démarre une partie bonus (cible aléatoire), PLAFONNÉE à
+ * VIP_MAX_REPLAYS par jour. Réservé aux rôles VIP (et ADMIN, qui n'est pas
+ * limité de toute façon). Le compteur vit dans le cookie et se réinitialise
+ * chaque jour (limite « souple » : suffisante pour l'usage prévu).
+ */
+export async function newVipGameAction(): Promise<{
+  ok: boolean;
+  error?: string;
+  remaining?: number;
+}> {
+  const user = await getCurrentUser();
+  if (!user || (user.role !== "VIP" && user.role !== "ADMIN")) {
+    return { ok: false, error: "Réservé aux membres VIP." };
+  }
+
+  const roster = await getRoster();
+  const target = pickRandomTarget(eligibleRoster(roster));
+  if (!target) {
+    return { ok: false, error: "Pas assez de personnages configurés." };
+  }
+
+  // Compte les parties VIP déjà jouées aujourd'hui.
+  const state = await readState();
+  const used =
+    state && state.mode === "vip" && state.date === todayKey()
+      ? state.replays ?? 0
+      : 0;
+  if (used >= VIP_MAX_REPLAYS) {
+    return {
+      ok: false,
+      error: `Limite de ${VIP_MAX_REPLAYS} parties bonus atteinte pour aujourd'hui.`,
+    };
+  }
+
+  const replays = used + 1;
+  await writeState({
+    mode: "vip",
+    date: todayKey(),
+    targetId: target.id,
+    guesses: [],
+    status: "playing",
+    replays,
+  });
+  return { ok: true, remaining: VIP_MAX_REPLAYS - replays };
 }

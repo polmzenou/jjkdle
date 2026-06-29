@@ -23,6 +23,7 @@ export default async function JjkdlePage() {
 
   const eligibleCount = eligibleRoster(roster).length;
   const isAdmin = user?.role === "ADMIN";
+  const isVip = user?.role === "VIP";
 
   // Réhydratation de l'état (si toujours valide).
   const map = Object.fromEntries(roster.map((c) => [c.id, c]));
@@ -30,12 +31,14 @@ export default async function JjkdlePage() {
   let status: GameStatus = "playing";
   let mode: GameMode = "daily";
   let revealed: JJKdleRevealed = null;
+  let vipReplaysUsed = 0;
 
   const state = await readState();
   if (state && isStateFresh(state, roster)) {
     mode = state.mode;
     status = state.status;
     rows = buildRows(state, map);
+    if (state.mode === "vip") vipReplaysUsed = state.replays ?? 0;
     if (status === "won") {
       const t = map[state.targetId];
       if (t) {
@@ -66,6 +69,8 @@ export default async function JjkdlePage() {
         initialStatus={status}
         mode={mode}
         isAdmin={isAdmin}
+        isVip={isVip}
+        vipReplaysUsed={vipReplaysUsed}
         msUntilMidnight={msUntilMidnight()}
         initialRevealed={revealed}
       />

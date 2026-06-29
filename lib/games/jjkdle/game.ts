@@ -22,7 +22,8 @@ import type { GuessRow } from "./types";
 export function isStateFresh(state: JjkdleState, roster: Character[]): boolean {
   const today = todayKey();
   if (state.date !== today) return false;
-  if (state.mode === "admin") return true;
+  // Parties bonus (admin illimité / VIP plafonné) : cible figée pour la journée.
+  if (state.mode === "admin" || state.mode === "vip") return true;
   const target = pickDailyTarget(today, eligibleRoster(roster));
   return target != null && target.id === state.targetId;
 }
