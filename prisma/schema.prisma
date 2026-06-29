@@ -123,6 +123,7 @@ enum JjkArc {
   CULLING_GAME // Colonies, Kashimo, Higuruma, Reggie…
   SHINJUKU_SHOWDOWN // Bataille finale Gojo vs Sukuna
   FINAL // Dénouement après la chute de Sukuna
+  MODULO // Jujutsu Kaisen Modulo (récit annexe)
 }
 
 /// Meilleur score de Jujutsu Draft d'un utilisateur (un enregistrement par
