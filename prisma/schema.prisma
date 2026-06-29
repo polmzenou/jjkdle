@@ -226,8 +226,10 @@ model DraftCharacter {
 }
 
 /// Consigne du jeu "JJK Pyramid" : `order` = 8 IDs de personnages, rang 1→8.
+/// `pool` = thème/casting (axe « qui »), `category` = critère (axe « selon quoi »).
 model RankingCondition {
   id       String   @id
+  pool     String   @default("")
   category String
   prompt   String
   order    String[]

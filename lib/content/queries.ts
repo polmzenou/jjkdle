@@ -75,6 +75,7 @@ export async function getConditions(): Promise<RankingCondition[]> {
   });
   return rows.map((c) => ({
     id: c.id,
+    pool: c.pool,
     category: c.category,
     prompt: c.prompt,
     order: c.order,
