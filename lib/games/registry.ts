@@ -66,6 +66,7 @@ export const GAMES: Game[] = [
     glyph: "🎭",
     tags: ["quotidien", "déduction", "roster JJK"],
     accent: "#7c3aed",
+    previewImage: "/assets/idle-screen.png",
     status: "live",
   },
   // Exemple de jeu futur (grisé sur le hub) :
