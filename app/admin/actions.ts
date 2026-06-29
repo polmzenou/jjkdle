@@ -3,7 +3,12 @@
 import { revalidatePath } from "next/cache";
 import type { Role } from "@prisma/client";
 import { getAdminUser } from "@/lib/auth/session";
-import { upsertCharacter, deleteCharacter } from "@/lib/admin/roster-store";
+import { upsertCharacter, deleteCharacter, readRoster } from "@/lib/admin/roster-store";
+import { listDraftCharacters } from "@/lib/games/draft/queries";
+import {
+  refreshAllRosterImages,
+  type ImageRefreshResult,
+} from "@/lib/admin/booru";
 import { getUserRole, setUserRole, deleteUser } from "@/lib/admin/users";
 import {
   adminUpdateScore,
@@ -109,6 +114,48 @@ export async function deleteCharacterAction(id: string): Promise<ActionResult> {
   }
   revalidatePath("/", "layout");
   return { ok: true };
+}
+
+/**
+ * Bouton « OUAIS » : récupère automatiquement une image depuis l'API booru pour
+ * chaque personnage des deux rosters (tag dérivé du nom) et met à jour leur URL
+ * d'image avec la première trouvée. Réservé ADMIN.
+ */
+export async function refreshRosterImagesFromApiAction(): Promise<ImageRefreshResult> {
+  const fail = (error: string): ImageRefreshResult => ({
+    ok: false,
+    error,
+    builderUpdated: 0,
+    draftUpdated: 0,
+    notFound: 0,
+    failed: 0,
+    total: 0,
+  });
+
+  if (!(await getAdminUser())) {
+    return fail("Accès réservé aux administrateurs.");
+  }
+
+  let roster: Character[];
+  let draftRoster: DraftCharacter[];
+  try {
+    [roster, draftRoster] = await Promise.all([
+      readRoster(),
+      listDraftCharacters(),
+    ]);
+  } catch (e) {
+    return fail(`Lecture du roster impossible : ${(e as Error).message}`);
+  }
+
+  let summary: Omit<ImageRefreshResult, "ok" | "error">;
+  try {
+    summary = await refreshAllRosterImages(roster, draftRoster);
+  } catch (e) {
+    return fail((e as Error).message);
+  }
+
+  revalidatePath("/", "layout"); // hub + jeux + admin relisent le roster
+  return { ok: true, ...summary };
 }
 
 // ──────────────────────────────────────────────────────────────────────────

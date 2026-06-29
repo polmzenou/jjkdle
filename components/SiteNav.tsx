@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { Logo } from "@/components/Logo";
 import { logoutAction } from "@/lib/auth/actions";
+import { refreshRosterImagesFromApiAction } from "@/app/admin/actions";
 
 const LINKS = [
   { href: "/", label: "Accueil" },
@@ -88,8 +89,40 @@ function UserMenu({ user }: { user: NavUser }) {
     });
   };
 
+  // Bouton « OUAIS » : récupère une image depuis l'API pour tous les persos.
+  const syncImages = () => {
+    if (
+      !window.confirm(
+        "Récupérer une image depuis l'API pour TOUS les personnages (builder + draft) ? Les images actuelles seront remplacées.",
+      )
+    ) {
+      return;
+    }
+    startTransition(async () => {
+      const res = await refreshRosterImagesFromApiAction();
+      if (!res.ok) {
+        window.alert(res.error ?? "Échec de la récupération.");
+        return;
+      }
+      window.alert(
+        `Images mises à jour : ${res.builderUpdated + res.draftUpdated}/${res.total}\nIntrouvables : ${res.notFound}\nÉchecs API (rate-limit/réseau) : ${res.failed}`,
+      );
+      router.refresh();
+    });
+  };
+
   return (
     <div className="ml-1 flex items-center gap-2">
+      {user.isAdmin && (
+        <button
+          type="button"
+          onClick={syncImages}
+          disabled={pending}
+          className="rounded-full bg-domain px-3 py-1.5 text-xs font-black uppercase tracking-wide text-white shadow-glow transition-transform enabled:hover:scale-105 disabled:opacity-40"
+        >
+          {pending ? "…" : "OUAIS"}
+        </button>
+      )}
       {user.isAdmin && (
         <Link
           href="/admin"

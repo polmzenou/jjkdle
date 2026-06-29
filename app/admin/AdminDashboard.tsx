@@ -10,7 +10,11 @@ import type { AdminScore } from "@/lib/leaderboard/store";
 import type { AdminUser } from "@/lib/admin/users";
 import type { DraftCharacter } from "@/lib/games/draft/types";
 import { ImageDropzone } from "./ImageDropzone";
-import { saveCharacterAction, deleteCharacterAction } from "./actions";
+import {
+  saveCharacterAction,
+  deleteCharacterAction,
+  refreshRosterImagesFromApiAction,
+} from "./actions";
 import { logoutAction } from "@/lib/auth/actions";
 import { LeaderboardAdmin } from "./LeaderboardAdmin";
 import { UserAdmin } from "./UserAdmin";
@@ -239,6 +243,33 @@ export function AdminDashboard({
     });
   };
 
+  // Bouton « OUAIS » : récupère une image depuis l'API pour tous les persos.
+  const [syncing, setSyncing] = useState(false);
+  const syncImages = () => {
+    if (
+      !window.confirm(
+        "Récupérer une image depuis l'API pour TOUS les personnages (builder + draft) ? Les images actuelles seront remplacées.",
+      )
+    ) {
+      return;
+    }
+    setFeedback(null);
+    setSyncing(true);
+    startTransition(async () => {
+      const res = await refreshRosterImagesFromApiAction();
+      setSyncing(false);
+      if (!res.ok) {
+        setFeedback({ ok: false, msg: res.error ?? "Échec." });
+        return;
+      }
+      setFeedback({
+        ok: true,
+        msg: `Images mises à jour : ${res.builderUpdated + res.draftUpdated}/${res.total} · introuvables : ${res.notFound} · échecs API : ${res.failed}.`,
+      });
+      router.refresh();
+    });
+  };
+
   const logout = () => startTransition(async () => {
     await logoutAction();
     router.refresh();
@@ -323,6 +354,27 @@ export function AdminDashboard({
           {feedback.msg}
         </div>
       )}
+
+      {/* Récupération automatique des images via l'API booru. */}
+      <div className="mb-5 flex flex-wrap items-center gap-3 rounded-xl border border-domain/30 bg-domain/5 px-4 py-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold text-white">
+            Images automatiques
+          </p>
+          <p className="text-xs text-white/50">
+            Récupère une image depuis l&apos;API pour chaque personnage (builder
+            + Jujutsu Draft). Remplace les images actuelles.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={syncImages}
+          disabled={pending}
+          className="rounded-xl bg-domain px-6 py-2.5 font-display font-black uppercase tracking-wide text-white shadow-glow transition-transform enabled:hover:scale-[1.03] disabled:opacity-40"
+        >
+          {syncing ? "Récupération…" : "OUAIS"}
+        </button>
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,420px)_1fr]">
         {/* ── Formulaire ── */}

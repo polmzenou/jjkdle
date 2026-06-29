@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { getCachedImage } from "@/lib/admin/image-cache";
 import type { DraftCharacter, DraftCategoryId, DraftTier } from "./types";
 import { DRAFT_ROSTER } from "./roster";
 import { DRAFT_CATEGORIES } from "./categories";
@@ -28,10 +29,12 @@ type DraftRow = {
 };
 
 function toDraftCharacter(row: DraftRow): DraftCharacter {
+  // L'image en cache (bouton « OUAIS ») prime sur celle stockée en base.
+  const image = getCachedImage(row.id) ?? row.image ?? undefined;
   return {
     id: row.id,
     name: row.name,
-    ...(row.image ? { image: row.image } : {}),
+    ...(image ? { image } : {}),
     excellenceCategory: row.excellenceCategory as DraftCategoryId,
     tier: row.tier as DraftTier,
     cost: row.cost,
