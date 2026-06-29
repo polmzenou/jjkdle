@@ -244,12 +244,14 @@ export function RankingGame({
       {/* Bandeau consigne + infos */}
       <div className="mb-4 rounded-2xl border border-white/10 bg-void-800/50 px-5 py-3 backdrop-blur">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-sm">
-            <span className="text-xs uppercase tracking-wider text-domain-light">
-              Catégorie
-            </span>{" "}
-            <span className="font-bold text-white">{condition.category}</span>
-          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full bg-domain/15 px-2.5 py-0.5 text-xs font-semibold text-domain-light">
+              {condition.pool}
+            </span>
+            <span className="rounded-full border border-white/10 bg-void-700/50 px-2.5 py-0.5 text-xs font-semibold text-white">
+              {condition.category}
+            </span>
+          </div>
           <p className="text-xs text-white/45">
             Rank 1 to 8 · 4 attempts · Correct positions lock
           </p>

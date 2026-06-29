@@ -56,6 +56,7 @@ async function main() {
   // ── Conditions "Pyramid" ──
   for (const [position, cond] of CONDITIONS.entries()) {
     const data = {
+      pool: cond.pool,
       category: cond.category,
       prompt: cond.prompt,
       order: cond.order,
@@ -67,7 +68,14 @@ async function main() {
       update: data,
     });
   }
-  console.log(`✓ ${CONDITIONS.length} conditions Pyramid`);
+  // Élague les consignes obsolètes (entièrement dérivées du code : sûr à purger).
+  const removed = await prisma.rankingCondition.deleteMany({
+    where: { id: { notIn: CONDITIONS.map((c) => c.id) } },
+  });
+  console.log(
+    `✓ ${CONDITIONS.length} conditions Pyramid` +
+      (removed.count ? ` (${removed.count} obsolète(s) supprimée(s))` : ""),
+  );
 
   // ── Roster "Jujutsu Draft" ──
   for (const [position, ch] of DRAFT_ROSTER.entries()) {
