@@ -14,6 +14,7 @@ import {
   saveCharacterAction,
   deleteCharacterAction,
   refreshRosterImagesFromApiAction,
+  clearImageCacheAction,
 } from "./actions";
 import { logoutAction } from "@/lib/auth/actions";
 import { LeaderboardAdmin } from "./LeaderboardAdmin";
@@ -33,6 +34,9 @@ import {
   CLAN_LABELS,
   ARC_LABELS,
   isComplete,
+  attributeDisplay,
+  ATTRIBUTE_COLUMNS,
+  ATTRIBUTE_LABELS,
 } from "@/lib/games/jjkdle/attributes";
 
 const TIERS: CharacterTier[] = ["s", "1", "2", "3", "4", "4minus"];
@@ -64,6 +68,8 @@ interface AdminDashboardProps {
   scores: AdminScore[];
   users: AdminUser[];
   currentUserId: string;
+  /** Nombre d'images dans le cache « OUAIS » (conditionne « Vider le cache »). */
+  cachedImageCount: number;
 }
 
 type Tab = "roster" | "draft" | "leaderboard" | "users";
@@ -92,6 +98,7 @@ export function AdminDashboard({
   scores,
   users,
   currentUserId,
+  cachedImageCount,
 }: AdminDashboardProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -102,6 +109,8 @@ export function AdminDashboard({
   );
   const [query, setQuery] = useState("");
   const [rosterCat, setRosterCat] = useState<CategoryId | "all">("all");
+  // Perso affiché en grand dans le modal (clic sur sa vignette).
+  const [previewChar, setPreviewChar] = useState<Character | null>(null);
 
   // Image : fichier en attente d'upload, ou retrait demandé.
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -303,7 +312,7 @@ export function AdminDashboard({
   const syncImages = () => {
     if (
       !window.confirm(
-        "Récupérer une image depuis l'API pour TOUS les personnages (builder + draft) ? Les images actuelles seront remplacées.",
+        "Récupérer une image depuis l'API pour les personnages FÉMININS (Genre = Femme) ? Les images actuelles seront remplacées.",
       )
     ) {
       return;
@@ -321,6 +330,23 @@ export function AdminDashboard({
         ok: true,
         msg: `Images mises à jour : ${res.builderUpdated + res.draftUpdated}/${res.total} · introuvables : ${res.notFound} · échecs API : ${res.failed}.`,
       });
+      router.refresh();
+    });
+  };
+
+  // Bouton « Vider le cache » : efface les images récupérées via « OUAIS ».
+  const clearCache = () => {
+    if (!window.confirm("Vider le cache d'images récupérées via « OUAIS » ?")) {
+      return;
+    }
+    setFeedback(null);
+    startTransition(async () => {
+      const res = await clearImageCacheAction();
+      if (!res.ok) {
+        setFeedback({ ok: false, msg: res.error ?? "Échec." });
+        return;
+      }
+      setFeedback({ ok: true, msg: "Cache d'images vidé." });
       router.refresh();
     });
   };
@@ -417,18 +443,31 @@ export function AdminDashboard({
             Images automatiques
           </p>
           <p className="text-xs text-white/50">
-            Récupère une image depuis l&apos;API pour chaque personnage (builder
-            + Jujutsu Draft). Remplace les images actuelles.
+            Récupère une image depuis l&apos;API pour les personnages féminins
+            (Genre = Femme). Remplace les images actuelles.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={syncImages}
-          disabled={pending}
-          className="rounded-xl bg-domain px-6 py-2.5 font-display font-black uppercase tracking-wide text-white shadow-glow transition-transform enabled:hover:scale-[1.03] disabled:opacity-40"
-        >
-          {syncing ? "Récupération…" : "OUAIS"}
-        </button>
+        <div className="flex items-center gap-2">
+          {cachedImageCount > 0 && (
+            <button
+              type="button"
+              onClick={clearCache}
+              disabled={pending}
+              title={`${cachedImageCount} image(s) en cache`}
+              className="rounded-xl border border-cursed/40 bg-cursed/10 px-4 py-2.5 font-display text-sm font-bold uppercase tracking-wide text-cursed-light transition-colors enabled:hover:bg-cursed/20 disabled:opacity-40"
+            >
+              Vider le cache ({cachedImageCount})
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={syncImages}
+            disabled={pending}
+            className="rounded-xl bg-domain px-6 py-2.5 font-display font-black uppercase tracking-wide text-white shadow-glow transition-transform enabled:hover:scale-[1.03] disabled:opacity-40"
+          >
+            {syncing ? "Récupération…" : "OUAIS"}
+          </button>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,420px)_1fr]">
@@ -693,9 +732,14 @@ export function AdminDashboard({
                   key={c.id}
                   className="flex items-center gap-3 rounded-xl border border-white/5 bg-void-700/30 p-2"
                 >
-                  <div className="h-14 w-11 shrink-0 overflow-hidden rounded-lg border border-white/10">
+                  <button
+                    type="button"
+                    onClick={() => setPreviewChar(c)}
+                    title="Agrandir l'image et voir les stats"
+                    className="h-14 w-11 shrink-0 overflow-hidden rounded-lg border border-white/10 transition-transform hover:scale-105 hover:border-domain focus:outline-none focus-visible:ring-2 focus-visible:ring-domain"
+                  >
                     <CharacterImage character={c} />
-                  </div>
+                  </button>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold text-white">
                       {c.name}{" "}
@@ -758,7 +802,119 @@ export function AdminDashboard({
       </div>
         </>
       )}
+
+      {previewChar && (
+        <CharacterPreviewModal
+          character={previewChar}
+          categories={categories}
+          onClose={() => setPreviewChar(null)}
+        />
+      )}
     </main>
+  );
+}
+
+/** Modal centré : grande image + toutes les stats du personnage. */
+function CharacterPreviewModal({
+  character: c,
+  categories,
+  onClose,
+}: {
+  character: Character;
+  categories: CategoryConfig[];
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  const catLabel = (id: string) =>
+    categories.find((cat) => cat.id === id)?.label ?? id;
+  const ratings = Object.entries(c.ratings);
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      onClick={onClose}
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-void-900/80 p-4 backdrop-blur-sm"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative flex max-h-[90vh] w-full max-w-3xl flex-col gap-5 overflow-hidden rounded-2xl border border-white/10 bg-void-800 p-5 shadow-2xl sm:flex-row sm:p-6"
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Fermer"
+          className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-void-900/70 text-white/70 transition-colors hover:text-white"
+        >
+          ✕
+        </button>
+
+        {/* Grande image */}
+        <div className="mx-auto aspect-[3/4] w-56 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-void-900 sm:mx-0 sm:w-64">
+          <CharacterImage character={c} />
+        </div>
+
+        {/* Stats */}
+        <div className="min-w-0 flex-1 overflow-y-auto pr-1">
+          <h3 className="font-display text-xl font-black text-white">{c.name}</h3>
+          <p className="text-sm text-white/45">
+            {c.title || "—"} · <span className="text-white/35">{c.id}</span>
+          </p>
+
+          <div className="mt-3 flex flex-wrap gap-2 text-xs">
+            <span className="rounded-full bg-domain/15 px-2.5 py-1 font-bold text-domain-light">
+              Tier {c.tier}
+            </span>
+            {c.battleValue != null && (
+              <span className="rounded-full bg-white/5 px-2.5 py-1 text-white/70">
+                Battle value : <b className="text-white">{c.battleValue}</b>
+              </span>
+            )}
+          </div>
+
+          {/* Catégories (builder) */}
+          <p className="mt-4 mb-1.5 text-[11px] uppercase tracking-wider text-white/40">
+            Catégories
+          </p>
+          {ratings.length === 0 ? (
+            <p className="text-xs text-white/30">Aucune catégorie.</p>
+          ) : (
+            <div className="flex flex-wrap gap-1.5">
+              {ratings.map(([id, val]) => (
+                <span
+                  key={id}
+                  className="rounded bg-domain/15 px-2 py-0.5 text-[11px] text-domain-light"
+                >
+                  {catLabel(id)} : <b>{val}</b>
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Attributs JJKdle */}
+          <p className="mt-4 mb-1.5 text-[11px] uppercase tracking-wider text-white/40">
+            Attributs JJKdle
+          </p>
+          <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm">
+            {ATTRIBUTE_COLUMNS.map((key) => (
+              <div key={key} className="flex justify-between gap-2">
+                <dt className="text-white/45">{ATTRIBUTE_LABELS[key]}</dt>
+                <dd className="text-right font-medium text-white/85">
+                  {attributeDisplay(key, c)}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </div>
+    </div>
   );
 }
 

@@ -5,7 +5,10 @@ import { usePathname, useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { Logo } from "@/components/Logo";
 import { logoutAction } from "@/lib/auth/actions";
-import { refreshRosterImagesFromApiAction } from "@/app/admin/actions";
+import {
+  refreshRosterImagesFromApiAction,
+  clearImageCacheAction,
+} from "@/app/admin/actions";
 
 const LINKS = [
   { href: "/", label: "Accueil" },
@@ -26,7 +29,13 @@ export type NavUser = {
  *
  * `user` est résolu côté serveur (layout) et passé en prop.
  */
-export function SiteNav({ user }: { user: NavUser | null }) {
+export function SiteNav({
+  user,
+  cachedImageCount = 0,
+}: {
+  user: NavUser | null;
+  cachedImageCount?: number;
+}) {
   const pathname = usePathname();
 
   if (pathname.startsWith("/games/") || pathname.startsWith("/admin")) {
@@ -62,7 +71,7 @@ export function SiteNav({ user }: { user: NavUser | null }) {
           })}
 
           {user ? (
-            <UserMenu user={user} />
+            <UserMenu user={user} cachedImageCount={cachedImageCount} />
           ) : (
             <Link
               href="/login"
@@ -78,7 +87,13 @@ export function SiteNav({ user }: { user: NavUser | null }) {
 }
 
 /** Pseudo + (lien admin) + bouton de déconnexion. */
-function UserMenu({ user }: { user: NavUser }) {
+function UserMenu({
+  user,
+  cachedImageCount,
+}: {
+  user: NavUser;
+  cachedImageCount: number;
+}) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
 
@@ -89,11 +104,26 @@ function UserMenu({ user }: { user: NavUser }) {
     });
   };
 
+  // Bouton « Vider le cache » : efface les images récupérées via « OUAIS ».
+  const clearCache = () => {
+    if (!window.confirm("Vider le cache d'images récupérées via « OUAIS » ?")) {
+      return;
+    }
+    startTransition(async () => {
+      const res = await clearImageCacheAction();
+      if (!res.ok) {
+        window.alert(res.error ?? "Échec.");
+        return;
+      }
+      router.refresh();
+    });
+  };
+
   // Bouton « OUAIS » : récupère une image depuis l'API pour tous les persos.
   const syncImages = () => {
     if (
       !window.confirm(
-        "Récupérer une image depuis l'API pour TOUS les personnages (builder + draft) ? Les images actuelles seront remplacées.",
+        "Récupérer une image depuis l'API pour les personnages FÉMININS (Genre = Femme) ? Les images actuelles seront remplacées.",
       )
     ) {
       return;
@@ -121,6 +151,17 @@ function UserMenu({ user }: { user: NavUser }) {
           className="rounded-full bg-domain px-3 py-1.5 text-xs font-black uppercase tracking-wide text-white shadow-glow transition-transform enabled:hover:scale-105 disabled:opacity-40"
         >
           {pending ? "…" : "OUAIS"}
+        </button>
+      )}
+      {user.isAdmin && cachedImageCount > 0 && (
+        <button
+          type="button"
+          onClick={clearCache}
+          disabled={pending}
+          title={`${cachedImageCount} image(s) en cache`}
+          className="rounded-full border border-cursed/40 bg-cursed/10 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-cursed-light transition-colors enabled:hover:bg-cursed/20 disabled:opacity-40"
+        >
+          Vider le cache ({cachedImageCount})
         </button>
       )}
       {user.isAdmin && (

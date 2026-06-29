@@ -3,6 +3,7 @@ import { Inter, Space_Grotesk } from "next/font/google";
 import { CursedBackground } from "@/components/CursedBackground";
 import { SiteNav } from "@/components/SiteNav";
 import { getCurrentUser } from "@/lib/auth/session";
+import { getCachedImageCount } from "@/lib/admin/image-cache";
 import "./globals.css";
 
 const inter = Inter({
@@ -31,12 +32,14 @@ export default async function RootLayout({
   const navUser = user
     ? { username: user.username, isAdmin: user.role === "ADMIN" }
     : null;
+  // Compteur du cache d'images (pour afficher « Vider le cache » côté admin).
+  const cachedImageCount = navUser?.isAdmin ? getCachedImageCount() : 0;
 
   return (
     <html lang="fr" className={`${inter.variable} ${spaceGrotesk.variable}`}>
       <body className="min-h-screen">
         <CursedBackground />
-        <SiteNav user={navUser} />
+        <SiteNav user={navUser} cachedImageCount={cachedImageCount} />
         {children}
       </body>
     </html>

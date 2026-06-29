@@ -37,3 +37,17 @@ export function getCachedImage(id: string): string | undefined {
   }
   return entry.url;
 }
+
+/** Nombre d'images actuellement en cache (purge les entrées expirées au passage). */
+export function getCachedImageCount(): number {
+  const now = Date.now();
+  for (const [id, entry] of store) {
+    if (now - entry.at > TTL_MS) store.delete(id);
+  }
+  return store.size;
+}
+
+/** Vide tout le cache d'images. */
+export function clearImageCache(): void {
+  store.clear();
+}

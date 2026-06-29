@@ -8,6 +8,7 @@ import { listAllScores, type AdminScore } from "@/lib/leaderboard/store";
 import { listAllDraftScores } from "@/lib/games/draft/store";
 import { listAllJjkdleScores } from "@/lib/games/jjkdle/leaderboard";
 import { listUsers } from "@/lib/admin/users";
+import { getCachedImageCount } from "@/lib/admin/image-cache";
 import type { Character } from "@/data/roster/characters";
 import type { DraftCharacter } from "@/lib/games/draft/types";
 import { AdminDashboard } from "./AdminDashboard";
@@ -101,6 +102,7 @@ export default async function AdminPage() {
       scores={[...scores, ...draftScores, ...jjkdleScores]}
       users={users}
       currentUserId={user.id}
+      cachedImageCount={getCachedImageCount()}
     />
   );
 }
