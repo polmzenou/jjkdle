@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { getRoster } from "@/lib/content/queries";
 import { getAdminUser, getCurrentUser } from "@/lib/auth/session";
 import {
@@ -10,6 +11,7 @@ import {
 } from "@/lib/games/jjkdle/daily";
 import { compareGuess } from "@/lib/games/jjkdle/scoring";
 import { isStateFresh } from "@/lib/games/jjkdle/game";
+import { saveJjkdleScore } from "@/lib/games/jjkdle/leaderboard";
 import {
   readState,
   writeState,
@@ -110,6 +112,46 @@ export async function newAdminGameAction(): Promise<{ ok: boolean; error?: strin
     guesses: [],
     status: "playing",
   });
+  return { ok: true };
+}
+
+/**
+ * Enregistre au leaderboard du jour le score de la partie quotidienne gagnée.
+ * AUTORITATIF : le nombre d'essais est relu depuis l'état serveur (cookie), pas
+ * envoyé par le client. Réservé aux utilisateurs connectés ; ne compte que la
+ * partie quotidienne résolue (pas les parties bonus admin/VIP).
+ */
+export async function submitJjkdleScoreAction(): Promise<{
+  ok: boolean;
+  error?: string;
+  needsAuth?: boolean;
+}> {
+  const user = await getCurrentUser();
+  if (!user) {
+    return {
+      ok: false,
+      needsAuth: true,
+      error: "Connecte-toi pour enregistrer ton score.",
+    };
+  }
+
+  const state = await readState();
+  if (!state || state.mode !== "daily" || state.status !== "won") {
+    return { ok: false, error: "Aucune victoire quotidienne à enregistrer." };
+  }
+
+  const roster = await getRoster();
+  if (!isStateFresh(state, roster)) {
+    return { ok: false, error: "Partie expirée, recharge la page." };
+  }
+
+  try {
+    await saveJjkdleScore(user.id, state.date, state.guesses.length);
+  } catch (e) {
+    return { ok: false, error: `Échec d'enregistrement : ${(e as Error).message}` };
+  }
+
+  revalidatePath("/games/jjkdle");
   return { ok: true };
 }
 

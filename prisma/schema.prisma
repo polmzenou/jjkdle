@@ -38,6 +38,7 @@ model User {
   scores       Score[]
   lobbyPlayers LobbyPlayer[]
   draftScores  JujutsuDraftScore[]
+  jjkdleScores JjkdleScore[]
 }
 
 /// Session d'authentification (token aléatoire stocké en cookie httpOnly).
@@ -145,6 +146,26 @@ model JujutsuDraftScore {
   updatedAt     DateTime     @updatedAt
 
   @@index([enemiesKilled, globalScore])
+}
+
+/// Score JJKdle : nombre d'essais d'un utilisateur pour le perso mystère d'un
+/// JOUR donné (un enregistrement par couple utilisateur/date). Le classement
+/// quotidien se lit en filtrant sur la date du jour (`date` = "YYYY-MM-DD") et
+/// se classe par `attempts` croissant (moins d'essais = meilleur). Les entrées
+/// des jours passés restent en base mais ne sont plus affichées → reset quotidien.
+/// Seules les parties en mode "daily" (perso commun) sont enregistrées ; les
+/// parties bonus admin/VIP (perso aléatoire) ne comptent pas.
+model JjkdleScore {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date      String
+  attempts  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([date, attempts])
 }
 
 /// Meilleur score d'un utilisateur pour un jeu donné (un enregistrement par

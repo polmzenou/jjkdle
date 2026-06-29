@@ -8,6 +8,7 @@ import {
   type LeaderboardGame,
 } from "@/lib/leaderboard/store";
 import { getUserDraftScore } from "@/lib/games/draft/store";
+import { getUserJjkdleScore } from "@/lib/games/jjkdle/leaderboard";
 import { BOSSES } from "@/lib/games/draft/scoring";
 import { getGrade } from "@/lib/scoring/grades";
 import { GAMES } from "@/lib/games/registry";
@@ -24,12 +25,18 @@ export default async function AccountPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  // Scores classiques (table Score) + score Draft (table dédiée).
-  const [classicScores, draftScore] = await Promise.all([
+  // Scores classiques (table Score) + scores des jeux à table dédiée
+  // (Draft, et JJKdle = score du jour).
+  const [classicScores, draftScore, jjkdleScore] = await Promise.all([
     getUserScores(user.id),
     getUserDraftScore(user.id),
+    getUserJjkdleScore(user.id),
   ]);
-  const scores = draftScore ? [...classicScores, draftScore] : classicScores;
+  const scores = [
+    ...classicScores,
+    ...(draftScore ? [draftScore] : []),
+    ...(jjkdleScore ? [jjkdleScore] : []),
+  ];
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-12 sm:py-16">
@@ -100,6 +107,7 @@ export default async function AccountPage() {
                       <p className="mt-1 text-xs uppercase tracking-wider text-white/45">
                         #{s.rank} sur {s.totalPlayers} joueur
                         {s.totalPlayers > 1 ? "s" : ""}
+                        {s.gameId === "jjkdle" && " · du jour"}
                       </p>
                     </div>
                     {grade && (
@@ -121,6 +129,11 @@ export default async function AccountPage() {
                     {max && (
                       <span className="ml-1 align-middle text-sm font-bold text-white/35">
                         / {max.toLocaleString("fr-FR")}
+                      </span>
+                    )}
+                    {s.gameId === "jjkdle" && (
+                      <span className="ml-1 align-middle text-sm font-bold text-white/35">
+                        essai{s.best > 1 ? "s" : ""}
                       </span>
                     )}
                   </p>

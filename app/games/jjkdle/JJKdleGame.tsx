@@ -14,6 +14,7 @@ import {
 import { guessAction, newAdminGameAction, newVipGameAction } from "./actions";
 import { CharacterSearch } from "./CharacterSearch";
 import { GuessHeader, GuessRow } from "./GuessRow";
+import { SubmitJjkdleScore } from "./SubmitJjkdleScore";
 
 /** Forme minimale d'un perso transmise au client (aucune donnée secrète). */
 export interface PublicCharacter {
@@ -32,6 +33,7 @@ interface JJKdleGameProps {
   mode: GameMode;
   isAdmin: boolean;
   isVip: boolean;
+  isAuthed: boolean;
   vipReplaysUsed: number;
   msUntilMidnight: number;
   initialRevealed: Revealed;
@@ -45,6 +47,7 @@ export function JJKdleGame({
   mode,
   isAdmin,
   isVip,
+  isAuthed,
   vipReplaysUsed,
   msUntilMidnight,
   initialRevealed,
@@ -131,6 +134,7 @@ export function JJKdleGame({
               attempts={rows.length}
               rows={rows}
               mode={mode}
+              isAuthed={isAuthed}
               showReplay={isPrivileged}
               replayLabel={replayLabel}
               replayDisabled={pending || !canReplay}
@@ -220,6 +224,7 @@ function VictoryPanel({
   attempts,
   rows,
   mode,
+  isAuthed,
   showReplay,
   replayLabel,
   replayDisabled,
@@ -230,6 +235,7 @@ function VictoryPanel({
   attempts: number;
   rows: GuessRowData[];
   mode: GameMode;
+  isAuthed: boolean;
   showReplay: boolean;
   replayLabel: string;
   replayDisabled: boolean;
@@ -291,6 +297,9 @@ function VictoryPanel({
           </button>
         )}
       </div>
+
+      {/* Enregistrement au classement : uniquement pour la partie quotidienne. */}
+      {mode === "daily" && <SubmitJjkdleScore isAuthed={isAuthed} />}
 
       {mode === "daily" && <Countdown ms={msUntilMidnight} />}
     </motion.div>

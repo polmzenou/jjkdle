@@ -20,6 +20,10 @@ import {
   adminDeleteDraftScore,
   DRAFT_MAX_KILLS,
 } from "@/lib/games/draft/store";
+import {
+  adminUpdateJjkdleScore,
+  adminDeleteJjkdleScore,
+} from "@/lib/games/jjkdle/leaderboard";
 import { DRAFT_CATEGORY_BY_ID } from "@/lib/games/draft/categories";
 import type {
   DraftCharacter,
@@ -42,6 +46,8 @@ export type ActionResult = { ok: boolean; error?: string };
 const TIERS: CharacterTier[] = ["4minus", "4", "3", "2", "1", "s"];
 const GAMES: LeaderboardGame[] = ["builder", "ranking"];
 const DRAFT_GAME = "jujutsu-draft";
+const JJKDLE_GAME = "jjkdle";
+const JJKDLE_MAX_ATTEMPTS = 999; // garde-fou : nombre d'essais réaliste
 const DRAFT_TIERS: DraftTier[] = ["S", "A", "B", "C"];
 
 /** Valide + enregistre (ajout ou édition) un personnage en base. */
@@ -256,6 +262,22 @@ export async function updateScoreAction(
     return { ok: true };
   }
 
+  // JJKdle : table dédiée, métrique = nombre d'essais (≥ 1, moins = mieux).
+  if (game === JJKDLE_GAME) {
+    const attempts = Math.round(Number(scoreRaw));
+    if (!Number.isFinite(attempts) || attempts < 1 || attempts > JJKDLE_MAX_ATTEMPTS) {
+      return { ok: false, error: `Nombre d'essais invalide (1 à ${JJKDLE_MAX_ATTEMPTS}).` };
+    }
+    try {
+      await adminUpdateJjkdleScore(id, attempts);
+    } catch (e) {
+      return { ok: false, error: `Échec de modification : ${(e as Error).message}` };
+    }
+    revalidatePath("/games/jjkdle");
+    revalidatePath("/admin");
+    return { ok: true };
+  }
+
   if (!GAMES.includes(game as LeaderboardGame)) {
     return { ok: false, error: "Jeu inconnu." };
   }
@@ -290,6 +312,17 @@ export async function deleteScoreAction(
       return { ok: false, error: `Échec de suppression : ${(e as Error).message}` };
     }
     revalidatePath("/games/jujutsu-draft");
+    revalidatePath("/admin");
+    return { ok: true };
+  }
+
+  if (game === JJKDLE_GAME) {
+    try {
+      await adminDeleteJjkdleScore(id);
+    } catch (e) {
+      return { ok: false, error: `Échec de suppression : ${(e as Error).message}` };
+    }
+    revalidatePath("/games/jjkdle");
     revalidatePath("/admin");
     return { ok: true };
   }

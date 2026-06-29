@@ -4,6 +4,7 @@ import { eligibleRoster, msUntilMidnight } from "@/lib/games/jjkdle/daily";
 import { buildRows, isStateFresh } from "@/lib/games/jjkdle/game";
 import { readState } from "@/lib/games/jjkdle/state";
 import type { GameMode, GameStatus, GuessRow } from "@/lib/games/jjkdle/types";
+import { JjkdleLeaderboard } from "@/components/leaderboard/JjkdleLeaderboard";
 import { JJKdleGame, type PublicCharacter } from "./JJKdleGame";
 
 export const metadata = {
@@ -70,10 +71,15 @@ export default async function JjkdlePage() {
         mode={mode}
         isAdmin={isAdmin}
         isVip={isVip}
+        isAuthed={Boolean(user)}
         vipReplaysUsed={vipReplaysUsed}
         msUntilMidnight={msUntilMidnight()}
         initialRevealed={revealed}
       />
+
+      <div className="mt-10">
+        <JjkdleLeaderboard limit={8} />
+      </div>
     </main>
   );
 }
