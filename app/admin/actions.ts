@@ -3,7 +3,12 @@
 import { revalidatePath } from "next/cache";
 import type { Role } from "@prisma/client";
 import { getAdminUser } from "@/lib/auth/session";
-import { upsertCharacter, deleteCharacter } from "@/lib/admin/roster-store";
+import { upsertCharacter, deleteCharacter, readRoster } from "@/lib/admin/roster-store";
+import {
+  refreshAllRosterImages,
+  type ImageRefreshResult,
+} from "@/lib/admin/booru";
+import { clearImageCache } from "@/lib/admin/image-cache";
 import { getUserRole, setUserRole, deleteUser } from "@/lib/admin/users";
 import {
   adminUpdateScore,
@@ -150,6 +155,58 @@ export async function deleteCharacterAction(id: string): Promise<ActionResult> {
   } catch (e) {
     return { ok: false, error: `Échec de suppression : ${(e as Error).message}` };
   }
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+/**
+ * Bouton « OUAIS » : récupère automatiquement une image depuis l'API booru pour
+ * les personnages FÉMININS du roster (gender === FEMALE en base) et met leur URL
+ * d'image en cache. Le roster Jujutsu Draft n'a pas d'attribut de genre : il est
+ * donc exclu. Réservé ADMIN.
+ */
+export async function refreshRosterImagesFromApiAction(): Promise<ImageRefreshResult> {
+  const fail = (error: string): ImageRefreshResult => ({
+    ok: false,
+    error,
+    builderUpdated: 0,
+    draftUpdated: 0,
+    notFound: 0,
+    failed: 0,
+    total: 0,
+  });
+
+  if (!(await getAdminUser())) {
+    return fail("Accès réservé aux administrateurs.");
+  }
+
+  let roster: Character[];
+  try {
+    roster = await readRoster();
+  } catch (e) {
+    return fail(`Lecture du roster impossible : ${(e as Error).message}`);
+  }
+
+  // Filtre demandé : uniquement les persos marqués FEMALE en base.
+  const females = roster.filter((c) => c.gender === "FEMALE");
+
+  let summary: Omit<ImageRefreshResult, "ok" | "error">;
+  try {
+    summary = await refreshAllRosterImages(females, []);
+  } catch (e) {
+    return fail((e as Error).message);
+  }
+
+  revalidatePath("/", "layout"); // hub + jeux + admin relisent le roster
+  return { ok: true, ...summary };
+}
+
+/** Vide le cache d'images « OUAIS » : les persos retombent sur l'image en base. */
+export async function clearImageCacheAction(): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  clearImageCache();
   revalidatePath("/", "layout");
   return { ok: true };
 }

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { getCachedImage } from "@/lib/admin/image-cache";
 import type { CategoryConfig, CategoryId } from "@/data/roster/categories";
 import type { Character, CharacterTier } from "@/data/roster/characters";
 import type { RankingCondition } from "@/data/ranking/conditions";
@@ -29,12 +30,14 @@ type CharacterRow = {
 };
 
 function toCharacter(row: CharacterRow): Character {
+  // L'image en cache (bouton « OUAIS ») prime sur celle stockée en base.
+  const image = getCachedImage(row.id) ?? row.image ?? undefined;
   return {
     id: row.id,
     name: row.name,
     title: row.title,
     tier: row.tier as CharacterTier,
-    ...(row.image ? { image: row.image } : {}),
+    ...(image ? { image } : {}),
     ratings: (row.ratings ?? {}) as Partial<Record<CategoryId, number>>,
     ...(row.battleValue != null ? { battleValue: row.battleValue } : {}),
     // null → undefined (omis) pour rester cohérent avec le type optionnel.
