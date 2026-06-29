@@ -45,6 +45,11 @@ model User {
   equippedTitleKey String? // clé ∈ TITLES (lib/titles/definitions.ts) ou null
   equippedFrameKey String? // clé ∈ FRAMES (lib/frames/definitions.ts) ou null
 
+  // Mise en page du profil PUBLIC : visibilité (titre, cadre, badges, scores) et
+  // ordre des sections de corps (badges/scores). Forme libre validée/normalisée
+  // en code (lib/profile/layout.ts). null = layout par défaut (tout affiché).
+  profileLayout Json?
+
   // ── Progression (cache recalculé en fin de partie ; source = scores) ──
   totalXp Int @default(0)
   xpBonus Int @default(0) // ajustement manuel admin (additif, persistant)
