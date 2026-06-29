@@ -2,6 +2,7 @@ import {
   topDraftEntries,
   type DraftLeaderboardEntry,
 } from "@/lib/games/draft/store";
+import Link from "next/link";
 import type { LeaderboardScope } from "@/lib/leaderboard/store";
 import { VipBadge } from "@/components/VipBadge";
 import { UserAvatar } from "@/components/UserAvatar";
@@ -107,7 +108,12 @@ function DraftRow({
         className="min-w-0 flex-1 truncate font-semibold"
         style={{ color: isPodium ? medal!.color : "#fff" }}
       >
-        {entry.pseudo}
+        <Link
+          href={`/u/${encodeURIComponent(entry.pseudo)}`}
+          className="underline-offset-2 hover:underline"
+        >
+          {entry.pseudo}
+        </Link>
         {entry.role === "VIP" && <VipBadge className="ml-1.5" />}
         {entry.outcome === "VICTORY" && (
           <span className="ml-2 align-middle text-xs text-emerald-300">★ clear</span>

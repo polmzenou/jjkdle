@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import type { AdminUser } from "@/lib/admin/users";
 import { BADGES } from "@/lib/badges/definitions";
 import {
@@ -123,7 +124,15 @@ export function UserAdmin({ users, currentUserId }: UserAdminProps) {
                 <div className="flex flex-wrap items-center gap-3 px-3 py-2.5">
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold text-white">
-                      {u.username}
+                      <Link
+                        href={`/u/${encodeURIComponent(u.username)}`}
+                        target="_blank"
+                        className="underline-offset-2 hover:underline"
+                        title="Voir le profil public"
+                      >
+                        {u.username}
+                        <span aria-hidden className="ml-1 text-white/40">↗</span>
+                      </Link>
                       {u.id === currentUserId && (
                         <span className="ml-1.5 text-[11px] font-normal text-white/40">
                           (vous)

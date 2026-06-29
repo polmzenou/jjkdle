@@ -106,6 +106,13 @@ export default async function AccountPage() {
         <div className="mt-4 rounded-2xl border border-white/10 bg-void-800/60 p-5 backdrop-blur">
           <LevelBar totalXp={profile?.totalXp ?? 0} />
         </div>
+
+        <Link
+          href={`/u/${encodeURIComponent(user.username)}`}
+          className="mt-3 inline-flex items-center gap-1.5 text-sm text-domain-light underline-offset-2 hover:underline"
+        >
+          Voir mon profil public <span aria-hidden>↗</span>
+        </Link>
       </header>
 
       {/* ── Récap des scores ── */}
