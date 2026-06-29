@@ -34,10 +34,12 @@ export default async function RootLayout({
         username: user.username,
         isAdmin: user.role === "ADMIN",
         isVip: user.role === "VIP",
+        // ADMIN et VIP peuvent lancer/vider la synchro d'images.
+        canSyncImages: user.role === "ADMIN" || user.role === "VIP",
       }
     : null;
-  // Compteur du cache d'images (pour afficher « Vider le cache » côté admin).
-  const cachedImageCount = navUser?.isAdmin ? getCachedImageCount() : 0;
+  // Compteur du cache d'images (pour afficher « Vider le cache »).
+  const cachedImageCount = navUser?.canSyncImages ? getCachedImageCount() : 0;
 
   return (
     <html lang="fr" className={`${inter.variable} ${spaceGrotesk.variable}`}>
