@@ -108,18 +108,21 @@ enum JjkClan {
   NONE
 }
 
-/// Arc de première apparition. L'ORDRE DES VALEURS EST SIGNIFIANT (chronologique) :
-/// il sert à l'indice ↑/↓ (apparu plus tard / plus tôt dans l'histoire).
+/// Arc de première apparition. L'ORDRE DES VALEURS EST SIGNIFIANT (chronologique
+/// au sens de l'histoire) : il sert à l'indice ↑/↓ (apparu plus tard / plus tôt).
+/// GOJOS_PAST est un flashback : placé ici à l'arc de première apparition à l'écran.
 enum JjkArc {
-  FEARSOME_WOMB
-  VS_MAHITO
-  KYOTO_GOODWILL_EVENT
-  DEATH_PAINTINGS
-  SHIBUYA_INCIDENT
-  ITADORI_EXTERMINATION
-  PERFECT_PREPARATION
-  CULLING_GAME
-  SHINJUKU_SHOWDOWN
+  JJK_0 // Jujutsu Kaisen 0 (préquel) : Yuta, Rika, Maki, Inumaki, Panda, Geto
+  FEARSOME_WOMB // Cursed Womb / Prologue : Yuji, Sukuna, école de Tokyo
+  VS_MAHITO // Vs Mahito / premiers fléaux
+  KYOTO_GOODWILL_EVENT // Échange Tokyo-Kyoto, Hanami
+  DEATH_PAINTING // Death Painting / pont Yasohachi : Choso & frères
+  GOJOS_PAST // Flashback Gojo & Geto, Riko Amanai, Toji
+  SHIBUYA_INCIDENT // Scellement de Gojo, mort de Nanami
+  ITADORI_EXTERMINATION // Post-Shibuya / Perfect Preparation
+  CULLING_GAME // Colonies, Kashimo, Higuruma, Reggie…
+  SHINJUKU_SHOWDOWN // Bataille finale Gojo vs Sukuna
+  FINAL // Dénouement après la chute de Sukuna
 }
 
 /// Meilleur score de Jujutsu Draft d'un utilisateur (un enregistrement par

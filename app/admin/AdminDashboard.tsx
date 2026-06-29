@@ -15,6 +15,21 @@ import { logoutAction } from "@/lib/auth/actions";
 import { LeaderboardAdmin } from "./LeaderboardAdmin";
 import { UserAdmin } from "./UserAdmin";
 import { DraftRosterAdmin } from "./DraftRosterAdmin";
+import {
+  RACES,
+  GENDERS,
+  GRADES_ORDER,
+  AFFILIATIONS,
+  CLANS,
+  ARCS_ORDER,
+  RACE_LABELS,
+  GENDER_LABELS,
+  GRADE_LABELS,
+  AFFILIATION_LABELS,
+  CLAN_LABELS,
+  ARC_LABELS,
+  isComplete,
+} from "@/lib/games/jjkdle/attributes";
 
 const TIERS: CharacterTier[] = ["s", "1", "2", "3", "4", "4minus"];
 
@@ -27,6 +42,15 @@ interface FormState {
   battleValue: string;
   image: string;
   cats: Record<string, CatField>;
+  // Attributs JJKdle ("" = non renseigné ; hasDomain : "" | "true" | "false").
+  race: string;
+  gender: string;
+  grade: string;
+  affiliation: string;
+  clan: string;
+  appearanceArc: string;
+  hasDomain: string;
+  cursedEnergy: string;
 }
 
 interface AdminDashboardProps {
@@ -90,6 +114,14 @@ export function AdminDashboard({
       cats: Object.fromEntries(
         categories.map((c) => [c.id, { enabled: false, value: "" }]),
       ),
+      race: "",
+      gender: "",
+      grade: "",
+      affiliation: "",
+      clan: "",
+      appearanceArc: "",
+      hasDomain: "",
+      cursedEnergy: "",
     }),
     [categories],
   );
@@ -140,6 +172,14 @@ export function AdminDashboard({
           return [cat.id, { enabled: v !== undefined, value: v?.toString() ?? "" }];
         }),
       ),
+      race: c.race ?? "",
+      gender: c.gender ?? "",
+      grade: c.grade ?? "",
+      affiliation: c.affiliation ?? "",
+      clan: c.clan ?? "",
+      appearanceArc: c.appearanceArc ?? "",
+      hasDomain: c.hasDomain == null ? "" : c.hasDomain ? "true" : "false",
+      cursedEnergy: c.cursedEnergy?.toString() ?? "",
     });
     if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -174,6 +214,21 @@ export function AdminDashboard({
         : {}),
       ...(image ? { image } : {}),
       ratings,
+      // Attributs JJKdle (omis si "non renseigné").
+      ...(form.race ? { race: form.race as Character["race"] } : {}),
+      ...(form.gender ? { gender: form.gender as Character["gender"] } : {}),
+      ...(form.grade ? { grade: form.grade as Character["grade"] } : {}),
+      ...(form.affiliation
+        ? { affiliation: form.affiliation as Character["affiliation"] }
+        : {}),
+      ...(form.clan ? { clan: form.clan as Character["clan"] } : {}),
+      ...(form.appearanceArc
+        ? { appearanceArc: form.appearanceArc as Character["appearanceArc"] }
+        : {}),
+      ...(form.hasDomain !== "" ? { hasDomain: form.hasDomain === "true" } : {}),
+      ...(form.cursedEnergy.trim() !== ""
+        ? { cursedEnergy: Number(form.cursedEnergy) }
+        : {}),
     };
   };
 
@@ -473,6 +528,73 @@ export function AdminDashboard({
             </div>
           </div>
 
+          {/* Attributs JJKdle */}
+          <div className="rounded-xl border border-domain/30 bg-domain/5 p-3">
+            <p className="mb-3 text-xs uppercase tracking-wider text-domain-light">
+              Attributs JJKdle{" "}
+              <span className="text-white/35">(pool quotidien si tous remplis)</span>
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <EnumField
+                label="Race"
+                value={form.race}
+                options={RACES.map((v) => [v, RACE_LABELS[v]])}
+                onChange={(v) => setForm((f) => ({ ...f, race: v }))}
+              />
+              <EnumField
+                label="Genre"
+                value={form.gender}
+                options={GENDERS.map((v) => [v, GENDER_LABELS[v]])}
+                onChange={(v) => setForm((f) => ({ ...f, gender: v }))}
+              />
+              <EnumField
+                label="Grade"
+                value={form.grade}
+                options={GRADES_ORDER.map((v) => [v, GRADE_LABELS[v]])}
+                onChange={(v) => setForm((f) => ({ ...f, grade: v }))}
+              />
+              <EnumField
+                label="Affiliation"
+                value={form.affiliation}
+                options={AFFILIATIONS.map((v) => [v, AFFILIATION_LABELS[v]])}
+                onChange={(v) => setForm((f) => ({ ...f, affiliation: v }))}
+              />
+              <EnumField
+                label="Clan"
+                value={form.clan}
+                options={CLANS.map((v) => [v, CLAN_LABELS[v]])}
+                onChange={(v) => setForm((f) => ({ ...f, clan: v }))}
+              />
+              <EnumField
+                label="Arc d'apparition"
+                value={form.appearanceArc}
+                options={ARCS_ORDER.map((v) => [v, ARC_LABELS[v]])}
+                onChange={(v) => setForm((f) => ({ ...f, appearanceArc: v }))}
+              />
+              <EnumField
+                label="Territoire (domaine)"
+                value={form.hasDomain}
+                options={[
+                  ["true", "Oui"],
+                  ["false", "Non"],
+                ]}
+                onChange={(v) => setForm((f) => ({ ...f, hasDomain: v }))}
+              />
+              <Field label="Énergie occulte (lore)">
+                <input
+                  type="number"
+                  min={0}
+                  value={form.cursedEnergy}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, cursedEnergy: e.target.value }))
+                  }
+                  className={inputCls}
+                  placeholder="ex. 120"
+                />
+              </Field>
+            </div>
+          </div>
+
           <button
             type="submit"
             disabled={pending}
@@ -528,6 +650,14 @@ export function AdminDashboard({
                       <span className="text-xs font-normal text-white/35">
                         {c.id}
                       </span>
+                      {!isComplete(c) && (
+                        <span
+                          className="ml-1.5 rounded bg-cursed/20 px-1.5 py-0.5 text-[10px] font-bold text-cursed-light"
+                          title="Attributs JJKdle manquants — exclu du pool quotidien"
+                        >
+                          JJKdle incomplet
+                        </span>
+                      )}
                     </p>
                     <div className="mt-1 flex flex-wrap gap-1">
                       {cats.length === 0 ? (
@@ -597,5 +727,35 @@ function Field({
       </span>
       {children}
     </label>
+  );
+}
+
+/** Select d'enum JJKdle avec option vide « non renseigné ». */
+function EnumField({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: [string, string][];
+  onChange: (v: string) => void;
+}) {
+  return (
+    <Field label={label}>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={inputCls}
+      >
+        <option value="">— non renseigné</option>
+        {options.map(([v, l]) => (
+          <option key={v} value={v}>
+            {l}
+          </option>
+        ))}
+      </select>
+    </Field>
   );
 }

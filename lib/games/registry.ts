@@ -53,6 +53,17 @@ export const GAMES: Game[] = [
     previewImage: "/assets/battle-screen.png",
     status: "live",
   },
+  {
+    id: "jjkdle",
+    title: "JJKdle",
+    description:
+      "Devine le personnage JJK mystère du jour. Chaque proposition révèle des indices par attribut (race, grade, clan, arc…) avec des flèches ↑/↓. Un perso par jour, essais illimités.",
+    route: "/games/jjkdle",
+    glyph: "🎭",
+    tags: ["quotidien", "déduction", "roster JJK"],
+    accent: "#7c3aed",
+    status: "live",
+  },
   // Exemple de jeu futur (grisé sur le hub) :
   // {
   //   id: "domain-clash",

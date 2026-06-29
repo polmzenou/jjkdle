@@ -28,6 +28,14 @@ import type {
 } from "@/lib/games/draft/types";
 import type { Character, CharacterTier } from "@/data/roster/characters";
 import { CATEGORY_BY_ID, type CategoryId } from "@/data/roster/categories";
+import {
+  RACES,
+  GENDERS,
+  GRADES_ORDER,
+  AFFILIATIONS,
+  CLANS,
+  ARCS_ORDER,
+} from "@/lib/games/jjkdle/attributes";
 
 export type ActionResult = { ok: boolean; error?: string };
 
@@ -78,6 +86,34 @@ export async function saveCharacterAction(
     }
   }
 
+  // ── Attributs JJKdle : chaque enum validé contre ses valeurs ; omis si vide.
+  const jjkdle: Partial<
+    Pick<
+      Character,
+      | "race"
+      | "gender"
+      | "grade"
+      | "affiliation"
+      | "clan"
+      | "appearanceArc"
+      | "hasDomain"
+      | "cursedEnergy"
+    >
+  > = {};
+  if (input.race && RACES.includes(input.race)) jjkdle.race = input.race;
+  if (input.gender && GENDERS.includes(input.gender)) jjkdle.gender = input.gender;
+  if (input.grade && GRADES_ORDER.includes(input.grade)) jjkdle.grade = input.grade;
+  if (input.affiliation && AFFILIATIONS.includes(input.affiliation))
+    jjkdle.affiliation = input.affiliation;
+  if (input.clan && CLANS.includes(input.clan)) jjkdle.clan = input.clan;
+  if (input.appearanceArc && ARCS_ORDER.includes(input.appearanceArc))
+    jjkdle.appearanceArc = input.appearanceArc;
+  if (typeof input.hasDomain === "boolean") jjkdle.hasDomain = input.hasDomain;
+  if (input.cursedEnergy != null && `${input.cursedEnergy}` !== "") {
+    const ce = Number(input.cursedEnergy);
+    if (Number.isFinite(ce) && ce >= 0) jjkdle.cursedEnergy = Math.round(ce);
+  }
+
   const char: Character = {
     id,
     name,
@@ -86,6 +122,7 @@ export async function saveCharacterAction(
     ...(image ? { image } : {}),
     ratings,
     ...(battleValue != null ? { battleValue } : {}),
+    ...jjkdle,
   };
 
   try {
