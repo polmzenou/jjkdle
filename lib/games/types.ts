@@ -24,4 +24,18 @@ export interface Game {
   previewImage?: string;
   /** Permet de griser une carte "à venir" sans la retirer du registre. */
   status?: "live" | "coming-soon";
+  /**
+   * Disponibilité d'un mode multijoueur pour ce jeu — alimente la modale
+   * multijoueur du hub. Absent = ce jeu n'a pas de mode multi listé.
+   */
+  multiplayer?: {
+    status: "live" | "coming-soon";
+    /** Route du hub multi (requise si `status: "live"`). */
+    route?: string;
+  };
+  /**
+   * Jeu jouable UNIQUEMENT en multijoueur : affiche un badge sur sa carte et
+   * l'exclut de la modale (il a déjà sa propre carte/hub). Ex. JJK Random Battle.
+   */
+  multiplayerOnly?: boolean;
 }

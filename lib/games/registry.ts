@@ -16,6 +16,7 @@ export const GAMES: Game[] = [
     accent: "#dc2626",
     previewImage: "/assets/builder-screen.png",
     status: "live",
+    multiplayer: { status: "live", route: "/games/multiplayer" },
   },
   {
     id: "ranking",
@@ -28,6 +29,7 @@ export const GAMES: Game[] = [
     accent: "#7c3aed",
     previewImage: "/assets/pyramid-screen.png",
     status: "live",
+    multiplayer: { status: "coming-soon" },
   },
   {
     id: "jujutsu-draft",
@@ -40,6 +42,7 @@ export const GAMES: Game[] = [
     accent: "#f59e0b",
     previewImage: "/assets/draft-screen.png",
     status: "live",
+    multiplayer: { status: "coming-soon" },
   },
   {
     id: "battle",
@@ -52,6 +55,7 @@ export const GAMES: Game[] = [
     accent: "#dc2626",
     previewImage: "/assets/battle-screen.png",
     status: "live",
+    multiplayerOnly: true,
   },
   // Exemple de jeu futur (grisé sur le hub) :
   // {
