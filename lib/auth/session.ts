@@ -60,6 +60,12 @@ export async function getAdminUser(): Promise<SessionUser | null> {
   return user && user.role === "ADMIN" ? user : null;
 }
 
+/** Utilisateur courant s'il est ADMIN ou VIP, sinon null (sync d'images). */
+export async function getAdminOrVipUser(): Promise<SessionUser | null> {
+  const user = await getCurrentUser();
+  return user && (user.role === "ADMIN" || user.role === "VIP") ? user : null;
+}
+
 /** Invalide la session courante (supprime la ligne DB + le cookie). */
 export async function destroySession(): Promise<void> {
   const store = await cookies();
