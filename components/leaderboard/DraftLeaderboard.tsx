@@ -2,6 +2,7 @@ import {
   topDraftEntries,
   type DraftLeaderboardEntry,
 } from "@/lib/games/draft/store";
+import { VipBadge } from "@/components/VipBadge";
 
 /** Couleurs des médailles : 1er Or, 2e Argent, 3e Bronze. */
 const MEDALS = [
@@ -92,6 +93,7 @@ function DraftRow({
         style={{ color: isPodium ? medal!.color : "#fff" }}
       >
         {entry.pseudo}
+        {entry.role === "VIP" && <VipBadge className="ml-1.5" />}
         {entry.outcome === "VICTORY" && (
           <span className="ml-2 align-middle text-xs text-emerald-300">★ clear</span>
         )}

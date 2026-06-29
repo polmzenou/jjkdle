@@ -1,3 +1,4 @@
+import type { Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import type { AdminScore, UserScore } from "@/lib/leaderboard/store";
 import { todayKey } from "./daily";
@@ -15,6 +16,8 @@ export interface JjkdleLeaderboardEntry {
   id: string;
   pseudo: string;
   attempts: number;
+  /** Rôle du joueur (pour afficher le tag VIP à côté du pseudo). */
+  role: Role;
 }
 
 /**
@@ -49,13 +52,14 @@ export async function topJjkdleEntries(
     where: { date },
     orderBy: [{ attempts: "asc" }, { updatedAt: "asc" }],
     take: limit,
-    include: { user: { select: { username: true } } },
+    include: { user: { select: { username: true, role: true } } },
   });
 
   return rows.map((r) => ({
     id: r.id,
     pseudo: r.user.username,
     attempts: r.attempts,
+    role: r.user.role,
   }));
 }
 
@@ -105,7 +109,7 @@ export async function getUserJjkdleScore(
 export async function listAllJjkdleScores(): Promise<AdminScore[]> {
   const rows = await prisma.jjkdleScore.findMany({
     orderBy: [{ date: "desc" }, { attempts: "asc" }, { updatedAt: "asc" }],
-    include: { user: { select: { username: true } } },
+    include: { user: { select: { username: true, role: true } } },
   });
 
   return rows.map((r) => ({
@@ -114,6 +118,7 @@ export async function listAllJjkdleScores(): Promise<AdminScore[]> {
     game: "jjkdle",
     score: r.attempts,
     date: r.date,
+    role: r.user.role,
   }));
 }
 

@@ -30,7 +30,11 @@ export default async function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const user = await getCurrentUser();
   const navUser = user
-    ? { username: user.username, isAdmin: user.role === "ADMIN" }
+    ? {
+        username: user.username,
+        isAdmin: user.role === "ADMIN",
+        isVip: user.role === "VIP",
+      }
     : null;
   // Compteur du cache d'images (pour afficher « Vider le cache » côté admin).
   const cachedImageCount = navUser?.isAdmin ? getCachedImageCount() : 0;

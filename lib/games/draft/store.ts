@@ -1,4 +1,4 @@
-import { Prisma, type DraftOutcome } from "@prisma/client";
+import { Prisma, type DraftOutcome, type Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import type { DraftSelection } from "./types";
 import type { AdminScore, UserScore } from "@/lib/leaderboard/store";
@@ -21,6 +21,8 @@ export interface DraftLeaderboardEntry {
   pseudo: string;
   enemiesKilled: number;
   outcome: DraftOutcome;
+  /** Rôle du joueur (pour afficher le tag VIP à côté du pseudo). */
+  role: Role;
 }
 
 export interface SaveDraftInput {
@@ -76,7 +78,7 @@ export async function topDraftEntries(
       { updatedAt: "asc" },
     ],
     take: limit,
-    include: { user: { select: { username: true } } },
+    include: { user: { select: { username: true, role: true } } },
   });
 
   return rows.map((r) => ({
@@ -84,6 +86,7 @@ export async function topDraftEntries(
     pseudo: r.user.username,
     enemiesKilled: r.enemiesKilled,
     outcome: r.outcome,
+    role: r.user.role,
   }));
 }
 
@@ -103,7 +106,7 @@ export async function listAllDraftScores(): Promise<AdminScore[]> {
       { globalScore: "desc" },
       { updatedAt: "asc" },
     ],
-    include: { user: { select: { username: true } } },
+    include: { user: { select: { username: true, role: true } } },
   });
 
   return rows.map((r) => ({
@@ -112,6 +115,7 @@ export async function listAllDraftScores(): Promise<AdminScore[]> {
     game: "jujutsu-draft",
     score: r.enemiesKilled,
     date: r.updatedAt.toISOString(),
+    role: r.user.role,
   }));
 }
 

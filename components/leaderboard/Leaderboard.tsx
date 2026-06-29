@@ -4,6 +4,7 @@ import {
   type LeaderboardGame,
 } from "@/lib/leaderboard/store";
 import { formatScore } from "@/lib/format";
+import { VipBadge } from "@/components/VipBadge";
 
 /** Couleurs des médailles : 1er Or, 2e Argent, 3e Bronze. */
 const MEDALS = [
@@ -108,6 +109,7 @@ function LeaderboardRow({
         style={{ color: isPodium ? medal!.color : "#fff" }}
       >
         {entry.pseudo}
+        {entry.role === "VIP" && <VipBadge className="ml-1.5" />}
       </p>
 
       {/* Score */}

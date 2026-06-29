@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { AdminScore } from "@/lib/leaderboard/store";
 import { getGame } from "@/lib/games/registry";
+import { VipBadge } from "@/components/VipBadge";
 import { updateScoreAction, deleteScoreAction } from "./actions";
 
 interface LeaderboardAdminProps {
@@ -123,6 +124,7 @@ export function LeaderboardAdmin({ scores }: LeaderboardAdminProps) {
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-white">
                         {s.pseudo}
+                        {s.role === "VIP" && <VipBadge className="ml-1.5" />}
                       </p>
                       <p className="text-[11px] text-white/30">
                         {new Date(s.date).toLocaleDateString("fr-FR")}

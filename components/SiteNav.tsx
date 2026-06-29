@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { Logo } from "@/components/Logo";
+import { VipBadge } from "@/components/VipBadge";
 import { logoutAction } from "@/lib/auth/actions";
 import {
   refreshRosterImagesFromApiAction,
@@ -18,6 +19,7 @@ const LINKS = [
 export type NavUser = {
   username: string;
   isAdmin: boolean;
+  isVip: boolean;
 };
 
 /**
@@ -181,6 +183,7 @@ function UserMenu({
         <span className="hidden max-w-[8rem] truncate sm:inline">
           {user.username}
         </span>
+        {user.isVip && <VipBadge />}
       </Link>
       <button
         type="button"

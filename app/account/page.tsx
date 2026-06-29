@@ -12,6 +12,7 @@ import { getUserJjkdleScore } from "@/lib/games/jjkdle/leaderboard";
 import { BOSSES } from "@/lib/games/draft/scoring";
 import { getGrade } from "@/lib/scoring/grades";
 import { GAMES } from "@/lib/games/registry";
+import { VipBadge } from "@/components/VipBadge";
 import { AccountForms } from "./AccountForms";
 
 export const metadata: Metadata = {
@@ -47,6 +48,7 @@ export default async function AccountPage() {
         </span>
         <h1 className="mt-3 font-display text-3xl font-black tracking-tight text-white sm:text-4xl">
           Salut, {user.username}
+          {user.role === "VIP" && <VipBadge className="ml-2 text-sm" />}
         </h1>
         <p className="mt-2 text-white/55">
           Retrouve ici tes scores et gère les infos de ton compte.

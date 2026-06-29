@@ -1,3 +1,4 @@
+import type { Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 /**
@@ -13,6 +14,8 @@ export interface LeaderboardEntry {
   id: string;
   pseudo: string;
   score: number;
+  /** Rôle du joueur (pour afficher le tag VIP à côté du pseudo). */
+  role: Role;
 }
 
 /** Score maximum atteignable par jeu (sert à valider les soumissions). */
@@ -59,13 +62,14 @@ export async function topEntries(
     where: game ? { gameId: game } : undefined,
     orderBy: [{ best: "desc" }, { updatedAt: "asc" }],
     take: limit,
-    include: { user: { select: { username: true } } },
+    include: { user: { select: { username: true, role: true } } },
   });
 
   return rows.map((r) => ({
     id: r.id,
     pseudo: r.user.username,
     score: r.best,
+    role: r.user.role,
   }));
 }
 
@@ -122,13 +126,15 @@ export interface AdminScore {
   score: number;
   /** Date du dernier record (ISO). */
   date: string;
+  /** Rôle du joueur (pour afficher le tag VIP à côté du pseudo). */
+  role: Role;
 }
 
 /** Tous les scores (tous jeux), pour l'admin. Groupé par jeu puis score décroissant. */
 export async function listAllScores(): Promise<AdminScore[]> {
   const rows = await prisma.score.findMany({
     orderBy: [{ gameId: "asc" }, { best: "desc" }, { updatedAt: "asc" }],
-    include: { user: { select: { username: true } } },
+    include: { user: { select: { username: true, role: true } } },
   });
 
   return rows.map((r) => ({
@@ -137,6 +143,7 @@ export async function listAllScores(): Promise<AdminScore[]> {
     game: r.gameId,
     score: r.best,
     date: r.updatedAt.toISOString(),
+    role: r.user.role,
   }));
 }
 
