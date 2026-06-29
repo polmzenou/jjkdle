@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { CharacterImage } from "@/components/CharacterImage";
+import { Logo } from "@/components/Logo";
 import {
   VIP_MAX_REPLAYS,
   type GameMode,
@@ -117,7 +118,7 @@ export function JJKdleGame({
   const displayRows = useMemo(() => [...rows].reverse(), [rows]);
 
   return (
-    <div className="pt-8">
+    <div>
       <Header attempts={rows.length} mode={mode} />
 
       {poolEmpty ? (
@@ -187,35 +188,30 @@ export function JJKdleGame({
 }
 
 function Header({ attempts, mode }: { attempts: number; mode: GameMode }) {
+  const subtitle =
+    mode === "admin"
+      ? "Mode admin illimité — perso aléatoire."
+      : mode === "vip"
+        ? "Partie bonus VIP — perso aléatoire."
+        : "Devine le personnage mystère du jour.";
   return (
-    <header className="flex flex-wrap items-end justify-between gap-3">
-      <div>
+    <>
+      {/* Barre de tête unifiée : retour, logo, donnée (essais) — cf. JJK Pyramid */}
+      <header className="mb-4 flex items-center justify-between py-4">
         <Link
-          href="/games"
-          className="text-xs text-white/40 hover:text-white/70"
+          href="/"
+          className="flex items-center gap-1 text-sm text-white/60 transition-colors hover:text-domain-light"
         >
-          ← Tous les jeux
+          ← Back
         </Link>
-        <h1 className="mt-1 font-display text-3xl font-black uppercase tracking-wider text-white">
-          JJK<span className="text-domain-light">dle</span>
-        </h1>
-        <p className="text-sm text-white/45">
-          {mode === "admin"
-            ? "Mode admin illimité — perso aléatoire."
-            : mode === "vip"
-              ? "Partie bonus VIP — perso aléatoire."
-              : "Devine le personnage mystère du jour."}
-        </p>
-      </div>
-      <div className="rounded-xl border border-white/10 bg-void-800/50 px-4 py-2 text-center">
-        <p className="font-display text-2xl font-black text-domain-light">
-          {attempts}
-        </p>
-        <p className="text-[10px] uppercase tracking-wider text-white/40">
-          essai{attempts > 1 ? "s" : ""}
-        </p>
-      </div>
-    </header>
+        <Logo className="h-12 w-auto sm:h-14" />
+        <span className="rounded-full bg-void-700/60 px-3 py-1 text-xs text-white/60">
+          Essais&nbsp;:{" "}
+          <span className="font-bold text-domain-light">{attempts}</span>
+        </span>
+      </header>
+      <p className="mb-6 text-center text-sm text-white/45">{subtitle}</p>
+    </>
   );
 }
 

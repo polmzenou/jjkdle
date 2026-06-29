@@ -16,6 +16,7 @@ import {
   type Selection,
 } from "@/lib/scoring/scoring";
 import { saveBestScore } from "@/lib/bestScore";
+import { formatScore } from "@/lib/format";
 import { CategoryTile } from "@/components/CategoryTile";
 import { RankFooter } from "@/components/RankFooter";
 import { Logo } from "@/components/Logo";
@@ -147,28 +148,21 @@ export function BuilderGame({
 
   return (
     <div>
-      {/* Barre de tête : retour, titre, compteur de taps */}
-      <header className="sticky top-0 z-20 -mx-4 mb-6 flex items-center justify-between border-b border-white/10 bg-void-900/80 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6">
+      {/* Barre de tête unifiée : retour, logo, record (cf. JJK Pyramid) */}
+      <header className="mb-4 flex items-center justify-between py-4">
         <Link
           href="/"
           className="flex items-center gap-1 text-sm text-white/60 transition-colors hover:text-domain-light"
         >
-          ← Home
+          ← Back
         </Link>
         <Logo className="h-12 w-auto sm:h-14" />
-        <div className="flex items-center gap-3">
-          <span className="text-xs font-bold uppercase tracking-wider text-white/70">
-            Tap! ({lockedCount}/{total})
+        <span className="rounded-full bg-void-700/60 px-3 py-1 text-xs text-white/60">
+          Record&nbsp;:{" "}
+          <span className="font-bold text-domain-light">
+            {formatScore(bestScore)}
           </span>
-          <button
-            type="button"
-            onClick={startNewGame}
-            aria-label="Recommencer"
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-domain text-white shadow-glow transition-transform hover:scale-110 active:scale-95"
-          >
-            ↻
-          </button>
-        </div>
+        </span>
       </header>
 
       {finished ? (
@@ -183,12 +177,22 @@ export function BuilderGame({
         />
       ) : (
         <>
-          {/* Bandeau d'instruction */}
-          <div
-            onClick={cyclePool}
-            className="mb-5 select-none rounded-xl border border-white/10 bg-void-800/60 px-4 py-3 text-center text-sm text-white/70 backdrop-blur"
-          >
-            👆 Tape une catégorie pour la <span className="font-semibold text-domain-light">verrouiller</span> ! ({lockedCount}/{total})
+          {/* Bandeau d'instruction + bouton recommencer (déplacé hors du header) */}
+          <div className="mb-5 flex items-center gap-2">
+            <div
+              onClick={cyclePool}
+              className="flex-1 select-none rounded-xl border border-white/10 bg-void-800/60 px-4 py-3 text-center text-sm text-white/70 backdrop-blur"
+            >
+              👆 Tape une catégorie pour la <span className="font-semibold text-domain-light">verrouiller</span> ! ({lockedCount}/{total})
+            </div>
+            <button
+              type="button"
+              onClick={startNewGame}
+              aria-label="Recommencer"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-domain text-white shadow-glow transition-transform hover:scale-110 active:scale-95"
+            >
+              ↻
+            </button>
           </div>
 
           {/* Barre de progression */}
