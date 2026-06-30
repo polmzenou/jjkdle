@@ -5,6 +5,7 @@ import type { SerializedLobby } from "@/lib/multiplayer/events";
 import type { RosterMap } from "@/lib/multiplayer/state";
 import { type BattleState } from "@/lib/games/battle/types";
 import { gauntletBreakdown } from "@/lib/games/battle/combat";
+import { UserAvatar } from "@/components/UserAvatar";
 import { DeckGrid } from "./DeckGrid";
 import { GauntletDeck } from "./GauntletDeck";
 
@@ -72,14 +73,20 @@ export function BattleResult({
         {headline}
       </motion.h1>
 
-      <div className="mt-6 flex items-center justify-center gap-6 font-display text-2xl font-bold text-white">
-        <span>
+      <div className="mt-6 flex flex-wrap items-center justify-center gap-4 font-display text-2xl font-bold text-white sm:gap-6">
+        <span className="flex items-center gap-2">
+          <UserAvatar username={me?.username ?? "Toi"} image={me?.avatarImage ?? null} size={32} />
           {me?.username ?? "Toi"} :{" "}
           <span className="text-domain-light">{myStat}</span>{" "}
           <span className="text-sm font-normal text-white/40">{statLabel}</span>
         </span>
         <span className="text-white/30">—</span>
-        <span>
+        <span className="flex items-center gap-2">
+          <UserAvatar
+            username={opponent?.username ?? "Adversaire"}
+            image={opponent?.avatarImage ?? null}
+            size={32}
+          />
           {opponent?.username ?? "Adversaire"} :{" "}
           <span className="text-cursed-light">{oppStat}</span>{" "}
           <span className="text-sm font-normal text-white/40">{statLabel}</span>
@@ -94,6 +101,7 @@ export function BattleResult({
               log={gauntletBreakdown(myDeck, oppDeck, rosterMap)}
               rosterMap={rosterMap}
               accent="#7c3aed"
+              avatar={me ? { username: me.username, image: me.avatarImage } : undefined}
             />
             {opponent && (
               <GauntletDeck
@@ -101,6 +109,7 @@ export function BattleResult({
                 log={gauntletBreakdown(oppDeck, myDeck, rosterMap)}
                 rosterMap={rosterMap}
                 accent="#dc2626"
+                avatar={{ username: opponent.username, image: opponent.avatarImage }}
               />
             )}
           </>
@@ -111,6 +120,7 @@ export function BattleResult({
               deckIds={myDeck}
               rosterMap={rosterMap}
               accent="#7c3aed"
+              avatar={me ? { username: me.username, image: me.avatarImage } : undefined}
             />
             {opponent && (
               <DeckGrid
@@ -118,6 +128,7 @@ export function BattleResult({
                 deckIds={oppDeck}
                 rosterMap={rosterMap}
                 accent="#dc2626"
+                avatar={{ username: opponent.username, image: opponent.avatarImage }}
               />
             )}
           </>

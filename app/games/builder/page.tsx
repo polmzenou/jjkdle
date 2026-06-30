@@ -2,6 +2,7 @@ import { getBestScore } from "@/lib/bestScore";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getCategories, getRoster } from "@/lib/content/queries";
 import { Leaderboard } from "@/components/leaderboard/Leaderboard";
+import { parseScope } from "@/lib/leaderboard/store";
 import { BuilderGame } from "./BuilderGame";
 
 export const metadata = {
@@ -16,8 +17,13 @@ export const dynamic = "force-dynamic";
  * composant client qui pilote la boucle de jeu (la barre de tête, le footer
  * ranks et le reveal sont gérés par BuilderGame).
  */
-export default async function BuilderPage() {
-  const [bestScore, user, categories, roster] = await Promise.all([
+export default async function BuilderPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ scope?: string }>;
+}) {
+  const [{ scope }, bestScore, user, categories, roster] = await Promise.all([
+    searchParams,
     getBestScore("builder"),
     getCurrentUser(),
     getCategories(),
@@ -34,7 +40,7 @@ export default async function BuilderPage() {
       />
 
       <div className="mt-10">
-        <Leaderboard game="builder" limit={8} />
+        <Leaderboard game="builder" limit={8} scope={parseScope(scope)} />
       </div>
     </main>
   );

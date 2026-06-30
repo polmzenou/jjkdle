@@ -9,7 +9,26 @@ import {
   type ImageRefreshResult,
 } from "@/lib/admin/booru";
 import { clearImageCache } from "@/lib/admin/image-cache";
-import { getUserRole, setUserRole, deleteUser } from "@/lib/admin/users";
+import {
+  getUserRole,
+  setUserRole,
+  deleteUser,
+  setUserXpBonus,
+  grantBadge,
+  revokeBadge,
+} from "@/lib/admin/users";
+import { buildUserStatsContext } from "@/lib/progress/context";
+import { computeTotalXp, levelToMinXp } from "@/lib/progress/xp";
+import { recomputeUserProgress } from "@/lib/progress/recompute";
+import { isBadgeKey } from "@/lib/badges/definitions";
+import { isTitleKey } from "@/lib/titles/definitions";
+import { isFrameKey } from "@/lib/frames/definitions";
+import {
+  grantTitle,
+  revokeTitle,
+  grantFrame,
+  revokeFrame,
+} from "@/lib/cosmetics/grants";
 import {
   adminUpdateScore,
   adminDeleteScore,
@@ -464,6 +483,189 @@ export async function deleteUserAction(userId: string): Promise<ActionResult> {
     await deleteUser(userId);
   } catch (e) {
     return { ok: false, error: `Échec de suppression : ${(e as Error).message}` };
+  }
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Progression (administration : XP, niveau, badges de n'importe quel joueur)
+// ──────────────────────────────────────────────────────────────────────────
+
+const XP_BONUS_LIMIT = 1_000_000;
+
+/** Fixe le bonus d'XP manuel (additif, persistant) puis recalcule niveau/badges. */
+export async function adminSetXpBonusAction(
+  userId: string,
+  xpBonusRaw: number,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  const xpBonus = Math.round(Number(xpBonusRaw));
+  if (!Number.isFinite(xpBonus) || Math.abs(xpBonus) > XP_BONUS_LIMIT) {
+    return { ok: false, error: `Bonus invalide (−${XP_BONUS_LIMIT} à ${XP_BONUS_LIMIT}).` };
+  }
+  try {
+    await setUserXpBonus(userId, xpBonus);
+    await recomputeUserProgress(userId);
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+/**
+ * Fixe le NIVEAU cible d'un joueur : calcule le bonus d'XP qui comble l'écart
+ * entre l'XP dérivée des scores et le seuil du niveau visé, puis recalcule. Le
+ * niveau est ainsi conservé même après de futures parties (bonus persistant).
+ */
+export async function adminSetLevelAction(
+  userId: string,
+  levelRaw: number,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  const level = Math.round(Number(levelRaw));
+  if (!Number.isFinite(level) || level < 1 || level > 999) {
+    return { ok: false, error: "Niveau invalide (1 à 999)." };
+  }
+  try {
+    const ctx = await buildUserStatsContext(userId);
+    const derived = computeTotalXp(ctx);
+    const bonus = levelToMinXp(level) - derived; // peut être négatif
+    await setUserXpBonus(userId, Math.max(-XP_BONUS_LIMIT, Math.min(XP_BONUS_LIMIT, bonus)));
+    await recomputeUserProgress(userId);
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+/** Accorde un badge à un joueur (idempotent). `targetUserId` peut être l'admin. */
+export async function adminGrantBadgeAction(
+  userId: string,
+  badgeKey: string,
+): Promise<ActionResult> {
+  const admin = await getAdminUser();
+  if (!admin) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  if (!isBadgeKey(badgeKey)) {
+    return { ok: false, error: "Badge inconnu." };
+  }
+  try {
+    await grantBadge(userId, badgeKey, admin.id);
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+/**
+ * Retire un badge à un joueur. Note : un badge DÉRIVÉ encore mérité se
+ * redébloquera à la prochaine partie ; le retrait n'est définitif que pour les
+ * badges manuels.
+ */
+export async function adminRevokeBadgeAction(
+  userId: string,
+  badgeKey: string,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  try {
+    await revokeBadge(userId, badgeKey);
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Titres & cadres (octroi/retrait MANUEL admin — couche « grant », cf. §5).
+//
+// Le retrait d'un grant n'enlève PAS un déblocage dérivé : si le joueur remplit
+// toujours la condition naturelle (ou est admin), l'item reste débloqué. Ces
+// actions n'agissent que sur la table de grant.
+// ──────────────────────────────────────────────────────────────────────────
+
+/** Octroie un titre à un joueur (idempotent). `userId` peut être l'admin lui-même. */
+export async function adminGrantTitleAction(
+  userId: string,
+  titleKey: string,
+): Promise<ActionResult> {
+  const admin = await getAdminUser();
+  if (!admin) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  if (!isTitleKey(titleKey)) {
+    return { ok: false, error: "Titre inconnu." };
+  }
+  try {
+    await grantTitle(userId, titleKey, admin.id);
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+/** Retire l'octroi manuel d'un titre (no-op s'il n'existe pas). */
+export async function adminRevokeTitleAction(
+  userId: string,
+  titleKey: string,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  try {
+    await revokeTitle(userId, titleKey);
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+/** Octroie un cadre à un joueur (idempotent). */
+export async function adminGrantFrameAction(
+  userId: string,
+  frameKey: string,
+): Promise<ActionResult> {
+  const admin = await getAdminUser();
+  if (!admin) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  if (!isFrameKey(frameKey)) {
+    return { ok: false, error: "Cadre inconnu." };
+  }
+  try {
+    await grantFrame(userId, frameKey, admin.id);
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+/** Retire l'octroi manuel d'un cadre (no-op s'il n'existe pas). */
+export async function adminRevokeFrameAction(
+  userId: string,
+  frameKey: string,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  try {
+    await revokeFrame(userId, frameKey);
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
   }
   revalidatePath("/admin");
   return { ok: true };

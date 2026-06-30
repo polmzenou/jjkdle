@@ -6,6 +6,7 @@ import type { RosterMap } from "@/lib/multiplayer/state";
 import type { SerializedLobby } from "@/lib/multiplayer/events";
 import { getGrade } from "@/lib/scoring/grades";
 import { MAX_SCORE } from "@/lib/scoring/scoring";
+import { UserAvatar } from "@/components/UserAvatar";
 import { PlayerBoard } from "./PlayerBoard";
 
 interface MultiplayerRecapProps {
@@ -68,6 +69,7 @@ export function MultiplayerRecap({
               <span className="font-display text-2xl font-black text-white/30">
                 {isWinner ? "🏆" : `#${i + 1}`}
               </span>
+              <UserAvatar username={p.username} image={p.avatarImage} size={36} />
               <div className="flex-1">
                 <p className="font-semibold text-white">
                   {p.username}
@@ -92,7 +94,8 @@ export function MultiplayerRecap({
       <div className="mt-8 flex flex-wrap justify-center gap-6 sm:gap-8">
         {ranked.map((p) => (
           <div key={p.userId} className="w-52 sm:w-64">
-            <p className="mb-1.5 truncate text-center text-xs uppercase tracking-[0.15em] text-white/40">
+            <p className="mb-1.5 flex items-center justify-center gap-1.5 truncate text-center text-xs uppercase tracking-[0.15em] text-white/40">
+              <UserAvatar username={p.username} image={p.avatarImage} size={20} />
               {p.username}
             </p>
             <PlayerBoard

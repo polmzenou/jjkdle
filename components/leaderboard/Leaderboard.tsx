@@ -2,9 +2,14 @@ import {
   topEntries,
   type LeaderboardEntry,
   type LeaderboardGame,
+  type LeaderboardScope,
 } from "@/lib/leaderboard/store";
+import Link from "next/link";
 import { formatScore } from "@/lib/format";
 import { VipBadge } from "@/components/VipBadge";
+import { TitleBadge } from "@/components/TitleBadge";
+import { UserAvatar } from "@/components/UserAvatar";
+import { ScopeToggle } from "./ScopeToggle";
 
 /** Couleurs des médailles : 1er Or, 2e Argent, 3e Bronze. */
 const MEDALS = [
@@ -28,31 +33,39 @@ interface LeaderboardProps {
   game: LeaderboardGame;
   /** Nombre d'entrées affichées (défaut 8). */
   limit?: number;
+  /** Portée : all-time (défaut) ou hebdomadaire. */
+  scope?: LeaderboardScope;
 }
 
 /**
  * Leaderboard d'un jeu (top N). Server component : lit le fichier à la demande.
  * Les 3 premiers sont mis en avant (Or / Argent / Bronze).
  */
-export async function Leaderboard({ game, limit = 8 }: LeaderboardProps) {
-  const entries = await topEntries(limit, game);
+export async function Leaderboard({
+  game,
+  limit = 8,
+  scope = "all-time",
+}: LeaderboardProps) {
+  const entries = await topEntries(limit, game, scope);
 
   return (
     <section
       id="leaderboard"
       className="rounded-2xl border border-white/10 bg-void-800/40 p-5 backdrop-blur"
     >
-      <div className="mb-4 flex items-center gap-3">
+      <div className="mb-4 flex flex-wrap items-center gap-3">
         <h2 className="font-display text-sm font-bold uppercase tracking-[0.2em] text-amber-200">
           🏆 Leaderboard {GAME_GLYPH[game]} {GAME_LABEL[game]}
         </h2>
         <span className="h-px flex-1 bg-gradient-to-r from-amber-300/30 to-transparent" />
-        <span className="text-xs text-white/35">Top {limit}</span>
+        <ScopeToggle scope={scope} />
       </div>
 
       {entries.length === 0 ? (
         <p className="py-8 text-center text-sm text-white/40">
-          Aucun score pour l&apos;instant — gagne une partie et sois le premier&nbsp;!
+          {scope === "weekly"
+            ? "Aucun record battu cette semaine — relance la machine !"
+            : "Aucun score pour l'instant — gagne une partie et sois le premier !"}
         </p>
       ) : (
         <ol className="space-y-2">
@@ -103,13 +116,28 @@ function LeaderboardRow({
         {rank}
       </span>
 
-      {/* Pseudo */}
+      {/* Avatar + niveau + cadre */}
+      <UserAvatar
+        username={entry.pseudo}
+        image={entry.avatarImage}
+        level={entry.level}
+        frameKey={entry.frameKey}
+        size={32}
+      />
+
+      {/* Pseudo + titre */}
       <p
         className="min-w-0 flex-1 truncate font-semibold"
         style={{ color: isPodium ? medal!.color : "#fff" }}
       >
-        {entry.pseudo}
+        <Link
+          href={`/u/${encodeURIComponent(entry.pseudo)}`}
+          className="underline-offset-2 hover:underline"
+        >
+          {entry.pseudo}
+        </Link>
         {entry.role === "VIP" && <VipBadge className="ml-1.5" />}
+        {entry.titleKey && <TitleBadge titleKey={entry.titleKey} className="ml-1.5" />}
       </p>
 
       {/* Score */}

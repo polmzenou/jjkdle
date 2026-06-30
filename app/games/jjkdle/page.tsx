@@ -5,6 +5,8 @@ import { buildRows, isStateFresh } from "@/lib/games/jjkdle/game";
 import { readState } from "@/lib/games/jjkdle/state";
 import type { GameMode, GameStatus, GuessRow } from "@/lib/games/jjkdle/types";
 import { JjkdleLeaderboard } from "@/components/leaderboard/JjkdleLeaderboard";
+import { parseScope } from "@/lib/leaderboard/store";
+import { prisma } from "@/lib/prisma";
 import { JJKdleGame, type PublicCharacter } from "./JJKdleGame";
 
 export const metadata = {
@@ -19,12 +21,29 @@ export const dynamic = "force-dynamic";
  * d'indices depuis le cookie, et passe au client UNIQUEMENT des données publiques.
  * La cible (`targetId`) n'est jamais transmise tant que la partie n'est pas gagnée.
  */
-export default async function JjkdlePage() {
-  const [roster, user] = await Promise.all([getRoster(), getCurrentUser()]);
+export default async function JjkdlePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ scope?: string }>;
+}) {
+  const [{ scope }, roster, user] = await Promise.all([
+    searchParams,
+    getRoster(),
+    getCurrentUser(),
+  ]);
 
   const eligibleCount = eligibleRoster(roster).length;
   const isAdmin = user?.role === "ADMIN";
   const isVip = user?.role === "VIP";
+  // Streak courant pour l'en-tête (affiché si > 0).
+  const streak = user
+    ? (
+        await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { jjkdleStreak: true },
+        })
+      )?.jjkdleStreak ?? 0
+    : 0;
 
   // Réhydratation de l'état (si toujours valide).
   const map = Object.fromEntries(roster.map((c) => [c.id, c]));
@@ -63,6 +82,11 @@ export default async function JjkdlePage() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 pb-16 sm:px-6">
+      {streak > 0 && (
+        <p className="mb-3 text-center text-sm font-bold text-amber-300">
+          🔥 {streak} jour{streak > 1 ? "s" : ""} d&apos;affilée
+        </p>
+      )}
       <JJKdleGame
         roster={publicRoster}
         eligibleCount={eligibleCount}
@@ -78,7 +102,7 @@ export default async function JjkdlePage() {
       />
 
       <div className="mt-10">
-        <JjkdleLeaderboard limit={8} />
+        <JjkdleLeaderboard limit={8} scope={parseScope(scope)} />
       </div>
     </main>
   );

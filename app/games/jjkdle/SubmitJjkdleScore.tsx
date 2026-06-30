@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { submitJjkdleScoreAction } from "./actions";
+import { BadgeToast } from "@/components/badges/BadgeToast";
 
 interface SubmitJjkdleScoreProps {
   /** L'utilisateur est-il connecté ? Conditionne l'enregistrement du score. */
@@ -20,6 +21,7 @@ export function SubmitJjkdleScore({ isAuthed }: SubmitJjkdleScoreProps) {
   const router = useRouter();
   const [phase, setPhase] = useState<"idle" | "done">("idle");
   const [error, setError] = useState<string | null>(null);
+  const [newBadges, setNewBadges] = useState<string[]>([]);
   const [pending, startTransition] = useTransition();
 
   if (!isAuthed) {
@@ -50,6 +52,7 @@ export function SubmitJjkdleScore({ isAuthed }: SubmitJjkdleScoreProps) {
         >
           Voir le classement ↓
         </a>
+        <BadgeToast badgeKeys={newBadges} />
       </div>
     );
   }
@@ -60,6 +63,7 @@ export function SubmitJjkdleScore({ isAuthed }: SubmitJjkdleScoreProps) {
       try {
         const res = await submitJjkdleScoreAction();
         if (res.ok) {
+          setNewBadges(res.newBadges ?? []);
           setPhase("done");
           router.refresh(); // rafraîchit le leaderboard sous le jeu
         } else {

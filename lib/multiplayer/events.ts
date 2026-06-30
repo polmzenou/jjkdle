@@ -17,6 +17,8 @@ export const MAX_PLAYERS = 3;
 export interface SerializedPlayer {
   userId: string;
   username: string;
+  /** Image de l'avatar choisi (personnage du roster), ou null = initiales. */
+  avatarImage: string | null;
   joinOrder: number;
   /** Sélection verrouillée : { [categoryId]: characterId }. */
   selection: Record<string, string>;

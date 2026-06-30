@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { CharacterImage } from "@/components/CharacterImage";
+import { BadgeToast } from "@/components/badges/BadgeToast";
 import { DRAFT_CATEGORIES } from "@/lib/games/draft/categories";
 import type {
   CombatResult,
@@ -103,6 +104,7 @@ function SubmitDraftScore({
 }) {
   const [phase, setPhase] = useState<"idle" | "done">("idle");
   const [error, setError] = useState<string | null>(null);
+  const [newBadges, setNewBadges] = useState<string[]>([]);
   const [pending, startTransition] = useTransition();
 
   if (!isAuthed) {
@@ -133,6 +135,7 @@ function SubmitDraftScore({
         >
           Voir le classement ↓
         </a>
+        <BadgeToast badgeKeys={newBadges} />
       </div>
     );
   }
@@ -146,9 +149,15 @@ function SubmitDraftScore({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ draft: selection }),
         });
-        const data = (await res.json()) as { ok?: boolean; error?: string };
-        if (res.ok && data.ok) setPhase("done");
-        else setError(data.error ?? "Échec de l'enregistrement.");
+        const data = (await res.json()) as {
+          ok?: boolean;
+          error?: string;
+          newBadges?: string[];
+        };
+        if (res.ok && data.ok) {
+          setNewBadges(data.newBadges ?? []);
+          setPhase("done");
+        } else setError(data.error ?? "Échec de l'enregistrement.");
       } catch {
         setError("Erreur réseau — réessaie.");
       }

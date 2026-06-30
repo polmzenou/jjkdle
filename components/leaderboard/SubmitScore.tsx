@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { submitScoreAction } from "@/lib/leaderboard/actions";
 import type { LeaderboardGame } from "@/lib/leaderboard/store";
+import { BadgeToast } from "@/components/badges/BadgeToast";
 
 interface SubmitScoreProps {
   score: number;
@@ -20,6 +21,7 @@ interface SubmitScoreProps {
 export function SubmitScore({ score, game, isAuthed }: SubmitScoreProps) {
   const [phase, setPhase] = useState<"idle" | "done">("idle");
   const [error, setError] = useState<string | null>(null);
+  const [newBadges, setNewBadges] = useState<string[]>([]);
   const [pending, startTransition] = useTransition();
 
   if (!isAuthed) {
@@ -51,6 +53,7 @@ export function SubmitScore({ score, game, isAuthed }: SubmitScoreProps) {
         >
           Voir le classement ↓
         </a>
+        <BadgeToast badgeKeys={newBadges} />
       </div>
     );
   }
@@ -60,8 +63,10 @@ export function SubmitScore({ score, game, isAuthed }: SubmitScoreProps) {
     startTransition(async () => {
       try {
         const res = await submitScoreAction(score, game);
-        if (res.ok) setPhase("done");
-        else setError(res.error ?? "Échec.");
+        if (res.ok) {
+          setNewBadges(res.newBadges ?? []);
+          setPhase("done");
+        } else setError(res.error ?? "Échec.");
       } catch {
         setError("Erreur réseau — réessaie.");
       }

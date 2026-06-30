@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth/session";
 import { Logo } from "@/components/Logo";
 import { RegisterForm } from "./RegisterForm";
@@ -17,9 +16,9 @@ export default async function RegisterPage() {
 
   return (
     <main className="mx-auto flex min-h-[80vh] max-w-sm flex-col justify-center px-6 py-16">
-      <Link href="/" className="mx-auto mb-6 block w-fit">
+      <div className="mx-auto mb-6 w-fit">
         <Logo className="h-12 w-auto" />
-      </Link>
+      </div>
       <h1 className="text-center font-display text-3xl font-black uppercase tracking-wider text-white">
         Créer un compte
       </h1>

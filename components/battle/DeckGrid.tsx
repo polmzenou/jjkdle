@@ -1,6 +1,7 @@
 "use client";
 
 import { CharacterImage } from "@/components/CharacterImage";
+import { UserAvatar } from "@/components/UserAvatar";
 import type { RosterMap } from "@/lib/multiplayer/state";
 import { DECK_SIZE } from "@/lib/games/battle/types";
 
@@ -12,6 +13,8 @@ interface DeckGridProps {
   accent: string;
   /** Affiche le compteur `n/5` à côté du titre (phase de draft). */
   showCount?: boolean;
+  /** Avatar du joueur à afficher à côté du titre (optionnel). */
+  avatar?: { username: string; image: string | null };
 }
 
 /** Grille de deck (5 emplacements) partagée par le draft et l'écran de résultat. */
@@ -21,12 +24,16 @@ export function DeckGrid({
   rosterMap,
   accent,
   showCount = false,
+  avatar,
 }: DeckGridProps) {
   return (
     <div className="rounded-2xl border border-white/10 bg-void-800/40 p-4">
-      <div className="mb-3 flex items-center justify-between">
-        <p className="truncate font-display text-sm font-bold text-white">
-          {title}
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <p className="flex min-w-0 items-center gap-2 font-display text-sm font-bold text-white">
+          {avatar && (
+            <UserAvatar username={avatar.username} image={avatar.image} size={26} />
+          )}
+          <span className="truncate">{title}</span>
         </p>
         {showCount && (
           <p className="text-xs text-white/45">
