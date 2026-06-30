@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { CursedBackground } from "@/components/CursedBackground";
 import { SiteNav } from "@/components/SiteNav";
+import { TutorialButton } from "@/components/TutorialButton";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getCachedImageCount } from "@/lib/admin/image-cache";
 import "./globals.css";
@@ -47,6 +48,7 @@ export default async function RootLayout({
         <CursedBackground />
         <SiteNav user={navUser} cachedImageCount={cachedImageCount} />
         {children}
+        <TutorialButton />
       </body>
     </html>
   );
