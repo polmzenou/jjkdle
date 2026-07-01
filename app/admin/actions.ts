@@ -13,13 +13,13 @@ import {
   getUserRole,
   setUserRole,
   deleteUser,
-  setUserXpBonus,
+  applyUserXpBonus,
+  setUserTotalXp,
   grantBadge,
   revokeBadge,
 } from "@/lib/admin/users";
-import { buildUserStatsContext } from "@/lib/progress/context";
-import { computeTotalXp, levelToMinXp } from "@/lib/progress/xp";
-import { recomputeUserProgress } from "@/lib/progress/recompute";
+import { levelToMinXp } from "@/lib/progress/xp";
+import { refreshLevelAndBadges } from "@/lib/progress/recompute";
 import { isBadgeKey } from "@/lib/badges/definitions";
 import { isTitleKey } from "@/lib/titles/definitions";
 import { isFrameKey } from "@/lib/frames/definitions";
@@ -507,8 +507,9 @@ export async function adminSetXpBonusAction(
     return { ok: false, error: `Bonus invalide (−${XP_BONUS_LIMIT} à ${XP_BONUS_LIMIT}).` };
   }
   try {
-    await setUserXpBonus(userId, xpBonus);
-    await recomputeUserProgress(userId);
+    // Applique le delta de bonus sur l'accumulateur `totalXp`, puis recalcule.
+    await applyUserXpBonus(userId, xpBonus);
+    await refreshLevelAndBadges(userId);
   } catch (e) {
     return { ok: false, error: `Échec : ${(e as Error).message}` };
   }
@@ -517,9 +518,9 @@ export async function adminSetXpBonusAction(
 }
 
 /**
- * Fixe le NIVEAU cible d'un joueur : calcule le bonus d'XP qui comble l'écart
- * entre l'XP dérivée des scores et le seuil du niveau visé, puis recalcule. Le
- * niveau est ainsi conservé même après de futures parties (bonus persistant).
+ * Fixe le NIVEAU cible d'un joueur : place directement l'XP totale au seuil
+ * d'entrée du niveau visé (`levelToMinXp`), puis recalcule niveau + badges. Les
+ * parties futures ajoutent leur EXP par-dessus (modèle accumulatif).
  */
 export async function adminSetLevelAction(
   userId: string,
@@ -533,11 +534,8 @@ export async function adminSetLevelAction(
     return { ok: false, error: "Niveau invalide (1 à 999)." };
   }
   try {
-    const ctx = await buildUserStatsContext(userId);
-    const derived = computeTotalXp(ctx);
-    const bonus = levelToMinXp(level) - derived; // peut être négatif
-    await setUserXpBonus(userId, Math.max(-XP_BONUS_LIMIT, Math.min(XP_BONUS_LIMIT, bonus)));
-    await recomputeUserProgress(userId);
+    await setUserTotalXp(userId, levelToMinXp(level));
+    await refreshLevelAndBadges(userId);
   } catch (e) {
     return { ok: false, error: `Échec : ${(e as Error).message}` };
   }

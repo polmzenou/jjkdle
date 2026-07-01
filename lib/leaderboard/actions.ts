@@ -2,7 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth/session";
-import { recomputeUserProgress } from "@/lib/progress/recompute";
+import { awardExp } from "@/lib/progress/recompute";
+import { builderExp, rankingExp } from "@/lib/progress/exp-rewards";
+import { getGrade } from "@/lib/scoring/grades";
 import { saveScore, MAX_SCORE, type LeaderboardGame } from "./store";
 
 export type SubmitResult = {
@@ -12,6 +14,8 @@ export type SubmitResult = {
   needsAuth?: boolean;
   /** Badges nouvellement débloqués par cette soumission (toast). */
   newBadges?: string[];
+  /** XP gagnée par cette partie (affichée à l'écran de fin). */
+  gainedExp?: number;
 };
 
 const GAMES: LeaderboardGame[] = ["builder", "ranking"];
@@ -44,10 +48,15 @@ export async function submitScoreAction(
   }
 
   try {
-    await saveScore(user.id, game, score);
-    const { newBadges } = await recomputeUserProgress(user.id);
+    const { isNewRecord } = await saveScore(user.id, game, score);
+    // Builder : EXP du grade (×2 si nouveau record). Pyramid : EXP par paliers de points.
+    const gainedExp =
+      game === "builder"
+        ? builderExp(getGrade(score).id, isNewRecord)
+        : rankingExp(score);
+    const { newBadges, gained } = await awardExp(user.id, gainedExp);
     revalidatePath(`/games/${game}`);
-    return { ok: true, newBadges };
+    return { ok: true, newBadges, gainedExp: gained };
   } catch (e) {
     return { ok: false, error: `Échec d'enregistrement : ${(e as Error).message}` };
   }

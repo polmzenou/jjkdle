@@ -105,13 +105,15 @@ function SubmitDraftScore({
   const [phase, setPhase] = useState<"idle" | "done">("idle");
   const [error, setError] = useState<string | null>(null);
   const [newBadges, setNewBadges] = useState<string[]>([]);
+  const [gainedExp, setGainedExp] = useState(0);
   const [pending, startTransition] = useTransition();
 
   if (!isAuthed) {
     return (
       <div className="mt-5 rounded-xl border border-amber-300/30 bg-amber-300/5 px-4 py-3 text-sm">
         <p className="text-white/70">
-          🔒 Connecte-toi pour enregistrer ton score et apparaître au classement.
+          🔒 Connecte-toi pour gagner de l&apos;XP, enregistrer ton score et
+          apparaître au classement.
         </p>
         <Link
           href="/login"
@@ -129,6 +131,11 @@ function SubmitDraftScore({
         <p className="font-semibold text-amber-200">
           ✓ Score enregistré au classement&nbsp;!
         </p>
+        {gainedExp > 0 && (
+          <p className="mt-1 font-display font-bold text-domain-light">
+            +{gainedExp} XP empochés ⚡
+          </p>
+        )}
         <a
           href="#leaderboard"
           className="mt-1 inline-block font-display text-xs font-bold uppercase tracking-wide text-domain-light underline-offset-4 hover:underline"
@@ -153,9 +160,11 @@ function SubmitDraftScore({
           ok?: boolean;
           error?: string;
           newBadges?: string[];
+          gainedExp?: number;
         };
         if (res.ok && data.ok) {
           setNewBadges(data.newBadges ?? []);
+          setGainedExp(data.gainedExp ?? 0);
           setPhase("done");
         } else setError(data.error ?? "Échec de l'enregistrement.");
       } catch {
@@ -174,6 +183,9 @@ function SubmitDraftScore({
       >
         {pending ? "Enregistrement…" : "🏆 Enregistrer mon score"}
       </button>
+      <p className="mt-2 text-center text-xs text-white/50">
+        ⚡ Enregistre ta partie pour empocher ton XP et apparaître au classement.
+      </p>
       {error && <p className="mt-2 text-sm text-cursed-light">{error}</p>}
     </div>
   );

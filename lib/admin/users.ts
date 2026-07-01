@@ -88,9 +88,39 @@ export async function listUsers(): Promise<AdminUser[]> {
   );
 }
 
-/** Met à jour le bonus d'XP manuel d'un utilisateur. */
-export async function setUserXpBonus(id: string, xpBonus: number): Promise<void> {
-  await prisma.user.update({ where: { id }, data: { xpBonus } });
+/** Bonus d'XP manuel courant d'un utilisateur (0 par défaut). */
+export async function getUserXpBonus(id: string): Promise<number> {
+  const u = await prisma.user.findUnique({
+    where: { id },
+    select: { xpBonus: true },
+  });
+  return u?.xpBonus ?? 0;
+}
+
+/**
+ * Enregistre le bonus admin ET répercute son delta sur `totalXp` (accumulateur).
+ * Modèle accumulatif : `xpBonus` n'est plus additionné à la volée — il sert de
+ * trace ; c'est `totalXp` qui porte l'ajustement. On applique donc `delta =
+ * nouveau − ancien` au total.
+ */
+export async function applyUserXpBonus(id: string, xpBonus: number): Promise<void> {
+  const previous = await getUserXpBonus(id);
+  const delta = xpBonus - previous;
+  await prisma.user.update({
+    where: { id },
+    data: {
+      xpBonus,
+      ...(delta !== 0 ? { totalXp: { increment: delta } } : {}),
+    },
+  });
+}
+
+/** Fixe directement l'XP totale accumulée (ex. « fixer le niveau »). */
+export async function setUserTotalXp(id: string, totalXp: number): Promise<void> {
+  await prisma.user.update({
+    where: { id },
+    data: { totalXp: Math.max(0, Math.round(totalXp)) },
+  });
 }
 
 /**

@@ -19,7 +19,7 @@ const DAY_MS = 86_400_000;
  */
 export async function updateJjkdleStreak(
   userId: string,
-): Promise<{ streak: number; best: number }> {
+): Promise<{ streak: number; best: number; firstToday: boolean }> {
   const today = todayKey();
   const yesterday = todayKey(new Date(Date.now() - DAY_MS));
 
@@ -32,11 +32,16 @@ export async function updateJjkdleStreak(
         jjkdleLastPlayedAt: true,
       },
     });
-    if (!user) return { streak: 0, best: 0 };
+    if (!user) return { streak: 0, best: 0, firstToday: false };
 
-    // Déjà compté aujourd'hui → no-op.
+    // Déjà compté aujourd'hui → no-op. `firstToday: false` sert de garde à
+    // l'octroi d'EXP (une re-soumission du même daily ne doit rien rapporter).
     if (user.jjkdleLastPlayedAt === today) {
-      return { streak: user.jjkdleStreak, best: user.jjkdleBestStreak };
+      return {
+        streak: user.jjkdleStreak,
+        best: user.jjkdleBestStreak,
+        firstToday: false,
+      };
     }
 
     const streak = user.jjkdleLastPlayedAt === yesterday ? user.jjkdleStreak + 1 : 1;
@@ -50,6 +55,6 @@ export async function updateJjkdleStreak(
         jjkdleLastPlayedAt: today,
       },
     });
-    return { streak, best };
+    return { streak, best, firstToday: true };
   });
 }

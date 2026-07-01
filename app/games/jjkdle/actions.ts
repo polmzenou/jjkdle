@@ -13,7 +13,8 @@ import { compareGuess } from "@/lib/games/jjkdle/scoring";
 import { isStateFresh } from "@/lib/games/jjkdle/game";
 import { saveJjkdleScore } from "@/lib/games/jjkdle/leaderboard";
 import { updateJjkdleStreak } from "@/lib/progress/streak";
-import { recomputeUserProgress } from "@/lib/progress/recompute";
+import { awardExp } from "@/lib/progress/recompute";
+import { jjkdleExp } from "@/lib/progress/exp-rewards";
 import {
   readState,
   writeState,
@@ -129,6 +130,8 @@ export async function submitJjkdleScoreAction(): Promise<{
   needsAuth?: boolean;
   newBadges?: string[];
   streak?: number;
+  /** XP gagnée par cette résolution (0 si le daily était déjà validé). */
+  gainedExp?: number;
 }> {
   const user = await getCurrentUser();
   if (!user) {
@@ -151,12 +154,16 @@ export async function submitJjkdleScoreAction(): Promise<{
 
   try {
     await saveJjkdleScore(user.id, state.date, state.guesses.length);
-    // Streak AVANT le recompute (le badge JJKDLE_STREAK_7 en dépend).
-    // `updateJjkdleStreak` est idempotent : un 2ᵉ appel le même jour est un no-op.
-    const { streak } = await updateJjkdleStreak(user.id);
-    const { newBadges } = await recomputeUserProgress(user.id);
+    // Streak AVANT l'octroi d'EXP : il sert au multiplicateur ×(streak+1) et au
+    // badge JJKDLE_STREAK_7. `updateJjkdleStreak` est idempotent (no-op le même jour).
+    // `firstToday` garde contre le farm : une re-soumission du daily ne rapporte rien.
+    const { streak, firstToday } = await updateJjkdleStreak(user.id);
+    const { newBadges, gained } = await awardExp(
+      user.id,
+      firstToday ? jjkdleExp(state.guesses.length, streak) : 0,
+    );
     revalidatePath("/games/jjkdle");
-    return { ok: true, newBadges, streak };
+    return { ok: true, newBadges, streak, gainedExp: gained };
   } catch (e) {
     return { ok: false, error: `Échec d'enregistrement : ${(e as Error).message}` };
   }

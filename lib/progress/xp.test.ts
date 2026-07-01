@@ -1,48 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  computeTotalXp,
-  xpForLevel,
-  xpToLevel,
-  levelToMinXp,
-} from "./xp";
-import type { UserStatsContext } from "./context";
-
-function ctx(partial: Partial<UserStatsContext> = {}): UserStatsContext {
-  return {
-    role: "PLAYER",
-    builderBest: 0,
-    rankingBest: 0,
-    draftKills: 0,
-    draftVictory: false,
-    jjkdleStreak: 0,
-    jjkdleBestStreak: 0,
-    jjkdleBestAttempts: 0,
-    gamesPlayed: 0,
-    playedBuilder: false,
-    playedRanking: false,
-    playedDraft: false,
-    playedJjkdle: false,
-    ...partial,
-  };
-}
-
-describe("computeTotalXp", () => {
-  it("vaut 0 pour un contexte vierge", () => {
-    expect(computeTotalXp(ctx())).toBe(0);
-  });
-
-  it("agrège les jeux selon les poids", () => {
-    // builder 1000*1 + ranking 10000*0.1 + 6 boss*200 + streak 10*100
-    const xp = computeTotalXp(
-      ctx({ builderBest: 1000, rankingBest: 10000, draftKills: 6, jjkdleBestStreak: 10 }),
-    );
-    expect(xp).toBe(1000 + 1000 + 1200 + 1000);
-  });
-
-  it("ne renvoie jamais de valeur négative", () => {
-    expect(computeTotalXp(ctx())).toBeGreaterThanOrEqual(0);
-  });
-});
+import { xpForLevel, xpToLevel, levelToMinXp } from "./xp";
 
 describe("xpToLevel / levelToMinXp", () => {
   it("0 XP = niveau 1", () => {

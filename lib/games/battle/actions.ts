@@ -18,6 +18,8 @@ import type { MpResult } from "@/lib/multiplayer/actions";
 import { BATTLE_EVENTS } from "./events";
 import { parseBattleState } from "./state";
 import { computeBattleResult } from "./scoring";
+import { awardExp } from "@/lib/progress/recompute";
+import { battleWinExp } from "@/lib/progress/exp-rewards";
 import { pickCard, randomSeed } from "./rng";
 import {
   BATTLE_PLAYERS,
@@ -245,10 +247,15 @@ export async function finishCombatAction(codeRaw: string): Promise<MpResult> {
   if (!state || state.phase !== "COMBAT") return { ok: true };
 
   const next: BattleState = { ...state, phase: "RESULT" };
-  await prisma.lobby.updateMany({
+  // Transition idempotente : seule la 1ʳᵉ passe (status encore PLAYING) écrit.
+  // On lit `count` pour n'octroyer l'EXP de victoire qu'une seule fois par partie.
+  const { count } = await prisma.lobby.updateMany({
     where: { id: lobby.id, status: "PLAYING" },
     data: { gameState: toJson(next), status: "FINISHED" },
   });
+  if (count === 1 && state.result?.winnerUserId) {
+    await awardExp(state.result.winnerUserId, battleWinExp());
+  }
   await broadcastBattle(code, { gameState: next });
   return { ok: true };
 }

@@ -224,8 +224,7 @@ export function Fighter({
   hpMax?: number;
 }) {
   // La barre descend en douceur quand on encaisse, mais se RECHARGE
-  // instantanément (nouveau duel) pour éviter l'effet « la barre remonte au
-  // max avant de rebaisser ».
+  // instantanément (nouveau duel)
   const prevHp = useRef(hp);
   const refilling = hp > prevHp.current;
   useEffect(() => {
