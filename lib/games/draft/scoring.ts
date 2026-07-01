@@ -22,7 +22,7 @@ import { DRAFT_ROSTER_BY_ID } from "./roster";
  * Le score n'est JAMAIS montré au joueur : seul le déroulé du combat l'est.
  */
 
-export const BUDGET = 100;
+export const BUDGET = 110;
 export const COST_COEF = 0.4;
 export const CATEGORY_BONUS = 0.5;
 
