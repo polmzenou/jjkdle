@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { RankingCard, LOCK_COLOR } from "./RankingCard";
 import { SubmitScore } from "@/components/leaderboard/SubmitScore";
+import { ExpReward } from "@/components/progress/ExpReward";
 import { formatScore } from "@/lib/format";
 
 interface VictoryModalProps {
@@ -13,6 +14,10 @@ interface VictoryModalProps {
   bestScore: number;
   isNewRecord: boolean;
   isAuthed: boolean;
+  /** XP empochée automatiquement (null = pas encore résolue / non connecté). */
+  gainedExp: number | null;
+  /** Badges débloqués par l'octroi d'XP. */
+  expBadges: string[];
   onReplay: () => void;
 }
 
@@ -24,6 +29,8 @@ export function VictoryModal({
   bestScore,
   isNewRecord,
   isAuthed,
+  gainedExp,
+  expBadges,
   onReplay,
 }: VictoryModalProps) {
   return (
@@ -62,6 +69,8 @@ export function VictoryModal({
             </span>
           </p>
         )}
+
+        <ExpReward gainedExp={gainedExp} newBadges={expBadges} />
 
         {/* Classement correct complet */}
         <div className="mt-6 grid grid-cols-4 gap-3">

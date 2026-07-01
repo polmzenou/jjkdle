@@ -90,6 +90,22 @@ export async function saveScore(
 }
 
 /**
+ * Meilleur score persisté d'un utilisateur pour un jeu (0 si jamais enregistré).
+ * Lecture SEULE — sert à détecter un « nouveau record » sans rien écrire (octroi
+ * d'XP automatique hors classement).
+ */
+export async function getBestScore(
+  userId: string,
+  game: LeaderboardGame,
+): Promise<number> {
+  const s = await prisma.score.findUnique({
+    where: { userId_gameId: { userId, gameId: game } },
+    select: { best: true },
+  });
+  return s?.best ?? 0;
+}
+
+/**
  * Top N d'un jeu (meilleur score décroissant, départage par ancienneté).
  */
 export async function topEntries(

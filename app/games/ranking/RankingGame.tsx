@@ -24,6 +24,7 @@ import {
   shuffledPool,
 } from "@/lib/ranking/ranking";
 import { saveBestScore } from "@/lib/bestScore";
+import { awardGameExpAction } from "@/lib/leaderboard/actions";
 import { formatScore } from "@/lib/format";
 import type { Character } from "@/data/roster/characters";
 import { RosterProvider } from "@/components/ranking/RosterContext";
@@ -71,6 +72,9 @@ export function RankingGame({
   const [score, setScore] = useState(0);
   const [bestScore, setBestScore] = useState(initialBestScore);
   const [isNewRecord, setIsNewRecord] = useState(false);
+  // XP empochée automatiquement à la victoire (sans enregistrer au classement).
+  const [gainedExp, setGainedExp] = useState<number | null>(null);
+  const [expBadges, setExpBadges] = useState<string[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   // Mémorise la condition courante pour ne jamais la retirer 2 fois de suite.
   const lastConditionId = useRef<string | undefined>(undefined);
@@ -95,6 +99,8 @@ export function RankingGame({
     setStatus("playing");
     setScore(0);
     setIsNewRecord(false);
+    setGainedExp(null);
+    setExpBadges([]);
     setActiveId(null);
   }, []);
 
@@ -190,6 +196,15 @@ export function RankingGame({
         setBestScore(r.best);
         setIsNewRecord(r.isNewRecord);
       });
+      // XP empochée automatiquement (connecté) — indépendant du classement.
+      if (isAuthed) {
+        void awardGameExpAction(earned, "ranking").then((res) => {
+          if (res.ok) {
+            setGainedExp(res.gainedExp ?? 0);
+            setExpBadges(res.newBadges ?? []);
+          }
+        });
+      }
       return;
     }
 
@@ -207,7 +222,7 @@ export function RankingGame({
     } else {
       setAttempt((a) => a + 1);
     }
-  }, [condition, allFilled, status, slots, locked, attempt]);
+  }, [condition, allFilled, status, slots, locked, attempt, isAuthed]);
 
   if (conditions.length === 0) {
     return (
@@ -314,6 +329,8 @@ export function RankingGame({
           bestScore={bestScore}
           isNewRecord={isNewRecord}
           isAuthed={isAuthed}
+          gainedExp={gainedExp}
+          expBadges={expBadges}
           onReplay={startNewGame}
         />
       )}

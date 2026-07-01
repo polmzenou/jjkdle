@@ -22,7 +22,6 @@ export function SubmitJjkdleScore({ isAuthed }: SubmitJjkdleScoreProps) {
   const [phase, setPhase] = useState<"idle" | "done">("idle");
   const [error, setError] = useState<string | null>(null);
   const [newBadges, setNewBadges] = useState<string[]>([]);
-  const [gainedExp, setGainedExp] = useState(0);
   const [pending, startTransition] = useTransition();
 
   if (!isAuthed) {
@@ -48,11 +47,6 @@ export function SubmitJjkdleScore({ isAuthed }: SubmitJjkdleScoreProps) {
         <p className="font-semibold text-amber-200">
           ✓ Score ajouté au classement du jour&nbsp;!
         </p>
-        {gainedExp > 0 && (
-          <p className="mt-1 font-display font-bold text-domain-light">
-            +{gainedExp} XP empochés ⚡
-          </p>
-        )}
         <a
           href="#leaderboard"
           className="mt-1 inline-block font-display text-xs font-bold uppercase tracking-wide text-domain-light underline-offset-4 hover:underline"
@@ -71,7 +65,6 @@ export function SubmitJjkdleScore({ isAuthed }: SubmitJjkdleScoreProps) {
         const res = await submitJjkdleScoreAction();
         if (res.ok) {
           setNewBadges(res.newBadges ?? []);
-          setGainedExp(res.gainedExp ?? 0);
           setPhase("done");
           router.refresh(); // rafraîchit le leaderboard sous le jeu
         } else {
@@ -94,8 +87,8 @@ export function SubmitJjkdleScore({ isAuthed }: SubmitJjkdleScoreProps) {
         {pending ? "Enregistrement…" : "🏆 Ajouter mon score au classement"}
       </button>
       <p className="mt-2 text-center text-xs text-white/50">
-        ⚡ Enregistre pour empocher ton XP (× ton streak&nbsp;!) et apparaître au
-        classement.
+        🏆 Ton XP est déjà empochée — enregistre pour apparaître au classement du
+        jour.
       </p>
       {error && <p className="mt-2 text-sm text-cursed-light">{error}</p>}
     </div>

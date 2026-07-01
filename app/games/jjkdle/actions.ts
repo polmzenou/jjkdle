@@ -13,8 +13,9 @@ import { compareGuess } from "@/lib/games/jjkdle/scoring";
 import { isStateFresh } from "@/lib/games/jjkdle/game";
 import { saveJjkdleScore } from "@/lib/games/jjkdle/leaderboard";
 import { updateJjkdleStreak } from "@/lib/progress/streak";
-import { awardExp } from "@/lib/progress/recompute";
+import { awardExp, refreshLevelAndBadges } from "@/lib/progress/recompute";
 import { jjkdleExp } from "@/lib/progress/exp-rewards";
+import type { ExpResult } from "@/lib/leaderboard/actions";
 import {
   readState,
   writeState,
@@ -119,19 +120,48 @@ export async function newAdminGameAction(): Promise<{ ok: boolean; error?: strin
 }
 
 /**
- * Enregistre au leaderboard du jour le score de la partie quotidienne gagnée.
- * AUTORITATIF : le nombre d'essais est relu depuis l'état serveur (cookie), pas
- * envoyé par le client. Réservé aux utilisateurs connectés ; ne compte que la
- * partie quotidienne résolue (pas les parties bonus admin/VIP).
+ * Octroi AUTOMATIQUE de l'XP JJKdle à la victoire du jour, SANS enregistrement
+ * au classement. Appelé à l'ouverture du panneau de victoire pour un
+ * utilisateur connecté (partie quotidienne uniquement, pas les bonus admin/VIP).
+ *
+ * AUTORITATIF : les essais sont relus depuis l'état serveur (cookie). Le streak
+ * est mis à jour ici (il matérialise « avoir résolu le daily », indépendamment
+ * du classement) ; son garde `firstToday` évite tout double octroi (reload).
+ */
+export async function awardJjkdleExpAction(): Promise<ExpResult & { streak?: number }> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, needsAuth: true };
+
+  const state = await readState();
+  if (!state || state.mode !== "daily" || state.status !== "won") {
+    return { ok: false };
+  }
+
+  const roster = await getRoster();
+  if (!isStateFresh(state, roster)) return { ok: false };
+
+  // Streak AVANT l'octroi : il sert au multiplicateur ×(streak+1) et au badge
+  // JJKDLE_STREAK_7. `firstToday: false` (déjà compté aujourd'hui) ⇒ 0 XP.
+  const { streak, firstToday } = await updateJjkdleStreak(user.id);
+  const { gained, newBadges } = await awardExp(
+    user.id,
+    firstToday ? jjkdleExp(state.guesses.length, streak) : 0,
+  );
+  return { ok: true, gainedExp: gained, newBadges, streak };
+}
+
+/**
+ * Enregistre au leaderboard du jour le score de la partie quotidienne gagnée
+ * (classement uniquement — l'XP et le streak sont gérés par
+ * `awardJjkdleExpAction` à la victoire). AUTORITATIF : le nombre d'essais est
+ * relu depuis l'état serveur (cookie). Réservé aux utilisateurs connectés ; ne
+ * compte que la partie quotidienne résolue (pas les parties bonus admin/VIP).
  */
 export async function submitJjkdleScoreAction(): Promise<{
   ok: boolean;
   error?: string;
   needsAuth?: boolean;
   newBadges?: string[];
-  streak?: number;
-  /** XP gagnée par cette résolution (0 si le daily était déjà validé). */
-  gainedExp?: number;
 }> {
   const user = await getCurrentUser();
   if (!user) {
@@ -154,16 +184,10 @@ export async function submitJjkdleScoreAction(): Promise<{
 
   try {
     await saveJjkdleScore(user.id, state.date, state.guesses.length);
-    // Streak AVANT l'octroi d'EXP : il sert au multiplicateur ×(streak+1) et au
-    // badge JJKDLE_STREAK_7. `updateJjkdleStreak` est idempotent (no-op le même jour).
-    // `firstToday` garde contre le farm : une re-soumission du daily ne rapporte rien.
-    const { streak, firstToday } = await updateJjkdleStreak(user.id);
-    const { newBadges, gained } = await awardExp(
-      user.id,
-      firstToday ? jjkdleExp(state.guesses.length, streak) : 0,
-    );
+    // Le score du jour peut débloquer un badge (ex. IDLE_MASTER au 1er essai).
+    const { newBadges } = await refreshLevelAndBadges(user.id);
     revalidatePath("/games/jjkdle");
-    return { ok: true, newBadges, streak, gainedExp: gained };
+    return { ok: true, newBadges };
   } catch (e) {
     return { ok: false, error: `Échec d'enregistrement : ${(e as Error).message}` };
   }

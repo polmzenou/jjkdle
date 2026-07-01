@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { CharacterImage } from "@/components/CharacterImage";
 import { BadgeToast } from "@/components/badges/BadgeToast";
+import { ExpReward } from "@/components/progress/ExpReward";
 import { DRAFT_CATEGORIES } from "@/lib/games/draft/categories";
 import type {
   CombatResult,
@@ -17,6 +18,10 @@ interface DraftResultModalProps {
   selection: DraftSelection;
   rosterById: Record<string, DraftCharacter>;
   isAuthed: boolean;
+  /** XP empochée automatiquement (null = pas encore résolue / non connecté). */
+  gainedExp: number | null;
+  /** Badges débloqués par l'octroi d'XP. */
+  expBadges: string[];
   onReplay: () => void;
 }
 
@@ -30,6 +35,8 @@ export function DraftResultModal({
   selection,
   rosterById,
   isAuthed,
+  gainedExp,
+  expBadges,
   onReplay,
 }: DraftResultModalProps) {
   const victory = result.outcome === "VICTORY";
@@ -60,6 +67,8 @@ export function DraftResultModal({
           </span>{" "}
           <span className="text-white/40">/ {result.duels.length}</span>
         </p>
+
+        <ExpReward gainedExp={gainedExp} newBadges={expBadges} />
 
         {/* Récap du draft */}
         <div className="mt-6 grid grid-cols-4 gap-2 sm:grid-cols-8 sm:gap-3">
@@ -105,7 +114,6 @@ function SubmitDraftScore({
   const [phase, setPhase] = useState<"idle" | "done">("idle");
   const [error, setError] = useState<string | null>(null);
   const [newBadges, setNewBadges] = useState<string[]>([]);
-  const [gainedExp, setGainedExp] = useState(0);
   const [pending, startTransition] = useTransition();
 
   if (!isAuthed) {
@@ -131,11 +139,6 @@ function SubmitDraftScore({
         <p className="font-semibold text-amber-200">
           ✓ Score enregistré au classement&nbsp;!
         </p>
-        {gainedExp > 0 && (
-          <p className="mt-1 font-display font-bold text-domain-light">
-            +{gainedExp} XP empochés ⚡
-          </p>
-        )}
         <a
           href="#leaderboard"
           className="mt-1 inline-block font-display text-xs font-bold uppercase tracking-wide text-domain-light underline-offset-4 hover:underline"
@@ -160,11 +163,9 @@ function SubmitDraftScore({
           ok?: boolean;
           error?: string;
           newBadges?: string[];
-          gainedExp?: number;
         };
         if (res.ok && data.ok) {
           setNewBadges(data.newBadges ?? []);
-          setGainedExp(data.gainedExp ?? 0);
           setPhase("done");
         } else setError(data.error ?? "Échec de l'enregistrement.");
       } catch {
@@ -184,7 +185,7 @@ function SubmitDraftScore({
         {pending ? "Enregistrement…" : "🏆 Enregistrer mon score"}
       </button>
       <p className="mt-2 text-center text-xs text-white/50">
-        ⚡ Enregistre ta partie pour empocher ton XP et apparaître au classement.
+        🏆 Ton XP est déjà empochée — enregistre pour apparaître au classement.
       </p>
       {error && <p className="mt-2 text-sm text-cursed-light">{error}</p>}
     </div>

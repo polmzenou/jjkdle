@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { CharacterImage } from "@/components/CharacterImage";
+import { ExpReward } from "@/components/progress/ExpReward";
 import { Logo } from "@/components/Logo";
 import {
   VIP_MAX_REPLAYS,
@@ -12,7 +13,12 @@ import {
   type GameStatus,
   type GuessRow as GuessRowData,
 } from "@/lib/games/jjkdle/types";
-import { guessAction, newAdminGameAction, newVipGameAction } from "./actions";
+import {
+  awardJjkdleExpAction,
+  guessAction,
+  newAdminGameAction,
+  newVipGameAction,
+} from "./actions";
 import { CharacterSearch } from "./CharacterSearch";
 import { GuessHeader, GuessRow } from "./GuessRow";
 import { SubmitJjkdleScore } from "./SubmitJjkdleScore";
@@ -61,6 +67,30 @@ export function JJKdleGame({
   const [error, setError] = useState<string | null>(null);
   const [lastGuessId, setLastGuessId] = useState<string | null>(null);
   const [vipUsed, setVipUsed] = useState(vipReplaysUsed);
+  // XP empochée automatiquement à la victoire du jour (sans enregistrer au classement).
+  const [gainedExp, setGainedExp] = useState<number | null>(null);
+  const [expBadges, setExpBadges] = useState<string[]>([]);
+  const awardedRef = useRef(false);
+
+  // Octroi automatique de l'XP dès que le daily est gagné (connecté). Le garde
+  // `awardedRef` évite un double appel dans le même montage ; côté serveur,
+  // `firstToday` rend l'octroi idempotent sur la journée (reload = 0 XP).
+  useEffect(() => {
+    if (status !== "won") {
+      awardedRef.current = false;
+      return;
+    }
+    if (mode !== "daily" || !isAuthed || awardedRef.current) return;
+    awardedRef.current = true;
+    awardJjkdleExpAction()
+      .then((res) => {
+        if (res.ok) {
+          setGainedExp(res.gainedExp ?? 0);
+          setExpBadges(res.newBadges ?? []);
+        }
+      })
+      .catch(() => {});
+  }, [status, mode, isAuthed]);
 
   const guessedIds = useMemo(
     () => new Set(rows.map((r) => r.characterId)),
@@ -110,6 +140,8 @@ export function JJKdleGame({
       setStatus("playing");
       setRevealed(null);
       setLastGuessId(null);
+      setGainedExp(null);
+      setExpBadges([]);
       router.refresh();
     });
   }, [router, isAdmin]);
@@ -136,6 +168,8 @@ export function JJKdleGame({
               rows={rows}
               mode={mode}
               isAuthed={isAuthed}
+              gainedExp={gainedExp}
+              expBadges={expBadges}
               showReplay={isPrivileged}
               replayLabel={replayLabel}
               replayDisabled={pending || !canReplay}
@@ -221,6 +255,8 @@ function VictoryPanel({
   rows,
   mode,
   isAuthed,
+  gainedExp,
+  expBadges,
   showReplay,
   replayLabel,
   replayDisabled,
@@ -232,6 +268,8 @@ function VictoryPanel({
   rows: GuessRowData[];
   mode: GameMode;
   isAuthed: boolean;
+  gainedExp: number | null;
+  expBadges: string[];
   showReplay: boolean;
   replayLabel: string;
   replayDisabled: boolean;
@@ -272,6 +310,10 @@ function VictoryPanel({
             <p className="text-sm text-white/50">{revealed.title}</p>
           )}
         </div>
+      )}
+
+      {mode === "daily" && (
+        <ExpReward gainedExp={gainedExp} newBadges={expBadges} />
       )}
 
       <div className="mt-5 flex flex-wrap items-center justify-center gap-3">

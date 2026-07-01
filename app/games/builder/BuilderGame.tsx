@@ -16,6 +16,7 @@ import {
   type Selection,
 } from "@/lib/scoring/scoring";
 import { saveBestScore } from "@/lib/bestScore";
+import { awardGameExpAction } from "@/lib/leaderboard/actions";
 import { formatScore } from "@/lib/format";
 import { CategoryTile } from "@/components/CategoryTile";
 import { RankFooter } from "@/components/RankFooter";
@@ -52,6 +53,9 @@ export function BuilderGame({
   const [bestScore, setBestScore] = useState(initialBestScore);
   const [isNewRecord, setIsNewRecord] = useState(false);
   const [curated, setCurated] = useState(false);
+  // XP empochée automatiquement en fin de partie (sans enregistrer au classement).
+  const [gainedExp, setGainedExp] = useState<number | null>(null);
+  const [expBadges, setExpBadges] = useState<string[]>([]);
 
   const lockedIds = useMemo(
     () =>
@@ -68,6 +72,8 @@ export function BuilderGame({
     setFinished(false);
     setIsNewRecord(false);
     setCurated(false);
+    setGainedExp(null);
+    setExpBadges([]);
     setDraw(drawAllOne(categories, roster));
     setDrawKey((k) => k + 1);
   }, [categories, roster]);
@@ -98,6 +104,15 @@ export function BuilderGame({
           setBestScore(best);
           setIsNewRecord(isNewRecord);
         });
+        // XP empochée automatiquement (connecté) — indépendant du classement.
+        if (isAuthed) {
+          void awardGameExpAction(score, "builder").then((res) => {
+            if (res.ok) {
+              setGainedExp(res.gainedExp ?? 0);
+              setExpBadges(res.newBadges ?? []);
+            }
+          });
+        }
         return;
       }
 
@@ -113,7 +128,7 @@ export function BuilderGame({
       );
       setDrawKey((k) => k + 1);
     },
-    [draw, selection, lockedIds, total, categories, roster, curated],
+    [draw, selection, lockedIds, total, categories, roster, curated, isAuthed],
   );
 
   // Re-tire aussitôt les cases encore libres avec le pool courant.
@@ -173,6 +188,8 @@ export function BuilderGame({
           bestScore={bestScore}
           isNewRecord={isNewRecord}
           isAuthed={isAuthed}
+          gainedExp={gainedExp}
+          expBadges={expBadges}
           onRestart={startNewGame}
         />
       ) : (

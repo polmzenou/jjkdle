@@ -8,6 +8,7 @@ import { CombatScene } from "@/components/draft/CombatScene";
 import { DraftResultModal } from "@/components/draft/DraftResultModal";
 import { pickDraw } from "@/lib/games/draft/draw";
 import { evaluateDraft } from "@/lib/games/draft/scoring";
+import { awardDraftExpAction } from "./actions";
 import { COMBAT_AVATAR_CATEGORY } from "@/lib/games/draft/categories";
 import type {
   CombatResult,
@@ -45,12 +46,17 @@ export function JujutsuDraftGame({
   const [selection, setSelection] = useState<DraftSelection>({});
   const [phase, setPhase] = useState<Phase>("draft");
   const [combat, setCombat] = useState<CombatResult | null>(null);
+  // XP empochée automatiquement en fin de combat (sans enregistrer au classement).
+  const [gainedExp, setGainedExp] = useState<number | null>(null);
+  const [expBadges, setExpBadges] = useState<string[]>([]);
 
   const startNewGame = useCallback(() => {
     setDraw(pickDraw(Math.random, roster));
     setSelection({});
     setCombat(null);
     setPhase("draft");
+    setGainedExp(null);
+    setExpBadges([]);
   }, [roster]);
 
   useEffect(() => {
@@ -68,6 +74,20 @@ export function JujutsuDraftGame({
     setCombat(evaluateDraft(selection, rosterById));
     setPhase("combat");
   }, [selection, rosterById]);
+
+  // Fin du combat → écran de résultat + octroi automatique de l'XP (connecté).
+  // Le serveur recalcule le nombre de boss (anti-triche) à partir de la sélection.
+  const finishCombat = useCallback(() => {
+    setPhase("result");
+    if (isAuthed) {
+      void awardDraftExpAction(selection).then((res) => {
+        if (res.ok) {
+          setGainedExp(res.gainedExp ?? 0);
+          setExpBadges(res.newBadges ?? []);
+        }
+      });
+    }
+  }, [isAuthed, selection]);
 
   const avatarId = selection[COMBAT_AVATAR_CATEGORY];
   const avatar: DraftCharacter | undefined = avatarId
@@ -125,7 +145,7 @@ export function JujutsuDraftGame({
           <CombatScene
             result={combat}
             avatar={avatar}
-            onFinish={() => setPhase("result")}
+            onFinish={finishCombat}
           />
         </div>
       )}
@@ -136,6 +156,8 @@ export function JujutsuDraftGame({
           selection={selection}
           rosterById={rosterById}
           isAuthed={isAuthed}
+          gainedExp={gainedExp}
+          expBadges={expBadges}
           onReplay={startNewGame}
         />
       )}

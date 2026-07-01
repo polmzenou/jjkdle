@@ -3,8 +3,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { evaluateDraft, validateSelection } from "@/lib/games/draft/scoring";
 import { getDraftRosterMap } from "@/lib/games/draft/queries";
 import { saveDraftScore } from "@/lib/games/draft/store";
-import { awardExp } from "@/lib/progress/recompute";
-import { draftExp } from "@/lib/progress/exp-rewards";
+import { refreshLevelAndBadges } from "@/lib/progress/recompute";
 
 /**
  * POST /api/games/jujutsu-draft/score
@@ -52,8 +51,9 @@ export async function POST(req: Request) {
     draft: validation.selection,
   });
 
-  // EXP selon le nombre de boss vaincus (recalculé serveur = anti-triche préservé).
-  const { newBadges, gained } = await awardExp(user.id, draftExp(result.enemiesKilled));
+  // Classement uniquement : le nouveau best peut débloquer un badge (l'XP est
+  // octroyée séparément à l'ouverture du modal de fin, hors enregistrement).
+  const { newBadges } = await refreshLevelAndBadges(user.id);
 
   return NextResponse.json({
     ok: true,
@@ -62,6 +62,5 @@ export async function POST(req: Request) {
     isNewRecord,
     best,
     newBadges,
-    gainedExp: gained,
   });
 }

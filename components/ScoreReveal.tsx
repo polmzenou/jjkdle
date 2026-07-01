@@ -7,6 +7,7 @@ import type { CategoryBreakdown } from "@/lib/scoring/scoring";
 import { MAX_SCORE } from "@/lib/scoring/scoring";
 import { CategoryTile } from "./CategoryTile";
 import { SubmitScore } from "./leaderboard/SubmitScore";
+import { ExpReward } from "./progress/ExpReward";
 
 interface ScoreRevealProps {
   score: number;
@@ -15,6 +16,10 @@ interface ScoreRevealProps {
   bestScore: number;
   isNewRecord: boolean;
   isAuthed: boolean;
+  /** XP empochée automatiquement (null = pas encore résolue / non connecté). */
+  gainedExp: number | null;
+  /** Badges débloqués par l'octroi d'XP. */
+  expBadges: string[];
   onRestart: () => void;
 }
 
@@ -25,6 +30,8 @@ export function ScoreReveal({
   bestScore,
   isNewRecord,
   isAuthed,
+  gainedExp,
+  expBadges,
   onRestart,
 }: ScoreRevealProps) {
   const animatedScore = useCountUp(score, 1100);
@@ -64,6 +71,8 @@ export function ScoreReveal({
           Meilleur score&nbsp;: <span className="font-semibold text-white">{bestScore}</span>
         </p>
       )}
+
+      <ExpReward gainedExp={gainedExp} newBadges={expBadges} />
 
       {/* Récap des choix : mêmes cartes que le jeu, sans les points */}
       <p className="mt-7 text-sm uppercase tracking-[0.2em] text-white/40">
