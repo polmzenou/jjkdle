@@ -19,13 +19,23 @@ import type { GuessRow } from "./types";
  *  - mode daily : en plus, la cible déterministe du jour doit être celle du
  *    cookie (sinon le pool a changé).
  */
-export function isStateFresh(state: JjkdleState, roster: Character[]): boolean {
+export function isStateFresh(
+  state: JjkdleState,
+  roster: Character[],
+  /**
+   * Id de la cible du jour déjà résolue (avec override admin éventuel, cf.
+   * `resolveDailyTarget`). Si omis, on retombe sur le tirage déterministe pur —
+   * suffisant quand aucun override n'est actif (et pour les tests).
+   */
+  dailyTargetId?: string,
+): boolean {
   const today = todayKey();
   if (state.date !== today) return false;
   // Parties bonus (admin illimité / VIP plafonné) : cible figée pour la journée.
   if (state.mode === "admin" || state.mode === "vip") return true;
-  const target = pickDailyTarget(today, eligibleRoster(roster));
-  return target != null && target.id === state.targetId;
+  const targetId =
+    dailyTargetId ?? pickDailyTarget(today, eligibleRoster(roster))?.id;
+  return targetId != null && targetId === state.targetId;
 }
 
 /** Reconstruit les lignes d'indices à partir des propositions stockées. */

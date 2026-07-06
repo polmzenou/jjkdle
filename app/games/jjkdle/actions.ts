@@ -5,13 +5,17 @@ import { getRoster } from "@/lib/content/queries";
 import { getAdminUser, getCurrentUser } from "@/lib/auth/session";
 import {
   eligibleRoster,
-  pickDailyTarget,
   pickRandomTarget,
   todayKey,
 } from "@/lib/games/jjkdle/daily";
+import { resolveDailyTarget } from "@/lib/games/jjkdle/daily-server";
 import { compareGuess } from "@/lib/games/jjkdle/scoring";
 import { isStateFresh } from "@/lib/games/jjkdle/game";
 import { saveJjkdleScore } from "@/lib/games/jjkdle/leaderboard";
+import {
+  recordJjkdleAttempt,
+  markJjkdleSolved,
+} from "@/lib/games/jjkdle/result";
 import { updateJjkdleStreak } from "@/lib/progress/streak";
 import { awardExp, refreshLevelAndBadges } from "@/lib/progress/recompute";
 import { jjkdleExp } from "@/lib/progress/exp-rewards";
@@ -31,19 +35,22 @@ import { VIP_MAX_REPLAYS, type GuessResult } from "@/lib/games/jjkdle/types";
 
 /** Propose un personnage et renvoie les indices colorés. */
 export async function guessAction(characterId: string): Promise<GuessResult> {
-  const roster = await getRoster();
+  const [roster, user] = await Promise.all([getRoster(), getCurrentUser()]);
   const map = Object.fromEntries(roster.map((c) => [c.id, c]));
 
   const guess = map[characterId];
   if (!guess) return { ok: false, error: "Personnage inconnu." };
 
+  // Cible du jour résolue (avec override admin éventuel) : sert à valider la
+  // fraîcheur de l'état ET à créer une nouvelle partie daily.
+  const dailyTarget = await resolveDailyTarget(roster);
+
   // Résolution de l'état : on repart à zéro si la partie daily a expiré.
   let state = await readState();
-  if (state && !isStateFresh(state, roster)) state = null;
+  if (state && !isStateFresh(state, roster, dailyTarget?.id)) state = null;
 
   if (!state) {
-    const target = pickDailyTarget(todayKey(), eligibleRoster(roster));
-    if (!target) {
+    if (!dailyTarget) {
       return {
         ok: false,
         error: "Pas assez de personnages configurés pour JJKdle.",
@@ -52,7 +59,7 @@ export async function guessAction(characterId: string): Promise<GuessResult> {
     state = {
       mode: "daily",
       date: todayKey(),
-      targetId: target.id,
+      targetId: dailyTarget.id,
       guesses: [],
       status: "playing",
     } satisfies JjkdleState;
@@ -76,6 +83,30 @@ export async function guessAction(characterId: string): Promise<GuessResult> {
   if (characterId === state.targetId) state.status = "won";
 
   await writeState(state);
+
+  // Journalisation analytique (parties daily d'un utilisateur connecté). Best-
+  // effort : ne doit jamais casser le gameplay si l'écriture échoue.
+  if (user && state.mode === "daily") {
+    try {
+      if (state.status === "won") {
+        await markJjkdleSolved(
+          user.id,
+          state.date,
+          state.targetId,
+          state.guesses.length,
+        );
+      } else {
+        await recordJjkdleAttempt(
+          user.id,
+          state.date,
+          state.targetId,
+          state.guesses.length,
+        );
+      }
+    } catch {
+      // silencieux : stat non bloquante
+    }
+  }
 
   return {
     ok: true,
@@ -138,7 +169,8 @@ export async function awardJjkdleExpAction(): Promise<ExpResult & { streak?: num
   }
 
   const roster = await getRoster();
-  if (!isStateFresh(state, roster)) return { ok: false };
+  const dailyTarget = await resolveDailyTarget(roster);
+  if (!isStateFresh(state, roster, dailyTarget?.id)) return { ok: false };
 
   // Streak AVANT l'octroi : il sert au multiplicateur ×(streak+1) et au badge
   // JJKDLE_STREAK_7. `firstToday: false` (déjà compté aujourd'hui) ⇒ 0 XP.
@@ -178,12 +210,25 @@ export async function submitJjkdleScoreAction(): Promise<{
   }
 
   const roster = await getRoster();
-  if (!isStateFresh(state, roster)) {
+  const dailyTarget = await resolveDailyTarget(roster);
+  if (!isStateFresh(state, roster, dailyTarget?.id)) {
     return { ok: false, error: "Partie expirée, recharge la page." };
   }
 
   try {
     await saveJjkdleScore(user.id, state.date, state.guesses.length);
+    // Filet analytique : marque le résultat comme résolu si le joueur s'est
+    // connecté APRÈS avoir gagné (les guess anonymes n'ont pas été loggés).
+    try {
+      await markJjkdleSolved(
+        user.id,
+        state.date,
+        state.targetId,
+        state.guesses.length,
+      );
+    } catch {
+      // stat non bloquante
+    }
     // Le score du jour peut débloquer un badge (ex. IDLE_MASTER au 1er essai).
     const { newBadges } = await refreshLevelAndBadges(user.id);
     revalidatePath("/games/jjkdle");

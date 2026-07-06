@@ -1,6 +1,9 @@
+import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
+import { isGameEnabled } from "@/lib/config/app-config";
 import { getRoster } from "@/lib/content/queries";
 import { eligibleRoster, msUntilMidnight } from "@/lib/games/jjkdle/daily";
+import { resolveDailyTarget } from "@/lib/games/jjkdle/daily-server";
 import { buildRows, isStateFresh } from "@/lib/games/jjkdle/game";
 import { readState } from "@/lib/games/jjkdle/state";
 import type { GameMode, GameStatus, GuessRow } from "@/lib/games/jjkdle/types";
@@ -26,6 +29,7 @@ export default async function JjkdlePage({
 }: {
   searchParams: Promise<{ scope?: string }>;
 }) {
+  if (!(await isGameEnabled("jjkdle"))) redirect("/games");
   const [{ scope }, roster, user] = await Promise.all([
     searchParams,
     getRoster(),
@@ -53,8 +57,9 @@ export default async function JjkdlePage({
   let revealed: JJKdleRevealed = null;
   let vipReplaysUsed = 0;
 
+  const dailyTarget = await resolveDailyTarget(roster);
   const state = await readState();
-  if (state && isStateFresh(state, roster)) {
+  if (state && isStateFresh(state, roster, dailyTarget?.id)) {
     mode = state.mode;
     status = state.status;
     rows = buildRows(state, map);

@@ -68,6 +68,15 @@ import {
   CLANS,
   ARCS_ORDER,
 } from "@/lib/games/jjkdle/attributes";
+import { eligibleRoster } from "@/lib/games/jjkdle/daily";
+import { getGame } from "@/lib/games/registry";
+import {
+  setConfig,
+  gameEnabledKey,
+  MAINTENANCE_KEY,
+  FORCED_TARGET_KEY,
+  type MaintenanceConfig,
+} from "@/lib/config/app-config";
 
 export type ActionResult = { ok: boolean; error?: string };
 
@@ -734,5 +743,94 @@ export async function adminRevokeFrameAction(
     return { ok: false, error: `Échec : ${(e as Error).message}` };
   }
   revalidatePath("/admin");
+  return { ok: true };
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Configuration globale (feature flags, maintenance, override du mot du jour).
+//
+// Ces flags affectent TOUT le site (gating des jeux, page maintenance, mot du
+// jour JJKdle) → on invalide le cache de layout racine en plus de /admin.
+// ──────────────────────────────────────────────────────────────────────────
+
+/** Invalide les caches affectés par un changement de config globale. */
+function revalidateGlobalConfig(): void {
+  revalidatePath("/", "layout");
+  revalidatePath("/admin");
+}
+
+/** Active ou désactive un jeu du catalogue. */
+export async function setGameEnabledAction(
+  gameId: string,
+  enabled: boolean,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  if (!getGame(gameId)) {
+    return { ok: false, error: "Jeu inconnu." };
+  }
+  try {
+    await setConfig(gameEnabledKey(gameId), Boolean(enabled));
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidateGlobalConfig();
+  return { ok: true };
+}
+
+/** Active/désactive le mode maintenance (message optionnel affiché aux joueurs). */
+export async function setMaintenanceAction(
+  enabled: boolean,
+  message?: string,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  const trimmed = (message ?? "").trim();
+  if (trimmed.length > 500) {
+    return { ok: false, error: "Message trop long (500 caractères max)." };
+  }
+  const value: MaintenanceConfig = {
+    enabled: Boolean(enabled),
+    ...(trimmed ? { message: trimmed } : {}),
+  };
+  try {
+    await setConfig(MAINTENANCE_KEY, value);
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidateGlobalConfig();
+  return { ok: true };
+}
+
+/**
+ * Force (ou réinitialise) le mot du jour JJKdle. `characterId` doit être un perso
+ * ÉLIGIBLE (complet) ; `null` rétablit le tirage déterministe. Pour tests uniquement.
+ */
+export async function setForcedTargetAction(
+  characterId: string | null,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  if (characterId !== null) {
+    const roster = await readRoster();
+    const eligible = eligibleRoster(roster);
+    if (!eligible.some((c) => c.id === characterId)) {
+      return {
+        ok: false,
+        error: "Personnage introuvable ou incomplet (non éligible au pool).",
+      };
+    }
+  }
+  try {
+    await setConfig(FORCED_TARGET_KEY, characterId);
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidateGlobalConfig();
+  // Le mot du jour change → invalider aussi la page du jeu.
+  revalidatePath("/games/jjkdle");
   return { ok: true };
 }

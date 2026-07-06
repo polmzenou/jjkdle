@@ -28,7 +28,8 @@
     "pusher": "^5.3.4",
     "pusher-js": "^8.5.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "recharts": "^3.9.2"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

@@ -3,6 +3,8 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { getCategories, getRoster } from "@/lib/content/queries";
 import { Leaderboard } from "@/components/leaderboard/Leaderboard";
 import { parseScope } from "@/lib/leaderboard/store";
+import { redirect } from "next/navigation";
+import { isGameEnabled } from "@/lib/config/app-config";
 import { BuilderGame } from "./BuilderGame";
 
 export const metadata = {
@@ -22,6 +24,7 @@ export default async function BuilderPage({
 }: {
   searchParams: Promise<{ scope?: string }>;
 }) {
+  if (!(await isGameEnabled("builder"))) redirect("/games");
   const [{ scope }, bestScore, user, categories, roster] = await Promise.all([
     searchParams,
     getBestScore("builder"),

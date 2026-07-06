@@ -70,6 +70,7 @@ model User {
   badges       UserBadge[]
   titleGrants  UserTitleGrant[]
   frameGrants  UserFrameGrant[]
+  jjkdleResults JjkdleResult[]
 }
 
 /// Déblocage d'un badge par un utilisateur. La métadonnée du badge (nom,
@@ -245,6 +246,37 @@ model JjkdleScore {
 
   @@unique([userId, date])
   @@index([date, attempts])
+}
+
+/// Résultat ANALYTIQUE d'une partie JJKdle QUOTIDIENNE, par utilisateur connecté.
+/// Distinct de `JjkdleScore` (classement, victoires uniquement) : on garde ICI le
+/// `targetId` (perso du jour) et le flag `solved` pour calculer les stats admin
+/// (taux de réussite, taux d'abandon, personnage le plus raté).
+/// Cycle : upsert au 1er essai (solved=false, attempts=1), mis à jour à chaque essai,
+/// puis solved=true à la victoire. Une ligne par couple utilisateur/date.
+/// Les parties anonymes (sans compte) ne sont PAS enregistrées (pas d'userId).
+model JjkdleResult {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetId  String // perso du jour
+  date      String // "YYYY-MM-DD" (todayKey, Europe/Paris)
+  attempts  Int // nb d'essais utilisés à date
+  solved    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([date])
+  @@index([targetId])
+}
+
+/// Configuration globale clé/valeur (feature flags, mode maintenance, override du
+/// mot du jour JJKdle). Lue partout dans l'app via `getConfig` (lib/config/app-config.ts),
+/// écrite depuis /admin. `value` est un blob JSON typé côté code selon la clé.
+model AppConfig {
+  key   String @id
+  value Json
 }
 
 /// Score d'une partie de « JJK Higher/Lower » — une ligne PAR PARTIE terminée

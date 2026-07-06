@@ -21,6 +21,13 @@ import { logoutAction } from "@/lib/auth/actions";
 import { LeaderboardAdmin } from "./LeaderboardAdmin";
 import { UserAdmin } from "./UserAdmin";
 import { DraftRosterAdmin } from "./DraftRosterAdmin";
+import { OverviewAdmin } from "./OverviewAdmin";
+import { ContentHealthAdmin } from "./ContentHealthAdmin";
+import { JjkdleAnalyticsAdmin } from "./JjkdleAnalyticsAdmin";
+import { ConfigAdmin } from "./ConfigAdmin";
+import type { OverviewStats } from "@/lib/admin/analytics";
+import type { JjkdleAnalytics } from "@/lib/admin/jjkdle-analytics";
+import type { MaintenanceConfig } from "@/lib/config/app-config";
 import {
   RACES,
   GENDERS,
@@ -71,17 +78,48 @@ interface AdminDashboardProps {
   currentUserId: string;
   /** Nombre d'images dans le cache « OUAIS » (conditionne « Vider le cache »). */
   cachedImageCount: number;
+  /** Statistiques agrégées de la Vue d'ensemble. */
+  overview: OverviewStats;
+  /** Analytics JJKdle du jour sélectionné. */
+  jjkdleAnalytics: JjkdleAnalytics;
+  /** État d'activation de chaque jeu (défaut true). */
+  gameFlags: Record<string, boolean>;
+  /** Config du mode maintenance. */
+  maintenance: MaintenanceConfig;
+  /** Perso forcé comme mot du jour JJKdle (ou null). */
+  forcedTarget: string | null;
 }
 
-type Tab = "roster" | "draft" | "leaderboard" | "users";
+type Tab =
+  | "overview"
+  | "roster"
+  | "content"
+  | "jjkdle"
+  | "draft"
+  | "leaderboard"
+  | "users"
+  | "config";
 
 const TAB_LABELS: Record<Tab, string> = {
+  overview: "Vue d'ensemble",
   roster: "Roster",
+  content: "Santé contenu",
+  jjkdle: "Analytics JJKdle",
   draft: "Jujutsu Draft",
   leaderboard: "Leaderboard",
   users: "Utilisateurs",
+  config: "Config",
 };
-const TAB_ORDER: Tab[] = ["roster", "draft", "leaderboard", "users"];
+const TAB_ORDER: Tab[] = [
+  "overview",
+  "roster",
+  "content",
+  "jjkdle",
+  "draft",
+  "leaderboard",
+  "users",
+  "config",
+];
 
 function slugify(s: string): string {
   return s
@@ -100,10 +138,15 @@ export function AdminDashboard({
   users,
   currentUserId,
   cachedImageCount,
+  overview,
+  jjkdleAnalytics,
+  gameFlags,
+  maintenance,
+  forcedTarget,
 }: AdminDashboardProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [tab, setTab] = useState<Tab>("roster");
+  const [tab, setTab] = useState<Tab>("overview");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ ok: boolean; msg: string } | null>(
     null,
@@ -400,6 +443,29 @@ export function AdminDashboard({
         c.id.includes(query.toLowerCase())),
   );
 
+  // Depuis l'onglet « Santé contenu » : ouvre un perso dans l'éditeur roster.
+  const editCharacter = (c: Character) => {
+    setTab("roster");
+    loadCharacter(c);
+  };
+
+  const subtitle =
+    tab === "overview"
+      ? `${overview.players.total} joueurs · ${roster.length} personnages`
+      : tab === "roster"
+        ? `${roster.length} personnages`
+        : tab === "content"
+          ? `${overview.content.incomplete} incomplets · ${overview.content.missingImage} sans image`
+          : tab === "jjkdle"
+            ? `Jour ${jjkdleAnalytics.date}`
+            : tab === "draft"
+              ? `${draftRoster.length} personnages (draft)`
+              : tab === "leaderboard"
+                ? `${scores.length} scores`
+                : tab === "config"
+                  ? "Feature flags & maintenance"
+                  : `${users.length} utilisateurs`;
+
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
       {/* En-tête */}
@@ -408,15 +474,7 @@ export function AdminDashboard({
           <h1 className="font-display text-2xl font-black uppercase tracking-wider text-white">
             Admin · <span className="text-domain-light">{TAB_LABELS[tab]}</span>
           </h1>
-          <p className="text-sm text-white/45">
-            {tab === "roster"
-              ? `${roster.length} personnages`
-              : tab === "draft"
-                ? `${draftRoster.length} personnages (draft)`
-                : tab === "leaderboard"
-                  ? `${scores.length} scores`
-                  : `${users.length} utilisateurs`}
-          </p>
+          <p className="text-sm text-white/45">{subtitle}</p>
         </div>
         <div className="flex items-center gap-2">
           <Link
@@ -458,6 +516,25 @@ export function AdminDashboard({
           </button>
         ))}
       </div>
+
+      {tab === "overview" && (
+        <OverviewAdmin stats={overview} onGotoContent={() => setTab("content")} />
+      )}
+
+      {tab === "content" && (
+        <ContentHealthAdmin roster={roster} onEdit={editCharacter} />
+      )}
+
+      {tab === "jjkdle" && <JjkdleAnalyticsAdmin data={jjkdleAnalytics} />}
+
+      {tab === "config" && (
+        <ConfigAdmin
+          roster={roster}
+          gameFlags={gameFlags}
+          maintenance={maintenance}
+          forcedTarget={forcedTarget}
+        />
+      )}
 
       {tab === "draft" && <DraftRosterAdmin roster={draftRoster} />}
 

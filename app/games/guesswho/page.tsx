@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
+import { isGameEnabled } from "@/lib/config/app-config";
 import { isPusherConfigured } from "@/lib/pusher/server";
 import { MpHubForm } from "@/components/multiplayer/MpHubForm";
 import {
@@ -15,6 +17,7 @@ export const metadata: Metadata = {
 };
 
 export default async function GuessWhoHubPage() {
+  if (!(await isGameEnabled("guesswho"))) redirect("/games");
   const user = await getCurrentUser();
   const pusherReady = isPusherConfigured();
 

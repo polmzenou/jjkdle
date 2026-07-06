@@ -9,6 +9,11 @@ interface GameCardProps {
   game: Game;
   /** Index pour l'animation d'apparition échelonnée + le badge "01". */
   index: number;
+  /**
+   * Désactivé par l'admin (feature flag `game.<id>.enabled` à false). Rendu
+   * identique à « bientôt disponible » : carte grisée, non cliquable.
+   */
+  disabled?: boolean;
 }
 
 /**
@@ -17,8 +22,9 @@ interface GameCardProps {
  * - Au survol : la carte se soulève, le glow d'accent s'allume et le screenshot
  *   du jeu se révèle en fond (faible opacité, overlay sombre pour le contraste).
  */
-export function GameCard({ game, index }: GameCardProps) {
-  const isComingSoon = game.status === "coming-soon";
+export function GameCard({ game, index, disabled = false }: GameCardProps) {
+  // Un jeu désactivé par l'admin est traité comme « bientôt » (grisé, non cliquable).
+  const isComingSoon = game.status === "coming-soon" || disabled;
   const isMultiplayerOnly = game.multiplayerOnly === true;
   const accent = game.accent ?? "#7c3aed";
   const accentVars = { "--accent": accent } as CSSProperties;

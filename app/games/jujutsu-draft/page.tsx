@@ -3,6 +3,8 @@ import { getUserDraftBest } from "@/lib/games/draft/store";
 import { getDraftRoster } from "@/lib/games/draft/queries";
 import { DraftLeaderboard } from "@/components/leaderboard/DraftLeaderboard";
 import { parseScope } from "@/lib/leaderboard/store";
+import { redirect } from "next/navigation";
+import { isGameEnabled } from "@/lib/config/app-config";
 import { JujutsuDraftGame } from "./JujutsuDraftGame";
 
 export const metadata = {
@@ -21,6 +23,7 @@ export default async function JujutsuDraftPage({
 }: {
   searchParams: Promise<{ scope?: string }>;
 }) {
+  if (!(await isGameEnabled("jujutsu-draft"))) redirect("/games");
   const user = await getCurrentUser();
   const [{ scope }, initialBest, roster] = await Promise.all([
     searchParams,

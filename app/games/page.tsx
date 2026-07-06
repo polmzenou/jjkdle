@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { GameCard } from "@/components/GameCard";
 import { MultiplayerPicker } from "@/components/multiplayer/MultiplayerPicker";
 import { GAMES } from "@/lib/games/registry";
+import { getGameFlags } from "@/lib/config/app-config";
 
 export const metadata: Metadata = {
   title: "Les jeux — JJK Arcade",
@@ -12,12 +13,16 @@ export const metadata: Metadata = {
 const FEATURES = ["Sans compte", "Best score local"];
 
 /** Hub : liste tous les jeux du registre (système pluggable). */
-export default function GamesPage() {
-  const liveCount = GAMES.filter((g) => g.status !== "coming-soon").length;
+export default async function GamesPage() {
+  // Flags d'activation admin (défaut true) : un jeu désactivé est grisé/non cliquable.
+  const flags = await getGameFlags();
+  const liveCount = GAMES.filter(
+    (g) => g.status !== "coming-soon" && flags[g.id] !== false,
+  ).length;
   // Jeux proposés dans la modale multi : ceux qui déclarent un mode multi et ne
   // sont pas "multi uniquement" (ces derniers ont déjà leur propre carte).
   const multiplayerGames = GAMES.filter(
-    (g) => g.multiplayer && !g.multiplayerOnly,
+    (g) => g.multiplayer && !g.multiplayerOnly && flags[g.id] !== false,
   );
 
   return (
@@ -64,7 +69,12 @@ export default function GamesPage() {
 
         <div className="grid gap-6 sm:grid-cols-2">
           {GAMES.map((game, i) => (
-            <GameCard key={game.id} game={game} index={i} />
+            <GameCard
+              key={game.id}
+              game={game}
+              index={i}
+              disabled={flags[game.id] === false}
+            />
           ))}
         </div>
       </section>

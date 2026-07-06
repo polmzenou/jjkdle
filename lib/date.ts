@@ -69,3 +69,15 @@ export function weekDateKeys(date: Date = new Date()): string[] {
     todayKey(new Date(start.getTime() + i * DAY_MS + DAY_MS / 2), TIMEZONE),
   );
 }
+
+/**
+ * Les `n` dernières clés "YYYY-MM-DD" (Europe/Paris), du plus ancien au plus
+ * récent (aujourd'hui en dernier). Sert aux séries temporelles admin
+ * (inscriptions/jour, historique du mot du jour).
+ */
+export function recentDateKeys(n: number, date: Date = new Date()): string[] {
+  const end = date.getTime();
+  return Array.from({ length: n }, (_, i) =>
+    todayKey(new Date(end - (n - 1 - i) * DAY_MS), TIMEZONE),
+  );
+}

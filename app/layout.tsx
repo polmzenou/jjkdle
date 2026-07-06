@@ -3,8 +3,10 @@ import { Inter, Space_Grotesk } from "next/font/google";
 import { CursedBackground } from "@/components/CursedBackground";
 import { SiteNav } from "@/components/SiteNav";
 import { TutorialButton } from "@/components/TutorialButton";
+import { MaintenanceScreen } from "@/components/MaintenanceScreen";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getCachedImageCount } from "@/lib/admin/image-cache";
+import { getMaintenance } from "@/lib/config/app-config";
 import { prisma } from "@/lib/prisma";
 import "./globals.css";
 
@@ -30,7 +32,12 @@ export const metadata: Metadata = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const user = await getCurrentUser();
+  const [user, maintenance] = await Promise.all([
+    getCurrentUser(),
+    getMaintenance(),
+  ]);
+  const isAdmin = user?.role === "ADMIN";
+  const maintenanceActive = maintenance.enabled && !isAdmin;
   // Profil (avatar + niveau) pour la barre de nav.
   const profile = user
     ? await prisma.user.findUnique({
@@ -63,9 +70,21 @@ export default async function RootLayout({
     <html lang="fr" className={`${inter.variable} ${spaceGrotesk.variable}`}>
       <body className="min-h-screen">
         <CursedBackground />
-        <SiteNav user={navUser} cachedImageCount={cachedImageCount} />
-        {children}
-        <TutorialButton />
+        {maintenanceActive ? (
+          <MaintenanceScreen message={maintenance.message} />
+        ) : (
+          <>
+            {/* Bandeau admin : la maintenance est active mais l'admin passe. */}
+            {maintenance.enabled && isAdmin && (
+              <div className="sticky top-0 z-50 bg-cursed px-4 py-1.5 text-center text-xs font-bold uppercase tracking-wide text-white">
+                Mode maintenance actif — visible par les admins uniquement
+              </div>
+            )}
+            <SiteNav user={navUser} cachedImageCount={cachedImageCount} />
+            {children}
+            <TutorialButton />
+          </>
+        )}
       </body>
     </html>
   );

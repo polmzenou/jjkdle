@@ -10,6 +10,14 @@ import { listAllJjkdleScores } from "@/lib/games/jjkdle/leaderboard";
 import { listAllHigherLowerScores } from "@/lib/games/higher-lower/store";
 import { listUsers } from "@/lib/admin/users";
 import { getCachedImageCount } from "@/lib/admin/image-cache";
+import { getOverviewStats } from "@/lib/admin/analytics";
+import { getJjkdleAnalytics } from "@/lib/admin/jjkdle-analytics";
+import {
+  getGameFlags,
+  getMaintenance,
+  getForcedTarget,
+} from "@/lib/config/app-config";
+import { todayKey } from "@/lib/games/jjkdle/daily";
 import type { Character } from "@/data/roster/characters";
 import type { DraftCharacter } from "@/lib/games/draft/types";
 import { AdminDashboard } from "./AdminDashboard";
@@ -38,8 +46,15 @@ function AccessDenied({
   );
 }
 
-export default async function AdminPage() {
-  const user = await getCurrentUser();
+export default async function AdminPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ jjkdleDate?: string }>;
+}) {
+  const [{ jjkdleDate }, user] = await Promise.all([
+    searchParams,
+    getCurrentUser(),
+  ]);
 
   if (!user) {
     return (
@@ -101,6 +116,19 @@ export default async function AdminPage() {
     higherLowerScores = [];
   }
 
+  // ── Sections analytics + config (calculées côté serveur) ──
+  const analyticsDate = /^\d{4}-\d{2}-\d{2}$/.test(jjkdleDate ?? "")
+    ? (jjkdleDate as string)
+    : todayKey();
+  const [overview, jjkdleAnalytics, gameFlags, maintenance, forcedTarget] =
+    await Promise.all([
+      getOverviewStats(roster),
+      getJjkdleAnalytics(roster, analyticsDate),
+      getGameFlags(),
+      getMaintenance(),
+      getForcedTarget(),
+    ]);
+
   return (
     <AdminDashboard
       roster={roster}
@@ -110,6 +138,11 @@ export default async function AdminPage() {
       users={users}
       currentUserId={user.id}
       cachedImageCount={getCachedImageCount()}
+      overview={overview}
+      jjkdleAnalytics={jjkdleAnalytics}
+      gameFlags={gameFlags}
+      maintenance={maintenance}
+      forcedTarget={forcedTarget}
     />
   );
 }

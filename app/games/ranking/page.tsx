@@ -3,6 +3,8 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { getConditions, getCharacterMap } from "@/lib/content/queries";
 import { Leaderboard } from "@/components/leaderboard/Leaderboard";
 import { parseScope } from "@/lib/leaderboard/store";
+import { redirect } from "next/navigation";
+import { isGameEnabled } from "@/lib/config/app-config";
 import { RankingGame } from "./RankingGame";
 
 export const metadata = {
@@ -21,6 +23,7 @@ export default async function RankingPage({
 }: {
   searchParams: Promise<{ scope?: string }>;
 }) {
+  if (!(await isGameEnabled("ranking"))) redirect("/games");
   const [{ scope }, bestScore, user, conditions, characterById] = await Promise.all([
     searchParams,
     getBestScore("ranking"),
