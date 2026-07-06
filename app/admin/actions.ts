@@ -48,6 +48,10 @@ import {
   adminUpdateJjkdleScore,
   adminDeleteJjkdleScore,
 } from "@/lib/games/jjkdle/leaderboard";
+import {
+  adminUpdateHigherLowerScore,
+  adminDeleteHigherLowerScore,
+} from "@/lib/games/higher-lower/store";
 import { DRAFT_CATEGORY_BY_ID } from "@/lib/games/draft/categories";
 import type {
   DraftCharacter,
@@ -71,7 +75,9 @@ const TIERS: CharacterTier[] = ["4minus", "4", "3", "2", "1", "s"];
 const GAMES: LeaderboardGame[] = ["builder", "ranking"];
 const DRAFT_GAME = "jujutsu-draft";
 const JJKDLE_GAME = "jjkdle";
+const HIGHER_LOWER_GAME = "higher-lower";
 const JJKDLE_MAX_ATTEMPTS = 999; // garde-fou : nombre d'essais réaliste
+const HIGHER_LOWER_MAX_SCORE = 100000; // garde-fou : score réaliste (bonnes réponses)
 const DRAFT_TIERS: DraftTier[] = ["S", "A", "B", "C"];
 
 /** Valide + enregistre (ajout ou édition) un personnage en base. */
@@ -354,6 +360,22 @@ export async function updateScoreAction(
     return { ok: true };
   }
 
+  // Higher/Lower : table dédiée, métrique = nombre de bonnes réponses (≥ 0).
+  if (game === HIGHER_LOWER_GAME) {
+    const s = Math.round(Number(scoreRaw));
+    if (!Number.isFinite(s) || s < 0 || s > HIGHER_LOWER_MAX_SCORE) {
+      return { ok: false, error: `Score invalide (0 à ${HIGHER_LOWER_MAX_SCORE}).` };
+    }
+    try {
+      await adminUpdateHigherLowerScore(id, s);
+    } catch (e) {
+      return { ok: false, error: `Échec de modification : ${(e as Error).message}` };
+    }
+    revalidatePath("/games/higher-lower");
+    revalidatePath("/admin");
+    return { ok: true };
+  }
+
   if (!GAMES.includes(game as LeaderboardGame)) {
     return { ok: false, error: "Jeu inconnu." };
   }
@@ -399,6 +421,17 @@ export async function deleteScoreAction(
       return { ok: false, error: `Échec de suppression : ${(e as Error).message}` };
     }
     revalidatePath("/games/jjkdle");
+    revalidatePath("/admin");
+    return { ok: true };
+  }
+
+  if (game === HIGHER_LOWER_GAME) {
+    try {
+      await adminDeleteHigherLowerScore(id);
+    } catch (e) {
+      return { ok: false, error: `Échec de suppression : ${(e as Error).message}` };
+    }
+    revalidatePath("/games/higher-lower");
     revalidatePath("/admin");
     return { ok: true };
   }

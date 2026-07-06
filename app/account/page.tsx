@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { getUserScores } from "@/lib/leaderboard/store";
 import { getUserDraftScore } from "@/lib/games/draft/store";
 import { getUserJjkdleScore } from "@/lib/games/jjkdle/leaderboard";
+import { getUserHigherLowerScore } from "@/lib/games/higher-lower/store";
 import { VipBadge } from "@/components/VipBadge";
 import { UserAvatar } from "@/components/UserAvatar";
 import { LevelBar } from "@/components/LevelBar";
@@ -45,6 +46,7 @@ export default async function AccountPage() {
     classicScores,
     draftScore,
     jjkdleScore,
+    higherLowerScore,
     profile,
     badgeKeys,
     roster,
@@ -55,6 +57,7 @@ export default async function AccountPage() {
     getUserScores(user.id),
     getUserDraftScore(user.id),
     getUserJjkdleScore(user.id),
+    getUserHigherLowerScore(user.id),
     prisma.user.findUnique({
       where: { id: user.id },
       select: {
@@ -90,6 +93,7 @@ export default async function AccountPage() {
     ...classicScores,
     ...(draftScore ? [draftScore] : []),
     ...(jjkdleScore ? [jjkdleScore] : []),
+    ...(higherLowerScore ? [higherLowerScore] : []),
   ];
 
   // ── Stats résumées (dérivées de données déjà chargées, aucune requête en plus) ──

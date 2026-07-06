@@ -69,6 +69,18 @@ export const GAMES: Game[] = [
     previewImage: "/assets/idle-screen.png",
     status: "live",
   },
+  {
+    id: "higher-lower",
+    title: "JJK Higher/Lower",
+    description:
+      "Plus ou moins d'énergie occulte ? Compare deux personnages du roster, devine si celui de droite dépasse celui de gauche et enchaîne les bonnes réponses le plus loin possible.",
+    route: "/games/higher-lower",
+    glyph: "📊",
+    tags: ["quickfire", "déduction", "roster JJK"],
+    accent: "#7c3aed",
+    previewImage: "/assets/higher-lower-screen.png",
+    status: "live",
+  },
   // Exemple de jeu futur (grisé sur le hub) :
   // {
   //   id: "domain-clash",

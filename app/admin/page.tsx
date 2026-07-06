@@ -7,6 +7,7 @@ import { listDraftCharacters } from "@/lib/games/draft/queries";
 import { listAllScores, type AdminScore } from "@/lib/leaderboard/store";
 import { listAllDraftScores } from "@/lib/games/draft/store";
 import { listAllJjkdleScores } from "@/lib/games/jjkdle/leaderboard";
+import { listAllHigherLowerScores } from "@/lib/games/higher-lower/store";
 import { listUsers } from "@/lib/admin/users";
 import { getCachedImageCount } from "@/lib/admin/image-cache";
 import type { Character } from "@/data/roster/characters";
@@ -93,13 +94,19 @@ export default async function AdminPage() {
   } catch {
     jjkdleScores = [];
   }
+  let higherLowerScores: AdminScore[] = [];
+  try {
+    higherLowerScores = await listAllHigherLowerScores();
+  } catch {
+    higherLowerScores = [];
+  }
 
   return (
     <AdminDashboard
       roster={roster}
       draftRoster={draftRoster}
       categories={categories}
-      scores={[...scores, ...draftScores, ...jjkdleScores]}
+      scores={[...scores, ...draftScores, ...jjkdleScores, ...higherLowerScores]}
       users={users}
       currentUserId={user.id}
       cachedImageCount={getCachedImageCount()}

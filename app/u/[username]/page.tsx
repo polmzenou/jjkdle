@@ -13,6 +13,7 @@ import { ScoreCards } from "@/components/profile/ScoreCards";
 import { getUserScores } from "@/lib/leaderboard/store";
 import { getUserDraftScore } from "@/lib/games/draft/store";
 import { getUserJjkdleScore } from "@/lib/games/jjkdle/leaderboard";
+import { getUserHigherLowerScore } from "@/lib/games/higher-lower/store";
 
 export const dynamic = "force-dynamic";
 
@@ -74,17 +75,19 @@ export default async function PublicProfilePage({
 
   // Scores agrégés (un seul fetch ; non rendus si la section est masquée).
   const showScores = layout.sections.some((s) => s.key === "scores" && s.visible);
-  const [classicScores, draftScore, jjkdleScore] = showScores
+  const [classicScores, draftScore, jjkdleScore, higherLowerScore] = showScores
     ? await Promise.all([
         getUserScores(profile.id),
         getUserDraftScore(profile.id),
         getUserJjkdleScore(profile.id),
+        getUserHigherLowerScore(profile.id),
       ])
-    : [[], null, null];
+    : [[], null, null, null];
   const scores = [
     ...classicScores,
     ...(draftScore ? [draftScore] : []),
     ...(jjkdleScore ? [jjkdleScore] : []),
+    ...(higherLowerScore ? [higherLowerScore] : []),
   ];
 
   /** Rend une section de corps selon son type (respecte l'ordre du layout). */

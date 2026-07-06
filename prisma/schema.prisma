@@ -65,6 +65,7 @@ model User {
   lobbyPlayers LobbyPlayer[]
   draftScores  JujutsuDraftScore[]
   jjkdleScores JjkdleScore[]
+  higherLowerScores HigherLowerScore[]
   badges       UserBadge[]
   titleGrants  UserTitleGrant[]
   frameGrants  UserFrameGrant[]
@@ -243,6 +244,44 @@ model JjkdleScore {
 
   @@unique([userId, date])
   @@index([date, attempts])
+}
+
+/// Score d'une partie de « JJK Higher/Lower » — une ligne PAR PARTIE terminée
+/// (append, pas d'upsert). `score` = nombre de bonnes réponses ; `xpEarned` = XP
+/// octroyée pour cette partie (persistée pour l'affichage ; l'XP totale reste
+/// agrégée sur User.totalXp via awardExp). Le classement se lit best-par-joueur
+/// (DISTINCT ON userId, cf. lib/games/higher-lower/store.ts).
+model HigherLowerScore {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  score     Int
+  xpEarned  Int
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([score])
+}
+
+/// État autoritatif d'une partie « Higher/Lower » EN COURS (anti-triche).
+/// Éphémère : créée au démarrage, supprimée en fin de partie. `id` = runId
+/// référencé par le cookie httpOnly `hl_run`. `userId` nullable → jouable sans
+/// compte. `rightCursedEnergy` = valeur cachée du perso de droite, JAMAIS exposée
+/// au client tant qu'il n'a pas répondu. `usedIds` = persos déjà apparus (évite la
+/// répétition immédiate à droite).
+model HigherLowerSession {
+  id                String   @id @default(cuid())
+  userId            String?
+  score             Int      @default(0)
+  leftId            String
+  leftCursedEnergy  Int
+  rightId           String
+  rightCursedEnergy Int
+  usedIds           String[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([userId])
 }
 
 /// Meilleur score d'un utilisateur pour un jeu donné (un enregistrement par
