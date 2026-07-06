@@ -259,23 +259,31 @@ export function GuessWhoLobby({
     [code],
   );
 
-  const handlePeek = useCallback(() => {
-    if (peek) {
-      setPeek(null);
-      return;
-    }
-    void peekAction(code).then((r) => {
-      if (r.id) setPeek(rosterMap[r.id]?.name ?? null);
-    });
-  }, [peek, code, rosterMap]);
-
+  const ctrlHeldRef = useRef(false);
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Control" && !e.repeat) handlePeek();
+    const clear = () => {
+      ctrlHeldRef.current = false;
+      setPeek(null);
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [handlePeek]);
+    const onDown = (e: KeyboardEvent) => {
+      if (e.key !== "Control" || e.repeat || ctrlHeldRef.current) return;
+      ctrlHeldRef.current = true;
+      void peekAction(code).then((r) => {
+        if (ctrlHeldRef.current && r.id) setPeek(rosterMap[r.id]?.name ?? null);
+      });
+    };
+    const onUp = (e: KeyboardEvent) => {
+      if (e.key === "Control") clear();
+    };
+    window.addEventListener("keydown", onDown);
+    window.addEventListener("keyup", onUp);
+    window.addEventListener("blur", clear);
+    return () => {
+      window.removeEventListener("keydown", onDown);
+      window.removeEventListener("keyup", onUp);
+      window.removeEventListener("blur", clear);
+    };
+  }, [code, rosterMap]);
 
   const handlePlayAgain = useCallback(() => {
     startTransition(async () => {
