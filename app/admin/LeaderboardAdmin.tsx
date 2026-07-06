@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 import type { AdminScore } from "@/lib/leaderboard/store";
 import { getGame } from "@/lib/games/registry";
 import { VipBadge } from "@/components/VipBadge";
-import { updateScoreAction, deleteScoreAction } from "./actions";
+import {
+  updateScoreAction,
+  deleteScoreAction,
+  deleteScoresAction,
+} from "./actions";
 
 interface LeaderboardAdminProps {
   scores: AdminScore[];
@@ -20,6 +24,8 @@ export function LeaderboardAdmin({ scores }: LeaderboardAdminProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [feedback, setFeedback] = useState<Feedback>(null);
+  // Multi-sélection : ids de scores cochés (uniques tous jeux confondus).
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   // Regroupe les scores par jeu, en conservant l'ordre (déjà trié côté serveur).
   const groups = useMemo(() => {
@@ -31,6 +37,52 @@ export function LeaderboardAdmin({ scores }: LeaderboardAdminProps) {
     }
     return Array.from(map.entries());
   }, [scores]);
+
+  const toggleOne = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  // Coche/décoche tout un groupe (jeu). Décoche si déjà tout coché.
+  const toggleGroup = (entries: AdminScore[]) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      const allSelected = entries.every((s) => next.has(s.id));
+      for (const s of entries) {
+        if (allSelected) next.delete(s.id);
+        else next.add(s.id);
+      }
+      return next;
+    });
+  };
+
+  const clearSelection = () => setSelected(new Set());
+
+  const removeSelected = () => {
+    const items = scores.filter((s) => selected.has(s.id));
+    if (items.length === 0) return;
+    if (!window.confirm(`Supprimer ${items.length} score(s) sélectionné(s) ?`))
+      return;
+    startTransition(async () => {
+      const res = await deleteScoresAction(
+        items.map((s) => ({ id: s.id, game: s.game })),
+      );
+      if (res.ok) {
+        setFeedback({ ok: true, msg: `${res.deleted} score(s) supprimé(s).` });
+      } else {
+        setFeedback({
+          ok: false,
+          msg: `${res.deleted} supprimé(s), échec sur certains : ${res.error ?? ""}`,
+        });
+      }
+      clearSelection();
+      router.refresh();
+    });
+  };
 
   const startEdit = (s: AdminScore) => {
     setFeedback(null);
@@ -93,6 +145,30 @@ export function LeaderboardAdmin({ scores }: LeaderboardAdminProps) {
         </div>
       )}
 
+      {/* Barre d'action multi-sélection (visible dès qu'un score est coché). */}
+      {selected.size > 0 && (
+        <div className="sticky top-2 z-10 flex flex-wrap items-center gap-3 rounded-xl border border-cursed/40 bg-void-800/95 px-4 py-3 shadow-lg backdrop-blur">
+          <span className="text-sm font-semibold text-white">
+            {selected.size} score(s) sélectionné(s)
+          </span>
+          <button
+            type="button"
+            onClick={clearSelection}
+            className="text-xs text-white/50 hover:text-white"
+          >
+            Tout décocher
+          </button>
+          <button
+            type="button"
+            onClick={removeSelected}
+            disabled={pending}
+            className="ml-auto rounded-lg border border-cursed/40 bg-cursed/10 px-4 py-1.5 text-sm font-bold text-cursed-light transition-colors enabled:hover:bg-cursed/20 disabled:opacity-40"
+          >
+            Supprimer la sélection
+          </button>
+        </div>
+      )}
+
       {groups.map(([game, entries]) => {
         const title = getGame(game)?.title ?? game;
         return (
@@ -101,6 +177,20 @@ export function LeaderboardAdmin({ scores }: LeaderboardAdminProps) {
             className="rounded-2xl border border-white/10 bg-void-800/40 p-5"
           >
             <div className="mb-4 flex items-center gap-3">
+              <input
+                type="checkbox"
+                checked={entries.every((s) => selected.has(s.id))}
+                ref={(el) => {
+                  if (el) {
+                    const some = entries.some((s) => selected.has(s.id));
+                    const all = entries.every((s) => selected.has(s.id));
+                    el.indeterminate = some && !all;
+                  }
+                }}
+                onChange={() => toggleGroup(entries)}
+                title="Tout sélectionner dans ce jeu"
+                className="h-4 w-4 accent-cursed"
+              />
               <h2 className="font-display text-lg font-bold text-white">
                 {title}
               </h2>
@@ -116,8 +206,18 @@ export function LeaderboardAdmin({ scores }: LeaderboardAdminProps) {
                 return (
                   <div
                     key={s.id}
-                    className="flex items-center gap-3 rounded-xl border border-white/5 bg-void-700/30 px-3 py-2.5"
+                    className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 ${
+                      selected.has(s.id)
+                        ? "border-cursed/40 bg-cursed/5"
+                        : "border-white/5 bg-void-700/30"
+                    }`}
                   >
+                    <input
+                      type="checkbox"
+                      checked={selected.has(s.id)}
+                      onChange={() => toggleOne(s.id)}
+                      className="h-4 w-4 shrink-0 accent-cursed"
+                    />
                     <span className="w-6 shrink-0 text-center font-display text-sm font-black text-white/40">
                       {i + 1}
                     </span>

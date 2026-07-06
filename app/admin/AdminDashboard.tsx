@@ -13,6 +13,7 @@ import { ImageDropzone } from "./ImageDropzone";
 import {
   saveCharacterAction,
   deleteCharacterAction,
+  deleteCharactersAction,
   refreshRosterImagesFromApiAction,
   clearImageCacheAction,
 } from "./actions";
@@ -111,6 +112,8 @@ export function AdminDashboard({
   const [rosterCat, setRosterCat] = useState<CategoryId | "all">("all");
   // Perso affiché en grand dans le modal (clic sur sa vignette).
   const [previewChar, setPreviewChar] = useState<Character | null>(null);
+  // Multi-sélection du roster (ids de personnages cochés).
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   // Image : fichier en attente d'upload, ou retrait demandé.
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -307,6 +310,40 @@ export function AdminDashboard({
     });
   };
 
+  const toggleSelected = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const clearSelection = () => setSelectedIds(new Set());
+
+  const removeSelected = () => {
+    const ids = roster
+      .filter((c) => selectedIds.has(c.id))
+      .map((c) => c.id);
+    if (ids.length === 0) return;
+    if (!window.confirm(`Supprimer ${ids.length} personnage(s) sélectionné(s) ?`))
+      return;
+    startTransition(async () => {
+      const res = await deleteCharactersAction(ids);
+      if (res.ok) {
+        setFeedback({ ok: true, msg: `${res.deleted} personnage(s) supprimé(s).` });
+      } else {
+        setFeedback({
+          ok: false,
+          msg: `${res.deleted} supprimé(s), échec sur certains : ${res.error ?? ""}`,
+        });
+      }
+      if (editingId && selectedIds.has(editingId)) resetForm();
+      clearSelection();
+      router.refresh();
+    });
+  };
+
   // Bouton « OUAIS » : récupère une image depuis l'API pour tous les persos.
   const [syncing, setSyncing] = useState(false);
   const syncImages = () => {
@@ -388,6 +425,14 @@ export function AdminDashboard({
           >
             ← Site
           </Link>
+          <a
+            href="/admin/graph"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-lg border border-domain/40 bg-domain/10 px-3 py-1.5 text-sm text-domain-light hover:bg-domain/20"
+          >
+            Graphe ↗
+          </a>
           <button
             type="button"
             onClick={logout}
@@ -698,6 +743,35 @@ export function AdminDashboard({
         {/* ── Listing ── */}
         <section className="rounded-2xl border border-white/10 bg-void-800/40 p-5">
           <div className="mb-4 flex flex-wrap items-center gap-3">
+            <input
+              type="checkbox"
+              checked={
+                filtered.length > 0 &&
+                filtered.every((c) => selectedIds.has(c.id))
+              }
+              ref={(el) => {
+                if (el) {
+                  const some = filtered.some((c) => selectedIds.has(c.id));
+                  const all =
+                    filtered.length > 0 &&
+                    filtered.every((c) => selectedIds.has(c.id));
+                  el.indeterminate = some && !all;
+                }
+              }}
+              onChange={(e) => {
+                const check = e.target.checked;
+                setSelectedIds((prev) => {
+                  const next = new Set(prev);
+                  for (const c of filtered) {
+                    if (check) next.add(c.id);
+                    else next.delete(c.id);
+                  }
+                  return next;
+                });
+              }}
+              title="Tout sélectionner (résultats filtrés)"
+              className="h-4 w-4 accent-cursed"
+            />
             <h2 className="font-display text-lg font-bold text-white">
               Tous les personnages
             </h2>
@@ -724,14 +798,48 @@ export function AdminDashboard({
             />
           </div>
 
+          {/* Barre d'action multi-sélection (visible dès qu'un perso est coché). */}
+          {selectedIds.size > 0 && (
+            <div className="sticky top-2 z-10 mb-3 flex flex-wrap items-center gap-3 rounded-xl border border-cursed/40 bg-void-800/95 px-4 py-2.5 shadow-lg backdrop-blur">
+              <span className="text-sm font-semibold text-white">
+                {selectedIds.size} personnage(s) sélectionné(s)
+              </span>
+              <button
+                type="button"
+                onClick={clearSelection}
+                className="text-xs text-white/50 hover:text-white"
+              >
+                Tout décocher
+              </button>
+              <button
+                type="button"
+                onClick={removeSelected}
+                disabled={pending}
+                className="ml-auto rounded-lg border border-cursed/40 bg-cursed/10 px-4 py-1.5 text-sm font-bold text-cursed-light transition-colors enabled:hover:bg-cursed/20 disabled:opacity-40"
+              >
+                Supprimer la sélection
+              </button>
+            </div>
+          )}
+
           <div className="space-y-2">
             {filtered.map((c) => {
               const cats = Object.entries(c.ratings);
               return (
                 <div
                   key={c.id}
-                  className="flex items-center gap-3 rounded-xl border border-white/5 bg-void-700/30 p-2"
+                  className={`flex items-center gap-3 rounded-xl border p-2 ${
+                    selectedIds.has(c.id)
+                      ? "border-cursed/40 bg-cursed/5"
+                      : "border-white/5 bg-void-700/30"
+                  }`}
                 >
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.has(c.id)}
+                    onChange={() => toggleSelected(c.id)}
+                    className="h-4 w-4 shrink-0 accent-cursed"
+                  />
                   <button
                     type="button"
                     onClick={() => setPreviewChar(c)}

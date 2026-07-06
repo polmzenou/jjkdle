@@ -184,6 +184,31 @@ export async function deleteCharacterAction(id: string): Promise<ActionResult> {
   return { ok: true };
 }
 
+/** Supprime plusieurs personnages en une fois (multi-sélection admin). */
+export async function deleteCharactersAction(
+  ids: string[],
+): Promise<ActionResult & { deleted: number }> {
+  if (!(await getAdminUser())) {
+    return { ok: false, deleted: 0, error: "Accès réservé aux administrateurs." };
+  }
+  let deleted = 0;
+  const errors: string[] = [];
+  for (const id of ids) {
+    try {
+      await deleteCharacter(id);
+      deleted += 1;
+    } catch (e) {
+      errors.push(`${id} : ${(e as Error).message}`);
+    }
+  }
+  revalidatePath("/", "layout");
+  return {
+    ok: errors.length === 0,
+    deleted,
+    ...(errors.length > 0 ? { error: errors.join(" · ") } : {}),
+  };
+}
+
 /**
  * Bouton « OUAIS » : récupère automatiquement une image depuis l'API booru pour
  * les personnages FÉMININS du roster (gender === FEMALE en base) et met leur URL
@@ -394,6 +419,22 @@ export async function updateScoreAction(
   return { ok: true };
 }
 
+/** Supprime un score dans la bonne table selon le jeu (sans revalidation). */
+async function deleteScoreForGame(id: string, game: string): Promise<void> {
+  if (game === DRAFT_GAME) return adminDeleteDraftScore(id);
+  if (game === JJKDLE_GAME) return adminDeleteJjkdleScore(id);
+  if (game === HIGHER_LOWER_GAME) return adminDeleteHigherLowerScore(id);
+  return adminDeleteScore(id);
+}
+
+/** Chemin de la page publique du jeu à revalider après une modification. */
+function gamePath(game: string): string {
+  if (game === DRAFT_GAME) return "/games/jujutsu-draft";
+  if (game === JJKDLE_GAME) return "/games/jjkdle";
+  if (game === HIGHER_LOWER_GAME) return "/games/higher-lower";
+  return `/games/${game}`;
+}
+
 /** Supprime un score du leaderboard. */
 export async function deleteScoreAction(
   id: string,
@@ -402,48 +443,42 @@ export async function deleteScoreAction(
   if (!(await getAdminUser())) {
     return { ok: false, error: "Accès réservé aux administrateurs." };
   }
-
-  if (game === DRAFT_GAME) {
-    try {
-      await adminDeleteDraftScore(id);
-    } catch (e) {
-      return { ok: false, error: `Échec de suppression : ${(e as Error).message}` };
-    }
-    revalidatePath("/games/jujutsu-draft");
-    revalidatePath("/admin");
-    return { ok: true };
-  }
-
-  if (game === JJKDLE_GAME) {
-    try {
-      await adminDeleteJjkdleScore(id);
-    } catch (e) {
-      return { ok: false, error: `Échec de suppression : ${(e as Error).message}` };
-    }
-    revalidatePath("/games/jjkdle");
-    revalidatePath("/admin");
-    return { ok: true };
-  }
-
-  if (game === HIGHER_LOWER_GAME) {
-    try {
-      await adminDeleteHigherLowerScore(id);
-    } catch (e) {
-      return { ok: false, error: `Échec de suppression : ${(e as Error).message}` };
-    }
-    revalidatePath("/games/higher-lower");
-    revalidatePath("/admin");
-    return { ok: true };
-  }
-
   try {
-    await adminDeleteScore(id);
+    await deleteScoreForGame(id, game);
   } catch (e) {
     return { ok: false, error: `Échec de suppression : ${(e as Error).message}` };
   }
-  revalidatePath(`/games/${game}`);
+  revalidatePath(gamePath(game));
   revalidatePath("/admin");
   return { ok: true };
+}
+
+/** Supprime plusieurs scores en une fois (multi-sélection admin, jeux mêlés). */
+export async function deleteScoresAction(
+  items: { id: string; game: string }[],
+): Promise<ActionResult & { deleted: number }> {
+  if (!(await getAdminUser())) {
+    return { ok: false, deleted: 0, error: "Accès réservé aux administrateurs." };
+  }
+  let deleted = 0;
+  const errors: string[] = [];
+  const games = new Set<string>();
+  for (const { id, game } of items) {
+    try {
+      await deleteScoreForGame(id, game);
+      games.add(game);
+      deleted += 1;
+    } catch (e) {
+      errors.push(`${id} : ${(e as Error).message}`);
+    }
+  }
+  for (const game of games) revalidatePath(gamePath(game));
+  revalidatePath("/admin");
+  return {
+    ok: errors.length === 0,
+    deleted,
+    ...(errors.length > 0 ? { error: errors.join(" · ") } : {}),
+  };
 }
 
 // ──────────────────────────────────────────────────────────────────────────
