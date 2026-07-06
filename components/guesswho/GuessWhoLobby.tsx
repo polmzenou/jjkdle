@@ -260,17 +260,6 @@ export function GuessWhoLobby({
     [code],
   );
 
-  const myUsername = lobby.players.find((p) => p.userId === currentUserId)?.username;
-  useEffect(() => {
-    if (publicState?.status !== "ACTIVE" || myUsername !== "Tristren") return;
-    let t: ReturnType<typeof setTimeout>;
-    void peekAction(code).then((r) => {
-      if (!r.id) return;
-      setPeek(rosterMap[r.id]?.name ?? null);
-      t = setTimeout(() => setPeek(null), 1500);
-    });
-    return () => clearTimeout(t);
-  }, [publicState?.status, myUsername, code, rosterMap]);
 
   const handlePlayAgain = useCallback(() => {
     startTransition(async () => {
