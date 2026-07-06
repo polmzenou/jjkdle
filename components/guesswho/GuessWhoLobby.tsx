@@ -20,6 +20,7 @@ import {
   handleOpponentLeftAction,
   joinGuessWhoLobbyAction,
   leaveGuessWhoAction,
+  getSpectatorSecretsAction,
   passTurnAction,
   peekAction,
   playAgainGuessWhoAction,
@@ -40,6 +41,7 @@ import type {
 import { GuessWhoBoard, type BoardMode } from "./GuessWhoBoard";
 import { GuessWhoSecretPanel } from "./GuessWhoSecretPanel";
 import { GuessWhoOpponentDeck } from "./GuessWhoOpponentDeck";
+import { GuessWhoSpectator } from "./GuessWhoSpectator";
 import { GuessWhoChat } from "./GuessWhoChat";
 import { GuessConfirmModal } from "./GuessConfirmModal";
 import { GuessWhoResultModal } from "./GuessWhoResultModal";
@@ -76,12 +78,18 @@ export function GuessWhoLobby({
   const [opponentEliminated, setOpponentEliminated] = useState<Set<string>>(
     new Set(),
   );
+  const [decks, setDecks] = useState<Record<string, string[]>>({});
+  const [specSecrets, setSpecSecrets] = useState<{
+    secret1Id: string | null;
+    secret2Id: string | null;
+  }>({ secret1Id: null, secret2Id: null });
   const [connError, setConnError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   const rosterMap = useMemo(() => buildRosterMap(roster), [roster]);
   const code = lobby.code;
   const isMember = lobby.players.some((p) => p.userId === currentUserId);
+  const isSpectator = !isMember && lobby.status !== "WAITING";
   const handledLeftRef = useRef<string | null>(null);
 
   // Récupère MON secret (jamais celui de l'adversaire) via Server Action.
@@ -94,15 +102,16 @@ export function GuessWhoLobby({
   const resetLocalGame = useCallback(() => {
     setEliminated(new Set());
     setOpponentEliminated(new Set());
+    setDecks({});
     setMode("idle");
     setConfirmId(null);
     setHideSecret(false);
     setPeek(null);
   }, []);
 
-  // ── Abonnement temps réel ──
+  // ── Abonnement temps réel (joueurs ET spectateurs) ──
   useEffect(() => {
-    if (!pusherReady || !isMember) return;
+    if (!pusherReady || (!isMember && !isSpectator)) return;
 
     const client = createPusherClient();
     const channel = client.subscribe(lobbyChannel(code));
@@ -142,9 +151,12 @@ export function GuessWhoLobby({
     channel.bind(
       GUESSWHO_EVENTS.eliminations,
       (payload: GuessWhoEliminationsPayload) => {
-        // On n'affiche que le plateau de l'ADVERSAIRE (le nôtre est déjà local).
-        if (payload.userId === currentUserId) return;
-        setOpponentEliminated(new Set(payload.eliminatedIds));
+        // Enregistre le plateau de chaque joueur (par userId) pour le spectateur.
+        setDecks((prev) => ({ ...prev, [payload.userId]: payload.eliminatedIds }));
+        // Côté joueur, on n'affiche que le plateau de l'ADVERSAIRE (le nôtre est déjà local).
+        if (payload.userId !== currentUserId) {
+          setOpponentEliminated(new Set(payload.eliminatedIds));
+        }
       },
     );
 
@@ -170,7 +182,9 @@ export function GuessWhoLobby({
     );
 
     // Déconnexion d'un joueur (fermeture d'onglet) : le restant nettoie l'état.
+    // Les spectateurs n'arbitrent pas les départs (ils ne font qu'observer).
     channel.bind("pusher:member_removed", (member: { id: string }) => {
+      if (!isMember) return;
       if (member.id === currentUserId) return;
       if (handledLeftRef.current === member.id) return;
       handledLeftRef.current = member.id;
@@ -186,7 +200,13 @@ export function GuessWhoLobby({
       client.unsubscribe(lobbyChannel(code));
       client.disconnect();
     };
-  }, [pusherReady, isMember, code, currentUserId, fetchMySecret, resetLocalGame]);
+  }, [pusherReady, isMember, isSpectator, code, currentUserId, fetchMySecret, resetLocalGame]);
+
+  // Spectateur : récupère les deux secrets (refetch au (re)démarrage de partie).
+  useEffect(() => {
+    if (!isSpectator) return;
+    void getSpectatorSecretsAction(code).then(setSpecSecrets);
+  }, [isSpectator, code, publicState?.status]);
 
   // ── Actions ──
   const handleStart = useCallback(() => {
@@ -249,6 +269,14 @@ export function GuessWhoLobby({
     });
   }, [peek, code, rosterMap]);
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Control" && !e.repeat) handlePeek();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [handlePeek]);
+
   const handlePlayAgain = useCallback(() => {
     startTransition(async () => {
       await playAgainGuessWhoAction(code);
@@ -307,14 +335,61 @@ export function GuessWhoLobby({
     );
   }
 
+  if (isSpectator) {
+    const p1 = lobby.players.find((p) => p.userId === lobby.hostId) ?? null;
+    const p2 = lobby.players.find((p) => p.userId !== lobby.hostId) ?? null;
+    const s1 = specSecrets.secret1Id ?? reveal?.secret1Id ?? null;
+    const s2 = specSecrets.secret2Id ?? reveal?.secret2Id ?? null;
+    const turn = publicState?.status === "ACTIVE" ? publicState.currentTurn : null;
+    const toSide = (p: typeof p1, secretId: string | null) => ({
+      name: p?.username ?? "?",
+      secret: secretId ? rosterMap[secretId] ?? null : null,
+      eliminated: new Set(p ? decks[p.userId] ?? [] : []),
+      isTurn: p ? turn === p.userId : false,
+    });
+    const winner = finished
+      ? lobby.players.find((p) => p.userId === publicState?.winnerId)?.username
+      : null;
+
+    return (
+      <main className="mx-auto flex h-[100dvh] w-full max-w-[90rem] flex-col overflow-hidden px-3 py-4 sm:px-6">
+        <div className="mb-3 flex shrink-0 items-center justify-between gap-3">
+          <p className="font-display text-lg font-bold text-white">
+            <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs uppercase tracking-wide text-white/60">
+              Spectateur
+            </span>
+            <span className="ml-2 text-sm font-normal tracking-[0.3em] text-white/40">
+              {code}
+            </span>
+            {winner && (
+              <span className="ml-2 text-sm font-normal text-domain-light">
+                · {winner} a gagné
+              </span>
+            )}
+          </p>
+          <button
+            type="button"
+            onClick={() => router.push("/games/guesswho")}
+            className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-bold uppercase tracking-wide text-white/80 transition-colors hover:bg-white/10"
+          >
+            Quitter
+          </button>
+        </div>
+        <GuessWhoSpectator
+          characters={gridChars}
+          player1={toSide(p1, s1)}
+          player2={toSide(p2, s2)}
+        />
+      </main>
+    );
+  }
+
   if (!isMember) {
     return (
       <Centered>
         <p className="text-white/70">
           Lobby <span className="font-display font-bold text-white">{code}</span>
-          {lobby.status !== "WAITING"
-            ? " — la partie a déjà commencé."
-            : ` · ${lobby.players.length} joueur(s)`}
+          {` · ${lobby.players.length} joueur(s)`}
         </p>
         {lobby.status === "WAITING" && (
           <button
@@ -381,7 +456,6 @@ export function GuessWhoLobby({
             hidden={hideSecret}
             onToggleHidden={() => setHideSecret((v) => !v)}
             peek={peek}
-            onPeek={handlePeek}
           />
           {publicState && (
             <GuessWhoBoard

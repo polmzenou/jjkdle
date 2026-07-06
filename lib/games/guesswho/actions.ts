@@ -210,6 +210,24 @@ export async function peekAction(codeRaw: string): Promise<{ id: string | null }
   return { id: opponentId ? secretForUser(game, opponentId) : null };
 }
 
+/**
+ * Renvoie les DEUX secrets — réservé aux spectateurs (non-joueurs). Un joueur
+ * ne peut jamais passer par ici (anti-triche) : il recevrait `null`.
+ */
+export async function getSpectatorSecretsAction(
+  codeRaw: string,
+): Promise<{ secret1Id: string | null; secret2Id: string | null }> {
+  const empty = { secret1Id: null, secret2Id: null };
+  const user = await getCurrentUser();
+  if (!user) return empty;
+  const lobby = await findLobby(normalizeCode(codeRaw));
+  if (!lobby || lobby.gameId !== "guesswho") return empty;
+  if (lobby.players.some((p) => p.userId === user.id)) return empty;
+  const game = await prisma.guessWhoGame.findUnique({ where: { lobbyId: lobby.id } });
+  if (!game) return empty;
+  return { secret1Id: game.secret1Id, secret2Id: game.secret2Id };
+}
+
 /** Passe le tour à l'adversaire (uniquement pendant son propre tour). */
 export async function passTurnAction(codeRaw: string): Promise<MpResult> {
   const user = await getCurrentUser();
