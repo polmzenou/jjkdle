@@ -1,12 +1,16 @@
 import { cookies } from "next/headers";
+import { seal, unseal } from "@/lib/games/seal";
 import type { GameMode, GameStatus } from "./types";
 
 /**
- * État de la partie JJKdle persisté dans un cookie httpOnly (aucun compte requis,
- * aucune écriture filesystem → compatible Vercel ; calqué sur lib/bestScore.ts).
+ * État de la partie JJKdle persisté dans un cookie (aucun compte requis, aucune
+ * écriture filesystem → compatible Vercel ; calqué sur lib/bestScore.ts).
  *
- * SÉCURITÉ : le cookie est httpOnly → le JS client ne peut PAS lire `targetId`.
- * La réponse (perso mystère) n'est donc jamais exposée au client avant résolution.
+ * SÉCURITÉ : le contenu est CHIFFRÉ (AES-GCM, cf. lib/games/seal) en plus d'être
+ * httpOnly. `httpOnly` seul ne suffit pas — la valeur du cookie reste lisible
+ * dans les DevTools / un proxy, ce qui exposerait `targetId` (la réponse) et
+ * permettrait de forcer `status: "won"`. Le scellement rend le cookie à la fois
+ * illisible ET infalsifiable : toute altération casse le déchiffrement.
  *
  * Lecture/écriture brutes uniquement ici ; la validation « est-ce toujours le bon
  * jour ? » se fait côté action/page (qui dispose du roster pour recalculer la cible).
@@ -28,28 +32,23 @@ export interface JjkdleState {
   replays?: number;
 }
 
-/** Lit l'état brut depuis le cookie (null si absent/illisible). */
+/** Lit l'état déchiffré depuis le cookie (null si absent/illisible/falsifié). */
 export async function readState(): Promise<JjkdleState | null> {
   const raw = (await cookies()).get(COOKIE)?.value;
-  if (!raw) return null;
-  try {
-    const parsed = JSON.parse(raw) as JjkdleState;
-    if (
-      parsed &&
-      typeof parsed.targetId === "string" &&
-      Array.isArray(parsed.guesses)
-    ) {
-      return parsed;
-    }
-  } catch {
-    // cookie corrompu → on repart de zéro
+  const parsed = unseal<JjkdleState>(raw);
+  if (
+    parsed &&
+    typeof parsed.targetId === "string" &&
+    Array.isArray(parsed.guesses)
+  ) {
+    return parsed;
   }
   return null;
 }
 
-/** Écrit l'état (à appeler depuis une Server Action ou un Route Handler). */
+/** Écrit l'état SCELLÉ (à appeler depuis une Server Action ou un Route Handler). */
 export async function writeState(state: JjkdleState): Promise<void> {
-  (await cookies()).set(COOKIE, JSON.stringify(state), {
+  (await cookies()).set(COOKIE, seal(state), {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",

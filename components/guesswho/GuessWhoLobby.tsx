@@ -22,7 +22,6 @@ import {
   leaveGuessWhoAction,
   getSpectatorSecretsAction,
   passTurnAction,
-  peekAction,
   playAgainGuessWhoAction,
   sendChatAction,
   startGuessWhoAction,
@@ -74,7 +73,6 @@ export function GuessWhoLobby({
   const [mode, setMode] = useState<BoardMode>("idle");
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [hideSecret, setHideSecret] = useState(false);
-  const [peek, setPeek] = useState<string | null>(null);
   const [opponentEliminated, setOpponentEliminated] = useState<Set<string>>(
     new Set(),
   );
@@ -107,7 +105,6 @@ export function GuessWhoLobby({
     setMode("idle");
     setConfirmId(null);
     setHideSecret(false);
-    setPeek(null);
   }, []);
 
   // ── Abonnement temps réel (joueurs ET spectateurs) ──
@@ -259,18 +256,6 @@ export function GuessWhoLobby({
     },
     [code],
   );
-
-  const myUsername = lobby.players.find((p) => p.userId === currentUserId)?.username;
-  useEffect(() => {
-    if (publicState?.status !== "ACTIVE" || myUsername !== "Tristren") return;
-    let t: ReturnType<typeof setTimeout>;
-    void peekAction(code).then((r) => {
-      if (!r.id) return;
-      setPeek(rosterMap[r.id]?.name ?? null);
-      t = setTimeout(() => setPeek(null), 1500);
-    });
-    return () => clearTimeout(t);
-  }, [publicState?.status, myUsername, code, rosterMap]);
 
   const handlePlayAgain = useCallback(() => {
     startTransition(async () => {
@@ -483,7 +468,6 @@ export function GuessWhoLobby({
             secret={mySecret}
             hidden={hideSecret}
             onToggleHidden={() => setHideSecret((v) => !v)}
-            peek={peek}
           />
           {publicState && (
             <GuessWhoBoard

@@ -9,7 +9,6 @@ interface GuessWhoSecretPanelProps {
   /** Masque le secret (pour montrer son écran sans le révéler). */
   hidden: boolean;
   onToggleHidden: () => void;
-  peek: string | null;
 }
 
 /**
@@ -20,7 +19,6 @@ export function GuessWhoSecretPanel({
   secret,
   hidden,
   onToggleHidden,
-  peek,
 }: GuessWhoSecretPanelProps) {
   return (
     <aside className="flex flex-col self-start rounded-2xl border border-domain/40 bg-void-800/60 p-3 text-center">
@@ -67,9 +65,6 @@ export function GuessWhoSecretPanel({
       <p className="mt-1 shrink-0 text-[0.7rem] text-white/40">
         Le personnage que ton adversaire doit deviner.
       </p>
-      {peek && (
-        <p className="mt-1 shrink-0 text-[0.7rem] text-white/40">{peek}</p>
-      )}
     </aside>
   );
 }

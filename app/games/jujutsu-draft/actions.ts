@@ -5,7 +5,7 @@ import { evaluateDraft, validateSelection } from "@/lib/games/draft/scoring";
 import { getDraftRosterMap } from "@/lib/games/draft/queries";
 import { awardExp } from "@/lib/progress/recompute";
 import { draftExp } from "@/lib/progress/exp-rewards";
-import type { ExpResult } from "@/lib/leaderboard/actions";
+import type { ExpResult } from "@/lib/leaderboard/types";
 
 /**
  * Octroi AUTOMATIQUE de l'XP du Jujutsu Draft en fin de partie, SANS

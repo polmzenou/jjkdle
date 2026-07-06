@@ -306,7 +306,7 @@ const DEFS: ConditionDef[] = [
     criterion: "lore",
     category: "Domaine le plus dangereux",
     prompt: "Classe ces Extensions du Territoire de la plus mortelle à la moins dangereuse.",
-    order: ["sukuna", "gojo", "higuruma", "mahito", "dabura", "kenjaku", "jogo", "dagon"],
+    order: ["sukuna", "gojo", "higuruma", "mahito", "kenjaku", "yuta", "jogo", "dagon"],
   },
   {
     id: "lore-black-flash",
@@ -314,7 +314,7 @@ const DEFS: ConditionDef[] = [
     criterion: "lore",
     category: "Black Flash",
     prompt: "Classe ces sorciers du plus à l'aise avec le Black Flash au moins à l'aise.",
-    order: ["yuji-modulo", "sukuna", "yuji", "todo", "nanami", "maki", "hakari", "megumi"],
+    order: ["yuji-modulo", "sukuna", "yuji", "gojo", "todo", "nanami", "hakari", "megumi"],
   },
 ];
 
