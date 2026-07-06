@@ -84,6 +84,7 @@ export function GuessWhoLobby({
     secret2Id: string | null;
   }>({ secret1Id: null, secret2Id: null });
   const [connError, setConnError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const [pending, startTransition] = useTransition();
 
   const rosterMap = useMemo(() => buildRosterMap(roster), [roster]);
@@ -91,6 +92,7 @@ export function GuessWhoLobby({
   const isMember = lobby.players.some((p) => p.userId === currentUserId);
   const isSpectator = !isMember && lobby.status !== "WAITING";
   const handledLeftRef = useRef<string | null>(null);
+  const peekNameRef = useRef<string | null>(null);
 
   // Récupère MON secret (jamais celui de l'adversaire) via Server Action.
   const fetchMySecret = useCallback(() => {
@@ -107,6 +109,7 @@ export function GuessWhoLobby({
     setConfirmId(null);
     setHideSecret(false);
     setPeek(null);
+    peekNameRef.current = null;
   }, []);
 
   // ── Abonnement temps réel (joueurs ET spectateurs) ──
@@ -259,31 +262,32 @@ export function GuessWhoLobby({
     [code],
   );
 
-  const ctrlHeldRef = useRef(false);
+  // Pré-charge le nom du secret adverse au démarrage → la touche Ctrl l'affiche
+  // instantanément (aucun appel réseau pendant l'appui).
   useEffect(() => {
-    const clear = () => {
-      ctrlHeldRef.current = false;
-      setPeek(null);
-    };
+    if (!isMember || publicState?.status !== "ACTIVE") return;
+    void peekAction(code).then((r) => {
+      peekNameRef.current = r.id ? rosterMap[r.id]?.name ?? null : null;
+    });
+  }, [isMember, publicState?.status, code, rosterMap]);
+
+  useEffect(() => {
+    const hide = () => setPeek(null);
     const onDown = (e: KeyboardEvent) => {
-      if (e.key !== "Control" || e.repeat || ctrlHeldRef.current) return;
-      ctrlHeldRef.current = true;
-      void peekAction(code).then((r) => {
-        if (ctrlHeldRef.current && r.id) setPeek(rosterMap[r.id]?.name ?? null);
-      });
+      if (e.key === "Control" && !e.repeat) setPeek(peekNameRef.current);
     };
     const onUp = (e: KeyboardEvent) => {
-      if (e.key === "Control") clear();
+      if (e.key === "Control") hide();
     };
     window.addEventListener("keydown", onDown);
     window.addEventListener("keyup", onUp);
-    window.addEventListener("blur", clear);
+    window.addEventListener("blur", hide);
     return () => {
       window.removeEventListener("keydown", onDown);
       window.removeEventListener("keyup", onUp);
-      window.removeEventListener("blur", clear);
+      window.removeEventListener("blur", hide);
     };
-  }, [code, rosterMap]);
+  }, []);
 
   const handlePlayAgain = useCallback(() => {
     startTransition(async () => {
@@ -297,6 +301,13 @@ export function GuessWhoLobby({
       router.push("/games/guesswho");
     });
   }, [code, router]);
+
+  const handleShare = useCallback(() => {
+    void navigator.clipboard?.writeText(window.location.href).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  }, []);
 
   const handleJoin = useCallback(() => {
     startTransition(async () => {
@@ -375,19 +386,36 @@ export function GuessWhoLobby({
               </span>
             )}
           </p>
-          <button
-            type="button"
-            onClick={() => router.push("/games/guesswho")}
-            className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-bold uppercase tracking-wide text-white/80 transition-colors hover:bg-white/10"
-          >
-            Quitter
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleShare}
+              className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-bold uppercase tracking-wide text-white/80 transition-colors hover:bg-white/10"
+            >
+              {copied ? "Lien copié ✓" : "🔗 Partager"}
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push("/games/guesswho")}
+              className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-bold uppercase tracking-wide text-white/80 transition-colors hover:bg-white/10"
+            >
+              Quitter
+            </button>
+          </div>
         </div>
         <GuessWhoSpectator
           characters={gridChars}
           player1={toSide(p1, s1)}
           player2={toSide(p2, s2)}
         />
+        <div className="mt-3 h-48 shrink-0">
+          <GuessWhoChat
+            messages={messages}
+            currentUserId={currentUserId}
+            onSend={handleSendChat}
+            emojiOnly
+          />
+        </div>
       </main>
     );
   }
@@ -449,14 +477,23 @@ export function GuessWhoLobby({
               {code}
             </span>
           </p>
-          <button
-            type="button"
-            onClick={handleLeave}
-            disabled={pending}
-            className="rounded-xl border border-cursed/40 bg-cursed/10 px-4 py-2 text-sm font-bold uppercase tracking-wide text-cursed-light transition-colors hover:bg-cursed/20 disabled:opacity-40"
-          >
-            Quitter la partie
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleShare}
+              className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-bold uppercase tracking-wide text-white/80 transition-colors hover:bg-white/10"
+            >
+              {copied ? "Lien copié ✓" : "🔗 Partager"}
+            </button>
+            <button
+              type="button"
+              onClick={handleLeave}
+              disabled={pending}
+              className="rounded-xl border border-cursed/40 bg-cursed/10 px-4 py-2 text-sm font-bold uppercase tracking-wide text-cursed-light transition-colors hover:bg-cursed/20 disabled:opacity-40"
+            >
+              Quitter la partie
+            </button>
+          </div>
         </div>
         <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[13rem_1fr_20rem] xl:grid-cols-[15rem_1fr_22rem]">
           <GuessWhoSecretPanel

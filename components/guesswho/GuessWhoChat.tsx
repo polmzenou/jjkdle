@@ -7,13 +7,27 @@ interface GuessWhoChatProps {
   messages: GuessWhoChatMessage[];
   currentUserId: string;
   onSend: (text: string) => void;
+  /** Mode spectateur : pas de saisie libre, uniquement une palette d'emojis. */
+  emojiOnly?: boolean;
 }
+
+/** Palette d'emojis pour les spectateurs (aucune lettre ni chiffre). */
+const SPECTATOR_EMOJIS = [
+  "😀", "😂", "😍", "😎", "😭", "😱", "🤯", "🥶", "🤔", "😴",
+  "🔥", "💀", "👀", "👏", "🙌", "💪", "🎉", "❤️", "💜", "⚡",
+  "🩸", "🗿", "👑", "🥇", "🤡", "😤", "🫡", "🙏", "✨", "🙈",
+];
 
 /**
  * Chat intégré (panneau latéral). Les messages sont éphémères (non persistés) :
  * c'est là que les joueurs posent leurs questions. Reçus via `guesswho:chat`.
  */
-export function GuessWhoChat({ messages, currentUserId, onSend }: GuessWhoChatProps) {
+export function GuessWhoChat({
+  messages,
+  currentUserId,
+  onSend,
+  emojiOnly = false,
+}: GuessWhoChatProps) {
   const [text, setText] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -67,22 +81,37 @@ export function GuessWhoChat({ messages, currentUserId, onSend }: GuessWhoChatPr
         )}
       </div>
 
-      <form onSubmit={submit} className="flex gap-2 border-t border-white/10 p-3">
-        <input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          maxLength={GUESSWHO_CHAT_MAX}
-          placeholder="Écris un message…"
-          className="min-w-0 flex-1 rounded-xl border border-white/10 bg-void-900 px-3 py-2 text-sm text-white placeholder:text-white/25 focus:border-domain-light focus:outline-none"
-        />
-        <button
-          type="submit"
-          disabled={!text.trim()}
-          className="rounded-xl bg-domain px-4 py-2 text-sm font-bold text-white transition-transform hover:scale-105 active:scale-95 disabled:opacity-40"
-        >
-          Envoyer
-        </button>
-      </form>
+      {emojiOnly ? (
+        <div className="flex flex-wrap justify-center gap-1 border-t border-white/10 p-2">
+          {SPECTATOR_EMOJIS.map((emoji) => (
+            <button
+              key={emoji}
+              type="button"
+              onClick={() => onSend(emoji)}
+              className="rounded-lg px-1.5 py-1 text-lg transition-transform hover:scale-125 active:scale-95"
+            >
+              {emoji}
+            </button>
+          ))}
+        </div>
+      ) : (
+        <form onSubmit={submit} className="flex gap-2 border-t border-white/10 p-3">
+          <input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            maxLength={GUESSWHO_CHAT_MAX}
+            placeholder="Écris un message…"
+            className="min-w-0 flex-1 rounded-xl border border-white/10 bg-void-900 px-3 py-2 text-sm text-white placeholder:text-white/25 focus:border-domain-light focus:outline-none"
+          />
+          <button
+            type="submit"
+            disabled={!text.trim()}
+            className="rounded-xl bg-domain px-4 py-2 text-sm font-bold text-white transition-transform hover:scale-105 active:scale-95 disabled:opacity-40"
+          >
+            Envoyer
+          </button>
+        </form>
+      )}
     </div>
   );
 }
