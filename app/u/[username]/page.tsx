@@ -14,6 +14,7 @@ import { getUserScores } from "@/lib/leaderboard/store";
 import { getUserDraftScore } from "@/lib/games/draft/store";
 import { getUserJjkdleScore } from "@/lib/games/jjkdle/leaderboard";
 import { getUserHigherLowerScore } from "@/lib/games/higher-lower/store";
+import { getUserGuessWhoStats } from "@/lib/games/guesswho/stats";
 
 export const dynamic = "force-dynamic";
 
@@ -75,20 +76,23 @@ export default async function PublicProfilePage({
 
   // Scores agrégés (un seul fetch ; non rendus si la section est masquée).
   const showScores = layout.sections.some((s) => s.key === "scores" && s.visible);
-  const [classicScores, draftScore, jjkdleScore, higherLowerScore] = showScores
-    ? await Promise.all([
-        getUserScores(profile.id),
-        getUserDraftScore(profile.id),
-        getUserJjkdleScore(profile.id),
-        getUserHigherLowerScore(profile.id),
-      ])
-    : [[], null, null, null];
+  const [classicScores, draftScore, jjkdleScore, higherLowerScore, guessWhoStats] =
+    showScores
+      ? await Promise.all([
+          getUserScores(profile.id),
+          getUserDraftScore(profile.id),
+          getUserJjkdleScore(profile.id),
+          getUserHigherLowerScore(profile.id),
+          getUserGuessWhoStats(profile.id),
+        ])
+      : [[], null, null, null, null];
   const scores = [
     ...classicScores,
     ...(draftScore ? [draftScore] : []),
     ...(jjkdleScore ? [jjkdleScore] : []),
     ...(higherLowerScore ? [higherLowerScore] : []),
   ];
+  const hasAnyScore = scores.length > 0 || Boolean(guessWhoStats);
 
   /** Rend une section de corps selon son type (respecte l'ordre du layout). */
   const renderSection = (key: "badges" | "scores") => {
@@ -107,12 +111,42 @@ export default async function PublicProfilePage({
         <h2 className="mb-4 font-display text-lg font-bold uppercase tracking-wider text-white/80">
           🏆 Scores
         </h2>
-        {scores.length === 0 ? (
+        {!hasAnyScore ? (
           <div className="rounded-2xl border border-white/10 bg-void-800/60 px-6 py-10 text-center backdrop-blur">
             <p className="text-white/55">Aucun score enregistré pour le moment.</p>
           </div>
         ) : (
-          <ScoreCards scores={scores} />
+          <div className="space-y-4">
+            {scores.length > 0 && <ScoreCards scores={scores} />}
+            {guessWhoStats && (
+              <article className="relative overflow-hidden rounded-2xl border border-white/10 bg-void-800/60 p-5 backdrop-blur">
+                <span
+                  aria-hidden
+                  className="absolute inset-x-0 top-0 h-px"
+                  style={{
+                    background:
+                      "linear-gradient(90deg, transparent, #7c3aed, transparent)",
+                  }}
+                />
+                <p className="flex items-center gap-2 font-display font-bold text-white">
+                  <span aria-hidden>🕵️</span>
+                  <span>Qui est-ce ?</span>
+                </p>
+                <p className="mt-1 text-xs uppercase tracking-wider text-white/45">
+                  {guessWhoStats.total} partie
+                  {guessWhoStats.total > 1 ? "s" : ""} jouée
+                  {guessWhoStats.total > 1 ? "s" : ""}
+                </p>
+                <p className="mt-4 font-display text-3xl font-black text-domain-light">
+                  {guessWhoStats.wins}
+                  <span className="text-white/35"> V</span>
+                  <span className="mx-2 align-middle text-lg text-white/25">/</span>
+                  {guessWhoStats.losses}
+                  <span className="text-white/35"> D</span>
+                </p>
+              </article>
+            )}
+          </div>
         )}
       </section>
     );

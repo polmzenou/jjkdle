@@ -66,6 +66,7 @@ model User {
   draftScores  JujutsuDraftScore[]
   jjkdleScores JjkdleScore[]
   higherLowerScores HigherLowerScore[]
+  guessWhoScores GuessWhoScore[]
   badges       UserBadge[]
   titleGrants  UserTitleGrant[]
   frameGrants  UserFrameGrant[]
@@ -280,6 +281,41 @@ model HigherLowerSession {
   usedIds           String[]
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+
+  @@index([userId])
+}
+
+/// Partie « Qui est-ce ? » (Guess Who JJK) — état autoritatif d'un 1v1 en cours.
+/// Réutilise le lobby/présence Pusher (Lobby via lobbyId). Les DEUX secrets vivent
+/// ICI et ne sont JAMAIS sérialisés vers le client tant que la partie est ACTIVE
+/// (anti-triche) : chaque joueur ne récupère que le sien via une Server Action
+/// authentifiée. La grille (25 IDs) est partagée/identique pour les deux joueurs ;
+/// seuls les secrets diffèrent. Les éliminations sont locales/privées (non persistées).
+model GuessWhoGame {
+  id          String   @id @default(cuid())
+  lobbyId     String   @unique
+  player1Id   String
+  player2Id   String
+  gridCharIds String[] // 25 IDs, ordre partagé
+  secret1Id   String // secret que player2 doit deviner (= perso secret de player1)
+  secret2Id   String // secret que player1 doit deviner (= perso secret de player2)
+  currentTurn String // userId dont c'est le tour
+  status      String   @default("ACTIVE") // ACTIVE | FINISHED
+  winnerId    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([lobbyId])
+}
+
+/// Résultat d'une partie « Qui est-ce ? » — une ligne PAR joueur ET PAR partie
+/// terminée (append). `won` = ce joueur a gagné. Le ratio V/D se lit par agrégation.
+model GuessWhoScore {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  won       Boolean
+  createdAt DateTime @default(now())
 
   @@index([userId])
 }

@@ -61,6 +61,16 @@ export function battleWinExp(): number {
   return 25;
 }
 
+/** « Qui est-ce ? » : EXP fixe pour une victoire (victoire > défaite). */
+export function guessWhoWinExp(): number {
+  return 50;
+}
+
+/** « Qui est-ce ? » : EXP de consolation pour une défaite. */
+export function guessWhoLossExp(): number {
+  return 10;
+}
+
 /** JJKdle : EXP de base selon le nombre d'essais (moins = mieux). */
 function jjkdleBaseExp(attempts: number): number {
   if (attempts <= 1) return 500;

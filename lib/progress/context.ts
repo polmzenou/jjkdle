@@ -29,6 +29,10 @@ export interface UserStatsContext {
    * IDLE_MASTER / cadre IDLE_LEGEND).
    */
   jjkdleBestAttempts: number;
+  /** Victoires « Qui est-ce ? ». */
+  guessWhoWins: number;
+  /** Défaites « Qui est-ce ? ». */
+  guessWhoLosses: number;
   /** Nombre de jeux distincts où l'utilisateur a au moins un score. */
   gamesPlayed: number;
   /** A déjà enregistré une partie sur Build the Perfect Sorcerer. */
@@ -39,13 +43,15 @@ export interface UserStatsContext {
   playedDraft: boolean;
   /** A déjà enregistré une partie sur JJKdle. */
   playedJjkdle: boolean;
+  /** A déjà joué une partie « Qui est-ce ? ». */
+  playedGuessWho: boolean;
 }
 
 /** Construit le contexte de stats d'un utilisateur (une passe groupée). */
 export async function buildUserStatsContext(
   userId: string,
 ): Promise<UserStatsContext> {
-  const [user, scores, draft, jjkdleAgg] = await Promise.all([
+  const [user, scores, draft, jjkdleAgg, guessWhoAgg] = await Promise.all([
     prisma.user.findUnique({
       where: { id: userId },
       select: { role: true, jjkdleStreak: true, jjkdleBestStreak: true },
@@ -64,15 +70,26 @@ export async function buildUserStatsContext(
       _count: { _all: true },
       _min: { attempts: true },
     }),
+    // Victoires/défaites « Qui est-ce ? » (une ligne par partie et par joueur).
+    prisma.guessWhoScore.groupBy({
+      by: ["won"],
+      where: { userId },
+      _count: { _all: true },
+    }),
   ]);
 
   const bestByGame = new Map(scores.map((s) => [s.gameId, s.best]));
   const jjkdleCount = jjkdleAgg._count._all;
+  const guessWhoWins =
+    guessWhoAgg.find((r) => r.won)?._count._all ?? 0;
+  const guessWhoLosses =
+    guessWhoAgg.find((r) => !r.won)?._count._all ?? 0;
 
-  // Jeux distincts joués : ids présents dans Score + draft + jjkdle.
+  // Jeux distincts joués : ids présents dans Score + draft + jjkdle + guesswho.
   const played = new Set<string>(bestByGame.keys());
   if (draft) played.add("jujutsu-draft");
   if (jjkdleCount > 0) played.add("jjkdle");
+  if (guessWhoWins + guessWhoLosses > 0) played.add("guesswho");
 
   return {
     role: user?.role ?? "PLAYER",
@@ -83,10 +100,13 @@ export async function buildUserStatsContext(
     jjkdleStreak: user?.jjkdleStreak ?? 0,
     jjkdleBestStreak: user?.jjkdleBestStreak ?? 0,
     jjkdleBestAttempts: jjkdleAgg._min.attempts ?? 0,
+    guessWhoWins,
+    guessWhoLosses,
     gamesPlayed: played.size,
     playedBuilder: played.has("builder"),
     playedRanking: played.has("ranking"),
     playedDraft: played.has("jujutsu-draft"),
     playedJjkdle: played.has("jjkdle"),
+    playedGuessWho: played.has("guesswho"),
   };
 }
