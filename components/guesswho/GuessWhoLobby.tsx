@@ -262,15 +262,6 @@ export function GuessWhoLobby({
     [code],
   );
 
-  // Pré-charge le nom du secret adverse au démarrage → la touche Ctrl l'affiche
-  // instantanément (aucun appel réseau pendant l'appui).
-  useEffect(() => {
-    if (!isMember || publicState?.status !== "ACTIVE") return;
-    void peekAction(code).then((r) => {
-      peekNameRef.current = r.id ? rosterMap[r.id]?.name ?? null : null;
-    });
-  }, [isMember, publicState?.status, code, rosterMap]);
-
   useEffect(() => {
     const hide = () => setPeek(null);
     const onDown = (e: KeyboardEvent) => {

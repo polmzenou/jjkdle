@@ -341,14 +341,27 @@ export async function getUserHigherLowerScore(
 // Administration (vue /admin) — grant/revoke cohérent avec les autres jeux
 // ──────────────────────────────────────────────────────────────────────────
 
-/** Tous les scores Higher/Lower au format `AdminScore` (récents d'abord). */
+/**
+ * Scores Higher/Lower au format `AdminScore`, en ne gardant que la MEILLEURE
+ * partie de chaque joueur (cohérent avec le leaderboard joueur `topHigherLowerEntries`).
+ * La table étant en append (une ligne par partie), on trie `score desc, createdAt asc`
+ * puis on dédoublonne par `userId` : la première ligne rencontrée pour un joueur est
+ * son best. L'`id` renvoyé reste celui de la ligne réelle → édition/suppression admin OK.
+ */
 export async function listAllHigherLowerScores(): Promise<AdminScore[]> {
   const rows = await prisma.higherLowerScore.findMany({
     orderBy: [{ score: "desc" }, { createdAt: "asc" }],
     include: { user: { select: { username: true, role: true } } },
   });
 
-  return rows.map((r) => ({
+  const seen = new Set<string>();
+  const best = rows.filter((r) => {
+    if (seen.has(r.userId)) return false;
+    seen.add(r.userId);
+    return true;
+  });
+
+  return best.map((r) => ({
     id: r.id,
     pseudo: r.user.username,
     game: GAME_ID,
