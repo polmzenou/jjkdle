@@ -28,7 +28,13 @@ export async function POST(req: Request) {
 
   const code = match[1];
   const lobby = await findLobby(code);
-  if (!lobby || !lobby.players.some((p) => p.userId === user.id)) {
+  if (!lobby) {
+    return NextResponse.json({ error: "Accès refusé au lobby." }, { status: 403 });
+  }
+  const isPlayer = lobby.players.some((p) => p.userId === user.id);
+  // Spectateurs : autorisés uniquement sur une partie « Qui est-ce ? » en cours.
+  const canSpectate = lobby.gameId === "guesswho" && lobby.status !== "WAITING";
+  if (!isPlayer && !canSpectate) {
     return NextResponse.json({ error: "Accès refusé au lobby." }, { status: 403 });
   }
 
