@@ -31,7 +31,7 @@ export function GuessWhoChat({ messages, currentUserId, onSend }: GuessWhoChatPr
   }
 
   return (
-    <div className="flex h-full min-h-[20rem] flex-col rounded-2xl border border-white/10 bg-void-800/50">
+    <div className="flex h-full min-h-0 flex-col rounded-2xl border border-white/10 bg-void-800/50">
       <p className="border-b border-white/10 px-4 py-3 font-display text-sm font-bold uppercase tracking-wide text-white/70">
         Chat
       </p>

@@ -17,6 +17,11 @@ export const GUESSWHO_EVENTS = {
   turnPassed: "guesswho:turn-passed",
   /** Message de chat intégré (éphémère, non persisté). */
   chat: "guesswho:chat",
+  /**
+   * Éliminations d'un joueur (éphémère, non persisté) : diffusées en direct pour
+   * que l'adversaire voie l'avancée du plateau de l'autre (« deck en direct »).
+   */
+  eliminations: "guesswho:eliminations",
   /** Résultat d'un guess : partie finie + vainqueur + révélation des 2 secrets. */
   guessResult: "guesswho:guess-result",
 } as const;
