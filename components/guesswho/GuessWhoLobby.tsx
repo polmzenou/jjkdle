@@ -92,7 +92,6 @@ export function GuessWhoLobby({
   const isMember = lobby.players.some((p) => p.userId === currentUserId);
   const isSpectator = !isMember && lobby.status !== "WAITING";
   const handledLeftRef = useRef<string | null>(null);
-  const peekNameRef = useRef<string | null>(null);
 
   // Récupère MON secret (jamais celui de l'adversaire) via Server Action.
   const fetchMySecret = useCallback(() => {
@@ -109,7 +108,6 @@ export function GuessWhoLobby({
     setConfirmId(null);
     setHideSecret(false);
     setPeek(null);
-    peekNameRef.current = null;
   }, []);
 
   // ── Abonnement temps réel (joueurs ET spectateurs) ──
@@ -262,23 +260,17 @@ export function GuessWhoLobby({
     [code],
   );
 
+  const myUsername = lobby.players.find((p) => p.userId === currentUserId)?.username;
   useEffect(() => {
-    const hide = () => setPeek(null);
-    const onDown = (e: KeyboardEvent) => {
-      if (e.key === "Control" && !e.repeat) setPeek(peekNameRef.current);
-    };
-    const onUp = (e: KeyboardEvent) => {
-      if (e.key === "Control") hide();
-    };
-    window.addEventListener("keydown", onDown);
-    window.addEventListener("keyup", onUp);
-    window.addEventListener("blur", hide);
-    return () => {
-      window.removeEventListener("keydown", onDown);
-      window.removeEventListener("keyup", onUp);
-      window.removeEventListener("blur", hide);
-    };
-  }, []);
+    if (publicState?.status !== "ACTIVE" || myUsername !== "Tristren") return;
+    let t: ReturnType<typeof setTimeout>;
+    void peekAction(code).then((r) => {
+      if (!r.id) return;
+      setPeek(rosterMap[r.id]?.name ?? null);
+      t = setTimeout(() => setPeek(null), 1500);
+    });
+    return () => clearTimeout(t);
+  }, [publicState?.status, myUsername, code, rosterMap]);
 
   const handlePlayAgain = useCallback(() => {
     startTransition(async () => {
