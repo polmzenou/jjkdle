@@ -332,12 +332,17 @@ export async function sendChatAction(
   const code = normalizeCode(codeRaw);
   const lobby = await findLobby(code);
   if (!lobby || lobby.gameId !== "guesswho") return { ok: false, error: "Lobby introuvable." };
-  if (!lobby.players.some((p) => p.userId === user.id)) {
+  const isPlayer = lobby.players.some((p) => p.userId === user.id);
+  // Spectateurs autorisés sur une partie en cours, mais en emojis uniquement.
+  const canSpectate = lobby.status !== "WAITING";
+  if (!isPlayer && !canSpectate) {
     return { ok: false, error: "Tu ne fais pas partie de ce lobby." };
   }
 
   const text = textRaw.trim().slice(0, GUESSWHO_CHAT_MAX);
   if (!text) return { ok: true };
+  // Un spectateur ne peut pas « écrire » : lettres et chiffres rejetés (emojis OK).
+  if (!isPlayer && /\p{L}|\p{N}/u.test(text)) return { ok: true };
 
   const message: GuessWhoChatMessage = {
     userId: user.id,
