@@ -51,6 +51,15 @@ export interface GuessWhoTurnPayload {
   currentTurn: string;
 }
 
+/**
+ * Payload `guesswho:eliminations` : plateau grisé d'un joueur (éphémère). Chaque
+ * joueur diffuse SES éliminations pour que l'adversaire suive son « deck » en direct.
+ */
+export interface GuessWhoEliminationsPayload {
+  userId: string;
+  eliminatedIds: string[];
+}
+
 /** Message de chat intégré (éphémère). */
 export interface GuessWhoChatMessage {
   userId: string;

@@ -15,6 +15,8 @@ interface GuessWhoBoardProps {
   isMyTurn: boolean;
   /** Mon perso secret (affiché uniquement à moi). */
   mySecret: Character | null;
+  /** Masque le marquage du secret dans la grille (mode « montrer l'écran »). */
+  hideSecret: boolean;
   pending: boolean;
   onCardClick: (id: string) => void;
   onSetMode: (mode: BoardMode) => void;
@@ -27,6 +29,7 @@ export function GuessWhoBoard({
   mode,
   isMyTurn,
   mySecret,
+  hideSecret,
   pending,
   onCardClick,
   onSetMode,
@@ -35,9 +38,9 @@ export function GuessWhoBoard({
   const interactive = isMyTurn && mode !== "idle";
 
   return (
-    <div>
+    <div className="flex h-full min-h-0 flex-col">
       {/* En-tête : indicateur de tour */}
-      <div className="mb-4 flex items-center justify-end">
+      <div className="mb-2 flex shrink-0 items-center justify-end">
         <span
           className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${
             isMyTurn
@@ -49,18 +52,18 @@ export function GuessWhoBoard({
         </span>
       </div>
 
-      {/* Grille 5×5 */}
-      <div className="grid grid-cols-5 gap-2 sm:gap-3">
+      {/* Grille 5×5 : remplit la hauteur disponible (aucun scroll) */}
+      <div className="mx-auto grid min-h-0 w-full max-w-[38rem] flex-1 grid-cols-5 grid-rows-5 gap-1.5 sm:gap-2">
         {characters.map((char) => {
           const isEliminated = eliminated.has(char.id);
-          const isSecret = mySecret?.id === char.id;
+          const isSecret = !hideSecret && mySecret?.id === char.id;
           return (
             <button
               key={char.id}
               type="button"
               disabled={!interactive || pending}
               onClick={() => onCardClick(char.id)}
-              className={`group relative aspect-[3/4] overflow-hidden rounded-xl border bg-void-800 transition-all ${
+              className={`group relative min-h-0 overflow-hidden rounded-lg border bg-void-800 transition-all ${
                 isSecret ? "border-domain-light" : "border-white/10"
               } ${isEliminated ? "opacity-25" : "opacity-100"} ${
                 interactive
@@ -69,11 +72,11 @@ export function GuessWhoBoard({
               }`}
             >
               <CharacterImage character={char} />
-              <span className="absolute inset-x-0 bottom-0 truncate bg-void-900/80 px-1.5 py-1 text-center text-[0.6rem] font-semibold text-white/90 sm:text-xs">
+              <span className="absolute inset-x-0 bottom-0 truncate bg-void-900/80 px-1 py-0.5 text-center text-[0.55rem] font-semibold text-white/90 sm:text-[0.65rem]">
                 {char.name}
               </span>
               {isSecret && (
-                <span className="absolute right-1 top-1 rounded-full bg-domain px-1.5 py-0.5 text-[0.55rem] font-bold uppercase text-white">
+                <span className="absolute right-1 top-1 rounded-full bg-domain px-1.5 py-0.5 text-[0.5rem] font-bold uppercase text-white">
                   Secret
                 </span>
               )}
@@ -83,12 +86,12 @@ export function GuessWhoBoard({
       </div>
 
       {/* Actions */}
-      <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+      <div className="mt-3 flex shrink-0 flex-wrap items-center justify-center gap-2">
         <button
           type="button"
           disabled={!isMyTurn || pending}
           onClick={onPass}
-          className="rounded-xl border border-white/15 bg-white/5 px-5 py-3 font-display text-sm font-bold uppercase tracking-wide text-white/80 transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 font-display text-sm font-bold uppercase tracking-wide text-white/80 transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
         >
           Passer le tour
         </button>
@@ -96,7 +99,7 @@ export function GuessWhoBoard({
           type="button"
           disabled={!isMyTurn || pending}
           onClick={() => onSetMode(mode === "eliminate" ? "idle" : "eliminate")}
-          className={`rounded-xl border px-5 py-3 font-display text-sm font-bold uppercase tracking-wide transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+          className={`rounded-xl border px-4 py-2 font-display text-sm font-bold uppercase tracking-wide transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
             mode === "eliminate"
               ? "border-domain bg-domain/20 text-domain-light"
               : "border-white/15 bg-white/5 text-white/80 hover:bg-white/10"
@@ -108,7 +111,7 @@ export function GuessWhoBoard({
           type="button"
           disabled={!isMyTurn || pending}
           onClick={() => onSetMode(mode === "guess" ? "idle" : "guess")}
-          className={`rounded-xl border px-5 py-3 font-display text-sm font-bold uppercase tracking-wide transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+          className={`rounded-xl border px-4 py-2 font-display text-sm font-bold uppercase tracking-wide transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
             mode === "guess"
               ? "border-cursed bg-cursed/20 text-cursed-light"
               : "border-cursed/40 bg-cursed/10 text-cursed-light hover:bg-cursed/20"
@@ -118,7 +121,7 @@ export function GuessWhoBoard({
         </button>
       </div>
 
-      <p className="mt-3 text-center text-xs text-white/35">
+      <p className="mt-2 shrink-0 text-center text-xs text-white/35">
         {mode === "eliminate"
           ? "Clique sur les cartes pour les griser (privé). Reclique pour restaurer."
           : mode === "guess"

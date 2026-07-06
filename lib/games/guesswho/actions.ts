@@ -18,12 +18,13 @@ import type { MpResult } from "@/lib/multiplayer/actions";
 import { awardExp, refreshLevelAndBadges } from "@/lib/progress/recompute";
 import { guessWhoLossExp, guessWhoWinExp } from "@/lib/progress/exp-rewards";
 import { GUESSWHO_EVENTS } from "./events";
-import { toPublicState } from "./load";
+import { secretForUser, toPublicState } from "./load";
 import {
   GUESSWHO_CHAT_MAX,
   GUESSWHO_GRID,
   GUESSWHO_PLAYERS,
   type GuessWhoChatMessage,
+  type GuessWhoEliminationsPayload,
   type GuessWhoGuessResultPayload,
   type GuessWhoStartPayload,
   type GuessWhoStatePayload,
@@ -193,6 +194,22 @@ export async function getMySecretAction(codeRaw: string): Promise<SecretResult> 
   return { ok: true, secretId };
 }
 
+export async function peekAction(codeRaw: string): Promise<{ id: string | null }> {
+  const user = await getCurrentUser();
+  if (!user) return { id: null };
+  const lobby = await findLobby(normalizeCode(codeRaw));
+  if (!lobby || lobby.gameId !== "guesswho") return { id: null };
+  const game = await prisma.guessWhoGame.findUnique({ where: { lobbyId: lobby.id } });
+  if (!game) return { id: null };
+  const opponentId =
+    user.id === game.player1Id
+      ? game.player2Id
+      : user.id === game.player2Id
+        ? game.player1Id
+        : null;
+  return { id: opponentId ? secretForUser(game, opponentId) : null };
+}
+
 /** Passe le tour à l'adversaire (uniquement pendant son propre tour). */
 export async function passTurnAction(codeRaw: string): Promise<MpResult> {
   const user = await getCurrentUser();
@@ -311,6 +328,34 @@ export async function sendChatAction(
     at: Date.now(),
   };
   await triggerLobby(code, GUESSWHO_EVENTS.chat, message);
+  return { ok: true };
+}
+
+/**
+ * Diffuse les éliminations (cartes grisées) du joueur appelant : l'adversaire
+ * suit ainsi son plateau en direct. Éphémère (non persisté), comme le chat.
+ */
+export async function updateEliminationsAction(
+  codeRaw: string,
+  eliminatedIdsRaw: string[],
+): Promise<MpResult> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, needsAuth: true };
+
+  const code = normalizeCode(codeRaw);
+  const lobby = await findLobby(code);
+  if (!lobby || lobby.gameId !== "guesswho") return { ok: false, error: "Lobby introuvable." };
+  if (!lobby.players.some((p) => p.userId === user.id)) {
+    return { ok: false, error: "Tu ne fais pas partie de ce lobby." };
+  }
+
+  // Défensif : on borne à la taille de grille et on ne garde que des chaînes.
+  const eliminatedIds = Array.from(
+    new Set(eliminatedIdsRaw.filter((id) => typeof id === "string")),
+  ).slice(0, GUESSWHO_GRID);
+
+  const payload: GuessWhoEliminationsPayload = { userId: user.id, eliminatedIds };
+  await triggerLobby(code, GUESSWHO_EVENTS.eliminations, payload);
   return { ok: true };
 }
 

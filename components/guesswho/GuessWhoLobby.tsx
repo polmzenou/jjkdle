@@ -21,13 +21,16 @@ import {
   joinGuessWhoLobbyAction,
   leaveGuessWhoAction,
   passTurnAction,
+  peekAction,
   playAgainGuessWhoAction,
   sendChatAction,
   startGuessWhoAction,
+  updateEliminationsAction,
 } from "@/lib/games/guesswho/actions";
 import { GUESSWHO_EVENTS, lobbyChannel } from "@/lib/games/guesswho/events";
 import type {
   GuessWhoChatMessage,
+  GuessWhoEliminationsPayload,
   GuessWhoGuessResultPayload,
   GuessWhoPublicState,
   GuessWhoStartPayload,
@@ -36,6 +39,7 @@ import type {
 } from "@/lib/games/guesswho/types";
 import { GuessWhoBoard, type BoardMode } from "./GuessWhoBoard";
 import { GuessWhoSecretPanel } from "./GuessWhoSecretPanel";
+import { GuessWhoOpponentDeck } from "./GuessWhoOpponentDeck";
 import { GuessWhoChat } from "./GuessWhoChat";
 import { GuessConfirmModal } from "./GuessConfirmModal";
 import { GuessWhoResultModal } from "./GuessWhoResultModal";
@@ -67,6 +71,11 @@ export function GuessWhoLobby({
   const [messages, setMessages] = useState<GuessWhoChatMessage[]>([]);
   const [mode, setMode] = useState<BoardMode>("idle");
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [hideSecret, setHideSecret] = useState(false);
+  const [peek, setPeek] = useState<string | null>(null);
+  const [opponentEliminated, setOpponentEliminated] = useState<Set<string>>(
+    new Set(),
+  );
   const [connError, setConnError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -82,6 +91,15 @@ export function GuessWhoLobby({
     });
   }, [code]);
 
+  const resetLocalGame = useCallback(() => {
+    setEliminated(new Set());
+    setOpponentEliminated(new Set());
+    setMode("idle");
+    setConfirmId(null);
+    setHideSecret(false);
+    setPeek(null);
+  }, []);
+
   // ── Abonnement temps réel ──
   useEffect(() => {
     if (!pusherReady || !isMember) return;
@@ -95,9 +113,7 @@ export function GuessWhoLobby({
       // Retour au salon (play-again / forfait) : on réinitialise l'état local.
       if (!payload.publicState) {
         setMySecretId(null);
-        setEliminated(new Set());
-        setMode("idle");
-        setConfirmId(null);
+        resetLocalGame();
       }
     });
 
@@ -109,9 +125,7 @@ export function GuessWhoLobby({
         status: "ACTIVE",
         winnerId: null,
       });
-      setEliminated(new Set());
-      setMode("idle");
-      setConfirmId(null);
+      resetLocalGame();
       fetchMySecret();
     });
 
@@ -124,6 +138,15 @@ export function GuessWhoLobby({
     channel.bind(GUESSWHO_EVENTS.chat, (msg: GuessWhoChatMessage) => {
       setMessages((prev) => [...prev, msg]);
     });
+
+    channel.bind(
+      GUESSWHO_EVENTS.eliminations,
+      (payload: GuessWhoEliminationsPayload) => {
+        // On n'affiche que le plateau de l'ADVERSAIRE (le nôtre est déjà local).
+        if (payload.userId === currentUserId) return;
+        setOpponentEliminated(new Set(payload.eliminatedIds));
+      },
+    );
 
     channel.bind(
       GUESSWHO_EVENTS.guessResult,
@@ -163,7 +186,7 @@ export function GuessWhoLobby({
       client.unsubscribe(lobbyChannel(code));
       client.disconnect();
     };
-  }, [pusherReady, isMember, code, currentUserId, fetchMySecret]);
+  }, [pusherReady, isMember, code, currentUserId, fetchMySecret, resetLocalGame]);
 
   // ── Actions ──
   const handleStart = useCallback(() => {
@@ -184,17 +207,17 @@ export function GuessWhoLobby({
   const handleCardClick = useCallback(
     (id: string) => {
       if (mode === "eliminate") {
-        setEliminated((prev) => {
-          const next = new Set(prev);
-          if (next.has(id)) next.delete(id);
-          else next.add(id);
-          return next;
-        });
+        const next = new Set(eliminated);
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
+        setEliminated(next);
+        // Diffuse en direct notre plateau à l'adversaire (éphémère).
+        void updateEliminationsAction(code, [...next]);
       } else if (mode === "guess") {
         setConfirmId(id);
       }
     },
-    [mode],
+    [mode, eliminated, code],
   );
 
   const handleConfirmGuess = useCallback(() => {
@@ -215,6 +238,16 @@ export function GuessWhoLobby({
     },
     [code],
   );
+
+  const handlePeek = useCallback(() => {
+    if (peek) {
+      setPeek(null);
+      return;
+    }
+    void peekAction(code).then((r) => {
+      if (r.id) setPeek(rosterMap[r.id]?.name ?? null);
+    });
+  }, [peek, code, rosterMap]);
 
   const handlePlayAgain = useCallback(() => {
     startTransition(async () => {
@@ -298,15 +331,23 @@ export function GuessWhoLobby({
     );
   }
 
+  const playing = lobby.status !== "WAITING";
+
   return (
-    <main className="mx-auto min-h-screen w-full max-w-[100rem] px-3 py-8 sm:px-6">
+    <main
+      className={
+        playing
+          ? "mx-auto flex h-[100dvh] w-full max-w-[110rem] flex-col overflow-hidden px-3 py-4 sm:px-6"
+          : "mx-auto min-h-screen w-full max-w-[100rem] px-3 py-8 sm:px-6"
+      }
+    >
       {connError && (
-        <p className="mb-4 rounded-xl border border-cursed/30 bg-cursed/10 px-4 py-2 text-center text-sm text-cursed-light">
+        <p className="mb-3 shrink-0 rounded-xl border border-cursed/30 bg-cursed/10 px-4 py-2 text-center text-sm text-cursed-light">
           {connError}
         </p>
       )}
 
-      {lobby.status === "WAITING" ? (
+      {!playing ? (
         <WaitingRoom
           lobby={lobby}
           currentUserId={currentUserId}
@@ -318,7 +359,7 @@ export function GuessWhoLobby({
         />
       ) : (
         <>
-        <div className="mb-6 flex items-center justify-between gap-3">
+        <div className="mb-3 flex shrink-0 items-center justify-between gap-3">
           <p className="font-display text-lg font-bold text-white">
             Qui est-ce ?{" "}
             <span className="ml-1 text-sm font-normal tracking-[0.3em] text-white/40">
@@ -334,8 +375,14 @@ export function GuessWhoLobby({
             Quitter la partie
           </button>
         </div>
-        <div className="grid gap-6 lg:grid-cols-[13rem_1fr_20rem] xl:grid-cols-[15rem_1fr_22rem]">
-          <GuessWhoSecretPanel secret={mySecret} />
+        <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[13rem_1fr_20rem] xl:grid-cols-[15rem_1fr_22rem]">
+          <GuessWhoSecretPanel
+            secret={mySecret}
+            hidden={hideSecret}
+            onToggleHidden={() => setHideSecret((v) => !v)}
+            peek={peek}
+            onPeek={handlePeek}
+          />
           {publicState && (
             <GuessWhoBoard
               characters={gridChars}
@@ -343,17 +390,27 @@ export function GuessWhoLobby({
               mode={mode}
               isMyTurn={Boolean(isMyTurn)}
               mySecret={mySecret}
+              hideSecret={hideSecret}
               pending={pending}
               onCardClick={handleCardClick}
               onSetMode={setMode}
               onPass={handlePass}
             />
           )}
-          <GuessWhoChat
-            messages={messages}
-            currentUserId={currentUserId}
-            onSend={handleSendChat}
-          />
+          {/* Colonne droite : chat réduit en haut, deck adverse en direct dessous. */}
+          <div className="flex min-h-0 flex-col gap-4">
+            <div className="min-h-0 basis-2/5">
+              <GuessWhoChat
+                messages={messages}
+                currentUserId={currentUserId}
+                onSend={handleSendChat}
+              />
+            </div>
+            <GuessWhoOpponentDeck
+              characters={gridChars}
+              eliminated={opponentEliminated}
+            />
+          </div>
         </div>
         </>
       )}
