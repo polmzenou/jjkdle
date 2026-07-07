@@ -7,8 +7,9 @@ import { topEntries, type LeaderboardGame } from "@/lib/leaderboard/store";
  * GET /api/leaderboard?game=builder&limit=20
  *   → top scores du jeu demandé (ou des deux jeux si `game` absent).
  *
- * L'enregistrement d'un score se fait via Server Action (submitScoreAction),
- * qui exige une session authentifiée — il n'y a donc pas de POST ici.
+ * L'enregistrement d'un score se fait côté serveur, à la fin de partie, par les
+ * Server Actions AUTORITATIVES de chaque jeu (le score y est recalculé, jamais
+ * fourni par le client) — il n'y a donc pas de POST ici.
  */
 
 export const dynamic = "force-dynamic";

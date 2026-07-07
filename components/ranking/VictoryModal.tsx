@@ -1,8 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { RankingCard, LOCK_COLOR } from "./RankingCard";
-import { SubmitScore } from "@/components/leaderboard/SubmitScore";
 import { ExpReward } from "@/components/progress/ExpReward";
 import { formatScore } from "@/lib/format";
 
@@ -13,8 +13,9 @@ interface VictoryModalProps {
   score: number;
   bestScore: number;
   isNewRecord: boolean;
-  isAuthed: boolean;
-  /** XP empochée automatiquement (null = pas encore résolue / non connecté). */
+  /** true si le joueur n'est pas connecté (score NON enregistré au classement). */
+  needsAuth: boolean;
+  /** XP empochée automatiquement (null = non connecté). */
   gainedExp: number | null;
   /** Badges débloqués par l'octroi d'XP. */
   expBadges: string[];
@@ -28,7 +29,7 @@ export function VictoryModal({
   score,
   bestScore,
   isNewRecord,
-  isAuthed,
+  needsAuth,
   gainedExp,
   expBadges,
   onReplay,
@@ -84,7 +85,24 @@ export function VictoryModal({
           ))}
         </div>
 
-        <SubmitScore score={score} game="ranking" isAuthed={isAuthed} />
+        {needsAuth ? (
+          <div className="mt-5 rounded-xl border border-amber-300/30 bg-amber-300/5 px-4 py-3 text-sm">
+            <p className="text-white/70">
+              🔒 Connecte-toi pour gagner de l&apos;XP, enregistrer ton score et
+              apparaître au classement.
+            </p>
+            <Link
+              href="/login"
+              className="mt-2 inline-block font-display text-xs font-bold uppercase tracking-wide text-amber-200 underline-offset-4 hover:underline"
+            >
+              Se connecter / créer un compte →
+            </Link>
+          </div>
+        ) : (
+          <p className="mt-5 rounded-xl border border-amber-300/30 bg-amber-300/5 px-4 py-3 text-sm font-semibold text-amber-200">
+            ✓ Score enregistré au classement&nbsp;!
+          </p>
+        )}
 
         <button
           type="button"

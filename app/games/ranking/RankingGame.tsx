@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import {
   DndContext,
@@ -13,20 +13,14 @@ import {
   type DragStartEvent,
   type DragEndEvent,
 } from "@dnd-kit/core";
-import type { RankingCondition } from "@/data/ranking/conditions";
 import { SLOT_COUNT } from "@/data/ranking/conditions";
 import {
-  MAX_ATTEMPTS,
-  checkPlacement,
-  isComplete,
-  pickRandomCondition,
-  scoreForAttempt,
-  shuffledPool,
-} from "@/lib/ranking/ranking";
-import { saveBestScore } from "@/lib/bestScore";
-import { awardGameExpAction } from "@/lib/leaderboard/actions";
+  startRankingRun,
+  checkRankingRun,
+  type RankingStartResult,
+} from "./actions";
+import type { RankingCardData } from "./types";
 import { formatScore } from "@/lib/format";
-import type { Character } from "@/data/roster/characters";
 import { RosterProvider } from "@/components/ranking/RosterContext";
 import { RankingSlot } from "@/components/ranking/RankingSlot";
 import { CharacterPool } from "@/components/ranking/CharacterPool";
@@ -38,31 +32,24 @@ import { Logo } from "@/components/Logo";
 
 interface RankingGameProps {
   initialBestScore: number;
-  isAuthed: boolean;
-  /** Conditions du jeu (depuis la base). */
-  conditions: RankingCondition[];
-  /** Roster indexé par id, pour résoudre les cartes côté client. */
-  characterById: Record<string, Character>;
 }
 
 type Status = "playing" | "won" | "lost";
 
+/** Intitulé de la manche courante (visuel seul, sans le classement correct). */
+type Prompt = { pool: string; category: string; prompt: string };
+
 const emptySlots = () => Array<string | null>(SLOT_COUNT).fill(null);
 const emptyFlags = () => Array<boolean>(SLOT_COUNT).fill(false);
 
-export function RankingGame({
-  initialBestScore,
-  isAuthed,
-  conditions,
-  characterById,
-}: RankingGameProps) {
-  // Conditions lues via une ref : `startNewGame` reste à deps [] (identité
-  // stable) pour ne pas réinitialiser la partie lors d'un refresh de route
-  // (déclenché par la soumission de score au leaderboard).
-  const conditionsRef = useRef(conditions);
-  conditionsRef.current = conditions;
-  // Tiré côté client (post-montage) pour éviter le mismatch d'hydratation.
-  const [condition, setCondition] = useState<RankingCondition | null>(null);
+/**
+ * JJK Pyramid — le CLIENT ne connaît jamais le classement correct : il reçoit 8
+ * cartes mélangées de `startRankingRun`, et chaque « Vérifier » est validé par
+ * `checkRankingRun` (score + XP + classement côté serveur). Voir app/games/ranking/actions.ts.
+ */
+export function RankingGame({ initialBestScore }: RankingGameProps) {
+  const [prompt, setPrompt] = useState<Prompt | null>(null);
+  const [cardsById, setCardsById] = useState<Record<string, RankingCardData>>({});
   const [poolOrder, setPoolOrder] = useState<string[]>([]);
   const [slots, setSlots] = useState<(string | null)[]>(emptySlots);
   const [locked, setLocked] = useState<boolean[]>(emptyFlags);
@@ -72,26 +59,24 @@ export function RankingGame({
   const [score, setScore] = useState(0);
   const [bestScore, setBestScore] = useState(initialBestScore);
   const [isNewRecord, setIsNewRecord] = useState(false);
-  // XP empochée automatiquement à la victoire (sans enregistrer au classement).
   const [gainedExp, setGainedExp] = useState<number | null>(null);
   const [expBadges, setExpBadges] = useState<string[]>([]);
+  const [order, setOrder] = useState<string[]>([]);
+  const [needsAuth, setNeedsAuth] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
-  // Mémorise la condition courante pour ne jamais la retirer 2 fois de suite.
-  const lastConditionId = useRef<string | undefined>(undefined);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+  const [loading, setLoading] = useState(true);
 
-  // Stable (deps []) : l'init ne doit tourner qu'au montage. Sinon un refresh de
-  // route (déclenché par le Server Action saveBestScore) réinitialiserait la
-  // partie et ferait disparaître le modal de victoire.
-  const startNewGame = useCallback(() => {
-    if (conditionsRef.current.length === 0) return;
-    const c = pickRandomCondition(
-      conditionsRef.current,
-      Math.random,
-      lastConditionId.current,
-    );
-    lastConditionId.current = c.id;
-    setCondition(c);
-    setPoolOrder(shuffledPool(c));
+  const applyStart = useCallback((res: RankingStartResult) => {
+    if (!res.ok) {
+      setError(res.error);
+      setLoading(false);
+      return;
+    }
+    setPrompt({ pool: res.pool, category: res.category, prompt: res.prompt });
+    setCardsById(Object.fromEntries(res.cards.map((c) => [c.id, c])));
+    setPoolOrder(res.cards.map((c) => c.id));
     setSlots(emptySlots());
     setLocked(emptyFlags());
     setWrongFlash(emptyFlags());
@@ -101,18 +86,28 @@ export function RankingGame({
     setIsNewRecord(false);
     setGainedExp(null);
     setExpBadges([]);
+    setOrder([]);
+    setNeedsAuth(false);
     setActiveId(null);
+    setError(null);
+    setLoading(false);
   }, []);
 
+  const startNewGame = useCallback(() => {
+    setLoading(true);
+    startTransition(async () => {
+      applyStart(await startRankingRun());
+    });
+  }, [applyStart]);
+
+  // Démarrage au montage.
   useEffect(() => {
     startNewGame();
-  }, [startNewGame]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Personnages restant à placer (ordre d'affichage stable, mélangé une fois).
-  const poolIds = useMemo(
-    () => poolOrder.filter((id) => !slots.includes(id)),
-    [poolOrder, slots],
-  );
+  const poolIds = poolOrder.filter((id) => !slots.includes(id));
   const allFilled = slots.every((s) => s !== null);
 
   const placeInSlot = useCallback(
@@ -142,7 +137,6 @@ export function RankingGame({
     [locked],
   );
 
-  // Tap-to-place : place dans le 1er slot libre non verrouillé.
   const tapPlaceFromPool = useCallback(
     (charId: string) => {
       const idx = slots.findIndex((s, i) => s === null && !locked[i]);
@@ -182,62 +176,64 @@ export function RankingGame({
   };
 
   const handleCheck = useCallback(() => {
-    if (!condition || !allFilled || status !== "playing") return;
+    if (!allFilled || status !== "playing" || pending) return;
+    const placement = slots as string[]; // allFilled garantit l'absence de null
 
-    const flags = checkPlacement(slots, condition.order);
-    const newLocked = locked.map((l, i) => l || flags[i]);
-
-    if (isComplete(flags)) {
-      const earned = scoreForAttempt(attempt);
-      setLocked(newLocked);
-      setStatus("won");
-      setScore(earned);
-      void saveBestScore("ranking", earned).then((r) => {
-        setBestScore(r.best);
-        setIsNewRecord(r.isNewRecord);
-      });
-      // XP empochée automatiquement (connecté) — indépendant du classement.
-      if (isAuthed) {
-        void awardGameExpAction(earned, "ranking").then((res) => {
-          if (res.ok) {
-            setGainedExp(res.gainedExp ?? 0);
-            setExpBadges(res.newBadges ?? []);
-          }
-        });
+    startTransition(async () => {
+      const res = await checkRankingRun(placement);
+      if (!res.ok) {
+        if (res.needsRestart) {
+          startNewGame();
+        } else {
+          setError(res.error);
+        }
+        return;
       }
-      return;
-    }
 
-    // Échec : verrouille les bons, flash rouge + renvoi des faux au pool.
-    const wrong = slots.map((s, i) => s !== null && !flags[i] && !locked[i]);
-    setLocked(newLocked);
-    setWrongFlash(wrong);
-    setTimeout(() => {
-      setSlots((prev) => prev.map((s, i) => (wrong[i] ? null : s)));
-      setWrongFlash(emptyFlags());
-    }, 500);
+      const flags = res.flags;
+      setLocked((prev) => prev.map((l, i) => l || flags[i]));
 
-    if (attempt >= MAX_ATTEMPTS) {
-      setStatus("lost");
-    } else {
-      setAttempt((a) => a + 1);
-    }
-  }, [condition, allFilled, status, slots, locked, attempt, isAuthed]);
+      if (res.status === "won") {
+        setStatus("won");
+        setScore(res.score);
+        setOrder(res.order);
+        setBestScore(res.bestScore);
+        setIsNewRecord(res.isNewRecord);
+        setGainedExp(res.gainedExp);
+        setExpBadges(res.newBadges);
+        setNeedsAuth(res.needsAuth);
+        return;
+      }
 
-  if (conditions.length === 0) {
+      if (res.status === "lost") {
+        setStatus("lost");
+        setOrder(res.order);
+        return;
+      }
+
+      // playing : flash rouge sur les positions fausses, renvoyées au pool.
+      setAttempt(res.attempt);
+      const wrong = slots.map((s, i) => s !== null && !flags[i] && !locked[i]);
+      setWrongFlash(wrong);
+      setTimeout(() => {
+        setSlots((prev) => prev.map((s, i) => (wrong[i] ? null : s)));
+        setWrongFlash(emptyFlags());
+      }, 500);
+    });
+  }, [allFilled, status, pending, slots, locked, startNewGame]);
+
+  if (error && !prompt) {
     return (
-      <p className="py-24 text-center text-white/40">
-        Aucune condition disponible pour le moment.
-      </p>
+      <p className="py-24 text-center text-white/40">{error}</p>
     );
   }
 
-  if (!condition) {
+  if (loading || !prompt) {
     return <p className="py-24 text-center text-white/40">Chargement…</p>;
   }
 
   return (
-    <RosterProvider value={characterById}>
+    <RosterProvider value={cardsById}>
     <div>
       {/* En-tête */}
       <header className="mb-4 flex items-center justify-between py-4">
@@ -261,17 +257,17 @@ export function RankingGame({
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-domain/15 px-2.5 py-0.5 text-xs font-semibold text-domain-light">
-              {condition.pool}
+              {prompt.pool}
             </span>
             <span className="rounded-full border border-white/10 bg-void-700/50 px-2.5 py-0.5 text-xs font-semibold text-white">
-              {condition.category}
+              {prompt.category}
             </span>
           </div>
           <p className="text-xs text-white/45">
             Rank 1 to 8 · 4 attempts · Correct positions lock
           </p>
         </div>
-        <p className="mt-1 text-sm text-white/65">{condition.prompt}</p>
+        <p className="mt-1 text-sm text-white/65">{prompt.prompt}</p>
       </div>
 
       <DndContext
@@ -319,16 +315,16 @@ export function RankingGame({
         </DragOverlay>
       </DndContext>
 
-      <AttemptsBar attempt={attempt} canCheck={allFilled} onCheck={handleCheck} />
+      <AttemptsBar attempt={attempt} canCheck={allFilled && !pending} onCheck={handleCheck} />
 
       {status === "won" && (
         <VictoryModal
-          order={condition.order}
-          category={condition.category}
+          order={order}
+          category={prompt.category}
           score={score}
           bestScore={bestScore}
           isNewRecord={isNewRecord}
-          isAuthed={isAuthed}
+          needsAuth={needsAuth}
           gainedExp={gainedExp}
           expBadges={expBadges}
           onReplay={startNewGame}
@@ -336,8 +332,8 @@ export function RankingGame({
       )}
       {status === "lost" && (
         <GameOverScreen
-          order={condition.order}
-          category={condition.category}
+          order={order}
+          category={prompt.category}
           onRetry={startNewGame}
         />
       )}

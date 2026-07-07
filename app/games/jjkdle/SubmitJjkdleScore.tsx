@@ -15,7 +15,8 @@ interface SubmitJjkdleScoreProps {
  * Enregistrement du score quotidien JJKdle depuis l'écran de victoire.
  *  - non connecté → invite à se connecter (lien /login) ;
  *  - connecté → bouton « Enregistrer mon score » (essais relus côté serveur).
- * Calqué sur components/leaderboard/SubmitScore.tsx.
+ * Le nombre d'essais est AUTORITATIF (relu depuis l'état serveur scellé), jamais
+ * fourni par le client.
  */
 export function SubmitJjkdleScore({ isAuthed }: SubmitJjkdleScoreProps) {
   const router = useRouter();

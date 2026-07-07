@@ -1,6 +1,4 @@
 import { getBestScore } from "@/lib/bestScore";
-import { getCurrentUser } from "@/lib/auth/session";
-import { getConditions, getCharacterMap } from "@/lib/content/queries";
 import { Leaderboard } from "@/components/leaderboard/Leaderboard";
 import { parseScope } from "@/lib/leaderboard/store";
 import { redirect } from "next/navigation";
@@ -24,22 +22,14 @@ export default async function RankingPage({
   searchParams: Promise<{ scope?: string }>;
 }) {
   if (!(await isGameEnabled("ranking"))) redirect("/games");
-  const [{ scope }, bestScore, user, conditions, characterById] = await Promise.all([
+  const [{ scope }, bestScore] = await Promise.all([
     searchParams,
     getBestScore("ranking"),
-    getCurrentUser(),
-    getConditions(),
-    getCharacterMap(),
   ]);
 
   return (
     <main className="mx-auto max-w-6xl px-4 pb-24 sm:px-6">
-      <RankingGame
-        initialBestScore={bestScore}
-        isAuthed={Boolean(user)}
-        conditions={conditions}
-        characterById={characterById}
-      />
+      <RankingGame initialBestScore={bestScore} />
 
       <div className="mt-10">
         <Leaderboard game="ranking" limit={8} scope={parseScope(scope)} />

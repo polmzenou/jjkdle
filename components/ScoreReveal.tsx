@@ -1,12 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import type { GradeTier } from "@/lib/scoring/grades";
 import type { CategoryBreakdown } from "@/lib/scoring/scoring";
 import { MAX_SCORE } from "@/lib/scoring/scoring";
 import { CategoryTile } from "./CategoryTile";
-import { SubmitScore } from "./leaderboard/SubmitScore";
 import { ExpReward } from "./progress/ExpReward";
 
 interface ScoreRevealProps {
@@ -15,8 +15,9 @@ interface ScoreRevealProps {
   breakdown: CategoryBreakdown[];
   bestScore: number;
   isNewRecord: boolean;
-  isAuthed: boolean;
-  /** XP empochée automatiquement (null = pas encore résolue / non connecté). */
+  /** true si le joueur n'est pas connecté (score NON enregistré au classement). */
+  needsAuth: boolean;
+  /** XP empochée automatiquement (null = non connecté). */
   gainedExp: number | null;
   /** Badges débloqués par l'octroi d'XP. */
   expBadges: string[];
@@ -29,7 +30,7 @@ export function ScoreReveal({
   breakdown,
   bestScore,
   isNewRecord,
-  isAuthed,
+  needsAuth,
   gainedExp,
   expBadges,
   onRestart,
@@ -96,8 +97,25 @@ export function ScoreReveal({
         ))}
       </div>
 
-      <div className="mx-auto max-w-sm">
-        <SubmitScore score={score} game="builder" isAuthed={isAuthed} />
+      <div className="mx-auto mt-5 max-w-sm">
+        {needsAuth ? (
+          <div className="rounded-xl border border-amber-300/30 bg-amber-300/5 px-4 py-3 text-sm">
+            <p className="text-white/70">
+              🔒 Connecte-toi pour gagner de l&apos;XP, enregistrer ton score et
+              apparaître au classement.
+            </p>
+            <Link
+              href="/login"
+              className="mt-2 inline-block font-display text-xs font-bold uppercase tracking-wide text-amber-200 underline-offset-4 hover:underline"
+            >
+              Se connecter / créer un compte →
+            </Link>
+          </div>
+        ) : (
+          <p className="rounded-xl border border-amber-300/30 bg-amber-300/5 px-4 py-3 text-sm font-semibold text-amber-200">
+            ✓ Score enregistré au classement&nbsp;!
+          </p>
+        )}
       </div>
 
       <button

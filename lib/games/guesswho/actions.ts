@@ -18,7 +18,7 @@ import type { MpResult } from "@/lib/multiplayer/actions";
 import { awardExp, refreshLevelAndBadges } from "@/lib/progress/recompute";
 import { guessWhoLossExp, guessWhoWinExp } from "@/lib/progress/exp-rewards";
 import { GUESSWHO_EVENTS } from "./events";
-import { secretForUser, toPublicState } from "./load";
+import { toPublicState } from "./load";
 import {
   GUESSWHO_CHAT_MAX,
   GUESSWHO_GRID,
@@ -192,22 +192,6 @@ export async function getMySecretAction(codeRaw: string): Promise<SecretResult> 
         ? game.secret2Id
         : null;
   return { ok: true, secretId };
-}
-
-export async function peekAction(codeRaw: string): Promise<{ id: string | null }> {
-  const user = await getCurrentUser();
-  if (!user) return { id: null };
-  const lobby = await findLobby(normalizeCode(codeRaw));
-  if (!lobby || lobby.gameId !== "guesswho") return { id: null };
-  const game = await prisma.guessWhoGame.findUnique({ where: { lobbyId: lobby.id } });
-  if (!game) return { id: null };
-  const opponentId =
-    user.id === game.player1Id
-      ? game.player2Id
-      : user.id === game.player2Id
-        ? game.player1Id
-        : null;
-  return { id: opponentId ? secretForUser(game, opponentId) : null };
 }
 
 /**

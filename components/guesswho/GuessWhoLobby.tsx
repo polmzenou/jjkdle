@@ -22,7 +22,6 @@ import {
   leaveGuessWhoAction,
   getSpectatorSecretsAction,
   passTurnAction,
-  peekAction,
   playAgainGuessWhoAction,
   sendChatAction,
   startGuessWhoAction,
@@ -74,7 +73,6 @@ export function GuessWhoLobby({
   const [mode, setMode] = useState<BoardMode>("idle");
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [hideSecret, setHideSecret] = useState(false);
-  const [peek, setPeek] = useState<string | null>(null);
   const [opponentEliminated, setOpponentEliminated] = useState<Set<string>>(
     new Set(),
   );
@@ -107,7 +105,6 @@ export function GuessWhoLobby({
     setMode("idle");
     setConfirmId(null);
     setHideSecret(false);
-    setPeek(null);
   }, []);
 
   // ── Abonnement temps réel (joueurs ET spectateurs) ──
@@ -259,7 +256,6 @@ export function GuessWhoLobby({
     },
     [code],
   );
-
 
   const handlePlayAgain = useCallback(() => {
     startTransition(async () => {
@@ -472,7 +468,6 @@ export function GuessWhoLobby({
             secret={mySecret}
             hidden={hideSecret}
             onToggleHidden={() => setHideSecret((v) => !v)}
-            peek={peek}
           />
           {publicState && (
             <GuessWhoBoard

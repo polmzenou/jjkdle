@@ -1,22 +1,23 @@
 "use client";
 
 import { createContext, useContext } from "react";
-import type { Character } from "@/data/roster/characters";
+import type { RankingCardData } from "@/app/games/ranking/types";
 
 /**
- * Fournit le roster (indexé par id) aux composants client du jeu Pyramid.
+ * Fournit les cartes en jeu (indexées par id) aux composants client du jeu Pyramid.
  *
- * Le roster vit désormais en base : la page serveur le charge et le passe ici,
- * pour que les cartes (`RankingCard`) résolvent un personnage par id sans
- * import statique de données.
+ * Anti-triche : ce ne sont PAS des personnages complets mais des données
+ * d'affichage réduites (id/nom/titre/image), sans AUCUNE statistique — sinon un
+ * joueur pourrait re-trier par la stat du critère pour deviner le classement.
+ * Les 8 cartes sont fournies par la Server Action `startRankingRun`.
  */
-const RosterContext = createContext<Record<string, Character>>({});
+const RosterContext = createContext<Record<string, RankingCardData>>({});
 
 export function RosterProvider({
   value,
   children,
 }: {
-  value: Record<string, Character>;
+  value: Record<string, RankingCardData>;
   children: React.ReactNode;
 }) {
   return (
@@ -24,7 +25,7 @@ export function RosterProvider({
   );
 }
 
-/** Résout un personnage par id depuis le roster fourni (ou undefined). */
-export function useCharacter(id: string): Character | undefined {
+/** Résout une carte par id depuis les cartes fournies (ou undefined). */
+export function useCharacter(id: string): RankingCardData | undefined {
   return useContext(RosterContext)[id];
 }

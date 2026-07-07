@@ -19,7 +19,7 @@ import {
 import { updateJjkdleStreak } from "@/lib/progress/streak";
 import { awardExp, refreshLevelAndBadges } from "@/lib/progress/recompute";
 import { jjkdleExp } from "@/lib/progress/exp-rewards";
-import type { ExpResult } from "@/lib/leaderboard/actions";
+import type { ExpResult } from "@/lib/leaderboard/types";
 import {
   readState,
   writeState,
