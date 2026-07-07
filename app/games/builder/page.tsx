@@ -6,10 +6,10 @@ import { parseScope } from "@/lib/leaderboard/store";
 import { redirect } from "next/navigation";
 import { isGameEnabled } from "@/lib/config/app-config";
 import { BuilderGame } from "./BuilderGame";
+import { GameJsonLd } from "@/components/seo/JsonLd";
+import { gameMetadata } from "@/lib/seo/config";
 
-export const metadata = {
-  title: "Build the Perfect Sorcerer — JJK Arcade",
-};
+export const metadata = gameMetadata("builder");
 
 // Le leaderboard lit le fichier à chaque requête (scores à jour).
 export const dynamic = "force-dynamic";
@@ -35,6 +35,7 @@ export default async function BuilderPage({
 
   return (
     <main className="mx-auto max-w-5xl px-4 pb-16 sm:px-6">
+      <GameJsonLd id="builder" />
       <BuilderGame
         categories={categories}
         roster={roster}

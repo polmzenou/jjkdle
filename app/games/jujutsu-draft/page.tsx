@@ -6,10 +6,10 @@ import { parseScope } from "@/lib/leaderboard/store";
 import { redirect } from "next/navigation";
 import { isGameEnabled } from "@/lib/config/app-config";
 import { JujutsuDraftGame } from "./JujutsuDraftGame";
+import { GameJsonLd } from "@/components/seo/JsonLd";
+import { gameMetadata } from "@/lib/seo/config";
 
-export const metadata = {
-  title: "Jujutsu Draft — JJK Arcade",
-};
+export const metadata = gameMetadata("jujutsu-draft");
 
 // Auth par cookie + leaderboard à jour à chaque requête.
 export const dynamic = "force-dynamic";
@@ -33,6 +33,7 @@ export default async function JujutsuDraftPage({
 
   return (
     <main className="mx-auto max-w-5xl px-4 pb-24 sm:px-6">
+      <GameJsonLd id="jujutsu-draft" />
       <JujutsuDraftGame
         isAuthed={Boolean(user)}
         initialBest={initialBest}

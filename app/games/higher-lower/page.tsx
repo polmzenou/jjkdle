@@ -5,10 +5,10 @@ import { parseScope } from "@/lib/leaderboard/store";
 import { redirect } from "next/navigation";
 import { isGameEnabled } from "@/lib/config/app-config";
 import { HigherLowerGame } from "./HigherLowerGame";
+import { GameJsonLd } from "@/components/seo/JsonLd";
+import { gameMetadata } from "@/lib/seo/config";
 
-export const metadata = {
-  title: "JJK Higher/Lower — JJK Arcade",
-};
+export const metadata = gameMetadata("higher-lower");
 
 // Auth par cookie + leaderboard à jour à chaque requête.
 export const dynamic = "force-dynamic";
@@ -32,6 +32,7 @@ export default async function HigherLowerPage({
 
   return (
     <main className="mx-auto max-w-5xl px-4 pb-24 sm:px-6">
+      <GameJsonLd id="higher-lower" />
       <HigherLowerGame
         isAuthed={Boolean(user)}
         hasEnoughRoster={pool.length >= MIN_HL_POOL}

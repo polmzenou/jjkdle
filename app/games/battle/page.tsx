@@ -1,20 +1,20 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
 import { isGameEnabled } from "@/lib/config/app-config";
 import { isPusherConfigured } from "@/lib/pusher/server";
 import { MpHubForm } from "@/components/multiplayer/MpHubForm";
+import { GameJsonLd } from "@/components/seo/JsonLd";
+import { gameMetadata } from "@/lib/seo/config";
 import {
   createBattleLobbyAction,
   joinBattleLobbyAction,
 } from "@/lib/games/battle/actions";
 
-export const metadata: Metadata = {
-  title: "JJK Random Battle — JJK Arcade",
-  description:
-    "Affronte un ami en 1v1 : drafte une équipe de 5 à tour de rôle, puis laisse parler le combat.",
-};
+export const metadata = gameMetadata(
+  "battle",
+  "JJK Random Battle : affronte un ami en 1v1 sur Jujutsu Kaisen. Drafte une équipe de 5 à tour de rôle, puis laisse parler le combat.",
+);
 
 export default async function BattleHubPage() {
   if (!(await isGameEnabled("battle"))) redirect("/games");
@@ -23,6 +23,7 @@ export default async function BattleHubPage() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col px-6 py-14 sm:py-20">
+      <GameJsonLd id="battle" />
       <header className="mx-auto max-w-2xl text-center">
         <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 text-xs font-medium uppercase tracking-[0.25em] text-cursed-light backdrop-blur">
           <span className="h-1.5 w-1.5 animate-glow-pulse rounded-full bg-cursed-light" />

@@ -5,9 +5,10 @@ import { isPusherConfigured } from "@/lib/pusher/server";
 import { MpHubForm } from "@/components/multiplayer/MpHubForm";
 
 export const metadata: Metadata = {
-  title: "Multijoueur — JJK Arcade",
+  title: "Multijoueur",
   description:
     "Affronte tes amis en temps réel sur Build the Perfect Sorcerer : lobbys privés, jusqu'à 3 joueurs.",
+  alternates: { canonical: "/games/multiplayer" },
 };
 
 export default async function MultiplayerHubPage() {

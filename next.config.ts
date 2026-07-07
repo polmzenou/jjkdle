@@ -52,6 +52,10 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   // Garde le client Prisma (et son moteur natif) hors du bundle webpack serveur.
   serverExternalPackages: ["@prisma/client"],
+  // Sert AVIF/WebP quand une image passe par next/image (LCP / Core Web Vitals).
+  images: {
+    formats: ["image/avif", "image/webp"],
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

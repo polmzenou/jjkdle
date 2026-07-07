@@ -5,7 +5,7 @@ import { Logo } from "@/components/Logo";
 import { LoginForm } from "./LoginForm";
 
 export const metadata: Metadata = {
-  title: "Connexion — JJK Arcade",
+  title: "Connexion",
   robots: { index: false, follow: false },
 };
 

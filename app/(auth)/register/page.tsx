@@ -5,7 +5,7 @@ import { Logo } from "@/components/Logo";
 import { RegisterForm } from "./RegisterForm";
 
 export const metadata: Metadata = {
-  title: "Créer un compte — JJK Arcade",
+  title: "Créer un compte",
   robots: { index: false, follow: false },
 };
 

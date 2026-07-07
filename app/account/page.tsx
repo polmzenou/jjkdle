@@ -30,7 +30,7 @@ import { AccountForms } from "./AccountForms";
 import { ProfileEditor, type AvatarChoice } from "./ProfileEditor";
 
 export const metadata: Metadata = {
-  title: "Mon compte — JJK Arcade",
+  title: "Mon compte",
   robots: { index: false, follow: false },
 };
 

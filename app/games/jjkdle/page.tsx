@@ -11,10 +11,13 @@ import { JjkdleLeaderboard } from "@/components/leaderboard/JjkdleLeaderboard";
 import { parseScope } from "@/lib/leaderboard/store";
 import { prisma } from "@/lib/prisma";
 import { JJKdleGame, type PublicCharacter } from "./JJKdleGame";
+import { GameJsonLd } from "@/components/seo/JsonLd";
+import { gameMetadata } from "@/lib/seo/config";
 
-export const metadata = {
-  title: "JJKdle — JJK Arcade",
-};
+export const metadata = gameMetadata(
+  "jjkdle",
+  "JJKdle : le jeu du jour Jujutsu Kaisen. Devine le personnage JJK mystère avec des indices par attribut (race, grade, clan, arc). Un nouveau perso chaque jour, essais illimités, gratuit et sans compte.",
+);
 
 // État quotidien lu à chaque requête (cookie httpOnly) → toujours à jour.
 export const dynamic = "force-dynamic";
@@ -87,6 +90,7 @@ export default async function JjkdlePage({
 
   return (
     <main className="mx-auto max-w-5xl px-4 pb-16 sm:px-6">
+      <GameJsonLd id="jjkdle" />
       {streak > 0 && (
         <p className="mb-3 text-center text-sm font-bold text-amber-300">
           🔥 {streak} jour{streak > 1 ? "s" : ""} d&apos;affilée

@@ -30,6 +30,10 @@ export default function HomePage() {
         </span>
 
         <h1 className="mt-8 flex justify-center">
+          {/* Texte lu par les moteurs/lecteurs d'écran ; le logo reste le visuel. */}
+          <span className="sr-only">
+            JJK Arcade — mini-jeux Jujutsu Kaisen gratuits
+          </span>
           <Logo className="h-44 w-auto sm:h-60" glow />
         </h1>
 

@@ -1,20 +1,20 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
 import { isGameEnabled } from "@/lib/config/app-config";
 import { isPusherConfigured } from "@/lib/pusher/server";
 import { MpHubForm } from "@/components/multiplayer/MpHubForm";
+import { GameJsonLd } from "@/components/seo/JsonLd";
+import { gameMetadata } from "@/lib/seo/config";
 import {
   createGuessWhoLobbyAction,
   joinGuessWhoLobbyAction,
 } from "@/lib/games/guesswho/actions";
 
-export const metadata: Metadata = {
-  title: "Qui est-ce ? — JJK Arcade",
-  description:
-    "Devine le personnage secret de ton adversaire en 1v1. Grille de 25, questions, éliminations et un seul guess pour gagner.",
-};
+export const metadata = gameMetadata(
+  "guesswho",
+  "Qui est-ce ? version Jujutsu Kaisen : devine le personnage secret de ton adversaire en 1v1. Grille de 25, questions, éliminations et un seul guess pour gagner.",
+);
 
 export default async function GuessWhoHubPage() {
   if (!(await isGameEnabled("guesswho"))) redirect("/games");
@@ -23,6 +23,7 @@ export default async function GuessWhoHubPage() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col px-6 py-14 sm:py-20">
+      <GameJsonLd id="guesswho" />
       <header className="mx-auto max-w-2xl text-center">
         <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 text-xs font-medium uppercase tracking-[0.25em] text-domain-light backdrop-blur">
           <span className="h-1.5 w-1.5 animate-glow-pulse rounded-full bg-domain-light" />

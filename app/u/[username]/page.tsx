@@ -46,10 +46,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { username } = await params;
   const profile = await getPublicProfile(username);
-  if (!profile) return { title: "Profil introuvable — JJK Arcade" };
+  if (!profile) return { title: "Profil introuvable" };
   return {
-    title: `${profile.username} — JJK Arcade`,
+    title: profile.username,
     description: `Profil de ${profile.username} : niveau ${profile.level}, badges et progression sur JJK Arcade.`,
+    robots: { index: false, follow: false },
   };
 }
 

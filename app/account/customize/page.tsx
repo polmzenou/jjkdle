@@ -7,7 +7,7 @@ import { normalizeProfileLayout } from "@/lib/profile/layout";
 import { ProfileLayoutEditor } from "./ProfileLayoutEditor";
 
 export const metadata: Metadata = {
-  title: "Customiser mon profil — JJK Arcade",
+  title: "Customiser mon profil",
   robots: { index: false, follow: false },
 };
 

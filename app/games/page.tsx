@@ -1,13 +1,22 @@
 import type { Metadata } from "next";
 import { GameCard } from "@/components/GameCard";
 import { MultiplayerPicker } from "@/components/multiplayer/MultiplayerPicker";
+import { GamesListJsonLd } from "@/components/seo/JsonLd";
 import { GAMES } from "@/lib/games/registry";
 import { getGameFlags } from "@/lib/config/app-config";
 
 export const metadata: Metadata = {
-  title: "Les jeux — JJK Arcade",
+  title: "Tous les jeux Jujutsu Kaisen",
   description:
-    "Tous les mini-jeux maudits de JJK Arcade : Build the Perfect Sorcerer, JJK Pyramid, et plus à venir.",
+    "Tous les mini-jeux Jujutsu Kaisen de JJK Arcade : JJKdle, Qui est-ce ?, JJK Pyramid, Jujutsu Draft, Random Battle, Higher/Lower… Gratuits, sans compte, dans le navigateur.",
+  alternates: { canonical: "/games" },
+  openGraph: {
+    type: "website",
+    url: "/games",
+    title: "Tous les jeux Jujutsu Kaisen · JJK Arcade",
+    description:
+      "JJKdle, Qui est-ce ?, JJK Pyramid, Jujutsu Draft, Random Battle, Higher/Lower… tous les mini-jeux Jujutsu Kaisen, gratuits et sans compte.",
+  },
 };
 
 const FEATURES = ["Sans compte", "Best score local"];
@@ -27,6 +36,7 @@ export default async function GamesPage() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-5xl flex-col px-6 py-14 sm:py-20">
+      <GamesListJsonLd />
       {/* ── En-tête de page ── */}
       <header className="mx-auto max-w-2xl text-center">
         <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 text-xs font-medium uppercase tracking-[0.25em] text-domain-light backdrop-blur">

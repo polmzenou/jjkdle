@@ -23,7 +23,7 @@ import type { DraftCharacter } from "@/lib/games/draft/types";
 import { AdminDashboard } from "./AdminDashboard";
 
 export const metadata: Metadata = {
-  title: "Admin — JJK Arcade",
+  title: "Admin",
   robots: { index: false, follow: false },
 };
 

@@ -4,10 +4,10 @@ import { parseScope } from "@/lib/leaderboard/store";
 import { redirect } from "next/navigation";
 import { isGameEnabled } from "@/lib/config/app-config";
 import { RankingGame } from "./RankingGame";
+import { GameJsonLd } from "@/components/seo/JsonLd";
+import { gameMetadata } from "@/lib/seo/config";
 
-export const metadata = {
-  title: "JJK Pyramid — JJK Arcade",
-};
+export const metadata = gameMetadata("ranking");
 
 // Le leaderboard lit le fichier à chaque requête (scores à jour).
 export const dynamic = "force-dynamic";
@@ -29,6 +29,7 @@ export default async function RankingPage({
 
   return (
     <main className="mx-auto max-w-6xl px-4 pb-24 sm:px-6">
+      <GameJsonLd id="ranking" />
       <RankingGame initialBestScore={bestScore} />
 
       <div className="mt-10">
