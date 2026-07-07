@@ -39,6 +39,7 @@ import type {
 } from "@/lib/games/guesswho/types";
 import { GuessWhoBoard, type BoardMode } from "./GuessWhoBoard";
 import { GuessWhoSecretPanel } from "./GuessWhoSecretPanel";
+import { GuessWhoCharacterInfo } from "./GuessWhoCharacterInfo";
 import { GuessWhoOpponentDeck } from "./GuessWhoOpponentDeck";
 import { GuessWhoSpectator } from "./GuessWhoSpectator";
 import { GuessWhoChat } from "./GuessWhoChat";
@@ -73,6 +74,7 @@ export function GuessWhoLobby({
   const [mode, setMode] = useState<BoardMode>("idle");
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [hideSecret, setHideSecret] = useState(false);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [opponentEliminated, setOpponentEliminated] = useState<Set<string>>(
     new Set(),
   );
@@ -464,11 +466,16 @@ export function GuessWhoLobby({
           </div>
         </div>
         <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[13rem_1fr_20rem] xl:grid-cols-[15rem_1fr_22rem]">
-          <GuessWhoSecretPanel
-            secret={mySecret}
-            hidden={hideSecret}
-            onToggleHidden={() => setHideSecret((v) => !v)}
-          />
+          <div className="flex min-h-0 flex-col gap-3">
+            <GuessWhoSecretPanel
+              secret={mySecret}
+              hidden={hideSecret}
+              onToggleHidden={() => setHideSecret((v) => !v)}
+            />
+            <GuessWhoCharacterInfo
+              character={hoveredId ? (rosterMap[hoveredId] ?? null) : null}
+            />
+          </div>
           {publicState && (
             <GuessWhoBoard
               characters={gridChars}
@@ -479,6 +486,7 @@ export function GuessWhoLobby({
               hideSecret={hideSecret}
               pending={pending}
               onCardClick={handleCardClick}
+              onHoverCharacter={(id) => setHoveredId(id)}
               onSetMode={setMode}
               onPass={handlePass}
             />

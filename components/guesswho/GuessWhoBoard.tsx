@@ -19,6 +19,8 @@ interface GuessWhoBoardProps {
   hideSecret: boolean;
   pending: boolean;
   onCardClick: (id: string) => void;
+  /** Survol d'une carte (id du perso, ou null quand le curseur quitte la grille). */
+  onHoverCharacter?: (id: string | null) => void;
   onSetMode: (mode: BoardMode) => void;
   onPass: () => void;
 }
@@ -32,6 +34,7 @@ export function GuessWhoBoard({
   hideSecret,
   pending,
   onCardClick,
+  onHoverCharacter,
   onSetMode,
   onPass,
 }: GuessWhoBoardProps) {
@@ -58,29 +61,39 @@ export function GuessWhoBoard({
           const isEliminated = eliminated.has(char.id);
           const isSecret = !hideSecret && mySecret?.id === char.id;
           return (
-            <button
+            // Le survol vit sur ce conteneur : un <button disabled> n'émet pas
+            // d'événements souris/focus, or la fiche d'aide doit marcher hors tour.
+            <div
               key={char.id}
-              type="button"
-              disabled={!interactive || pending}
-              onClick={() => onCardClick(char.id)}
-              className={`group relative min-h-0 overflow-hidden rounded-lg border bg-void-800 transition-all ${
-                isSecret ? "border-domain-light" : "border-white/10"
-              } ${isEliminated ? "opacity-25" : "opacity-100"} ${
-                interactive
-                  ? "cursor-pointer hover:border-domain-light hover:ring-2 hover:ring-domain/40"
-                  : "cursor-default"
-              }`}
+              className="relative min-h-0"
+              onMouseEnter={() => onHoverCharacter?.(char.id)}
+              onMouseLeave={() => onHoverCharacter?.(null)}
             >
-              <CharacterImage character={char} />
-              <span className="absolute inset-x-0 bottom-0 truncate bg-void-900/80 px-1 py-0.5 text-center text-[0.55rem] font-semibold text-white/90 sm:text-[0.65rem]">
-                {char.name}
-              </span>
-              {isSecret && (
-                <span className="absolute right-1 top-1 rounded-full bg-domain px-1.5 py-0.5 text-[0.5rem] font-bold uppercase text-white">
-                  Secret
+              <button
+                type="button"
+                disabled={!interactive || pending}
+                onClick={() => onCardClick(char.id)}
+                onFocus={() => onHoverCharacter?.(char.id)}
+                onBlur={() => onHoverCharacter?.(null)}
+                className={`group relative h-full w-full min-h-0 overflow-hidden rounded-lg border bg-void-800 transition-all ${
+                  isSecret ? "border-domain-light" : "border-white/10"
+                } ${isEliminated ? "opacity-25" : "opacity-100"} ${
+                  interactive
+                    ? "cursor-pointer hover:border-domain-light hover:ring-2 hover:ring-domain/40"
+                    : "cursor-default"
+                }`}
+              >
+                <CharacterImage character={char} />
+                <span className="absolute inset-x-0 bottom-0 truncate bg-void-900/80 px-1 py-0.5 text-center text-[0.55rem] font-semibold text-white/90 sm:text-[0.65rem]">
+                  {char.name}
                 </span>
-              )}
-            </button>
+                {isSecret && (
+                  <span className="absolute right-1 top-1 rounded-full bg-domain px-1.5 py-0.5 text-[0.5rem] font-bold uppercase text-white">
+                    Secret
+                  </span>
+                )}
+              </button>
+            </div>
           );
         })}
       </div>
