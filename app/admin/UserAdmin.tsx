@@ -10,6 +10,7 @@ import { FRAMES } from "@/lib/frames/definitions";
 import { rarityStyle, type Rarity } from "@/lib/profile/rarity";
 import {
   setUserRoleAction,
+  setUsernameAction,
   deleteUserAction,
   adminSetLevelAction,
   adminSetXpBonusAction,
@@ -25,6 +26,8 @@ interface UserAdminProps {
   users: AdminUser[];
   /** Id de l'admin connecté (pour marquer « vous »). */
   currentUserId: string;
+  /** Le viewer est-il le super-admin (droits étendus) ? */
+  isSuperAdmin: boolean;
 }
 
 type Feedback = { ok: boolean; msg: string } | null;
@@ -34,7 +37,11 @@ type Feedback = { ok: boolean; msg: string } | null;
  * Règle : un administrateur ne peut pas être rétrogradé → pas de bouton de
  * rétrogradation pour les ADMIN (et la server action le refuse aussi).
  */
-export function UserAdmin({ users, currentUserId }: UserAdminProps) {
+export function UserAdmin({
+  users,
+  currentUserId,
+  isSuperAdmin,
+}: UserAdminProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [feedback, setFeedback] = useState<Feedback>(null);
@@ -122,6 +129,8 @@ export function UserAdmin({ users, currentUserId }: UserAdminProps) {
           {users.map((u) => {
             const isAdmin = u.role === "ADMIN";
             const isVip = u.role === "VIP";
+            const isSelf = u.id === currentUserId;
+            const protectedAdmin = isAdmin && !(isSuperAdmin && !isSelf);
             const expanded = expandedId === u.id;
             return (
               <div
@@ -174,13 +183,36 @@ export function UserAdmin({ users, currentUserId }: UserAdminProps) {
                     >
                       Progression {expanded ? "▲" : "▼"}
                     </button>
-                    {isAdmin ? (
+                    {protectedAdmin ? (
                       <span
                         className="text-[11px] text-white/30"
                         title="Un administrateur ne peut être ni rétrogradé ni supprimé."
                       >
                         🔒 protégé
                       </span>
+                    ) : isAdmin ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setRole(u, "VIP", `« ${u.username} » est désormais VIP.`)
+                          }
+                          disabled={pending}
+                          className="rounded-md border border-amber-400/40 bg-amber-400/10 px-2.5 py-1 text-xs font-bold text-amber-300 hover:bg-amber-400/20 disabled:opacity-40"
+                        >
+                          Passer VIP
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setRole(u, "PLAYER", `« ${u.username} » est rétrogradé joueur.`)
+                          }
+                          disabled={pending}
+                          className="rounded-md border border-cursed/30 px-2.5 py-1 text-xs font-bold text-cursed-light hover:bg-cursed/10 disabled:opacity-40"
+                        >
+                          Rétrograder joueur
+                        </button>
+                      </>
                     ) : (
                       <>
                         {isVip ? (
@@ -227,6 +259,18 @@ export function UserAdmin({ users, currentUserId }: UserAdminProps) {
                   </div>
                 </div>
 
+                {isSuperAdmin && (
+                  <RenameField
+                    user={u}
+                    pending={pending}
+                    run={startTransition}
+                    onResult={(ok, msg) => {
+                      setFeedback({ ok, msg });
+                      if (ok) router.refresh();
+                    }}
+                  />
+                )}
+
                 {expanded && (
                   <ProgressionPanel
                     user={u}
@@ -243,6 +287,56 @@ export function UserAdmin({ users, currentUserId }: UserAdminProps) {
           })}
         </div>
       </section>
+    </div>
+  );
+}
+
+/** Champ inline de renommage d'un joueur (super-admin uniquement). */
+function RenameField({
+  user,
+  pending,
+  onResult,
+  run,
+}: {
+  user: AdminUser;
+  pending: boolean;
+  onResult: (ok: boolean, msg: string) => void;
+  run: (cb: () => void) => void;
+}) {
+  const [value, setValue] = useState(user.username);
+
+  const submit = () => {
+    const next = value.trim();
+    if (next === user.username) return;
+    run(async () => {
+      const res = await setUsernameAction(user.id, next);
+      onResult(
+        res.ok,
+        res.ok
+          ? `« ${user.username} » renommé « ${next} ».`
+          : res.error ?? "Échec.",
+      );
+    });
+  };
+
+  return (
+    <div className="flex items-center gap-2 border-t border-white/5 px-3 py-2">
+      <span className="text-[11px] uppercase tracking-wider text-white/45">
+        Pseudo
+      </span>
+      <input
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        className="w-44 rounded-md border border-white/10 bg-void-900 px-2 py-1 text-sm text-white outline-none focus:border-domain"
+      />
+      <button
+        type="button"
+        onClick={submit}
+        disabled={pending || value.trim() === user.username}
+        className="rounded-md border border-domain/40 bg-domain/10 px-2.5 py-1 text-xs font-bold text-domain-light hover:bg-domain/20 disabled:opacity-40"
+      >
+        Renommer
+      </button>
     </div>
   );
 }

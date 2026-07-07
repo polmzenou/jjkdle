@@ -159,6 +159,19 @@ export async function setUserRole(id: string, role: Role): Promise<void> {
   await prisma.user.update({ where: { id }, data: { role } });
 }
 
+/** Change le pseudo d'un utilisateur ; renvoie l'ancien (P2002 propagé si pris). */
+export async function setUsername(
+  id: string,
+  username: string,
+): Promise<string | null> {
+  const before = await prisma.user.findUnique({
+    where: { id },
+    select: { username: true },
+  });
+  await prisma.user.update({ where: { id }, data: { username } });
+  return before?.username ?? null;
+}
+
 /** Supprime un compte (cascade : sessions + scores via le schéma). */
 export async function deleteUser(id: string): Promise<void> {
   await prisma.user.delete({ where: { id } });

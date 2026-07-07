@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getCurrentUser } from "@/lib/auth/session";
+import { getCurrentUser, isSuperAdmin } from "@/lib/auth/session";
 import { readRoster } from "@/lib/admin/roster-store";
 import { getCategories } from "@/lib/content/queries";
 import { listDraftCharacters } from "@/lib/games/draft/queries";
@@ -137,6 +137,7 @@ export default async function AdminPage({
       scores={[...scores, ...draftScores, ...jjkdleScores, ...higherLowerScores]}
       users={users}
       currentUserId={user.id}
+      isSuperAdmin={isSuperAdmin(user)}
       cachedImageCount={getCachedImageCount()}
       overview={overview}
       jjkdleAnalytics={jjkdleAnalytics}

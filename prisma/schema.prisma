@@ -164,6 +164,7 @@ enum JjkGender {
 /// Grade hiérarchique JJK. L'ORDRE DES VALEURS EST SIGNIFIANT (croissant) :
 /// il sert à l'indice ↑/↓ (la cible est d'un grade plus haut / plus bas).
 enum JjkGrade {
+  NO_GRADE // pas de grade (≠ null = non renseigné), non ordonné pour l'indice
   GRADE_4
   SEMI_GRADE_3
   GRADE_3

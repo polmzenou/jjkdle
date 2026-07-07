@@ -1,8 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import type { Role } from "@prisma/client";
-import { getAdminUser, getAdminOrVipUser } from "@/lib/auth/session";
+import { Prisma, type Role } from "@prisma/client";
+import {
+  getAdminUser,
+  getAdminOrVipUser,
+  getSuperAdminUser,
+} from "@/lib/auth/session";
 import { upsertCharacter, deleteCharacter, readRoster } from "@/lib/admin/roster-store";
 import {
   refreshAllRosterImages,
@@ -12,6 +16,7 @@ import { clearImageCache } from "@/lib/admin/image-cache";
 import {
   getUserRole,
   setUserRole,
+  setUsername,
   deleteUser,
   applyUserXpBonus,
   setUserTotalXp,
@@ -503,11 +508,16 @@ export async function setUserRoleAction(
   userId: string,
   role: Role,
 ): Promise<ActionResult> {
-  if (!(await getAdminUser())) {
+  const superAdmin = await getSuperAdminUser();
+  if (!(await getAdminUser()) && !superAdmin) {
     return { ok: false, error: "Accès réservé aux administrateurs." };
   }
   if (role !== "ADMIN" && role !== "PLAYER" && role !== "VIP") {
     return { ok: false, error: "Rôle invalide." };
+  }
+
+  if (superAdmin && superAdmin.id === userId && role !== "ADMIN") {
+    return { ok: false, error: "Tu ne peux pas te rétrograder toi-même." };
   }
 
   const current = await getUserRole(userId);
@@ -516,7 +526,7 @@ export async function setUserRoleAction(
   }
 
   // Protection : on ne rétrograde/modifie jamais un administrateur.
-  if (current === "ADMIN" && role !== "ADMIN") {
+  if (!superAdmin && current === "ADMIN" && role !== "ADMIN") {
     return {
       ok: false,
       error: "Les administrateurs ne peuvent pas être rétrogradés.",
@@ -533,6 +543,50 @@ export async function setUserRoleAction(
     return { ok: false, error: `Échec : ${(e as Error).message}` };
   }
   revalidatePath("/admin");
+  return { ok: true };
+}
+
+const USERNAME_RE = /^[a-zA-Z0-9_-]{3,24}$/;
+
+/**
+ * Renomme n'importe quel joueur. Réservé au super-admin. Mêmes règles de pseudo
+ * que l'inscription ; l'unicité est garantie par la contrainte DB (P2002).
+ */
+export async function setUsernameAction(
+  userId: string,
+  newUsername: string,
+): Promise<ActionResult> {
+  if (!(await getSuperAdminUser())) {
+    return { ok: false, error: "Réservé au super-admin." };
+  }
+
+  const username = String(newUsername ?? "").trim();
+  if (!USERNAME_RE.test(username)) {
+    return {
+      ok: false,
+      error:
+        "Pseudo invalide (3 à 24 caractères : lettres, chiffres, tirets, underscores).",
+    };
+  }
+
+  let previous: string | null;
+  try {
+    previous = await setUsername(userId, username);
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError) {
+      if (e.code === "P2002") {
+        return { ok: false, error: "Ce pseudo est déjà pris." };
+      }
+      if (e.code === "P2025") {
+        return { ok: false, error: "Utilisateur introuvable." };
+      }
+    }
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+
+  revalidatePath("/admin");
+  if (previous) revalidatePath(`/u/${previous}`);
+  revalidatePath(`/u/${username}`);
   return { ok: true };
 }
 

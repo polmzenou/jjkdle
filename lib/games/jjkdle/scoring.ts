@@ -44,6 +44,11 @@ function compareAttribute(
   const display = attributeDisplay(key, guess);
 
   if (key === "grade") {
+    // NO_GRADE n'est pas ordonné : égalité stricte, jamais de flèche.
+    if (guess.grade === "NO_GRADE" || target.grade === "NO_GRADE") {
+      const correct = guess.grade != null && guess.grade === target.grade;
+      return { key, status: correct ? "correct" : "wrong", display, direction: null };
+    }
     return orderedHint(key, display, guess.grade, target.grade, GRADES_ORDER);
   }
   if (key === "appearanceArc") {

@@ -19,6 +19,7 @@ import type { Character } from "@/data/roster/characters";
 export type JjkRace = "HUMAN" | "CURSED_SPIRIT" | "SHIKIGAMI" | "CURSED_CORPSE" | "OTHER";
 export type JjkGender = "MALE" | "FEMALE" | "OTHER";
 export type JjkGrade =
+  | "NO_GRADE"
   | "GRADE_4"
   | "SEMI_GRADE_3"
   | "GRADE_3"
@@ -63,8 +64,13 @@ export const AFFILIATIONS: JjkAffiliation[] = [
 ];
 export const CLANS: JjkClan[] = ["ZENIN", "KAMO", "GOJO", "NONE"];
 
-/** Grades du plus faible au plus fort. L'INDEX sert à l'indice ↑/↓. */
+/**
+ * Grades du plus faible au plus fort. L'INDEX sert à l'indice ↑/↓.
+ * NO_GRADE est en tête mais NON ordonné : la comparaison le court-circuite
+ * (aucune flèche vs un vrai grade — cf. scoring.ts).
+ */
 export const GRADES_ORDER: JjkGrade[] = [
+  "NO_GRADE",
   "GRADE_4",
   "SEMI_GRADE_3",
   "GRADE_3",
@@ -108,6 +114,7 @@ export const GENDER_LABELS: Record<JjkGender, string> = {
 };
 
 export const GRADE_LABELS: Record<JjkGrade, string> = {
+  NO_GRADE: "Pas de grade",
   GRADE_4: "Grade 4",
   SEMI_GRADE_3: "Semi-grade 3",
   GRADE_3: "Grade 3",

@@ -66,6 +66,24 @@ export async function getAdminOrVipUser(): Promise<SessionUser | null> {
   return user && (user.role === "ADMIN" || user.role === "VIP") ? user : null;
 }
 
+/** Email du super-admin (variable d'env, fallback par défaut). */
+export function superAdminEmail(): string {
+  return (process.env.SUPER_ADMIN_EMAIL ?? "paul.mehr68@gmail.com")
+    .trim()
+    .toLowerCase();
+}
+
+/** Cet utilisateur est-il le super-admin (identifié par email) ? */
+export function isSuperAdmin(user: SessionUser | null): boolean {
+  return !!user && user.email.trim().toLowerCase() === superAdminEmail();
+}
+
+/** Utilisateur courant s'il est super-admin, sinon null. */
+export async function getSuperAdminUser(): Promise<SessionUser | null> {
+  const user = await getCurrentUser();
+  return isSuperAdmin(user) ? user : null;
+}
+
 /** Invalide la session courante (supprime la ligne DB + le cookie). */
 export async function destroySession(): Promise<void> {
   const store = await cookies();

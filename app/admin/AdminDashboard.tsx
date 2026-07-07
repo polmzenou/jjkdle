@@ -76,6 +76,8 @@ interface AdminDashboardProps {
   scores: AdminScore[];
   users: AdminUser[];
   currentUserId: string;
+  /** Le viewer est-il le super-admin (droits étendus sur les comptes) ? */
+  isSuperAdmin: boolean;
   /** Nombre d'images dans le cache « OUAIS » (conditionne « Vider le cache »). */
   cachedImageCount: number;
   /** Statistiques agrégées de la Vue d'ensemble. */
@@ -137,6 +139,7 @@ export function AdminDashboard({
   scores,
   users,
   currentUserId,
+  isSuperAdmin,
   cachedImageCount,
   overview,
   jjkdleAnalytics,
@@ -541,7 +544,11 @@ export function AdminDashboard({
       {tab === "leaderboard" && <LeaderboardAdmin scores={scores} />}
 
       {tab === "users" && (
-        <UserAdmin users={users} currentUserId={currentUserId} />
+        <UserAdmin
+          users={users}
+          currentUserId={currentUserId}
+          isSuperAdmin={isSuperAdmin}
+        />
       )}
 
       {tab === "roster" && (

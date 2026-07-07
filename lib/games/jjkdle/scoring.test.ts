@@ -59,6 +59,22 @@ describe("compareGuess — attributs ordonnés (flèche ↑/↓)", () => {
     expect(h.status).toBe("correct");
     expect(h.direction).toBeNull();
   });
+
+  it("grade NO_GRADE vs vrai grade → wrong SANS flèche (non ordonné)", () => {
+    const h = hint(guess({ grade: "NO_GRADE" }), "grade");
+    expect(h.status).toBe("wrong");
+    expect(h.direction).toBeNull();
+  });
+
+  it("grade NO_GRADE vs NO_GRADE → vert", () => {
+    const g = compareGuess(
+      guess({ grade: "NO_GRADE" }),
+      { ...target, grade: "NO_GRADE" },
+    );
+    const h = g.hints.find((x) => x.key === "grade")!;
+    expect(h.status).toBe("correct");
+    expect(h.direction).toBeNull();
+  });
 });
 
 describe("compareGuess — cursedEnergy", () => {
