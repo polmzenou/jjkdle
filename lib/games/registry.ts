@@ -79,6 +79,7 @@ export const GAMES: Game[] = [
     glyph: "🎯",
     tags: ["multijoueur", "2-6", "déduction", "roster JJK"],
     accent: "#dc2626",
+    previewImage: "/assets/codenames-screen.png",
     status: "live",
     multiplayerOnly: true,
   },
