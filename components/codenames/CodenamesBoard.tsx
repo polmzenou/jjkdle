@@ -1,7 +1,7 @@
 "use client";
 
 import type { Character } from "@/data/roster/characters";
-import type { CardColor } from "@/lib/games/codenames/types";
+import type { CardColor, ColorKey } from "@/lib/games/codenames/types";
 import { CharacterImage } from "@/components/CharacterImage";
 import { CARD_COLOR_BG, CARD_COLOR_BORDER } from "./colors";
 
@@ -12,6 +12,8 @@ interface CodenamesBoardProps {
   revealed: Record<string, CardColor>;
   /** Vrai si le joueur courant peut révéler (agent de l'équipe active + indice donné). */
   canReveal: boolean;
+  /** Carte-clé complète (maître-espion) : colore le cadre des cartes non révélées. */
+  spymasterKey?: ColorKey | null;
   pending: boolean;
   onReveal: (charId: string) => void;
 }
@@ -25,6 +27,7 @@ export function CodenamesBoard({
   characters,
   revealed,
   canReveal,
+  spymasterKey,
   pending,
   onReveal,
 }: CodenamesBoardProps) {
@@ -35,18 +38,24 @@ export function CodenamesBoard({
           const color = revealed[c.id];
           const isRevealed = Boolean(color);
           const interactive = canReveal && !isRevealed && !pending;
+          // Cadre coloré réservé au maître-espion sur les cartes non révélées.
+          const keyColor = !isRevealed ? spymasterKey?.[c.id] : undefined;
           return (
             <div key={c.id} className="relative min-h-0">
               <button
                 type="button"
                 disabled={!interactive}
                 onClick={() => interactive && onReveal(c.id)}
-                className={`group relative h-full w-full overflow-hidden rounded-lg border transition-all ${
+                className={`group relative h-full w-full overflow-hidden rounded-lg border-2 transition-all ${
                   isRevealed
                     ? `${CARD_COLOR_BORDER[color]} ${CARD_COLOR_BG[color]}`
-                    : interactive
-                      ? "border-white/15 hover:border-domain-light hover:scale-[1.02] cursor-pointer"
-                      : "border-white/10 cursor-default"
+                    : keyColor
+                      ? `${CARD_COLOR_BORDER[keyColor]} ${
+                          interactive ? "hover:scale-[1.02] cursor-pointer" : "cursor-default"
+                        }`
+                      : interactive
+                        ? "border-white/15 hover:border-domain-light hover:scale-[1.02] cursor-pointer"
+                        : "border-white/10 cursor-default"
                 }`}
               >
                 <div

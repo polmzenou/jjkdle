@@ -436,6 +436,7 @@ export function CodenamesLobby({
                   characters={gridChars}
                   revealed={publicState.revealed}
                   canReveal={amActiveAgent && Boolean(clue)}
+                  spymasterKey={isSpymaster ? keyCard : null}
                   pending={pending}
                   onReveal={handleReveal}
                 />
