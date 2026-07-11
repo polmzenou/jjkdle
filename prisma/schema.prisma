@@ -67,6 +67,7 @@ model User {
   jjkdleScores JjkdleScore[]
   higherLowerScores HigherLowerScore[]
   guessWhoScores GuessWhoScore[]
+  codenamesScores CodenamesScore[]
   badges       UserBadge[]
   titleGrants  UserTitleGrant[]
   frameGrants  UserFrameGrant[]
@@ -348,6 +349,48 @@ model GuessWhoScore {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   won       Boolean
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+/// Partie « JJK Codenames » — état autoritatif d'une partie d'équipe (2 équipes,
+/// 4-6 joueurs) en cours. Réutilise le lobby/présence Pusher (Lobby via lobbyId).
+/// La carte-clé (`colorKey`, mapping id→couleur) vit ICI et n'est JAMAIS sérialisée
+/// vers le client tant que la partie est ACTIVE (anti-triche) : seuls les 2 maîtres-
+/// espions la récupèrent via une Server Action authentifiée. La grille (36 IDs) est
+/// partagée/identique pour tous. La sélection d'équipe pré-partie vit dans
+/// `Lobby.gameState` (phase transitoire), pas ici : `teams` est figé au démarrage.
+model CodenamesGame {
+  id                String   @id @default(cuid())
+  lobbyId           String   @unique
+  gridCharIds       String[] // 36 IDs (6×6), ordre partagé
+  colorKey          Json // { [charId]: "RED"|"PURPLE"|"NEUTRAL"|"ASSASSIN" } — jamais diffusée en ACTIVE
+  redSpymasterId    String
+  purpleSpymasterId String
+  teams             Json // { [userId]: "RED"|"PURPLE" } figé au démarrage
+  revealedIds       String[] @default([])
+  redScore          Int      @default(0)
+  purpleScore       Int      @default(0)
+  currentTeam       String // "RED" | "PURPLE"
+  currentClue       Json? // { word: string, count: number, remaining: number }
+  passedAgentIds    String[] @default([]) // agents ayant "passé" ce tour (reset à chaque tour)
+  status            String   @default("ACTIVE") // ACTIVE | FINISHED
+  winnerTeam        String? // "RED" | "PURPLE"
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([lobbyId])
+}
+
+/// Résultat d'une partie « JJK Codenames » — une ligne PAR joueur ET PAR partie
+/// terminée (append). `won` = ce joueur a gagné. Le ratio V/D se lit par agrégation.
+model CodenamesScore {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  won       Boolean
+  team      String // "RED" | "PURPLE"
   createdAt DateTime @default(now())
 
   @@index([userId])

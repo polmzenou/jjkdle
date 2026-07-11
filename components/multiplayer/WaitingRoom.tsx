@@ -19,6 +19,10 @@ interface WaitingRoomProps {
   title?: string;
   /** Capacité du lobby (défaut : MAX_PLAYERS). 1v1 = 2 pour le battle. */
   maxPlayers?: number;
+  /** Nombre minimum de joueurs pour démarrer (défaut : MIN_PLAYERS). */
+  minPlayers?: number;
+  /** Libellé du bouton de démarrage (défaut : « Démarrer la partie »). */
+  startLabel?: string;
   /** Contrôles supplémentaires (ex. options de partie), affichés à l'hôte. */
   hostExtra?: React.ReactNode;
 }
@@ -31,11 +35,13 @@ export function WaitingRoom({
   onLeave,
   title = "Build the Perfect Sorcerer",
   maxPlayers = MAX_PLAYERS,
+  minPlayers = MIN_PLAYERS,
+  startLabel = "Démarrer la partie",
   hostExtra,
 }: WaitingRoomProps) {
   const [copied, setCopied] = useState(false);
   const isHost = lobby.hostId === currentUserId;
-  const canStart = isHost && lobby.players.length >= MIN_PLAYERS;
+  const canStart = isHost && lobby.players.length >= minPlayers;
 
   async function copyCode() {
     const flash = () => {
@@ -136,7 +142,7 @@ export function WaitingRoom({
             onClick={onStart}
             className="w-full max-w-xs rounded-xl bg-domain px-6 py-3 font-display font-bold uppercase tracking-wide text-white shadow-glow transition-transform hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {canStart ? "Démarrer la partie" : `Il faut ${MIN_PLAYERS} joueurs`}
+            {canStart ? startLabel : `Il faut ${minPlayers} joueurs`}
           </button>
         ) : (
           <p className="text-sm text-white/50">

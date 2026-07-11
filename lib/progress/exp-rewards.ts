@@ -71,6 +71,16 @@ export function guessWhoLossExp(): number {
   return 10;
 }
 
+/** « JJK Codenames » : EXP fixe par joueur de l'équipe gagnante. */
+export function codenamesWinExp(): number {
+  return 150;
+}
+
+/** « JJK Codenames » : EXP de consolation par joueur de l'équipe perdante. */
+export function codenamesLossExp(): number {
+  return 50;
+}
+
 /** JJKdle : EXP de base selon le nombre d'essais (moins = mieux). */
 function jjkdleBaseExp(attempts: number): number {
   if (attempts <= 1) return 500;

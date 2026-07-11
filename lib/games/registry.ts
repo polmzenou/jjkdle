@@ -71,6 +71,18 @@ export const GAMES: Game[] = [
     multiplayerOnly: true,
   },
   {
+    id: "codenames",
+    title: "JJK Codenames",
+    description:
+      "En équipe (4 à 6 joueurs, rouge vs violet) : les maîtres-espions donnent des indices, les agents révèlent les bons personnages d'une grille de 36. Évitez l'assassin, révélez vos 8 cartes avant l'équipe adverse.",
+    route: "/games/codenames",
+    glyph: "🎯",
+    tags: ["multijoueur", "2-6", "déduction", "roster JJK"],
+    accent: "#dc2626",
+    status: "live",
+    multiplayerOnly: true,
+  },
+  {
     id: "jjkdle",
     title: "JJKdle",
     description:

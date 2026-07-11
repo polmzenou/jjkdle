@@ -120,13 +120,15 @@ async function playerStats(): Promise<OverviewStats["players"]> {
  * null (affiché « pas de données » plutôt qu'un faux 0).
  */
 async function gamesPlayed(): Promise<GamePlayCount[]> {
-  const [scoreByGame, draft, jjkdle, higherLower, guessWho] = await Promise.all([
-    prisma.score.groupBy({ by: ["gameId"], _count: { _all: true } }),
-    prisma.jujutsuDraftScore.count(),
-    prisma.jjkdleScore.count(),
-    prisma.higherLowerScore.count(),
-    prisma.guessWhoScore.count(),
-  ]);
+  const [scoreByGame, draft, jjkdle, higherLower, guessWho, codenames] =
+    await Promise.all([
+      prisma.score.groupBy({ by: ["gameId"], _count: { _all: true } }),
+      prisma.jujutsuDraftScore.count(),
+      prisma.jjkdleScore.count(),
+      prisma.higherLowerScore.count(),
+      prisma.guessWhoScore.count(),
+      prisma.codenamesScore.count(),
+    ]);
   const byGame = new Map(scoreByGame.map((r) => [r.gameId, r._count._all]));
 
   return [
@@ -136,6 +138,7 @@ async function gamesPlayed(): Promise<GamePlayCount[]> {
     { gameId: "jjkdle", label: "JJKdle", count: jjkdle },
     { gameId: "higher-lower", label: "Higher/Lower", count: higherLower },
     { gameId: "guesswho", label: "Qui est-ce ?", count: guessWho },
+    { gameId: "codenames", label: "JJK Codenames", count: codenames },
     { gameId: "battle", label: "Random Battle", count: null },
   ];
 }
