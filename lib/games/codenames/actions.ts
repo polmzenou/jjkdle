@@ -3,6 +3,7 @@
 import { Prisma } from "@prisma/client";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getRoster } from "@/lib/content/queries";
+import { getCurrentUniverse } from "@/lib/universes/current";
 import { prisma } from "@/lib/prisma";
 import { isPusherConfigured, triggerLobby } from "@/lib/pusher/server";
 import { serializeLobby } from "@/lib/multiplayer/state";
@@ -366,6 +367,9 @@ export async function startCodenamesAction(codeRaw: string): Promise<MpResult> {
     if (a.spymaster && a.team === "PURPLE") purpleSpymasterId = p.userId;
   }
 
+  // La partie hérite de l'univers du lobby (déjà filtré par `findLobby`).
+  const { id: universeId } = await getCurrentUniverse();
+
   await prisma.$transaction([
     prisma.codenamesGame.create({
       data: {
@@ -376,6 +380,7 @@ export async function startCodenamesAction(codeRaw: string): Promise<MpResult> {
         purpleSpymasterId,
         teams: teams as unknown as Prisma.InputJsonValue,
         currentTeam: "RED", // le rouge commence
+        universeId,
       },
     }),
     prisma.lobby.update({
@@ -644,11 +649,13 @@ async function finishGame(
   const userIds = Object.keys(teams);
 
   // Persistance des résultats (une ligne par joueur).
+  const { id: universeId } = await getCurrentUniverse();
   await prisma.codenamesScore.createMany({
     data: userIds.map((userId) => ({
       userId,
       team: teams[userId],
       won: teams[userId] === winnerTeam,
+      universeId,
     })),
   });
 

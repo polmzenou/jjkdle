@@ -1,8 +1,10 @@
 import { Prisma, type DraftOutcome, type Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUniverse } from "@/lib/universes/current";
 import type { DraftSelection } from "./types";
 import {
-  USER_DECOR_SELECT,
+  userDecor,
+  userDecorSelect,
   scopeWhere,
   type AdminScore,
   type LeaderboardScope,
@@ -51,8 +53,9 @@ export async function saveDraftScore(
   userId: string,
   input: SaveDraftInput,
 ): Promise<{ best: number; isNewRecord: boolean }> {
+  const { id: universeId } = await getCurrentUniverse();
   const existing = await prisma.jujutsuDraftScore.findUnique({
-    where: { userId },
+    where: { userId_universeId: { userId, universeId } },
   });
 
   const isBetter =
@@ -73,8 +76,8 @@ export async function saveDraftScore(
   };
 
   await prisma.jujutsuDraftScore.upsert({
-    where: { userId },
-    create: { userId, ...data },
+    where: { userId_universeId: { userId, universeId } },
+    create: { userId, universeId, ...data },
     update: data,
   });
 
@@ -86,27 +89,23 @@ export async function topDraftEntries(
   limit = 8,
   scope: LeaderboardScope = "all-time",
 ): Promise<DraftLeaderboardEntry[]> {
+  const { id: universeId } = await getCurrentUniverse();
   const rows = await prisma.jujutsuDraftScore.findMany({
-    where: scopeWhere(scope),
+    where: { universeId, ...scopeWhere(scope) },
     orderBy: [
       { enemiesKilled: "desc" },
       { globalScore: "desc" },
       { updatedAt: "asc" },
     ],
     take: limit,
-    include: { user: { select: USER_DECOR_SELECT } },
+    include: { user: { select: userDecorSelect(universeId) } },
   });
 
   return rows.map((r) => ({
     id: r.id,
-    pseudo: r.user.username,
     enemiesKilled: r.enemiesKilled,
     outcome: r.outcome,
-    role: r.user.role,
-    avatarImage: r.user.avatarCharacter?.image ?? null,
-    level: r.user.level,
-    titleKey: r.user.equippedTitleKey,
-    frameKey: r.user.equippedFrameKey,
+    ...userDecor(r.user),
   }));
 }
 
@@ -120,7 +119,9 @@ export async function topDraftEntries(
  * trié comme le classement (ennemis vaincus, puis score global en départage).
  */
 export async function listAllDraftScores(): Promise<AdminScore[]> {
+  const { id: universeId } = await getCurrentUniverse();
   const rows = await prisma.jujutsuDraftScore.findMany({
+    where: { universeId },
     orderBy: [
       { enemiesKilled: "desc" },
       { globalScore: "desc" },
@@ -165,8 +166,9 @@ export async function adminDeleteDraftScore(id: string): Promise<void> {
 export async function getUserDraftBest(
   userId: string,
 ): Promise<number | null> {
+  const { id: universeId } = await getCurrentUniverse();
   const row = await prisma.jujutsuDraftScore.findUnique({
-    where: { userId },
+    where: { userId_universeId: { userId, universeId } },
     select: { enemiesKilled: true },
   });
   return row?.enemiesKilled ?? null;
@@ -180,12 +182,16 @@ export async function getUserDraftBest(
 export async function getUserDraftScore(
   userId: string,
 ): Promise<UserScore | null> {
-  const mine = await prisma.jujutsuDraftScore.findUnique({ where: { userId } });
+  const { id: universeId } = await getCurrentUniverse();
+  const mine = await prisma.jujutsuDraftScore.findUnique({
+    where: { userId_universeId: { userId, universeId } },
+  });
   if (!mine) return null;
 
   const [better, totalPlayers] = await Promise.all([
     prisma.jujutsuDraftScore.count({
       where: {
+        universeId,
         OR: [
           { enemiesKilled: { gt: mine.enemiesKilled } },
           {
@@ -195,7 +201,7 @@ export async function getUserDraftScore(
         ],
       },
     }),
-    prisma.jujutsuDraftScore.count(),
+    prisma.jujutsuDraftScore.count({ where: { universeId } }),
   ]);
 
   return {

@@ -1,8 +1,19 @@
 import type { Config } from "tailwindcss";
 
 /**
- * Thème "Cursed Energy" — palette sombre + accents néon Jujutsu Kaisen.
- * Les couleurs de grade sont réutilisées pour les bordures animées des cartes.
+ * Palette du site, PAR UNIVERS (étape 4).
+ *
+ * Les couleurs pointent vers des VARIABLES CSS dont les valeurs sont injectées
+ * par le layout racine depuis l'univers courant (cf. lib/universes/theme.ts) :
+ * les classes (`bg-domain`, `bg-void-800/60`…) restent identiques, seule la
+ * palette change d'un anime à l'autre. Les valeurs par défaut (JJK) vivent dans
+ * app/globals.css, ce qui garantit un rendu correct même hors layout.
+ *
+ * La forme `rgb(var(--x) / <alpha-value>)` est indispensable : c'est elle qui
+ * préserve les modificateurs d'opacité Tailwind (`bg-domain/10`).
+ *
+ * Les couleurs de GRADE restent en dur : ce sont des rangs de carte (tiers),
+ * pas du branding d'univers.
  */
 const config: Config = {
   content: [
@@ -14,25 +25,25 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Fond profond / surface
+        // Fond profond / surface (par univers)
         void: {
-          DEFAULT: "#0a0a0f",
-          900: "#0a0a0f",
-          800: "#12121c",
-          700: "#1b1b2b",
-          600: "#26263a",
+          DEFAULT: "rgb(var(--color-void) / <alpha-value>)",
+          900: "rgb(var(--color-void-900) / <alpha-value>)",
+          800: "rgb(var(--color-void-800) / <alpha-value>)",
+          700: "rgb(var(--color-void-700) / <alpha-value>)",
+          600: "rgb(var(--color-void-600) / <alpha-value>)",
         },
-        // Violet "Domain Expansion"
+        // Accent principal (JJK : violet "Domain Expansion")
         domain: {
-          DEFAULT: "#7c3aed",
-          light: "#a78bfa",
-          dark: "#5b21b6",
+          DEFAULT: "rgb(var(--color-domain) / <alpha-value>)",
+          light: "rgb(var(--color-domain-light) / <alpha-value>)",
+          dark: "rgb(var(--color-domain-dark) / <alpha-value>)",
         },
-        // Rouge "Cursed"
+        // Accent secondaire (JJK : rouge "Cursed")
         cursed: {
-          DEFAULT: "#dc2626",
-          light: "#f87171",
-          dark: "#991b1b",
+          DEFAULT: "rgb(var(--color-cursed) / <alpha-value>)",
+          light: "rgb(var(--color-cursed-light) / <alpha-value>)",
+          dark: "rgb(var(--color-cursed-dark) / <alpha-value>)",
         },
         // Couleurs de grade (du plus faible au plus fort)
         grade: {
@@ -49,8 +60,8 @@ const config: Config = {
         body: ["var(--font-body)", "system-ui", "sans-serif"],
       },
       boxShadow: {
-        glow: "0 0 20px rgba(124, 58, 237, 0.45)",
-        "glow-cursed": "0 0 20px rgba(220, 38, 38, 0.45)",
+        glow: "0 0 20px rgb(var(--color-domain) / 0.45)",
+        "glow-cursed": "0 0 20px rgb(var(--color-cursed) / 0.45)",
       },
       keyframes: {
         "glow-pulse": {

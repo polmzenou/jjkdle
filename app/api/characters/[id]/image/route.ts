@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getAdminUser } from "@/lib/auth/session";
+import { getCurrentUniverse } from "@/lib/universes/current";
 
 /**
  * Image d'un personnage, stockée en base (table Character : imageData/imageMime).
@@ -12,6 +13,12 @@ import { getAdminUser } from "@/lib/auth/session";
  *
  * Le champ `image` du personnage porte l'URL d'affichage : pour une image
  * uploadée, c'est cette route (avec un `?v=` pour casser le cache à chaque upload).
+ *
+ * Univers : le GET reste volontairement NON cadré — l'`id` d'un personnage est
+ * global, l'image est publique, et l'URL stockée en base doit rester valable
+ * depuis n'importe quel univers. Les ÉCRITURES, elles, sont cadrées sur l'univers
+ * administré : le rôle admin est global, il ne doit pas permettre de modifier par
+ * id le contenu d'un univers que l'on n'administre pas à cet instant.
  */
 
 const ALLOWED_MIME = new Set([
@@ -50,9 +57,10 @@ export async function POST(req: Request, { params }: Params) {
     return NextResponse.json({ error: "Accès réservé aux administrateurs." }, { status: 403 });
   }
   const { id } = await params;
+  const { id: universeId } = await getCurrentUniverse();
 
-  const character = await prisma.character.findUnique({
-    where: { id },
+  const character = await prisma.character.findFirst({
+    where: { id, universeId },
     select: { id: true },
   });
   if (!character) {
@@ -90,9 +98,10 @@ export async function DELETE(_req: Request, { params }: Params) {
     return NextResponse.json({ error: "Accès réservé aux administrateurs." }, { status: 403 });
   }
   const { id } = await params;
+  const { id: universeId } = await getCurrentUniverse();
 
   await prisma.character.updateMany({
-    where: { id },
+    where: { id, universeId },
     data: { imageData: null, imageMime: null, image: null },
   });
 

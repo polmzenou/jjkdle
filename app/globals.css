@@ -5,6 +5,23 @@
 :root {
   --font-display: "Space Grotesk", system-ui, sans-serif;
   --font-body: "Inter", system-ui, sans-serif;
+
+  /* Palette PAR UNIVERS — valeurs par DÉFAUT (JJK). Le layout racine les
+     surcharge avec celles de l'univers courant (cf. lib/universes/theme.ts).
+     Canaux RGB séparés par des espaces : c'est ce que consomme
+     `rgb(var(--x) / <alpha-value>)` dans tailwind.config.ts, et ce qui fait
+     fonctionner les modificateurs d'opacité (`bg-domain/10`). */
+  --color-void: 10 10 15;
+  --color-void-900: 10 10 15;
+  --color-void-800: 18 18 28;
+  --color-void-700: 27 27 43;
+  --color-void-600: 38 38 58;
+  --color-domain: 124 58 237;
+  --color-domain-light: 167 139 250;
+  --color-domain-dark: 91 33 182;
+  --color-cursed: 220 38 38;
+  --color-cursed-light: 248 113 113;
+  --color-cursed-dark: 153 27 27;
 }
 
 @layer base {
@@ -25,10 +42,10 @@
     height: 10px;
   }
   ::-webkit-scrollbar-track {
-    background: #0a0a0f;
+    background: rgb(var(--color-void-900));
   }
   ::-webkit-scrollbar-thumb {
-    background: #5b21b6;
+    background: rgb(var(--color-domain-dark));
     border-radius: 9999px;
   }
 }
@@ -41,6 +58,6 @@
 
   /* Texte néon "domain" */
   .text-glow {
-    text-shadow: 0 0 12px rgba(124, 58, 237, 0.7);
+    text-shadow: 0 0 12px rgb(var(--color-domain) / 0.7);
   }
 }

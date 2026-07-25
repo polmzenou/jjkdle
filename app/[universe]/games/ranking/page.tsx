@@ -1,0 +1,45 @@
+import type { Metadata } from "next";
+import { getBestScore } from "@/lib/bestScore";
+import { Leaderboard } from "@/components/leaderboard/Leaderboard";
+import { parseScope } from "@/lib/leaderboard/store";
+import { redirect } from "next/navigation";
+import { isGameEnabled } from "@/lib/config/app-config";
+import { RankingGame } from "./RankingGame";
+import { GameJsonLd } from "@/components/seo/JsonLd";
+import { gameMetadata } from "@/lib/seo/config";
+import { universeHref } from "@/lib/universes/current";
+
+/** Métadonnées de l'univers courant (résolu par hostname). */
+export async function generateMetadata(): Promise<Metadata> {
+  return gameMetadata("ranking");
+}
+
+// Le leaderboard lit le fichier à chaque requête (scores à jour).
+export const dynamic = "force-dynamic";
+
+/**
+ * Page serveur : charge le best score (cookie). Le composant client tire la
+ * condition + mélange le pool côté client (anti-mismatch d'hydratation).
+ */
+export default async function RankingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ scope?: string }>;
+}) {
+  if (!(await isGameEnabled("ranking"))) redirect(await universeHref("/games"));
+  const [{ scope }, bestScore] = await Promise.all([
+    searchParams,
+    getBestScore("ranking"),
+  ]);
+
+  return (
+    <main className="mx-auto max-w-6xl px-4 pb-24 sm:px-6">
+      <GameJsonLd id="ranking" />
+      <RankingGame initialBestScore={bestScore} />
+
+      <div className="mt-10">
+        <Leaderboard game="ranking" limit={8} scope={parseScope(scope)} />
+      </div>
+    </main>
+  );
+}

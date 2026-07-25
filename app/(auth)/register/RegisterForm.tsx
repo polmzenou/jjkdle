@@ -4,10 +4,12 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { registerAction } from "@/lib/auth/actions";
+import { useUniverseHref } from "@/components/universe/UniverseProvider";
 
 /** Formulaire d'inscription (pseudo + email + mot de passe). */
 export function RegisterForm() {
   const router = useRouter();
+  const withUniverse = useUniverseHref();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,7 +22,7 @@ export function RegisterForm() {
     startTransition(async () => {
       const res = await registerAction({ username, email, password });
       if (res.ok) {
-        router.push("/games");
+        router.push(withUniverse("/games"));
         router.refresh();
       } else {
         setError(res.error ?? "Échec de l'inscription.");

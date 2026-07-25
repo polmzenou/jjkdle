@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { DraftCharacter } from "@/lib/games/draft/types";
+import { getCurrentUniverse } from "@/lib/universes/current";
 
 /**
  * Écriture du roster « Jujutsu Draft » en base (édition depuis /admin).
@@ -25,11 +26,21 @@ export async function upsertDraftCharacter(c: DraftCharacter): Promise<void> {
   if (existing) {
     await prisma.draftCharacter.update({ where: { id: c.id }, data });
   } else {
+    // Nouveau perso : rattaché à l'univers courant, position en fin de liste DE
+    // CET UNIVERS ; slug = id (clé lisible).
+    const current = await getCurrentUniverse();
     const max = await prisma.draftCharacter.aggregate({
+      where: { universeId: current.id },
       _max: { position: true },
     });
     await prisma.draftCharacter.create({
-      data: { id: c.id, ...data, position: (max._max.position ?? -1) + 1 },
+      data: {
+        id: c.id,
+        ...data,
+        position: (max._max.position ?? -1) + 1,
+        universeId: current.id,
+        slug: c.id,
+      },
     });
   }
 }

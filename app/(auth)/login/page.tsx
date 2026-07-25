@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
 import { Logo } from "@/components/Logo";
 import { LoginForm } from "./LoginForm";
+import { universeHref } from "@/lib/universes/current";
 
 export const metadata: Metadata = {
   title: "Connexion",
@@ -13,7 +14,7 @@ export const dynamic = "force-dynamic";
 
 export default async function LoginPage() {
   // Déjà connecté → inutile d'afficher le formulaire.
-  if (await getCurrentUser()) redirect("/games");
+  if (await getCurrentUser()) redirect(await universeHref("/games"));
 
   return (
     <main className="mx-auto flex min-h-[80vh] max-w-sm flex-col justify-center px-6 py-16">

@@ -2,24 +2,13 @@ import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { CursedBackground } from "@/components/CursedBackground";
-import { SiteNav } from "@/components/SiteNav";
-import { TutorialButton } from "@/components/TutorialButton";
-import { MaintenanceScreen } from "@/components/MaintenanceScreen";
-import { SiteJsonLd } from "@/components/seo/JsonLd";
-import { getCurrentUser } from "@/lib/auth/session";
-import { getCachedImageCount } from "@/lib/admin/image-cache";
-import { getMaintenance } from "@/lib/config/app-config";
-import { prisma } from "@/lib/prisma";
 import {
-  SITE_URL,
-  SITE_NAME,
-  SITE_TITLE,
-  SITE_DESCRIPTION,
-  SITE_LOCALE,
-  KEYWORDS,
-  DEFAULT_OG_IMAGE,
-} from "@/lib/seo/config";
+  getCurrentUniverseConfig,
+  isHubRequest,
+  universeHref,
+} from "@/lib/universes/current";
+import { themeCss, hubThemeCss } from "@/lib/universes/theme";
+import { siteSeo, DEFAULT_OG_IMAGE } from "@/lib/seo/config";
 import "./globals.css";
 
 const inter = Inter({
@@ -35,102 +24,100 @@ const spaceGrotesk = Space_Grotesk({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: {
-    default: SITE_TITLE,
-    // Les sous-pages passent un titre « nu » → suffixé automatiquement.
-    template: "%s · JJK Arcade",
-  },
-  description: SITE_DESCRIPTION,
-  keywords: KEYWORDS,
-  applicationName: SITE_NAME,
-  authors: [{ name: SITE_NAME }],
-  creator: SITE_NAME,
-  category: "games",
-  alternates: { canonical: "/" },
-  openGraph: {
-    type: "website",
-    locale: SITE_LOCALE,
-    url: "/",
-    siteName: SITE_NAME,
-    title: SITE_TITLE,
-    description: SITE_DESCRIPTION,
-    images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: SITE_TITLE }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: SITE_TITLE,
-    description: SITE_DESCRIPTION,
-    images: [DEFAULT_OG_IMAGE],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: { index: true, follow: true, "max-image-preview": "large" },
-  },
-  verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
-    ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
-    : undefined,
-};
+/**
+ * Métadonnées de l'UNIVERS COURANT (résolu par hostname). Dynamique et non plus
+ * constante : le même déploiement sert plusieurs animes, chacun avec son nom,
+ * son titre, sa description et ses mots-clés.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const [seo, hub] = await Promise.all([siteSeo(), isHubRequest()]);
+  // Sur le HUB, aucun suffixe de marque : « Les univers · JJK Arcade » n'aurait
+  // aucun sens sur une page qui sert justement à choisir entre les animes.
+  if (hub) {
+    return {
+      metadataBase: new URL(seo.url),
+      title: { default: "Les univers", template: "%s" },
+      description:
+        "Choisis ton univers : chaque anime a son arcade, son roster et ses classements.",
+      alternates: { canonical: "/" },
+      robots: { index: true, follow: true },
+    };
+  }
+  return {
+    metadataBase: new URL(seo.url),
+    title: {
+      default: seo.title,
+      // Les sous-pages passent un titre « nu » → suffixé automatiquement.
+      template: `%s · ${seo.name}`,
+    },
+    description: seo.description,
+    keywords: seo.keywords,
+    applicationName: seo.name,
+    authors: [{ name: seo.name }],
+    creator: seo.name,
+    category: "games",
+    alternates: { canonical: await universeHref("/") },
+    openGraph: {
+      type: "website",
+      locale: seo.locale,
+      url: await universeHref("/"),
+      siteName: seo.name,
+      title: seo.title,
+      description: seo.description,
+      images: [
+        { url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: seo.title },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: seo.title,
+      description: seo.description,
+      images: [DEFAULT_OG_IMAGE],
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: { index: true, follow: true, "max-image-preview": "large" },
+    },
+    verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+      ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
+      : undefined,
+  };
+}
 
+/**
+ * Layout RACINE : uniquement ce qui est vrai pour TOUTE la plateforme (document,
+ * polices, mesures). Il ne monte AUCUN chrome d'univers.
+ *
+ * Raison : en App Router, une navigation client ne re-rend que les segments SOUS
+ * le layout commun. Un layout racine qui porterait la palette et la nav resterait
+ * figé sur l'univers du premier chargement — c'était le bug « /jjk affiché avec
+ * la palette grise du hub et sans header ». Le chrome vit donc dans les layouts
+ * de segment : `app/[universe]/layout.tsx`, `app/universes/layout.tsx`, etc.
+ *
+ * Seule exception : le `<style>` ci-dessous, qui n'existe que pour le PREMIER
+ * PAINT (le fond du <body> est peint avant que le corps du document ne soit
+ * analysé). Il est toujours juste au chargement d'un document, éventuellement
+ * périmé après une navigation client — auquel cas la palette posée par le layout
+ * de segment, plus bas dans le document, l'emporte par ordre de cascade.
+ */
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const [user, maintenance] = await Promise.all([
-    getCurrentUser(),
-    getMaintenance(),
+  const [hub, config] = await Promise.all([
+    isHubRequest(),
+    getCurrentUniverseConfig(),
   ]);
-  const isAdmin = user?.role === "ADMIN";
-  const maintenanceActive = maintenance.enabled && !isAdmin;
-  // Profil (avatar + niveau) pour la barre de nav.
-  const profile = user
-    ? await prisma.user.findUnique({
-        where: { id: user.id },
-        select: {
-          level: true,
-          equippedTitleKey: true,
-          equippedFrameKey: true,
-          avatarCharacter: { select: { image: true } },
-        },
-      })
-    : null;
-  const navUser = user
-    ? {
-        username: user.username,
-        isAdmin: user.role === "ADMIN",
-        isVip: user.role === "VIP",
-        // ADMIN et VIP peuvent lancer/vider la synchro d'images.
-        canSyncImages: user.role === "ADMIN" || user.role === "VIP",
-        avatarImage: profile?.avatarCharacter?.image ?? null,
-        level: profile?.level ?? 1,
-        titleKey: profile?.equippedTitleKey ?? null,
-        frameKey: profile?.equippedFrameKey ?? null,
-      }
-    : null;
-  // Compteur du cache d'images (pour afficher « Vider le cache »).
-  const cachedImageCount = navUser?.canSyncImages ? getCachedImageCount() : 0;
 
   return (
     <html lang="fr" className={`${inter.variable} ${spaceGrotesk.variable}`}>
+      <head>
+        {/* Les classes Tailwind (bg-domain, bg-void-800/60…) consomment ces
+            variables. Sur le hub : palette NEUTRE, aucune marque. */}
+        <style>{hub ? hubThemeCss() : themeCss(config)}</style>
+      </head>
       <body className="min-h-screen">
-        <SiteJsonLd />
-        <CursedBackground />
-        {maintenanceActive ? (
-          <MaintenanceScreen message={maintenance.message} />
-        ) : (
-          <>
-            {/* Bandeau admin : la maintenance est active mais l'admin passe. */}
-            {maintenance.enabled && isAdmin && (
-              <div className="sticky top-0 z-50 bg-cursed px-4 py-1.5 text-center text-xs font-bold uppercase tracking-wide text-white">
-                Mode maintenance actif — visible par les admins uniquement
-              </div>
-            )}
-            <SiteNav user={navUser} cachedImageCount={cachedImageCount} />
-            {children}
-            <TutorialButton />
-          </>
-        )}
+        {children}
         <Analytics />
         <SpeedInsights />
       </body>

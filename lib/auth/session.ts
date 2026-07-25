@@ -14,6 +14,23 @@ const COOKIE = "jjk_session";
 const TTL_DAYS = 30;
 const TTL_MS = TTL_DAYS * 24 * 60 * 60 * 1000;
 
+/**
+ * Domaine du cookie de session (env `SESSION_COOKIE_DOMAIN`, ex. ".apex.com").
+ *
+ * MULTI-UNIVERS : chaque anime vit sur un SOUS-DOMAINE de l'apex. Sans cette
+ * variable, le cookie est lié à l'hôte exact — un joueur connecté sur
+ * jjk.apex.com devrait se reconnecter sur csm.apex.com, ce qui contredirait la
+ * décision de COMPTE GLOBAL. En la posant sur `.apex.com`, une seule connexion
+ * vaut pour tous les univers.
+ *
+ * Non définie ⇒ comportement d'origine (cookie propre à l'hôte), ce qui reste
+ * correct en local et sur un déploiement mono-domaine.
+ */
+function cookieDomain(): string | undefined {
+  const domain = process.env.SESSION_COOKIE_DOMAIN?.trim();
+  return domain ? domain : undefined;
+}
+
 export type SessionUser = {
   id: string;
   username: string;
@@ -27,12 +44,14 @@ export async function createSession(userId: string): Promise<void> {
   const expiresAt = new Date(Date.now() + TTL_MS);
   await prisma.session.create({ data: { token, userId, expiresAt } });
 
+  const domain = cookieDomain();
   (await cookies()).set(COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
     expires: expiresAt,
+    ...(domain ? { domain } : {}),
   });
 }
 
@@ -91,5 +110,9 @@ export async function destroySession(): Promise<void> {
   if (token) {
     await prisma.session.deleteMany({ where: { token } });
   }
-  store.delete(COOKIE);
+  // La suppression doit cibler le MÊME domaine que la pose, sinon le cookie
+  // survit à la déconnexion (le navigateur les traite comme distincts).
+  const domain = cookieDomain();
+  if (domain) store.delete({ name: COOKIE, path: "/", domain });
+  else store.delete(COOKIE);
 }

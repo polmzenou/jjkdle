@@ -1,4 +1,5 @@
 import type { Character } from "@/data/roster/characters";
+import type { AttributeSchema } from "./attribute-schema";
 import { eligibleRoster, pickDailyTarget, todayKey } from "./daily";
 import { compareGuess } from "./scoring";
 import type { JjkdleState } from "./state";
@@ -22,6 +23,7 @@ import type { GuessRow } from "./types";
 export function isStateFresh(
   state: JjkdleState,
   roster: Character[],
+  schema: AttributeSchema,
   /**
    * Id de la cible du jour déjà résolue (avec override admin éventuel, cf.
    * `resolveDailyTarget`). Si omis, on retombe sur le tirage déterministe pur —
@@ -34,7 +36,7 @@ export function isStateFresh(
   // Parties bonus (admin illimité / VIP plafonné) : cible figée pour la journée.
   if (state.mode === "admin" || state.mode === "vip") return true;
   const targetId =
-    dailyTargetId ?? pickDailyTarget(today, eligibleRoster(roster))?.id;
+    dailyTargetId ?? pickDailyTarget(today, eligibleRoster(roster, schema))?.id;
   return targetId != null && targetId === state.targetId;
 }
 
@@ -42,11 +44,12 @@ export function isStateFresh(
 export function buildRows(
   state: JjkdleState,
   map: Record<string, Character>,
+  schema: AttributeSchema,
 ): GuessRow[] {
   const target = map[state.targetId];
   if (!target) return [];
   return state.guesses
     .map((id) => map[id])
     .filter((c): c is Character => Boolean(c))
-    .map((guess) => compareGuess(guess, target));
+    .map((guess) => compareGuess(guess, target, schema));
 }

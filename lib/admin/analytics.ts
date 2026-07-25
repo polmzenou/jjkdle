@@ -1,6 +1,10 @@
 import type { Character } from "@/data/roster/characters";
 import { prisma } from "@/lib/prisma";
-import { isComplete } from "@/lib/games/jjkdle/attributes";
+import {
+  isCompleteFor,
+  type AttributeSchema,
+} from "@/lib/games/jjkdle/attribute-schema";
+import { loadAttributeSchema } from "@/lib/games/jjkdle/attributes-db";
 import { eligibleRoster, pickDailyTarget, todayKey } from "@/lib/games/jjkdle/daily";
 import { resolveDailyTarget } from "@/lib/games/jjkdle/daily-server";
 import { getForcedTarget } from "@/lib/config/app-config";
@@ -144,19 +148,25 @@ async function gamesPlayed(): Promise<GamePlayCount[]> {
 }
 
 /** Résumé de complétion du roster (persos incomplets / sans image). */
-function contentHealth(roster: Character[]): OverviewStats["content"] {
+function contentHealth(
+  roster: Character[],
+  schema: AttributeSchema,
+): OverviewStats["content"] {
   let incomplete = 0;
   let missingImage = 0;
   for (const c of roster) {
-    if (!isComplete(c)) incomplete += 1;
+    if (!isCompleteFor(schema, c)) incomplete += 1;
     if (!c.image) missingImage += 1;
   }
   return { total: roster.length, incomplete, missingImage };
 }
 
 /** Cible du jour + historique 7 jours (tirage déterministe pour le passé). */
-async function dailyWord(roster: Character[]): Promise<OverviewStats["dailyWord"]> {
-  const eligible = eligibleRoster(roster);
+async function dailyWord(
+  roster: Character[],
+  schema: AttributeSchema,
+): Promise<OverviewStats["dailyWord"]> {
+  const eligible = eligibleRoster(roster, schema);
   const byId = new Map(eligible.map((c) => [c.id, c]));
   const toEntry = (date: string, c: Character | null): DailyWordEntry => ({
     date,
@@ -166,7 +176,7 @@ async function dailyWord(roster: Character[]): Promise<OverviewStats["dailyWord"
 
   const [forcedId, todayTarget] = await Promise.all([
     getForcedTarget(),
-    resolveDailyTarget(roster),
+    resolveDailyTarget(roster, schema),
   ]);
 
   const keys = recentDateKeys(7);
@@ -184,17 +194,18 @@ async function dailyWord(roster: Character[]): Promise<OverviewStats["dailyWord"
 
 /** Point d'entrée : toutes les stats de la Vue d'ensemble. */
 export async function getOverviewStats(roster: Character[]): Promise<OverviewStats> {
+  const schema = await loadAttributeSchema();
   const [players, gp, roles, dw] = await Promise.all([
     playerStats(),
     gamesPlayed(),
     roleCounts(),
-    dailyWord(roster),
+    dailyWord(roster, schema),
   ]);
   return {
     players,
     gamesPlayed: gp,
     roles,
-    content: contentHealth(roster),
+    content: contentHealth(roster, schema),
     dailyWord: dw,
   };
 }

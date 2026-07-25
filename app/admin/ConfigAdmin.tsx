@@ -3,7 +3,11 @@
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { Character } from "@/data/roster/characters";
-import { isComplete } from "@/lib/games/jjkdle/attributes";
+import {
+  buildAttributeSchema,
+  isCompleteFor,
+  type AttributeSpec,
+} from "@/lib/games/jjkdle/attribute-schema";
 import { GAMES } from "@/lib/games/registry";
 import type { MaintenanceConfig } from "@/lib/config/app-config";
 import {
@@ -24,11 +28,14 @@ export function ConfigAdmin({
   gameFlags,
   maintenance,
   forcedTarget,
+  attributeColumns,
 }: {
   roster: Character[];
   gameFlags: Record<string, boolean>;
   maintenance: MaintenanceConfig;
   forcedTarget: string | null;
+  /** Attributs de l'univers courant (éligibilité = tous renseignés). */
+  attributeColumns: AttributeSpec[];
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -37,13 +44,12 @@ export function ConfigAdmin({
   const [maintMsg, setMaintMsg] = useState(maintenance.message ?? "");
   const [targetId, setTargetId] = useState(forcedTarget ?? "");
 
-  const eligible = useMemo(
-    () =>
-      roster
-        .filter(isComplete)
-        .sort((a, b) => a.name.localeCompare(b.name)),
-    [roster],
-  );
+  const eligible = useMemo(() => {
+    const schema = buildAttributeSchema(attributeColumns);
+    return roster
+      .filter((c) => isCompleteFor(schema, c))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [roster, attributeColumns]);
   const forcedName =
     eligible.find((c) => c.id === forcedTarget)?.name ?? forcedTarget;
 

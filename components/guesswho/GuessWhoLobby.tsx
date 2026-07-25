@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import type { Character } from "@/data/roster/characters";
+import type { AttributeSpec } from "@/lib/games/jjkdle/attribute-schema";
 import type { SerializedLobby } from "@/lib/multiplayer/events";
 import { buildRosterMap } from "@/lib/multiplayer/state";
 import { createPusherClient } from "@/lib/pusher/client";
@@ -45,12 +46,15 @@ import { GuessWhoSpectator } from "./GuessWhoSpectator";
 import { GuessWhoChat } from "./GuessWhoChat";
 import { GuessConfirmModal } from "./GuessConfirmModal";
 import { GuessWhoResultModal } from "./GuessWhoResultModal";
+import { useUniverseHref } from "@/components/universe/UniverseProvider";
 
 interface GuessWhoLobbyProps {
   initialLobby: SerializedLobby;
   initialPublicState: GuessWhoPublicState | null;
   initialMySecretId: string | null;
   roster: Character[];
+  /** Attributs de l'univers courant (fiche d'aide sous la carte secrète). */
+  attributeColumns: AttributeSpec[];
   currentUserId: string;
   pusherReady: boolean;
 }
@@ -60,10 +64,12 @@ export function GuessWhoLobby({
   initialPublicState,
   initialMySecretId,
   roster,
+  attributeColumns,
   currentUserId,
   pusherReady,
 }: GuessWhoLobbyProps) {
   const router = useRouter();
+  const withUniverse = useUniverseHref();
   const [lobby, setLobby] = useState<SerializedLobby>(initialLobby);
   const [publicState, setPublicState] = useState<GuessWhoPublicState | null>(
     initialPublicState,
@@ -268,7 +274,7 @@ export function GuessWhoLobby({
   const handleLeave = useCallback(() => {
     startTransition(async () => {
       await leaveGuessWhoAction(code);
-      router.push("/games/guesswho");
+      router.push(withUniverse("/games/guesswho"));
     });
   }, [code, router]);
 
@@ -366,7 +372,7 @@ export function GuessWhoLobby({
             </button>
             <button
               type="button"
-              onClick={() => router.push("/games/guesswho")}
+              onClick={() => router.push(withUniverse("/games/guesswho"))}
               className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-bold uppercase tracking-wide text-white/80 transition-colors hover:bg-white/10"
             >
               Quitter
@@ -474,6 +480,7 @@ export function GuessWhoLobby({
             />
             <GuessWhoCharacterInfo
               character={hoveredId ? (rosterMap[hoveredId] ?? null) : null}
+              attributeColumns={attributeColumns}
             />
           </div>
           {publicState && (

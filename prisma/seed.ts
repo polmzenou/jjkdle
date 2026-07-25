@@ -13,10 +13,19 @@ import { CATEGORIES } from "../data/roster/categories";
 import { ROSTER } from "../data/roster/characters";
 import { CONDITIONS } from "../data/ranking/conditions";
 import { DRAFT_ROSTER } from "../lib/games/draft/roster";
+import { jjk } from "../lib/universes/jjk";
 
 const prisma = new PrismaClient();
 
 async function main() {
+  // ── Univers JJK (multi-univers, étape 1) : le contenu seedé lui est rattaché. ──
+  const universe = await prisma.universe.upsert({
+    where: { slug: jjk.slug },
+    create: { slug: jjk.slug, name: jjk.name },
+    update: { name: jjk.name },
+  });
+  console.log(`✓ Univers "${universe.slug}"`);
+
   // ── Catégories ──
   for (const [position, c] of CATEGORIES.entries()) {
     const data = {
@@ -25,6 +34,8 @@ async function main() {
       weight: c.weight,
       drawCount: c.drawCount,
       position,
+      universeId: universe.id,
+      slug: c.id,
     };
     await prisma.category.upsert({
       where: { id: c.id },
@@ -44,6 +55,8 @@ async function main() {
       ratings: ch.ratings,
       battleValue: ch.battleValue ?? null,
       position,
+      universeId: universe.id,
+      slug: ch.id,
     };
     await prisma.character.upsert({
       where: { id: ch.id },
@@ -61,6 +74,8 @@ async function main() {
       prompt: cond.prompt,
       order: cond.order,
       position,
+      universeId: universe.id,
+      slug: cond.id,
     };
     await prisma.rankingCondition.upsert({
       where: { id: cond.id },
@@ -87,6 +102,8 @@ async function main() {
       cost: ch.cost,
       statValue: ch.statValue,
       position,
+      universeId: universe.id,
+      slug: ch.id,
     };
     await prisma.draftCharacter.upsert({
       where: { id: ch.id },

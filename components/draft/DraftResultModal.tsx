@@ -7,6 +7,7 @@ import { CharacterImage } from "@/components/CharacterImage";
 import { BadgeToast } from "@/components/badges/BadgeToast";
 import { ExpReward } from "@/components/progress/ExpReward";
 import { DRAFT_CATEGORIES } from "@/lib/games/draft/categories";
+import { useUniverseHref } from "@/components/universe/UniverseProvider";
 import type {
   CombatResult,
   DraftCharacter,
@@ -111,6 +112,7 @@ function SubmitDraftScore({
   selection: DraftSelection;
   isAuthed: boolean;
 }) {
+  const withUniverse = useUniverseHref();
   const [phase, setPhase] = useState<"idle" | "done">("idle");
   const [error, setError] = useState<string | null>(null);
   const [newBadges, setNewBadges] = useState<string[]>([]);
@@ -154,7 +156,7 @@ function SubmitDraftScore({
     setError(null);
     startTransition(async () => {
       try {
-        const res = await fetch("/api/games/jujutsu-draft/score", {
+        const res = await fetch(withUniverse("/api/games/jujutsu-draft/score"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ draft: selection }),

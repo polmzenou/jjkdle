@@ -4,10 +4,12 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { loginAction } from "@/lib/auth/actions";
+import { useUniverseHref } from "@/components/universe/UniverseProvider";
 
 /** Formulaire de connexion (email ou pseudo + mot de passe). */
 export function LoginForm() {
   const router = useRouter();
+  const withUniverse = useUniverseHref();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -19,7 +21,7 @@ export function LoginForm() {
     startTransition(async () => {
       const res = await loginAction({ identifier, password });
       if (res.ok) {
-        router.push("/games");
+        router.push(withUniverse("/games"));
         router.refresh();
       } else {
         setError(res.error ?? "Échec de la connexion.");

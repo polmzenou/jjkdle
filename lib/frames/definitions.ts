@@ -1,4 +1,10 @@
 import type { UnlockContext } from "@/lib/cosmetics/types";
+import {
+  ANY_UNIVERSE,
+  inUniverse,
+  isInUniverse,
+  type UniverseScope,
+} from "@/lib/cosmetics/universe";
 import type { Rarity } from "@/lib/profile/rarity";
 import { MAX_LEVEL } from "@/lib/progress/xp";
 import { frameRingForStyle, type FrameStyleKey } from "./styles";
@@ -21,6 +27,9 @@ export interface FrameDefinition {
   rarity: Rarity;
   /** Référence un style CSS défini en code (lib/frames/styles). */
   styleKey: FrameStyleKey;
+  /** Univers propriétaire (multi-univers, étape 2d). `ANY_UNIVERSE` = neutre.
+   * Un cadre ne s'équipe que dans son univers ; la possession reste globale. */
+  universe: UniverseScope;
   isUnlocked: (ctx: UnlockContext) => boolean;
 }
 
@@ -34,6 +43,7 @@ export const FRAMES: FrameDefinition[] = [
     description: "Cadre par défaut, toujours disponible.",
     rarity: "common",
     styleKey: "default",
+    universe: ANY_UNIVERSE,
     isUnlocked: () => true,
   },
   {
@@ -42,6 +52,7 @@ export const FRAMES: FrameDefinition[] = [
     description: "Atteindre le niveau 5.",
     rarity: "common",
     styleKey: "cursedEnergy",
+    universe: "jjk",
     isUnlocked: (u) => u.level >= 5,
   },
   {
@@ -50,6 +61,7 @@ export const FRAMES: FrameDefinition[] = [
     description: "Atteindre le niveau 20.",
     rarity: "epic",
     styleKey: "domainGlow",
+    universe: "jjk",
     isUnlocked: (u) => u.level >= 20,
   },
   {
@@ -58,6 +70,7 @@ export const FRAMES: FrameDefinition[] = [
     description: `Atteindre le niveau maximum (${MAX_LEVEL}).`,
     rarity: "legendary",
     styleKey: "infinity",
+    universe: "jjk",
     isUnlocked: (u) => u.level >= MAX_LEVEL,
   },
   {
@@ -66,6 +79,7 @@ export const FRAMES: FrameDefinition[] = [
     description: "Atteindre un streak JJKdle de 7 jours.",
     rarity: "rare",
     styleKey: "flameStreak",
+    universe: "jjk",
     isUnlocked: (u) => u.stats.jjkdleBestStreak >= 7,
   },
   {
@@ -75,6 +89,7 @@ export const FRAMES: FrameDefinition[] = [
       "Battre un membre VIP en JJK Random Battle — décerné par le staff.",
     rarity: "rare",
     styleKey: "vipHunter",
+    universe: "jjk",
     isUnlocked: () => false,
   },
   {
@@ -83,9 +98,16 @@ export const FRAMES: FrameDefinition[] = [
     description: "Trouver le JJKdle du jour en un seul essai.",
     rarity: "epic",
     styleKey: "idleLegend",
+    universe: "jjk",
     isUnlocked: (u) => u.stats.jjkdleBestAttempts === 1,
   },
 ];
+
+/** Cadres d'un univers (slug) — catalogue affiché par le sélecteur de profil.
+ * Inclut toujours le cadre par défaut (neutre). */
+export function framesForUniverse(slug: string): FrameDefinition[] {
+  return inUniverse(FRAMES, slug);
+}
 
 const BY_KEY = new Map(FRAMES.map((f) => [f.key, f]));
 
@@ -97,6 +119,15 @@ export function getFrame(key: string): FrameDefinition | undefined {
 /** Vrai si la clé correspond à un cadre connu (garde anti-tamper). */
 export function isFrameKey(key: unknown): key is string {
   return typeof key === "string" && BY_KEY.has(key);
+}
+
+/**
+ * Garde d'équipement multi-univers : le cadre doit exister ET appartenir à
+ * l'univers (ou être neutre, cas du cadre par défaut). Orthogonal au DÉBLOCAGE.
+ */
+export function isFrameInUniverse(key: string, slug: string): boolean {
+  const def = BY_KEY.get(key);
+  return def !== undefined && isInUniverse(def.universe, slug);
 }
 
 /**

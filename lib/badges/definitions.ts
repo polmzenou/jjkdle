@@ -1,3 +1,8 @@
+import {
+  inUniverse,
+  tagUniverse,
+  type UniverseScope,
+} from "@/lib/cosmetics/universe";
 import type { UserStatsContext } from "@/lib/progress/context";
 
 /**
@@ -18,10 +23,15 @@ export interface BadgeRule {
   iconKey: string;
   /** Couleur d'accent (hex) pour l'affichage débloqué. */
   color: string;
+  /** Univers propriétaire (multi-univers, étape 2d). Un badge ne se gagne et ne
+   * s'affiche que dans son univers ; la possession reste globale et à vie. */
+  universe: UniverseScope;
   check: (ctx: UserStatsContext) => boolean;
 }
 
-export const BADGES: BadgeRule[] = [
+// Catalogue JJK (non tagué) → tagué `universe: "jjk"` à l'export. Un futur
+// univers ajoute son propre tableau tagué de son slug, concaténé ci-dessous.
+const JJK_BADGES: Omit<BadgeRule, "universe">[] = [
   // ── Badges de découverte : jouer à chaque jeu pour la première fois ──
   {
     key: "FIRST_PLAY_BUILDER",
@@ -106,6 +116,18 @@ export const BADGES: BadgeRule[] = [
     check: () => false,
   },
 ];
+
+/**
+ * Catalogue COMPLET (tous univers). La possession étant globale, c'est ce
+ * catalogue qui sert de référence de clés ; pour ce qui se gagne et s'affiche
+ * dans un univers donné, utiliser `badgesForUniverse`.
+ */
+export const BADGES: BadgeRule[] = tagUniverse(JJK_BADGES, "jjk");
+
+/** Badges d'un univers (slug) — évaluation des déblocages et vitrine profil. */
+export function badgesForUniverse(slug: string): BadgeRule[] {
+  return inUniverse(BADGES, slug);
+}
 
 const BY_KEY = new Map(BADGES.map((b) => [b.key, b]));
 

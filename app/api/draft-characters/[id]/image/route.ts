@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
+import {
+  getCurrentUniverse,
+  revalidateUniversePath,
+} from "@/lib/universes/current";
 import { prisma } from "@/lib/prisma";
 import { getAdminUser } from "@/lib/auth/session";
 
@@ -10,6 +14,9 @@ import { getAdminUser } from "@/lib/auth/session";
  *   GET    → sert l'image (public, cacheable).
  *   POST   → upload (multipart, champ `file`) — réservé ADMIN.
  *   DELETE → retire l'image — réservé ADMIN.
+ *
+ * Comme la route du roster : GET non cadré (image publique, id global), écritures
+ * cadrées sur l'univers administré.
  */
 
 const ALLOWED_MIME = new Set([
@@ -47,9 +54,10 @@ export async function POST(req: Request, { params }: Params) {
     return NextResponse.json({ error: "Accès réservé aux administrateurs." }, { status: 403 });
   }
   const { id } = await params;
+  const { id: universeId } = await getCurrentUniverse();
 
-  const character = await prisma.draftCharacter.findUnique({
-    where: { id },
+  const character = await prisma.draftCharacter.findFirst({
+    where: { id, universeId },
     select: { id: true },
   });
   if (!character) {
@@ -78,7 +86,7 @@ export async function POST(req: Request, { params }: Params) {
     data: { imageData: bytes, imageMime: file.type, image: url },
   });
 
-  revalidatePath("/games/jujutsu-draft");
+  await revalidateUniversePath("/games/jujutsu-draft");
   revalidatePath("/admin");
   return NextResponse.json({ ok: true, image: url });
 }
@@ -88,13 +96,14 @@ export async function DELETE(_req: Request, { params }: Params) {
     return NextResponse.json({ error: "Accès réservé aux administrateurs." }, { status: 403 });
   }
   const { id } = await params;
+  const { id: universeId } = await getCurrentUniverse();
 
   await prisma.draftCharacter.updateMany({
-    where: { id },
+    where: { id, universeId },
     data: { imageData: null, imageMime: null, image: null },
   });
 
-  revalidatePath("/games/jujutsu-draft");
+  await revalidateUniversePath("/games/jujutsu-draft");
   revalidatePath("/admin");
   return NextResponse.json({ ok: true });
 }

@@ -1,21 +1,24 @@
-import { BADGES } from "@/lib/badges/definitions";
+import { badgesForUniverse } from "@/lib/badges/definitions";
 
 interface BadgeShelfProps {
-  /** Clés des badges débloqués par l'utilisateur. */
+  /** Clés des badges débloqués par l'utilisateur (possession GLOBALE). */
   unlockedKeys: string[];
+  /** Slug de l'univers courant : la vitrine n'affiche que ses badges. */
+  universeSlug: string;
 }
 
 /**
  * Vitrine des badges sur la page profil : débloqués en couleur, verrouillés
  * grisés avec leur description (objectif à atteindre). Itère sur le catalogue
- * `BADGES` (source de vérité = code).
+ * code (source de vérité = `BADGES`) RESTREINT à l'univers courant — la
+ * possession reste globale, seul l'affichage est filtré.
  */
-export function BadgeShelf({ unlockedKeys }: BadgeShelfProps) {
+export function BadgeShelf({ unlockedKeys, universeSlug }: BadgeShelfProps) {
   const unlocked = new Set(unlockedKeys);
 
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-      {BADGES.map((b) => {
+      {badgesForUniverse(universeSlug).map((b) => {
         const has = unlocked.has(b.key);
         return (
           <div

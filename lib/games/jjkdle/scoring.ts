@@ -1,32 +1,39 @@
 import type { Character } from "@/data/roster/characters";
 import {
-  ATTRIBUTE_COLUMNS,
-  ARCS_ORDER,
-  GRADES_ORDER,
-  CURSED_ENERGY_TOLERANCE,
-  attributeDisplay,
-  type AttributeKey,
-} from "./attributes";
+  attributeDisplayFor,
+  attributeValue,
+  type AttributeSchema,
+  type AttributeSpec,
+} from "./attribute-schema";
 import type { AttributeHint, GuessRow, HintDirection } from "./types";
 
 /**
  * Comparaison d'une proposition à la cible — cœur de la logique d'indices JJKdle.
  * Module PUR (aucun accès base/cookie) → testable et réutilisable.
  *
- * Règles :
- *  - attributs mono-valeur (race, gender, affiliation, clan, hasDomain) :
- *    correct si égal, sinon wrong ;
- *  - attributs ordonnés (grade, appearanceArc) : correct si égal, sinon wrong +
- *    flèche up/down selon l'index de la cible vs la proposition ;
- *  - cursedEnergy : correct si égal, close si |écart| ≤ tolérance, sinon wrong ;
- *    flèche up/down dans tous les cas non corrects.
+ * DATA-DRIVEN (étape 3) : les colonnes comparées, leur ordre et leurs règles
+ * viennent du SCHÉMA D'ATTRIBUTS de l'univers courant, plus des enums JJK. Le
+ * même code sert donc n'importe quel anime.
+ *
+ * Règles par `kind` :
+ *  - CATEGORICAL / BOOLEAN : correct si égal, sinon wrong. Jamais de flèche.
+ *  - ORDINAL : correct si égal, sinon wrong + flèche ↑/↓ selon le rang
+ *    (`AttributeOption.order`) de la cible vs la proposition. Une valeur de rang
+ *    `null` est NON ORDONNÉE : elle ne produit jamais de flèche (c'est la règle
+ *    historique de « pas de grade »).
+ *  - NUMERIC : correct si égal, close si |écart| ≤ `tolerance`, sinon wrong ;
+ *    flèche ↑/↓ dans tous les cas non corrects.
  *
  * La cible est toujours un perso COMPLET (cf. eligibleRoster) ; une proposition
- * peut être incomplète (attribut undefined) → statut wrong neutre + display "?".
+ * peut être incomplète (attribut absent) → statut wrong neutre + display "?".
  */
-export function compareGuess(guess: Character, target: Character): GuessRow {
-  const hints: AttributeHint[] = ATTRIBUTE_COLUMNS.map((key) =>
-    compareAttribute(key, guess, target),
+export function compareGuess(
+  guess: Character,
+  target: Character,
+  schema: AttributeSchema,
+): GuessRow {
+  const hints: AttributeHint[] = schema.columns.map((spec) =>
+    compareAttribute(spec, guess, target, schema),
   );
   return {
     characterId: guess.id,
@@ -37,96 +44,66 @@ export function compareGuess(guess: Character, target: Character): GuessRow {
 }
 
 function compareAttribute(
-  key: AttributeKey,
+  spec: AttributeSpec,
   guess: Character,
   target: Character,
+  schema: AttributeSchema,
 ): AttributeHint {
-  const display = attributeDisplay(key, guess);
+  const key = spec.key;
+  const display = attributeDisplayFor(schema, guess, key);
+  const g = attributeValue(guess, key);
+  const t = attributeValue(target, key);
 
-  if (key === "grade") {
-    // NO_GRADE n'est pas ordonné : égalité stricte, jamais de flèche.
-    if (guess.grade === "NO_GRADE" || target.grade === "NO_GRADE") {
-      const correct = guess.grade != null && guess.grade === target.grade;
-      return { key, status: correct ? "correct" : "wrong", display, direction: null };
-    }
-    return orderedHint(key, display, guess.grade, target.grade, GRADES_ORDER);
-  }
-  if (key === "appearanceArc") {
-    return orderedHint(
-      key,
-      display,
-      guess.appearanceArc,
-      target.appearanceArc,
-      ARCS_ORDER,
-    );
-  }
-  if (key === "cursedEnergy") {
-    return cursedEnergyHint(display, guess.cursedEnergy, target.cursedEnergy);
-  }
+  if (spec.kind === "NUMERIC") return numericHint(spec, display, g, t);
+  if (spec.kind === "ORDINAL") return orderedHint(spec, display, g, t, schema);
 
-  // Attributs mono-valeur : égalité stricte.
-  const g = scalarValue(key, guess);
-  const t = scalarValue(key, target);
+  // CATEGORICAL / BOOLEAN : égalité stricte, jamais de flèche.
   const correct = g != null && g === t;
   return { key, status: correct ? "correct" : "wrong", display, direction: null };
 }
 
-/** Valeur scalaire comparable d'un attribut mono-valeur. */
-function scalarValue(key: AttributeKey, c: Character): string | boolean | undefined {
-  switch (key) {
-    case "race":
-      return c.race;
-    case "gender":
-      return c.gender;
-    case "affiliation":
-      return c.affiliation;
-    case "clan":
-      return c.clan;
-    case "hasDomain":
-      return c.hasDomain;
-    default:
-      return undefined;
-  }
-}
-
-/** Indice pour un attribut ordonné (grade, arc) : flèche selon l'index. */
-function orderedHint<T extends string>(
-  key: AttributeKey,
+/** Indice d'un attribut ORDINAL : flèche selon le rang des options. */
+function orderedHint(
+  spec: AttributeSpec,
   display: string,
-  guessVal: T | undefined,
-  targetVal: T | undefined,
-  order: T[],
+  guessVal: string | number | undefined,
+  targetVal: string | number | undefined,
+  schema: AttributeSchema,
 ): AttributeHint {
+  const key = spec.key;
   if (guessVal != null && guessVal === targetVal) {
     return { key, status: "correct", display, direction: null };
   }
   let direction: HintDirection = null;
-  if (guessVal != null && targetVal != null) {
-    const gi = order.indexOf(guessVal);
-    const ti = order.indexOf(targetVal);
-    if (gi !== -1 && ti !== -1 && gi !== ti) {
+  if (typeof guessVal === "string" && typeof targetVal === "string") {
+    const gi = schema.optionOrder(key, guessVal);
+    const ti = schema.optionOrder(key, targetVal);
+    // `null` = valeur non ordonnée (ou option inconnue) → aucune flèche.
+    if (gi != null && ti != null && gi !== ti) {
       direction = ti > gi ? "up" : "down";
     }
   }
   return { key, status: "wrong", display, direction };
 }
 
-/** Indice numérique pour cursedEnergy : correct / close / wrong + flèche. */
-function cursedEnergyHint(
+/** Indice d'un attribut NUMERIC : correct / close (tolérance) / wrong + flèche. */
+function numericHint(
+  spec: AttributeSpec,
   display: string,
-  guessVal: number | undefined,
-  targetVal: number | undefined,
+  guessVal: string | number | undefined,
+  targetVal: string | number | undefined,
 ): AttributeHint {
-  const key: AttributeKey = "cursedEnergy";
-  if (guessVal == null || targetVal == null) {
+  const key = spec.key;
+  if (typeof guessVal !== "number" || typeof targetVal !== "number") {
     return { key, status: "wrong", display, direction: null };
   }
   if (guessVal === targetVal) {
     return { key, status: "correct", display, direction: null };
   }
   const direction: HintDirection = targetVal > guessVal ? "up" : "down";
-  const status = Math.abs(targetVal - guessVal) <= CURSED_ENERGY_TOLERANCE
-    ? "close"
-    : "wrong";
+  // Pas de tolérance définie ⇒ aucun palier « proche ».
+  const tolerance = spec.tolerance ?? 0;
+  const status =
+    Math.abs(targetVal - guessVal) <= tolerance ? "close" : "wrong";
   return { key, status, display, direction };
 }

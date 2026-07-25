@@ -3,21 +3,31 @@ import {
   buildUserStatsContext,
   type UserStatsContext,
 } from "@/lib/progress/context";
-import { BADGES } from "./definitions";
+import { getCurrentUniverse } from "@/lib/universes/current";
+import { badgesForUniverse } from "./definitions";
 
 /**
- * Évalue toutes les règles de badge pour un utilisateur et persiste les
- * nouveaux déblocages. Idempotent : `@@unique([userId, badgeKey])` empêche tout
- * doublon, et un badge déjà possédé n'est jamais retiré (l'attribution manuelle
- * admin coexiste). Renvoie les clés NOUVELLEMENT débloquées (pour le toast).
+ * Évalue les règles de badge de l'UNIVERS COURANT pour un utilisateur et persiste
+ * les nouveaux déblocages. Idempotent : `@@unique([userId, badgeKey])` empêche
+ * tout doublon, et un badge déjà possédé n'est jamais retiré (l'attribution
+ * manuelle admin coexiste). Renvoie les clés NOUVELLEMENT débloquées (toast).
+ *
+ * Multi-univers (étape 2d) : on ne gagne que les badges de l'univers où l'on
+ * joue — mais la POSSESSION reste globale (UserBadge n'est pas taggé), donc un
+ * badge acquis sur JJK le reste à vie.
  */
 export async function evaluateBadges(
   userId: string,
   ctx?: UserStatsContext,
 ): Promise<string[]> {
-  const context = ctx ?? (await buildUserStatsContext(userId));
+  const [context, universe] = await Promise.all([
+    ctx ? Promise.resolve(ctx) : buildUserStatsContext(userId),
+    getCurrentUniverse(),
+  ]);
 
-  const earnedKeys = BADGES.filter((b) => b.check(context)).map((b) => b.key);
+  const earnedKeys = badgesForUniverse(universe.slug)
+    .filter((b) => b.check(context))
+    .map((b) => b.key);
   if (earnedKeys.length === 0) return [];
 
   const existing = await prisma.userBadge.findMany({

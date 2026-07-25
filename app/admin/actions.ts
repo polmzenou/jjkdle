@@ -1,7 +1,17 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { Prisma, type Role } from "@prisma/client";
+import { cookies } from "next/headers";
+import { Prisma, type AttributeKind, type Role } from "@prisma/client";
+import {
+  upsertAttribute,
+  deleteAttribute,
+  upsertAttributeOption,
+  deleteAttributeOption,
+  validateAttributeKey,
+  type AttributeInput,
+  type AttributeOptionInput,
+} from "@/lib/admin/attribute-store";
 import {
   getAdminUser,
   getAdminOrVipUser,
@@ -65,21 +75,23 @@ import type {
 } from "@/lib/games/draft/types";
 import type { Character, CharacterTier } from "@/data/roster/characters";
 import { CATEGORY_BY_ID, type CategoryId } from "@/data/roster/categories";
-import {
-  RACES,
-  GENDERS,
-  GRADES_ORDER,
-  AFFILIATIONS,
-  CLANS,
-  ARCS_ORDER,
-} from "@/lib/games/jjkdle/attributes";
 import { eligibleRoster } from "@/lib/games/jjkdle/daily";
+import { loadAttributeSchema } from "@/lib/games/jjkdle/attributes-db";
+import {
+  getCurrentUniverseSlug,
+  listAvailableUniverses,
+  revalidateUniversePath,
+} from "@/lib/universes/current";
+import {
+  ADMIN_UNIVERSE_COOKIE,
+  adminUniverseCookieOptions,
+} from "@/lib/universes/admin-scope";
 import { getGame } from "@/lib/games/registry";
 import {
   setConfig,
   gameEnabledKey,
-  MAINTENANCE_KEY,
-  FORCED_TARGET_KEY,
+  maintenanceKey,
+  forcedTargetKey,
   type MaintenanceConfig,
 } from "@/lib/config/app-config";
 
@@ -136,32 +148,23 @@ export async function saveCharacterAction(
     }
   }
 
-  // ── Attributs JJKdle : chaque enum validé contre ses valeurs ; omis si vide.
-  const jjkdle: Partial<
-    Pick<
-      Character,
-      | "race"
-      | "gender"
-      | "grade"
-      | "affiliation"
-      | "clan"
-      | "appearanceArc"
-      | "hasDomain"
-      | "cursedEnergy"
-    >
-  > = {};
-  if (input.race && RACES.includes(input.race)) jjkdle.race = input.race;
-  if (input.gender && GENDERS.includes(input.gender)) jjkdle.gender = input.gender;
-  if (input.grade && GRADES_ORDER.includes(input.grade)) jjkdle.grade = input.grade;
-  if (input.affiliation && AFFILIATIONS.includes(input.affiliation))
-    jjkdle.affiliation = input.affiliation;
-  if (input.clan && CLANS.includes(input.clan)) jjkdle.clan = input.clan;
-  if (input.appearanceArc && ARCS_ORDER.includes(input.appearanceArc))
-    jjkdle.appearanceArc = input.appearanceArc;
-  if (typeof input.hasDomain === "boolean") jjkdle.hasDomain = input.hasDomain;
-  if (input.cursedEnergy != null && `${input.cursedEnergy}` !== "") {
-    const ce = Number(input.cursedEnergy);
-    if (Number.isFinite(ce) && ce >= 0) jjkdle.cursedEnergy = Math.round(ce);
+  // ── Attributs DATA-DRIVEN : validés contre le SCHÉMA de l'univers courant
+  // (valeur ∈ options de l'attribut, ou entier ≥ 0 pour un NUMERIC). Une clé
+  // inconnue de l'univers ou une valeur invalide est ignorée — anti-tamper : on
+  // ne fait jamais confiance au client, exactement comme l'ancienne validation
+  // contre les enums.
+  const schema = await loadAttributeSchema();
+  const attributes: Record<string, string | number> = {};
+  for (const col of schema.columns) {
+    const raw = input.attributes?.[col.key];
+    if (raw == null || raw === "") continue;
+    if (col.kind === "NUMERIC") {
+      const n = Number(raw);
+      if (Number.isFinite(n) && n >= 0) attributes[col.key] = Math.round(n);
+      continue;
+    }
+    const value = String(raw);
+    if (col.options.some((o) => o.value === value)) attributes[col.key] = value;
   }
 
   const char: Character = {
@@ -172,7 +175,7 @@ export async function saveCharacterAction(
     ...(image ? { image } : {}),
     ratings,
     ...(battleValue != null ? { battleValue } : {}),
-    ...jjkdle,
+    attributes,
   };
 
   try {
@@ -251,8 +254,10 @@ export async function refreshRosterImagesFromApiAction(): Promise<ImageRefreshRe
     return fail(`Lecture du roster impossible : ${(e as Error).message}`);
   }
 
-  // Filtre demandé : uniquement les persos marqués FEMALE en base.
-  const females = roster.filter((c) => c.gender === "FEMALE");
+  // Filtre demandé : uniquement les persos marqués FEMALE en base. Lu depuis les
+  // attributs data-driven (l'attribut "gender" est propre à l'univers JJK ; un
+  // univers sans cet attribut ne renvoie simplement personne).
+  const females = roster.filter((c) => c.attributes?.gender === "FEMALE");
 
   let summary: Omit<ImageRefreshResult, "ok" | "error">;
   try {
@@ -331,7 +336,7 @@ export async function saveDraftCharacterAction(
     return { ok: false, error: `Échec d'écriture : ${(e as Error).message}` };
   }
 
-  revalidatePath("/games/jujutsu-draft");
+  await revalidateUniversePath("/games/jujutsu-draft");
   revalidatePath("/admin");
   return { ok: true };
 }
@@ -348,7 +353,7 @@ export async function deleteDraftCharacterAction(
   } catch (e) {
     return { ok: false, error: `Échec de suppression : ${(e as Error).message}` };
   }
-  revalidatePath("/games/jujutsu-draft");
+  await revalidateUniversePath("/games/jujutsu-draft");
   revalidatePath("/admin");
   return { ok: true };
 }
@@ -378,7 +383,7 @@ export async function updateScoreAction(
     } catch (e) {
       return { ok: false, error: `Échec de modification : ${(e as Error).message}` };
     }
-    revalidatePath("/games/jujutsu-draft");
+    await revalidateUniversePath("/games/jujutsu-draft");
     revalidatePath("/admin");
     return { ok: true };
   }
@@ -394,7 +399,7 @@ export async function updateScoreAction(
     } catch (e) {
       return { ok: false, error: `Échec de modification : ${(e as Error).message}` };
     }
-    revalidatePath("/games/jjkdle");
+    await revalidateUniversePath("/games/jjkdle");
     revalidatePath("/admin");
     return { ok: true };
   }
@@ -410,7 +415,7 @@ export async function updateScoreAction(
     } catch (e) {
       return { ok: false, error: `Échec de modification : ${(e as Error).message}` };
     }
-    revalidatePath("/games/higher-lower");
+    await revalidateUniversePath("/games/higher-lower");
     revalidatePath("/admin");
     return { ok: true };
   }
@@ -428,7 +433,7 @@ export async function updateScoreAction(
   } catch (e) {
     return { ok: false, error: `Échec de modification : ${(e as Error).message}` };
   }
-  revalidatePath(`/games/${game}`);
+  await revalidateUniversePath(`/games/${game}`);
   revalidatePath("/admin");
   return { ok: true };
 }
@@ -462,7 +467,7 @@ export async function deleteScoreAction(
   } catch (e) {
     return { ok: false, error: `Échec de suppression : ${(e as Error).message}` };
   }
-  revalidatePath(gamePath(game));
+  await revalidateUniversePath(gamePath(game));
   revalidatePath("/admin");
   return { ok: true };
 }
@@ -486,7 +491,7 @@ export async function deleteScoresAction(
       errors.push(`${id} : ${(e as Error).message}`);
     }
   }
-  for (const game of games) revalidatePath(gamePath(game));
+  for (const game of games) await revalidateUniversePath(gamePath(game));
   revalidatePath("/admin");
   return {
     ok: errors.length === 0,
@@ -585,8 +590,8 @@ export async function setUsernameAction(
   }
 
   revalidatePath("/admin");
-  if (previous) revalidatePath(`/u/${previous}`);
-  revalidatePath(`/u/${username}`);
+  if (previous) await revalidateUniversePath(`/u/${previous}`);
+  await revalidateUniversePath(`/u/${username}`);
   return { ok: true };
 }
 
@@ -813,6 +818,151 @@ function revalidateGlobalConfig(): void {
   revalidatePath("/admin");
 }
 
+// ── Attributs de l'univers (étape 5) ──────────────────────────────────────
+// C'est cette section qui permet d'ajouter un anime SANS CODE : on définit ses
+// attributs de personnage et leurs valeurs possibles, et JJKdle en découle.
+
+const ATTRIBUTE_KINDS: AttributeKind[] = [
+  "CATEGORICAL",
+  "ORDINAL",
+  "BOOLEAN",
+  "NUMERIC",
+];
+
+/** Entier ≥ 0 lu depuis un champ de formulaire, ou null si vide/invalide. */
+function optionalInt(raw: unknown): number | null {
+  if (raw == null || `${raw}`.trim() === "") return null;
+  const n = Number(raw);
+  return Number.isFinite(n) && n >= 0 ? Math.round(n) : null;
+}
+
+/** Crée ou met à jour un attribut de l'univers administré. */
+export async function saveAttributeAction(
+  input: AttributeInput,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+
+  const key = String(input.key ?? "").trim();
+  const label = String(input.label ?? "").trim();
+  if (!label) return { ok: false, error: "Le libellé est obligatoire." };
+  if (!ATTRIBUTE_KINDS.includes(input.kind)) {
+    return { ok: false, error: "Type d'attribut invalide." };
+  }
+  // La clé n'est validée qu'à la CRÉATION : elle est immuable ensuite.
+  if (!input.id) {
+    const keyError = validateAttributeKey(key);
+    if (keyError) return { ok: false, error: keyError };
+  }
+
+  try {
+    await upsertAttribute({
+      ...(input.id ? { id: input.id } : {}),
+      key,
+      label,
+      kind: input.kind,
+      position: optionalInt(input.position) ?? 0,
+      comparable: Boolean(input.comparable),
+      tolerance: optionalInt(input.tolerance),
+    });
+  } catch (e) {
+    // Collision de clé (@@unique([universeId, key])) ou écriture refusée.
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidateGlobalConfig();
+  return { ok: true };
+}
+
+/** Supprime un attribut (et, en cascade, ses valeurs saisies). */
+export async function deleteAttributeAction(
+  id: string,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  try {
+    await deleteAttribute(id);
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidateGlobalConfig();
+  return { ok: true };
+}
+
+/** Crée ou met à jour une valeur possible d'un attribut. */
+export async function saveAttributeOptionAction(
+  input: AttributeOptionInput,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  const value = String(input.value ?? "").trim();
+  const label = String(input.label ?? "").trim();
+  if (!value) return { ok: false, error: "La valeur est obligatoire." };
+  if (!label) return { ok: false, error: "Le libellé est obligatoire." };
+
+  try {
+    await upsertAttributeOption({
+      ...(input.id ? { id: input.id } : {}),
+      attributeId: input.attributeId,
+      value,
+      label,
+      // `null` = valeur non ordonnée : aucune flèche ↑/↓ ne sera affichée.
+      order: optionalInt(input.order),
+    });
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidateGlobalConfig();
+  return { ok: true };
+}
+
+/** Supprime une valeur possible (et, en cascade, les valeurs des persos). */
+export async function deleteAttributeOptionAction(
+  id: string,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  try {
+    await deleteAttributeOption(id);
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidateGlobalConfig();
+  return { ok: true };
+}
+
+/**
+ * Change l'UNIVERS CIBLÉ par la session d'administration (étape 5).
+ *
+ * Le slug est posé dans un cookie que le middleware applique aux chemins
+ * `/admin` uniquement : toutes les vues et actions de l'admin (roster, draft,
+ * catégories, classements, attributs, config) basculent d'un coup sur cet
+ * univers, sans changer ce que voient les joueurs sur le site public.
+ */
+export async function setAdminUniverseAction(
+  slug: string,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  // L'univers doit être utilisable : ligne en base ET config en code.
+  const available = await listAvailableUniverses();
+  if (!available.some((u) => u.slug === slug)) {
+    return { ok: false, error: "Univers inconnu ou non configuré." };
+  }
+
+  (await cookies()).set(
+    ADMIN_UNIVERSE_COOKIE,
+    slug,
+    adminUniverseCookieOptions(),
+  );
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
 /** Active ou désactive un jeu du catalogue. */
 export async function setGameEnabledAction(
   gameId: string,
@@ -825,7 +975,8 @@ export async function setGameEnabledAction(
     return { ok: false, error: "Jeu inconnu." };
   }
   try {
-    await setConfig(gameEnabledKey(gameId), Boolean(enabled));
+    const slug = await getCurrentUniverseSlug();
+    await setConfig(gameEnabledKey(slug, gameId), Boolean(enabled));
   } catch (e) {
     return { ok: false, error: `Échec : ${(e as Error).message}` };
   }
@@ -850,7 +1001,8 @@ export async function setMaintenanceAction(
     ...(trimmed ? { message: trimmed } : {}),
   };
   try {
-    await setConfig(MAINTENANCE_KEY, value);
+    const slug = await getCurrentUniverseSlug();
+    await setConfig(maintenanceKey(slug), value);
   } catch (e) {
     return { ok: false, error: `Échec : ${(e as Error).message}` };
   }
@@ -869,8 +1021,11 @@ export async function setForcedTargetAction(
     return { ok: false, error: "Accès réservé aux administrateurs." };
   }
   if (characterId !== null) {
-    const roster = await readRoster();
-    const eligible = eligibleRoster(roster);
+    const [roster, schema] = await Promise.all([
+      readRoster(),
+      loadAttributeSchema(),
+    ]);
+    const eligible = eligibleRoster(roster, schema);
     if (!eligible.some((c) => c.id === characterId)) {
       return {
         ok: false,
@@ -879,12 +1034,13 @@ export async function setForcedTargetAction(
     }
   }
   try {
-    await setConfig(FORCED_TARGET_KEY, characterId);
+    const slug = await getCurrentUniverseSlug();
+    await setConfig(forcedTargetKey(slug), characterId);
   } catch (e) {
     return { ok: false, error: `Échec : ${(e as Error).message}` };
   }
   revalidateGlobalConfig();
   // Le mot du jour change → invalider aussi la page du jeu.
-  revalidatePath("/games/jjkdle");
+  await revalidateUniversePath("/games/jjkdle");
   return { ok: true };
 }

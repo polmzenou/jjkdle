@@ -25,6 +25,7 @@ import {
 import { DraftPhase } from "./DraftPhase";
 import { BattleCombat } from "./BattleCombat";
 import { BattleResult } from "./BattleResult";
+import { useUniverseHref } from "@/components/universe/UniverseProvider";
 
 interface BattleLobbyProps {
   initialLobby: SerializedLobby;
@@ -42,6 +43,7 @@ export function BattleLobby({
   pusherReady,
 }: BattleLobbyProps) {
   const router = useRouter();
+  const withUniverse = useUniverseHref();
   const [lobby, setLobby] = useState<SerializedLobby>(initialLobby);
   const [gameState, setGameState] = useState<BattleState | null>(initialGameState);
   const [connError, setConnError] = useState<string | null>(null);
@@ -120,7 +122,7 @@ export function BattleLobby({
   const handleLeave = useCallback(() => {
     startTransition(async () => {
       await leaveBattleAction(code);
-      router.push("/games/battle");
+      router.push(withUniverse("/games/battle"));
     });
   }, [code, router]);
 

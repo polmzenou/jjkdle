@@ -1,24 +1,38 @@
 "use client";
 
+import { useMemo } from "react";
 import type { Character } from "@/data/roster/characters";
 import {
-  ATTRIBUTE_COLUMNS,
-  ATTRIBUTE_LABELS,
-  attributeDisplay,
-} from "@/lib/games/jjkdle/attributes";
+  attributeDisplayFor,
+  buildAttributeSchema,
+  type AttributeSpec,
+} from "@/lib/games/jjkdle/attribute-schema";
 
 interface GuessWhoCharacterInfoProps {
   /** Personnage actuellement survolé (null = rien à afficher). */
   character: Character | null;
+  /** Attributs de l'univers courant (définissent les lignes de la fiche). */
+  attributeColumns: AttributeSpec[];
 }
 
 /**
- * Petite fiche d'aide affichée sous la carte secrète : reprend toutes les
- * données JJKdle du personnage survolé (race, genre, grade, affiliation, clan,
- * arc d'apparition, extension du territoire, énergie occulte). Aide les joueurs
- * qui ne connaissent pas tout le roster. Ne s'affiche que si un perso est survolé.
+ * Petite fiche d'aide affichée sous la carte secrète : reprend tous les attributs
+ * du personnage survolé (pour JJK : race, genre, grade, affiliation, clan, arc
+ * d'apparition, territoire, énergie occulte). Aide les joueurs qui ne connaissent
+ * pas tout le roster. Ne s'affiche que si un perso est survolé.
+ *
+ * Les lignes viennent du schéma d'attributs de l'univers : un autre anime affiche
+ * automatiquement SES attributs, sans toucher à ce composant.
  */
-export function GuessWhoCharacterInfo({ character }: GuessWhoCharacterInfoProps) {
+export function GuessWhoCharacterInfo({
+  character,
+  attributeColumns,
+}: GuessWhoCharacterInfoProps) {
+  const schema = useMemo(
+    () => buildAttributeSchema(attributeColumns),
+    [attributeColumns],
+  );
+
   if (!character) return null;
 
   return (
@@ -27,16 +41,16 @@ export function GuessWhoCharacterInfo({ character }: GuessWhoCharacterInfoProps)
         {character.name}
       </p>
       <dl className="flex flex-col gap-1">
-        {ATTRIBUTE_COLUMNS.map((key) => (
+        {schema.columns.map((col) => (
           <div
-            key={key}
+            key={col.key}
             className="flex items-baseline justify-between gap-2 text-[0.7rem]"
           >
             <dt className="shrink-0 uppercase tracking-wide text-white/40">
-              {ATTRIBUTE_LABELS[key]}
+              {col.label}
             </dt>
             <dd className="truncate text-right font-semibold text-white/80">
-              {attributeDisplay(key, character)}
+              {attributeDisplayFor(schema, character, col.key)}
             </dd>
           </div>
         ))}

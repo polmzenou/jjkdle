@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext } from "react";
-import type { RankingCardData } from "@/app/games/ranking/types";
+import type { RankingCardData } from "@/app/[universe]/games/ranking/types";
 
 /**
  * Fournit les cartes en jeu (indexées par id) aux composants client du jeu Pyramid.

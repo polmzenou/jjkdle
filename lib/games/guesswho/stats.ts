@@ -1,5 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUniverse } from "@/lib/universes/current";
 
 /** Bilan « Qui est-ce ? » d'un joueur (ratio victoires/défaites). */
 export interface GuessWhoStats {
@@ -12,9 +13,10 @@ export interface GuessWhoStats {
 export async function getUserGuessWhoStats(
   userId: string,
 ): Promise<GuessWhoStats | null> {
+  const { id: universeId } = await getCurrentUniverse();
   const rows = await prisma.guessWhoScore.groupBy({
     by: ["won"],
-    where: { userId },
+    where: { userId, universeId },
     _count: { _all: true },
   });
   if (rows.length === 0) return null;

@@ -34,31 +34,14 @@ model User {
   role         Role     @default(PLAYER)
   createdAt    DateTime @default(now())
 
-  // ── Customisation profil (ensembles fermés, aucun upload) ──
-  bannerKey         String     @default("default") // clé ∈ BANNER_PALETTE (lib/profile/banners.ts)
-  avatarCharacterId String?
-  avatarCharacter   Character? @relation("UserAvatar", fields: [avatarCharacterId], references: [id], onDelete: SetNull)
+  // Customisation profil (bannière, avatar, titre/cadre équipés, layout) ET
+  // streak quotidien JJKdle sont désormais PAR UNIVERS → cf. UserUniverseProfile
+  // (étape 2c). Le compte ne porte plus que l'identité et la progression globale.
 
-  // Titre + cadre équipés (au plus un de chaque, ou aucun). Comme bannerKey, ce
-  // sont des CLÉS vers des catalogues définis en code (lib/titles, lib/frames) —
-  // source de vérité = code, pas de table. Validés serveur à l'équipement.
-  equippedTitleKey String? // clé ∈ TITLES (lib/titles/definitions.ts) ou null
-  equippedFrameKey String? // clé ∈ FRAMES (lib/frames/definitions.ts) ou null
-
-  // Mise en page du profil PUBLIC : visibilité (titre, cadre, badges, scores) et
-  // ordre des sections de corps (badges/scores). Forme libre validée/normalisée
-  // en code (lib/profile/layout.ts). null = layout par défaut (tout affiché).
-  profileLayout Json?
-
-  // ── Progression (cache recalculé en fin de partie ; source = scores) ──
+  // ── Progression GLOBALE (cache recalculé en fin de partie ; source = scores) ──
   totalXp Int @default(0)
   xpBonus Int @default(0) // ajustement manuel admin (additif, persistant)
   level   Int @default(1)
-
-  // ── Streak quotidien JJKdle (jour de réf. = Europe/Paris, cf. todayKey) ──
-  jjkdleStreak       Int     @default(0)
-  jjkdleBestStreak   Int     @default(0)
-  jjkdleLastPlayedAt String? // clé "YYYY-MM-DD" du dernier daily complété
 
   sessions     Session[]
   scores       Score[]
@@ -72,6 +55,35 @@ model User {
   titleGrants  UserTitleGrant[]
   frameGrants  UserFrameGrant[]
   jjkdleResults JjkdleResult[]
+  universeProfiles UserUniverseProfile[]
+}
+
+/// Profil PAR UNIVERS d'un utilisateur (étape 2c). Le compte reste global
+/// (identité, XP, niveau, possession des cosmétiques) ; en revanche ce qui est
+/// ÉQUIPÉ (titre/cadre/bannière/avatar/layout) et le STREAK quotidien sont
+/// propres à chaque univers. Une ligne par couple utilisateur/univers.
+model UserUniverseProfile {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  universeId String
+  universe   Universe @relation(fields: [universeId], references: [id])
+
+  // ── Loadout équipé (déplacé de User) ──
+  equippedTitleKey  String?
+  equippedFrameKey  String?
+  bannerKey         String     @default("default")
+  avatarCharacterId String?
+  avatarCharacter   Character? @relation("UserUniverseAvatar", fields: [avatarCharacterId], references: [id], onDelete: SetNull)
+  profileLayout     Json?
+
+  // ── Streak daily (déplacé de User — décision : streak par univers) ──
+  jjkdleStreak       Int     @default(0)
+  jjkdleBestStreak   Int     @default(0)
+  jjkdleLastPlayedAt String?
+
+  @@unique([userId, universeId])
+  @@index([universeId])
 }
 
 /// Déblocage d'un badge par un utilisateur. La métadonnée du badge (nom,
@@ -140,85 +152,13 @@ enum DraftOutcome {
   DEFEAT
 }
 
-// ──────────────────────────────────────────────────────────────────────────
-// Attributs JJKdle (jeu de déduction quotidien). Listes fermées = enums.
-// Remplis via /admin (non seedés). Colonnes ajoutées au model Character ci-dessous,
-// toutes nullable → le builder/battle/ranking ne sont pas impactés.
-// ──────────────────────────────────────────────────────────────────────────
-
-/// Race / nature du personnage (JJKdle).
-enum JjkRace {
-  HUMAN
-  CURSED_SPIRIT // fléau
-  SHIKIGAMI
-  CURSED_CORPSE
-  OTHER
-}
-
-/// Genre (JJKdle).
-enum JjkGender {
-  MALE
-  FEMALE
-  OTHER
-}
-
-/// Grade hiérarchique JJK. L'ORDRE DES VALEURS EST SIGNIFIANT (croissant) :
-/// il sert à l'indice ↑/↓ (la cible est d'un grade plus haut / plus bas).
-enum JjkGrade {
-  NO_GRADE // pas de grade (≠ null = non renseigné), non ordonné pour l'indice
-  GRADE_4
-  SEMI_GRADE_3
-  GRADE_3
-  SEMI_GRADE_2
-  GRADE_2
-  SEMI_GRADE_1
-  GRADE_1
-  SPECIAL_GRADE
-}
-
-/// Affiliation principale (mono-valeur). Étendre si le roster l'exige.
-enum JjkAffiliation {
-  TOKYO_SCHOOL
-  KYOTO_SCHOOL
-  CULLING_GAME
-  SHIBUYA
-  CURSED_SPIRITS_FACTION
-  OTHER
-}
-
-/// Clan d'origine. NONE = pas de clan (≠ null = attribut non renseigné).
-enum JjkClan {
-  ZENIN
-  KAMO
-  GOJO
-  NONE
-}
-
-/// Arc de première apparition. L'ORDRE DES VALEURS EST SIGNIFIANT (chronologique
-/// au sens de l'histoire) : il sert à l'indice ↑/↓ (apparu plus tard / plus tôt).
-/// GOJOS_PAST est un flashback : placé ici à l'arc de première apparition à l'écran.
-enum JjkArc {
-  JJK_0 // Jujutsu Kaisen 0 (préquel) : Yuta, Rika, Maki, Inumaki, Panda, Geto
-  FEARSOME_WOMB // Cursed Womb / Prologue : Yuji, Sukuna, école de Tokyo
-  VS_MAHITO // Vs Mahito / premiers fléaux
-  KYOTO_GOODWILL_EVENT // Échange Tokyo-Kyoto, Hanami
-  DEATH_PAINTING // Death Painting / pont Yasohachi : Choso & frères
-  GOJOS_PAST // Flashback Gojo & Geto, Riko Amanai, Toji
-  SHIBUYA_INCIDENT // Scellement de Gojo, mort de Nanami
-  ITADORI_EXTERMINATION // Post-Shibuya / Perfect Preparation
-  CULLING_GAME // Colonies, Kashimo, Higuruma, Reggie…
-  SHINJUKU_SHOWDOWN // Bataille finale Gojo vs Sukuna
-  FINAL // Dénouement après la chute de Sukuna
-  MODULO // Jujutsu Kaisen Modulo (récit annexe)
-}
-
 /// Meilleur score de Jujutsu Draft d'un utilisateur (un enregistrement par
 /// utilisateur — upsert quand un meilleur résultat est obtenu). `globalScore`
 /// est le score global caché recalculé côté serveur (anti-triche) ; `draft`
 /// est le snapshot des persos choisis par catégorie au moment du record.
 model JujutsuDraftScore {
   id            String       @id @default(cuid())
-  userId        String       @unique
+  userId        String
   user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   enemiesKilled Int
   globalScore   Int
@@ -227,7 +167,11 @@ model JujutsuDraftScore {
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
-  @@index([enemiesKilled, globalScore])
+  // Multi-univers (étape 2b). Un meilleur score par joueur ET par univers.
+  universeId String
+
+  @@unique([userId, universeId])
+  @@index([universeId, enemiesKilled, globalScore])
 }
 
 /// Score JJKdle : nombre d'essais d'un utilisateur pour le perso mystère d'un
@@ -246,8 +190,12 @@ model JjkdleScore {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([userId, date])
-  @@index([date, attempts])
+  // Multi-univers (étape 2b). Le daily étant PAR univers, universeId entre dans
+  // la clé d'unicité (un score par joueur, par univers, par jour).
+  universeId String
+
+  @@unique([userId, universeId, date])
+  @@index([universeId, date, attempts])
 }
 
 /// Résultat ANALYTIQUE d'une partie JJKdle QUOTIDIENNE, par utilisateur connecté.
@@ -268,8 +216,11 @@ model JjkdleResult {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([userId, date])
-  @@index([date])
+  // Multi-univers (étape 2b). Daily par univers → unicité par joueur/univers/jour.
+  universeId String
+
+  @@unique([userId, universeId, date])
+  @@index([universeId, date])
   @@index([targetId])
 }
 
@@ -294,8 +245,11 @@ model HigherLowerScore {
   xpEarned  Int
   createdAt DateTime @default(now())
 
+  // Multi-univers (étape 2b).
+  universeId String
+
   @@index([userId])
-  @@index([score])
+  @@index([universeId, score])
 }
 
 /// État autoritatif d'une partie « Higher/Lower » EN COURS (anti-triche).
@@ -315,6 +269,11 @@ model HigherLowerSession {
   usedIds           String[]
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+
+  // Multi-univers (étape 2e). Colonne scalaire (pas de FK) : table éphémère à
+  // fort churn, même convention que les tables de score. Une session démarrée
+  // dans un univers ne peut pas être reprise depuis un autre.
+  universeId String
 
   @@index([userId])
 }
@@ -339,6 +298,11 @@ model GuessWhoGame {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // Multi-univers (étape 2e). La partie n'est atteignable qu'via son lobby (déjà
+  // filtré par univers), mais on tagge quand même : défense en profondeur +
+  // statistiques admin par univers.
+  universeId String
+
   @@index([lobbyId])
 }
 
@@ -351,7 +315,11 @@ model GuessWhoScore {
   won       Boolean
   createdAt DateTime @default(now())
 
+  // Multi-univers (étape 2b).
+  universeId String
+
   @@index([userId])
+  @@index([universeId, userId])
 }
 
 /// Partie « JJK Codenames » — état autoritatif d'une partie d'équipe (2 équipes,
@@ -380,6 +348,9 @@ model CodenamesGame {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
+  // Multi-univers (étape 2e), même raisonnement que GuessWhoGame.
+  universeId String
+
   @@index([lobbyId])
 }
 
@@ -393,7 +364,11 @@ model CodenamesScore {
   team      String // "RED" | "PURPLE"
   createdAt DateTime @default(now())
 
+  // Multi-univers (étape 2b).
+  universeId String
+
   @@index([userId])
+  @@index([universeId, userId])
 }
 
 /// Meilleur score d'un utilisateur pour un jeu donné (un enregistrement par
@@ -407,8 +382,121 @@ model Score {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([userId, gameId])
-  @@index([gameId, best])
+  // Multi-univers (étape 2b). Colonne scalaire (pas de FK) pour ces tables
+  // append/upsert à fort volume. Classements filtrés par univers à la lecture.
+  universeId String
+
+  @@unique([userId, universeId, gameId])
+  @@index([universeId, gameId, best])
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Multi-univers (plateforme "anime-arcade"). Un univers = des lignes de CONTENU
+// taggées par `universeId` + une config de thème (lib/universes/). L'univers
+// courant est résolu par hostname (middleware, cf. étape 4). La config vit en
+// code (lib/universes/registry.ts), joint la base par `slug`.
+// ──────────────────────────────────────────────────────────────────────────
+
+/// Univers (anime) de la plateforme. `slug` = clé stable jointe à la config
+/// code (ex. "jjk", "csm"). Le contenu et les scores sont filtrés par `id`.
+model Universe {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  createdAt DateTime @default(now())
+
+  characters        Character[]
+  categories        Category[]
+  draftCharacters   DraftCharacter[]
+  rankingConditions RankingCondition[]
+  userProfiles      UserUniverseProfile[]
+  attributes        Attribute[]
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Attributs DATA-DRIVEN (étape 3). Remplacent les enums Jjk* : chaque univers
+// définit SES propres attributs de personnage, donc JJKdle fonctionne pour
+// n'importe quel anime sans une ligne de code métier en plus.
+//
+// Les enums Jjk* et les colonnes correspondantes de `Character` sont CONSERVÉS
+// le temps du strangler (parité prouvée par lib/games/jjkdle/scoring.parity.test.ts),
+// puis supprimés.
+// ──────────────────────────────────────────────────────────────────────────
+
+/// Nature d'un attribut — détermine la comparaison et le rendu du formulaire admin.
+enum AttributeKind {
+  /// Liste fermée non ordonnée (race, genre…) : égalité stricte, jamais de flèche.
+  CATEGORICAL
+  /// Liste fermée ORDONNÉE (grade, arc…) : indice ↑/↓ via `AttributeOption.order`.
+  ORDINAL
+  /// Oui/Non. Stocké comme un CATEGORICAL à 2 options ("true"/"false") — une
+  /// seule voie de stockage, et les libellés Oui/Non restent de la donnée.
+  BOOLEAN
+  /// Entier (énergie occulte…) : indice ↑/↓ + palier « proche » via `tolerance`.
+  NUMERIC
+}
+
+/// Attribut de personnage propre à un univers (une colonne de la grille JJKdle).
+model Attribute {
+  id         String        @id @default(cuid())
+  universeId String
+  universe   Universe      @relation(fields: [universeId], references: [id])
+  /// Clé stable et lisible ("grade", "appearanceArc", "cursedEnergy").
+  key        String
+  /// Libellé affiché en en-tête de colonne ("Grade", "Énergie occulte").
+  label      String
+  kind       AttributeKind
+  /// Ordre d'affichage des colonnes de la grille.
+  position   Int           @default(0)
+  /// ORDINAL/NUMERIC : l'indice affiche une flèche ↑/↓.
+  comparable Boolean       @default(false)
+  /// NUMERIC uniquement : écart |cible − proposition| sous lequel l'indice passe
+  /// en « proche » (orange). JJK cursedEnergy = 20 (ex-CURSED_ENERGY_TOLERANCE).
+  tolerance  Int?
+
+  options AttributeOption[]
+  values  CharacterAttribute[]
+
+  @@unique([universeId, key])
+  @@index([universeId, position])
+}
+
+/// Valeur possible d'un attribut à liste fermée (CATEGORICAL/ORDINAL/BOOLEAN).
+model AttributeOption {
+  id          String    @id @default(cuid())
+  attributeId String
+  attribute   Attribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  /// Valeur stable stockée/comparée ("GRADE_1", "true").
+  value       String
+  /// Libellé affiché ("Grade 1", "Oui").
+  label       String
+  /// Rang pour l'indice ↑/↓ des attributs ORDINAL.
+  /// NULL = valeur NON ORDONNÉE → jamais de flèche. C'est ce qui reproduit la
+  /// règle historique de `NO_GRADE` (« pas de grade » ne se compare pas à un grade).
+  order       Int?
+
+  values CharacterAttribute[]
+
+  @@unique([attributeId, value])
+}
+
+/// Valeur d'un attribut pour un personnage. L'ABSENCE de ligne = « non renseigné »
+/// (ce qui rend le perso inéligible comme cible du jour, cf. isComplete).
+model CharacterAttribute {
+  id          String    @id @default(cuid())
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  attributeId String
+  attribute   Attribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+
+  /// CATEGORICAL | ORDINAL | BOOLEAN.
+  optionId     String?
+  option       AttributeOption? @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  /// NUMERIC.
+  numericValue Int?
+
+  @@unique([characterId, attributeId])
+  @@index([attributeId, optionId])
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -425,6 +513,15 @@ model Category {
   weight      Float
   drawCount   Int
   position    Int    @default(0)
+
+  // Multi-univers (étape 2a). `id` reste la PK globale ; `slug` = clé lisible
+  // unique PAR univers (JJK : slug = id, ex. "innate-technique").
+  slug       String
+  universeId String
+  universe   Universe @relation(fields: [universeId], references: [id])
+
+  @@unique([universeId, slug])
+  @@index([universeId, position])
 }
 
 /// Personnage du roster. `ratings` est un objet JSON
@@ -445,23 +542,23 @@ model Character {
   battleValue Int?
   position  Int     @default(0)
 
-  // ── Attributs JJKdle (remplis via /admin, non seedés). Nullable = "non renseigné".
-  // Un personnage n'entre dans le pool quotidien que si TOUS ces champs sont remplis.
-  race          JjkRace?
-  gender        JjkGender?
-  grade         JjkGrade?
-  affiliation   JjkAffiliation?
-  clan          JjkClan? // NONE = pas de clan (≠ null = non renseigné)
-  appearanceArc JjkArc?
-  hasDomain     Boolean? // nullable pour distinguer "non" (false) de "non renseigné" (null)
-  /// Énergie occulte "lore" (indice numérique ↑/↓). DÉDUPLIQUÉE VOLONTAIREMENT de la
-  /// note builder ratings["cursed-energy"] (échelle gameplay 0–100) : la valeur lore
-  /// peut différer et ne doit pas coupler JJKdle au barème du builder.
-  cursedEnergy  Int?
 
-  /// Utilisateurs ayant choisi ce personnage comme avatar de profil.
-  avatarUsers User[] @relation("UserAvatar")
+  // ── Multi-univers (étape 1, phase B : NON-NULL après backfill).
+  // `id` reste la PK globale (zéro cassure des références string existantes) ;
+  // `slug` = clé lisible unique PAR univers (JJK : slug = id, ex. "gojo").
+  slug       String
+  universeId String
+  universe   Universe @relation(fields: [universeId], references: [id])
 
+  /// Avatars par univers (UserUniverseProfile) pointant sur ce personnage.
+  universeAvatarUsers UserUniverseProfile[] @relation("UserUniverseAvatar")
+
+  /// Valeurs d'attributs data-driven (étape 3). Remplacent à terme les colonnes
+  /// enum ci-dessus. Absence de ligne pour un attribut = « non renseigné ».
+  attributeValues CharacterAttribute[]
+
+  @@unique([universeId, slug])
+  @@index([universeId, position])
   @@index([position])
 }
 
@@ -481,6 +578,14 @@ model DraftCharacter {
   statValue          Int
   position           Int     @default(0)
 
+  // Multi-univers (étape 2a). `id` reste la PK globale ; `slug` = clé lisible
+  // unique PAR univers (JJK : slug = id).
+  slug       String
+  universeId String
+  universe   Universe @relation(fields: [universeId], references: [id])
+
+  @@unique([universeId, slug])
+  @@index([universeId, position])
   @@index([position])
 }
 
@@ -494,6 +599,14 @@ model RankingCondition {
   order    String[]
   position Int      @default(0)
 
+  // Multi-univers (étape 2a). `id` reste la PK globale ; `slug` = clé lisible
+  // unique PAR univers (JJK : slug = id).
+  slug       String
+  universeId String
+  universe   Universe @relation(fields: [universeId], references: [id])
+
+  @@unique([universeId, slug])
+  @@index([universeId, position])
   @@index([position])
 }
 
@@ -528,7 +641,14 @@ model Lobby {
 
   players LobbyPlayer[]
 
+  // Multi-univers (étape 2e). `code` reste GLOBALEMENT unique (deux univers ne
+  // peuvent pas tirer le même code) ; en revanche la RÉSOLUTION par code filtre
+  // sur l'univers courant → un code d'un autre univers se comporte exactement
+  // comme un code inexistant.
+  universeId String
+
   @@index([code])
+  @@index([universeId])
 }
 
 /// Plateau d'un joueur dans un lobby (sa sélection verrouillée + son tirage courant).

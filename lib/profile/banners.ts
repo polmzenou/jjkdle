@@ -1,3 +1,8 @@
+import {
+  ANY_UNIVERSE,
+  isInUniverse,
+  type UniverseScope,
+} from "@/lib/cosmetics/universe";
 import { MAX_LEVEL } from "@/lib/progress/xp";
 
 /**
@@ -16,6 +21,10 @@ export interface BannerStyle {
   gradient: string;
   /** Niveau minimum pour débloquer (1 = disponible d'entrée). */
   requiredLevel: number;
+  /** Univers propriétaire (multi-univers, étape 2d). `ANY_UNIVERSE` = neutre —
+   * c'est le cas de `default`, qui est la valeur `@default` du schéma et doit
+   * donc rester valide dans tous les univers. */
+  universe: UniverseScope;
 }
 
 export const BANNER_PALETTE = {
@@ -23,61 +32,73 @@ export const BANNER_PALETTE = {
     label: "Cursed Energy",
     gradient: "linear-gradient(120deg, #1b1b2b 0%, #5b21b6 60%, #7c3aed 100%)",
     requiredLevel: 1,
+    universe: ANY_UNIVERSE,
   },
   crimson: {
     label: "Sukuna",
     gradient: "linear-gradient(120deg, #1b1b2b 0%, #991b1b 55%, #dc2626 100%)",
     requiredLevel: 1,
+    universe: "jjk",
   },
   infinity: {
     label: "Infinity",
     gradient: "linear-gradient(120deg, #0a0a0f 0%, #1e3a8a 55%, #38bdf8 100%)",
     requiredLevel: 3,
+    universe: "jjk",
   },
   domain: {
     label: "Domain Expansion",
     gradient: "linear-gradient(120deg, #2e1065 0%, #7c3aed 55%, #a78bfa 100%)",
     requiredLevel: 5,
+    universe: "jjk",
   },
   blackflash: {
     label: "Black Flash",
     gradient: "linear-gradient(120deg, #0a0a0f 0%, #26263a 50%, #f43f5e 100%)",
     requiredLevel: 8,
+    universe: "jjk",
   },
   cursedrot: {
     label: "Cursed Rot",
     gradient: "linear-gradient(120deg, #14532d 0%, #166534 55%, #4ade80 100%)",
     requiredLevel: 11,
+    universe: "jjk",
   },
   gold: {
     label: "Special Grade",
     gradient: "linear-gradient(120deg, #1b1b2b 0%, #b45309 55%, #f59e0b 100%)",
     requiredLevel: 15,
+    universe: "jjk",
   },
   shadow: {
     label: "Ten Shadows",
     gradient: "linear-gradient(120deg, #000000 0%, #1b1b2b 55%, #6b7280 100%)",
     requiredLevel: 20,
+    universe: "jjk",
   },
   abyss: {
     label: "Abyssal Void",
     gradient: "linear-gradient(120deg, #020617 0%, #1e1b4b 55%, #4338ca 100%)",
     requiredLevel: 26,
+    universe: "jjk",
   },
   reverse: {
     label: "Reverse Cursed",
     gradient: "linear-gradient(120deg, #1b1b2b 0%, #be123c 50%, #fb7185 100%)",
     requiredLevel: 33,
+    universe: "jjk",
   },
   maximum: {
     label: "Maximum Output",
     gradient: "linear-gradient(120deg, #022c22 0%, #0f766e 55%, #2dd4bf 100%)",
     requiredLevel: 41,
+    universe: "jjk",
   },
   hollow: {
     label: "Hollow Purple",
     gradient: "linear-gradient(120deg, #1e1b4b 0%, #6d28d9 45%, #f43f5e 100%)",
     requiredLevel: MAX_LEVEL,
+    universe: "jjk",
   },
 } as const satisfies Record<string, BannerStyle>;
 
@@ -86,6 +107,25 @@ export type BannerKey = keyof typeof BANNER_PALETTE;
 /** Garde de type : vrai si `k` est une clé valide de la palette. */
 export function isBannerKey(k: unknown): k is BannerKey {
   return typeof k === "string" && Object.prototype.hasOwnProperty.call(BANNER_PALETTE, k);
+}
+
+/**
+ * Clés de bannière proposées dans un univers (neutres incluses) — catalogue
+ * affiché par l'éditeur de profil.
+ */
+export function bannerKeysForUniverse(slug: string): BannerKey[] {
+  return (Object.keys(BANNER_PALETTE) as BannerKey[]).filter((k) =>
+    isInUniverse(BANNER_PALETTE[k].universe, slug),
+  );
+}
+
+/**
+ * Garde d'équipement multi-univers : la clé doit exister ET appartenir à
+ * l'univers (ou être neutre). Orthogonal au déblocage par niveau
+ * (`isBannerUnlocked`) : les deux sont vérifiés côté serveur.
+ */
+export function isBannerInUniverse(key: string, slug: string): boolean {
+  return isBannerKey(key) && isInUniverse(BANNER_PALETTE[key].universe, slug);
 }
 
 /** Style d'une bannière, avec repli sur `default` si la clé est inconnue. */

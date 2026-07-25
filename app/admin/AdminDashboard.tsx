@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useUniverseHref } from "@/components/universe/UniverseProvider";
 import type { CategoryConfig, CategoryId } from "@/data/roster/categories";
 import type { Character, CharacterTier } from "@/data/roster/characters";
 import { CharacterImage } from "@/components/CharacterImage";
@@ -25,27 +25,23 @@ import { OverviewAdmin } from "./OverviewAdmin";
 import { ContentHealthAdmin } from "./ContentHealthAdmin";
 import { JjkdleAnalyticsAdmin } from "./JjkdleAnalyticsAdmin";
 import { ConfigAdmin } from "./ConfigAdmin";
+import {
+  UniverseSwitcher,
+  type UniverseOption,
+} from "./UniverseSwitcher";
+import { AttributesAdmin } from "./AttributesAdmin";
+import type { AdminAttribute } from "@/lib/admin/attribute-store";
 import type { OverviewStats } from "@/lib/admin/analytics";
 import type { JjkdleAnalytics } from "@/lib/admin/jjkdle-analytics";
 import type { MaintenanceConfig } from "@/lib/config/app-config";
+import { UniverseLink } from "@/components/universe/UniverseLink";
 import {
-  RACES,
-  GENDERS,
-  GRADES_ORDER,
-  AFFILIATIONS,
-  CLANS,
-  ARCS_ORDER,
-  RACE_LABELS,
-  GENDER_LABELS,
-  GRADE_LABELS,
-  AFFILIATION_LABELS,
-  CLAN_LABELS,
-  ARC_LABELS,
-  isComplete,
-  attributeDisplay,
-  ATTRIBUTE_COLUMNS,
-  ATTRIBUTE_LABELS,
-} from "@/lib/games/jjkdle/attributes";
+  attributeDisplayFor,
+  buildAttributeSchema,
+  isCompleteFor,
+  type AttributeSchema,
+  type AttributeSpec,
+} from "@/lib/games/jjkdle/attribute-schema";
 
 const TIERS: CharacterTier[] = ["s", "1", "2", "3", "4", "4minus"];
 
@@ -58,15 +54,12 @@ interface FormState {
   battleValue: string;
   image: string;
   cats: Record<string, CatField>;
-  // Attributs JJKdle ("" = non renseigné ; hasDomain : "" | "true" | "false").
-  race: string;
-  gender: string;
-  grade: string;
-  affiliation: string;
-  clan: string;
-  appearanceArc: string;
-  hasDomain: string;
-  cursedEnergy: string;
+  /**
+   * Attributs data-driven : `clé d'attribut → valeur saisie` (toujours des
+   * chaînes dans le formulaire ; "" = non renseigné). Les clés viennent du
+   * schéma de l'univers courant, il n'y a plus de champ codé en dur.
+   */
+  attrs: Record<string, string>;
 }
 
 interface AdminDashboardProps {
@@ -90,6 +83,16 @@ interface AdminDashboardProps {
   maintenance: MaintenanceConfig;
   /** Perso forcé comme mot du jour JJKdle (ou null). */
   forcedTarget: string | null;
+  /** Attributs (colonnes) de l'univers courant — pilotent le formulaire roster. */
+  attributeColumns: AttributeSpec[];
+  /** Univers administrables (sélecteur). */
+  universes: UniverseOption[];
+  /** Slug de l'univers actuellement administré. */
+  currentUniverse: string;
+  /** Nom affichable de l'univers administré. */
+  universeName: string;
+  /** Attributs de l'univers administré (onglet Attributs). */
+  attributes: AdminAttribute[];
 }
 
 type Tab =
@@ -97,6 +100,7 @@ type Tab =
   | "roster"
   | "content"
   | "jjkdle"
+  | "attributes"
   | "draft"
   | "leaderboard"
   | "users"
@@ -107,6 +111,7 @@ const TAB_LABELS: Record<Tab, string> = {
   roster: "Roster",
   content: "Santé contenu",
   jjkdle: "Analytics JJKdle",
+  attributes: "Attributs",
   draft: "Jujutsu Draft",
   leaderboard: "Leaderboard",
   users: "Utilisateurs",
@@ -117,6 +122,7 @@ const TAB_ORDER: Tab[] = [
   "roster",
   "content",
   "jjkdle",
+  "attributes",
   "draft",
   "leaderboard",
   "users",
@@ -146,10 +152,23 @@ export function AdminDashboard({
   gameFlags,
   maintenance,
   forcedTarget,
+  attributeColumns,
+  universes,
+  currentUniverse,
+  universeName,
+  attributes,
 }: AdminDashboardProps) {
   const router = useRouter();
+  // Les appels d'API doivent porter l'univers ADMINISTRÉ (cf. admin/layout.tsx),
+  // sinon le middleware les résout sur le dernier univers VISITÉ.
+  const withUniverse = useUniverseHref();
   const [pending, startTransition] = useTransition();
   const [tab, setTab] = useState<Tab>("overview");
+  // Schéma d'attributs de l'univers courant : complétude, libellés, options.
+  const attributeSchema = useMemo(
+    () => buildAttributeSchema(attributeColumns),
+    [attributeColumns],
+  );
   const [editingId, setEditingId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ ok: boolean; msg: string } | null>(
     null,
@@ -176,16 +195,9 @@ export function AdminDashboard({
       cats: Object.fromEntries(
         categories.map((c) => [c.id, { enabled: false, value: "" }]),
       ),
-      race: "",
-      gender: "",
-      grade: "",
-      affiliation: "",
-      clan: "",
-      appearanceArc: "",
-      hasDomain: "",
-      cursedEnergy: "",
+      attrs: Object.fromEntries(attributeColumns.map((a) => [a.key, ""])),
     }),
-    [categories],
+    [categories, attributeColumns],
   );
 
   const [form, setForm] = useState<FormState>(emptyForm);
@@ -234,14 +246,10 @@ export function AdminDashboard({
           return [cat.id, { enabled: v !== undefined, value: v?.toString() ?? "" }];
         }),
       ),
-      race: c.race ?? "",
-      gender: c.gender ?? "",
-      grade: c.grade ?? "",
-      affiliation: c.affiliation ?? "",
-      clan: c.clan ?? "",
-      appearanceArc: c.appearanceArc ?? "",
-      hasDomain: c.hasDomain == null ? "" : c.hasDomain ? "true" : "false",
-      cursedEnergy: c.cursedEnergy?.toString() ?? "",
+      // Valeur existante de chaque attribut de l'univers ("" si non renseignée).
+      attrs: Object.fromEntries(
+        attributeColumns.map((a) => [a.key, String(c.attributes?.[a.key] ?? "")]),
+      ),
     });
     if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -266,6 +274,13 @@ export function AdminDashboard({
     // l'image uploadée). Sinon on préserve l'URL existante ; un éventuel upload
     // écrasera `image` côté serveur après l'enregistrement.
     const image = imageRemoved ? "" : form.image.trim();
+    // Attributs : NUMERIC en nombre, listes fermées en valeur d'option.
+    const attributes: Record<string, string | number> = {};
+    for (const col of attributeColumns) {
+      const raw = (form.attrs[col.key] ?? "").trim();
+      if (raw === "") continue;
+      attributes[col.key] = col.kind === "NUMERIC" ? Number(raw) : raw;
+    }
     return {
       id: form.id.trim(),
       name: form.name.trim(),
@@ -276,21 +291,8 @@ export function AdminDashboard({
         : {}),
       ...(image ? { image } : {}),
       ratings,
-      // Attributs JJKdle (omis si "non renseigné").
-      ...(form.race ? { race: form.race as Character["race"] } : {}),
-      ...(form.gender ? { gender: form.gender as Character["gender"] } : {}),
-      ...(form.grade ? { grade: form.grade as Character["grade"] } : {}),
-      ...(form.affiliation
-        ? { affiliation: form.affiliation as Character["affiliation"] }
-        : {}),
-      ...(form.clan ? { clan: form.clan as Character["clan"] } : {}),
-      ...(form.appearanceArc
-        ? { appearanceArc: form.appearanceArc as Character["appearanceArc"] }
-        : {}),
-      ...(form.hasDomain !== "" ? { hasDomain: form.hasDomain === "true" } : {}),
-      ...(form.cursedEnergy.trim() !== ""
-        ? { cursedEnergy: Number(form.cursedEnergy) }
-        : {}),
+      // Attributs data-driven (une clé absente = « non renseigné »).
+      attributes,
     };
   };
 
@@ -311,7 +313,7 @@ export function AdminDashboard({
         if (imageFile) {
           const fd = new FormData();
           fd.append("file", imageFile);
-          const up = await fetch(`/api/characters/${char.id}/image`, {
+          const up = await fetch(withUniverse(`/api/characters/${char.id}/image`), {
             method: "POST",
             body: fd,
           });
@@ -325,7 +327,7 @@ export function AdminDashboard({
             return;
           }
         } else if (imageRemoved) {
-          await fetch(`/api/characters/${char.id}/image`, { method: "DELETE" });
+          await fetch(withUniverse(`/api/characters/${char.id}/image`), { method: "DELETE" });
         }
       } catch {
         setFeedback({
@@ -461,13 +463,15 @@ export function AdminDashboard({
           ? `${overview.content.incomplete} incomplets · ${overview.content.missingImage} sans image`
           : tab === "jjkdle"
             ? `Jour ${jjkdleAnalytics.date}`
-            : tab === "draft"
-              ? `${draftRoster.length} personnages (draft)`
-              : tab === "leaderboard"
-                ? `${scores.length} scores`
-                : tab === "config"
-                  ? "Feature flags & maintenance"
-                  : `${users.length} utilisateurs`;
+            : tab === "attributes"
+              ? `${attributes.length} attribut(s) · ${universeName}`
+              : tab === "draft"
+                ? `${draftRoster.length} personnages (draft)`
+                : tab === "leaderboard"
+                  ? `${scores.length} scores`
+                  : tab === "config"
+                    ? "Feature flags & maintenance"
+                    : `${users.length} utilisateurs`;
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
@@ -479,13 +483,21 @@ export function AdminDashboard({
           </h1>
           <p className="text-sm text-white/45">{subtitle}</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Link
+        <div className="flex flex-wrap items-center gap-2">
+          <UniverseSwitcher universes={universes} current={currentUniverse} />
+          {/* Gestion des univers eux-mêmes (créer/renommer/supprimer). */}
+          <a
+            href="/admin/universes"
+            className="rounded-lg border border-domain/40 bg-domain/10 px-3 py-1.5 text-sm font-semibold text-domain-light hover:bg-domain/20"
+          >
+            Univers
+          </a>
+          <UniverseLink
             href="/"
             className="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-white/60 hover:text-white"
           >
             ← Site
-          </Link>
+          </UniverseLink>
           <a
             href="/admin/graph"
             target="_blank"
@@ -525,10 +537,18 @@ export function AdminDashboard({
       )}
 
       {tab === "content" && (
-        <ContentHealthAdmin roster={roster} onEdit={editCharacter} />
+        <ContentHealthAdmin
+          roster={roster}
+          attributeColumns={attributeColumns}
+          onEdit={editCharacter}
+        />
       )}
 
       {tab === "jjkdle" && <JjkdleAnalyticsAdmin data={jjkdleAnalytics} />}
+
+      {tab === "attributes" && (
+        <AttributesAdmin attributes={attributes} universeName={universeName} />
+      )}
 
       {tab === "config" && (
         <ConfigAdmin
@@ -536,6 +556,7 @@ export function AdminDashboard({
           gameFlags={gameFlags}
           maintenance={maintenance}
           forcedTarget={forcedTarget}
+          attributeColumns={attributeColumns}
         />
       )}
 
@@ -748,70 +769,44 @@ export function AdminDashboard({
             </div>
           </div>
 
-          {/* Attributs JJKdle */}
+          {/* Attributs du personnage (définis par univers) */}
           <div className="rounded-xl border border-domain/30 bg-domain/5 p-3">
             <p className="mb-3 text-xs uppercase tracking-wider text-domain-light">
               Attributs JJKdle{" "}
               <span className="text-white/35">(pool quotidien si tous remplis)</span>
             </p>
             <div className="grid grid-cols-2 gap-3">
-              <EnumField
-                label="Race"
-                value={form.race}
-                options={RACES.map((v) => [v, RACE_LABELS[v]])}
-                onChange={(v) => setForm((f) => ({ ...f, race: v }))}
-              />
-              <EnumField
-                label="Genre"
-                value={form.gender}
-                options={GENDERS.map((v) => [v, GENDER_LABELS[v]])}
-                onChange={(v) => setForm((f) => ({ ...f, gender: v }))}
-              />
-              <EnumField
-                label="Grade"
-                value={form.grade}
-                options={GRADES_ORDER.map((v) => [v, GRADE_LABELS[v]])}
-                onChange={(v) => setForm((f) => ({ ...f, grade: v }))}
-              />
-              <EnumField
-                label="Affiliation"
-                value={form.affiliation}
-                options={AFFILIATIONS.map((v) => [v, AFFILIATION_LABELS[v]])}
-                onChange={(v) => setForm((f) => ({ ...f, affiliation: v }))}
-              />
-              <EnumField
-                label="Clan"
-                value={form.clan}
-                options={CLANS.map((v) => [v, CLAN_LABELS[v]])}
-                onChange={(v) => setForm((f) => ({ ...f, clan: v }))}
-              />
-              <EnumField
-                label="Arc d'apparition"
-                value={form.appearanceArc}
-                options={ARCS_ORDER.map((v) => [v, ARC_LABELS[v]])}
-                onChange={(v) => setForm((f) => ({ ...f, appearanceArc: v }))}
-              />
-              <EnumField
-                label="Territoire (domaine)"
-                value={form.hasDomain}
-                options={[
-                  ["true", "Oui"],
-                  ["false", "Non"],
-                ]}
-                onChange={(v) => setForm((f) => ({ ...f, hasDomain: v }))}
-              />
-              <Field label="Énergie occulte (lore)">
-                <input
-                  type="number"
-                  min={0}
-                  value={form.cursedEnergy}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, cursedEnergy: e.target.value }))
-                  }
-                  className={inputCls}
-                  placeholder="ex. 120"
-                />
-              </Field>
+              {attributeColumns.map((col) => {
+                const value = form.attrs[col.key] ?? "";
+                const setValue = (v: string) =>
+                  setForm((f) => ({ ...f, attrs: { ...f.attrs, [col.key]: v } }));
+                // NUMERIC : saisie libre entière. Sinon : liste fermée d'options.
+                return col.kind === "NUMERIC" ? (
+                  <Field key={col.key} label={col.label}>
+                    <input
+                      type="number"
+                      min={0}
+                      value={value}
+                      onChange={(e) => setValue(e.target.value)}
+                      className={inputCls}
+                      placeholder="ex. 120"
+                    />
+                  </Field>
+                ) : (
+                  <EnumField
+                    key={col.key}
+                    label={col.label}
+                    value={value}
+                    options={col.options.map((o) => [o.value, o.label])}
+                    onChange={setValue}
+                  />
+                );
+              })}
+              {attributeColumns.length === 0 && (
+                <p className="col-span-2 text-xs text-white/40">
+                  Aucun attribut défini pour cet univers.
+                </p>
+              )}
             </div>
           </div>
 
@@ -938,7 +933,7 @@ export function AdminDashboard({
                       <span className="text-xs font-normal text-white/35">
                         {c.id}
                       </span>
-                      {!isComplete(c) && (
+                      {!isCompleteFor(attributeSchema, c) && (
                         <span
                           className="ml-1.5 rounded bg-cursed/20 px-1.5 py-0.5 text-[10px] font-bold text-cursed-light"
                           title="Attributs JJKdle manquants — exclu du pool quotidien"
@@ -999,6 +994,7 @@ export function AdminDashboard({
         <CharacterPreviewModal
           character={previewChar}
           categories={categories}
+          schema={attributeSchema}
           onClose={() => setPreviewChar(null)}
         />
       )}
@@ -1010,10 +1006,13 @@ export function AdminDashboard({
 function CharacterPreviewModal({
   character: c,
   categories,
+  schema,
   onClose,
 }: {
   character: Character;
   categories: CategoryConfig[];
+  /** Schéma d'attributs de l'univers (libellés + valeurs affichables). */
+  schema: AttributeSchema;
   onClose: () => void;
 }) {
   useEffect(() => {
@@ -1095,11 +1094,11 @@ function CharacterPreviewModal({
             Attributs JJKdle
           </p>
           <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm">
-            {ATTRIBUTE_COLUMNS.map((key) => (
-              <div key={key} className="flex justify-between gap-2">
-                <dt className="text-white/45">{ATTRIBUTE_LABELS[key]}</dt>
+            {schema.columns.map((col) => (
+              <div key={col.key} className="flex justify-between gap-2">
+                <dt className="text-white/45">{col.label}</dt>
                 <dd className="text-right font-medium text-white/85">
-                  {attributeDisplay(key, c)}
+                  {attributeDisplayFor(schema, c, col.key)}
                 </dd>
               </div>
             ))}

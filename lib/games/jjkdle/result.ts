@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { getCurrentUniverse } from "@/lib/universes/current";
 
 /**
  * Journalisation ANALYTIQUE des parties JJKdle quotidiennes (table `JjkdleResult`).
@@ -27,9 +28,10 @@ export async function recordJjkdleAttempt(
   targetId: string,
   attempts: number,
 ): Promise<void> {
+  const { id: universeId } = await getCurrentUniverse();
   await prisma.jjkdleResult.upsert({
-    where: { userId_date: { userId, date } },
-    create: { userId, date, targetId, attempts, solved: false },
+    where: { userId_universeId_date: { userId, universeId, date } },
+    create: { userId, universeId, date, targetId, attempts, solved: false },
     update: { attempts, targetId },
   });
 }
@@ -44,9 +46,10 @@ export async function markJjkdleSolved(
   targetId: string,
   attempts: number,
 ): Promise<void> {
+  const { id: universeId } = await getCurrentUniverse();
   await prisma.jjkdleResult.upsert({
-    where: { userId_date: { userId, date } },
-    create: { userId, date, targetId, attempts, solved: true },
+    where: { userId_universeId_date: { userId, universeId, date } },
+    create: { userId, universeId, date, targetId, attempts, solved: true },
     update: { attempts, targetId, solved: true },
   });
 }

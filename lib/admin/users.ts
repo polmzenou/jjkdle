@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import type { Role } from "@prisma/client";
 import { buildUnlockContext, getUnlockedTitleKeys, getUnlockedFrameKeys } from "@/lib/cosmetics/unlock";
+import { getCurrentUniverse } from "@/lib/universes/current";
 
 /**
  * Accès admin aux comptes utilisateurs (onglet « Utilisateurs » du dashboard).
@@ -44,6 +45,9 @@ export interface AdminUser {
  * acceptable à l'échelle du site (peu de comptes), à surveiller s'il grossit.
  */
 export async function listUsers(): Promise<AdminUser[]> {
+  // Le loadout équipé (titre/cadre) est PAR univers → on lit celui de l'univers
+  // courant de l'admin (sélecteur d'univers admin à venir étape 5).
+  const { id: universeId } = await getCurrentUniverse();
   const rows = await prisma.user.findMany({
     orderBy: [{ role: "asc" }, { createdAt: "asc" }], // "ADMIN" < "PLAYER"
     select: {
@@ -55,17 +59,20 @@ export async function listUsers(): Promise<AdminUser[]> {
       level: true,
       totalXp: true,
       xpBonus: true,
-      equippedTitleKey: true,
-      equippedFrameKey: true,
       badges: { select: { badgeKey: true } },
       titleGrants: { select: { titleKey: true } },
       frameGrants: { select: { frameKey: true } },
+      universeProfiles: {
+        where: { universeId },
+        select: { equippedTitleKey: true, equippedFrameKey: true },
+      },
     },
   });
 
   return Promise.all(
     rows.map(async (u) => {
       const ctx = await buildUnlockContext(u.id);
+      const prof = u.universeProfiles[0];
       return {
         id: u.id,
         username: u.username,
@@ -76,8 +83,8 @@ export async function listUsers(): Promise<AdminUser[]> {
         totalXp: u.totalXp,
         xpBonus: u.xpBonus,
         badgeKeys: u.badges.map((b) => b.badgeKey),
-        equippedTitleKey: u.equippedTitleKey,
-        equippedFrameKey: u.equippedFrameKey,
+        equippedTitleKey: prof?.equippedTitleKey ?? null,
+        equippedFrameKey: prof?.equippedFrameKey ?? null,
         // « auto » = sans tenir compte des grants (pour distinguer auto/octroyé).
         autoTitleKeys: [...getUnlockedTitleKeys(ctx)],
         titleGrantKeys: u.titleGrants.map((t) => t.titleKey),

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   topHigherLowerEntries,
   type HigherLowerLeaderboardEntry,
@@ -8,6 +7,7 @@ import { VipBadge } from "@/components/VipBadge";
 import { TitleBadge } from "@/components/TitleBadge";
 import { UserAvatar } from "@/components/UserAvatar";
 import { ScopeToggle } from "./ScopeToggle";
+import { UniverseLink } from "@/components/universe/UniverseLink";
 
 /** Couleurs des médailles : 1er Or, 2e Argent, 3e Bronze. */
 const MEDALS = [
@@ -111,12 +111,12 @@ function HigherLowerRow({
         className="min-w-0 flex-1 truncate font-semibold"
         style={{ color: isPodium ? medal!.color : "#fff" }}
       >
-        <Link
+        <UniverseLink
           href={`/u/${encodeURIComponent(entry.pseudo)}`}
           className="underline-offset-2 hover:underline"
         >
           {entry.pseudo}
-        </Link>
+        </UniverseLink>
         {entry.role === "VIP" && <VipBadge className="ml-1.5" />}
         {entry.titleKey && <TitleBadge titleKey={entry.titleKey} className="ml-1.5" />}
       </p>

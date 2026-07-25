@@ -88,7 +88,11 @@ export interface PlayerRow {
   currentDraw: unknown;
   lockedThisRound: boolean;
   finalScore: number | null;
-  user: { username: string; avatarCharacter: { image: string | null } | null };
+  user: {
+    username: string;
+    // Avatar par univers (0 ou 1 profil selon le filtre universeId de lobbyInclude).
+    universeProfiles: { avatarCharacter: { image: string | null } | null }[];
+  };
 }
 
 export interface LobbyRow {
@@ -109,7 +113,7 @@ export function serializePlayer(player: PlayerRow): SerializedPlayer {
   return {
     userId: player.userId,
     username: player.user.username,
-    avatarImage: player.user.avatarCharacter?.image ?? null,
+    avatarImage: player.user.universeProfiles[0]?.avatarCharacter?.image ?? null,
     joinOrder: player.joinOrder,
     selection: asRecord<SelectionIds>(player.selection),
     currentDraw: asRecord<DrawIds>(player.currentDraw),

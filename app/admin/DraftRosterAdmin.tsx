@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useUniverseHref } from "@/components/universe/UniverseProvider";
 import { CharacterImage } from "@/components/CharacterImage";
 import { DRAFT_CATEGORIES, DRAFT_CATEGORY_BY_ID } from "@/lib/games/draft/categories";
-import { MIN_DRAFT_ROSTER } from "@/lib/games/draft/queries";
+import { MIN_DRAFT_ROSTER } from "@/lib/games/draft/types";
 import type {
   DraftCharacter,
   DraftCategoryId,
@@ -64,6 +65,8 @@ const inputCls =
 /** Onglet admin : roster du jeu « Jujutsu Draft » (catégorie, tier, coût, stat, image). */
 export function DraftRosterAdmin({ roster }: DraftRosterAdminProps) {
   const router = useRouter();
+  // Idem AdminDashboard : l'API doit cibler l'univers administré.
+  const withUniverse = useUniverseHref();
   const [pending, startTransition] = useTransition();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
@@ -157,7 +160,7 @@ export function DraftRosterAdmin({ roster }: DraftRosterAdminProps) {
         if (imageFile) {
           const fd = new FormData();
           fd.append("file", imageFile);
-          const up = await fetch(`/api/draft-characters/${char.id}/image`, {
+          const up = await fetch(withUniverse(`/api/draft-characters/${char.id}/image`), {
             method: "POST",
             body: fd,
           });
@@ -171,7 +174,7 @@ export function DraftRosterAdmin({ roster }: DraftRosterAdminProps) {
             return;
           }
         } else if (imageRemoved) {
-          await fetch(`/api/draft-characters/${char.id}/image`, {
+          await fetch(withUniverse(`/api/draft-characters/${char.id}/image`), {
             method: "DELETE",
           });
         }
