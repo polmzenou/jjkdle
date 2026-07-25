@@ -9,6 +9,7 @@ import {
   type Team,
 } from "@/lib/games/codenames/types";
 import { CharacterImage } from "@/components/CharacterImage";
+import { useGameTitle } from "@/components/universe/UniverseProvider";
 import { CARD_COLOR_BG, CARD_COLOR_BORDER, TEAM_STYLES } from "./colors";
 
 interface CodenamesResultModalProps {
@@ -53,6 +54,7 @@ export function CodenamesResultModal({
   onLeave,
 }: CodenamesResultModalProps) {
   const won = myTeam !== null && myTeam === winnerTeam;
+  const gameTitle = useGameTitle("codenames");
 
   return (
     <AnimatePresence>
@@ -70,7 +72,7 @@ export function CodenamesResultModal({
             className="my-auto w-full max-w-3xl rounded-3xl border border-white/10 bg-void-800/95 p-6 text-center"
           >
             <p className="text-sm uppercase tracking-[0.3em] text-white/40">
-              JJK Codenames
+              {gameTitle}
             </p>
             <h2
               className={`mt-2 font-display text-4xl font-black ${

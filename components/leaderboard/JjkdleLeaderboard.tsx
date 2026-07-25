@@ -9,6 +9,7 @@ import { TitleBadge } from "@/components/TitleBadge";
 import { UserAvatar } from "@/components/UserAvatar";
 import { ScopeToggle } from "./ScopeToggle";
 import { UniverseLink } from "@/components/universe/UniverseLink";
+import { universeGameTitle } from "@/lib/games/universe";
 
 /** Couleurs des médailles : 1er Or, 2e Argent, 3e Bronze. */
 const MEDALS = [
@@ -35,6 +36,7 @@ export async function JjkdleLeaderboard({
   const entries = weekly
     ? await topJjkdleWeeklyEntries(limit)
     : await topJjkdleEntries(limit);
+  const title = await universeGameTitle("jjkdle");
 
   return (
     <section
@@ -43,7 +45,7 @@ export async function JjkdleLeaderboard({
     >
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <h2 className="font-display text-sm font-bold uppercase tracking-[0.2em] text-amber-200">
-          🏆 Leaderboard 🎭 JJKdle
+          🏆 Leaderboard 🎭 {title}
         </h2>
         <span className="text-xs text-white/35">{weekly ? "Semaine" : "Du jour"}</span>
         <span className="h-px flex-1 bg-gradient-to-r from-amber-300/30 to-transparent" />

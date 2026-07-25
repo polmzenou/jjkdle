@@ -2,6 +2,7 @@ import { Logo } from "@/components/Logo";
 import { GameShowcase } from "@/components/landing/GameShowcase";
 import { MangaDecor } from "@/components/landing/MangaDecor";
 import { GAMES } from "@/lib/games/registry";
+import { universeGameTitle } from "@/lib/games/universe";
 import { getCurrentUniverseConfig } from "@/lib/universes/current";
 import { UniverseLink } from "@/components/universe/UniverseLink";
 
@@ -19,7 +20,10 @@ const STATS = [
  * page sert donc n'importe quel anime.
  */
 export default async function HomePage() {
-  const universe = await getCurrentUniverseConfig();
+  const [universe, builderTitle] = await Promise.all([
+    getCurrentUniverseConfig(),
+    universeGameTitle("builder"),
+  ]);
   return (
     <main className="flex flex-col">
       {/* Couche décorative manga / JJK (kanji, ofuda, lignes de concentration) */}
@@ -64,7 +68,7 @@ export default async function HomePage() {
             href="/games/builder"
             className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.03] px-7 py-3 font-display text-sm font-bold uppercase tracking-wider text-white/80 backdrop-blur transition-colors hover:border-white/30 hover:text-white"
           >
-            Build the Perfect Sorcerer
+            {builderTitle}
           </UniverseLink>
         </div>
 

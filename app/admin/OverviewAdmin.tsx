@@ -15,6 +15,7 @@ import {
   Area,
 } from "recharts";
 import type { OverviewStats } from "@/lib/admin/analytics";
+import { useGameTitle } from "@/components/universe/UniverseProvider";
 
 /**
  * Onglet « Vue d'ensemble » : cartes KPI + graphes recharts, themés avec les
@@ -39,6 +40,8 @@ export function OverviewAdmin({
   onGotoContent: () => void;
 }) {
   const { players, gamesPlayed, roles, content, dailyWord } = stats;
+  // Nom du jeu du jour dans l'univers administré (« JJKdle » / « CSMdle »).
+  const dailyTitle = useGameTitle("jjkdle");
 
   const roleData = [
     { name: "Joueurs", key: "PLAYER", value: roles.PLAYER },
@@ -81,7 +84,7 @@ export function OverviewAdmin({
             glyph="⚠️"
             value={content.incomplete}
             accent={content.incomplete > 0 ? "#f87171" : "#34d399"}
-            sub={`sur ${content.total} · exclus du pool JJKdle →`}
+            sub={`sur ${content.total} · exclus du pool ${dailyTitle} →`}
           />
         </button>
         <button
@@ -196,11 +199,11 @@ export function OverviewAdmin({
         </ChartCard>
       </div>
 
-      {/* Mot du jour JJKdle */}
+      {/* Mot du jour du jeu quotidien */}
       <section className="rounded-2xl border border-white/10 bg-void-800/40 p-5">
         <div className="mb-3 flex flex-wrap items-center gap-3">
           <h2 className="font-display text-lg font-bold text-white">
-            Mot du jour JJKdle
+            Mot du jour {dailyTitle}
           </h2>
           {dailyWord.forcedActive && (
             <span className="rounded-full border border-amber-400/40 bg-amber-400/10 px-2.5 py-0.5 text-[11px] font-bold text-amber-300">

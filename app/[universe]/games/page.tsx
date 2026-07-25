@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { GameCard } from "@/components/GameCard";
 import { MultiplayerPicker } from "@/components/multiplayer/MultiplayerPicker";
 import { GamesListJsonLd } from "@/components/seo/JsonLd";
-import { GAMES } from "@/lib/games/registry";
+import { universeGames } from "@/lib/games/universe";
 import { getGameFlags } from "@/lib/config/app-config";
 
 export const metadata: Metadata = {
@@ -24,13 +24,14 @@ const FEATURES = ["Sans compte", "Best score local"];
 /** Hub : liste tous les jeux du registre (système pluggable). */
 export default async function GamesPage() {
   // Flags d'activation admin (défaut true) : un jeu désactivé est grisé/non cliquable.
-  const flags = await getGameFlags();
-  const liveCount = GAMES.filter(
+  // `universeGames()` = le registre avec les titres de l'univers courant.
+  const [flags, games] = await Promise.all([getGameFlags(), universeGames()]);
+  const liveCount = games.filter(
     (g) => g.status !== "coming-soon" && flags[g.id] !== false,
   ).length;
   // Jeux proposés dans la modale multi : ceux qui déclarent un mode multi et ne
   // sont pas "multi uniquement" (ces derniers ont déjà leur propre carte).
-  const multiplayerGames = GAMES.filter(
+  const multiplayerGames = games.filter(
     (g) => g.multiplayer && !g.multiplayerOnly && flags[g.id] !== false,
   );
 
@@ -78,7 +79,7 @@ export default async function GamesPage() {
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2">
-          {GAMES.map((game, i) => (
+          {games.map((game, i) => (
             <GameCard
               key={game.id}
               game={game}

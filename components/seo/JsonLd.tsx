@@ -1,4 +1,4 @@
-import { GAMES, getGame } from "@/lib/games/registry";
+import { universeGame, universeGames } from "@/lib/games/universe";
 import { siteSeo, absoluteUrl } from "@/lib/seo/config";
 import {
   getCurrentUniverseConfig,
@@ -65,7 +65,7 @@ export async function SiteJsonLd() {
  * (source unique). `id` = identifiant du jeu dans `lib/games/registry.ts`.
  */
 export async function GameJsonLd({ id }: { id: string }) {
-  const game = getGame(id);
+  const game = await universeGame(id);
   if (!game) return null;
 
   const seo = await siteSeo();
@@ -100,7 +100,9 @@ export async function GameJsonLd({ id }: { id: string }) {
  * sur la home) pour renforcer le maillage interne et les rich results.
  */
 export async function GamesListJsonLd() {
-  const liveGames = GAMES.filter((g) => g.status !== "coming-soon");
+  const liveGames = (await universeGames()).filter(
+    (g) => g.status !== "coming-soon",
+  );
   const seo = await siteSeo();
   const universe = await getCurrentUniverseConfig();
   const gamesUrl = await absoluteUrl(await universeHref("/games"));

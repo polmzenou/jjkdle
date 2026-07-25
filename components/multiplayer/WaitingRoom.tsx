@@ -8,6 +8,7 @@ import {
   type SerializedLobby,
 } from "@/lib/multiplayer/events";
 import { UserAvatar } from "@/components/UserAvatar";
+import { useGameTitle } from "@/components/universe/UniverseProvider";
 
 interface WaitingRoomProps {
   lobby: SerializedLobby;
@@ -15,7 +16,7 @@ interface WaitingRoomProps {
   pending: boolean;
   onStart: () => void;
   onLeave: () => void;
-  /** Titre affiché (défaut : builder). */
+  /** Titre affiché (défaut : le nom du builder dans l'univers courant). */
   title?: string;
   /** Capacité du lobby (défaut : MAX_PLAYERS). 1v1 = 2 pour le battle. */
   maxPlayers?: number;
@@ -33,12 +34,15 @@ export function WaitingRoom({
   pending,
   onStart,
   onLeave,
-  title = "Build the Perfect Sorcerer",
+  title,
   maxPlayers = MAX_PLAYERS,
   minPlayers = MIN_PLAYERS,
   startLabel = "Démarrer la partie",
   hostExtra,
 }: WaitingRoomProps) {
+  // Le lobby « nu » est celui du builder : son nom dépend de l'univers.
+  const builderTitle = useGameTitle("builder");
+  const heading = title ?? builderTitle;
   const [copied, setCopied] = useState(false);
   const isHost = lobby.hostId === currentUserId;
   const canStart = isHost && lobby.players.length >= minPlayers;
@@ -79,7 +83,7 @@ export function WaitingRoom({
     <div className="mx-auto max-w-lg text-center">
       <p className="text-sm uppercase tracking-[0.3em] text-white/40">Salon d'attente</p>
       <h1 className="mt-2 font-display text-3xl font-bold text-white">
-        {title}
+        {heading}
       </h1>
 
       {/* Code partageable */}

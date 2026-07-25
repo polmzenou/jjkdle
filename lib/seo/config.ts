@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { cache } from "react";
-import { getGame } from "@/lib/games/registry";
+import { universeGame } from "@/lib/games/universe";
 import {
   getCurrentUniverseConfig,
   universeHref,
@@ -105,7 +105,7 @@ export async function gameMetadata(
   seoDescription?: string,
 ): Promise<Metadata> {
   const seo = await siteSeo();
-  const game = getGame(id);
+  const game = await universeGame(id);
   if (!game) {
     // Ne casse pas le build si un id est mal orthographié : fallback générique.
     return { title: seo.name, description: seo.description };

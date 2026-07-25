@@ -2,7 +2,50 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { GAMES } from "@/lib/games/registry";
+import {
+  useGameTitle,
+  useUniverseGames,
+} from "@/components/universe/UniverseProvider";
+
+/** Nom du jeu du jour dans l'univers courant, inséré dans une phrase. */
+function DailyGameName() {
+  return <>{useGameTitle("jjkdle")}</>;
+}
+
+/**
+ * Liste des jeux jouables affichée par l'étape « Les jeux ». Composant à part
+ * (et non du JSX inline dans `STEPS`) parce qu'il lui faut un hook : les titres
+ * dépendent de l'univers courant (« JJKdle » / « CSMdle »).
+ */
+function GamesStep() {
+  const games = useUniverseGames().filter((g) => g.status !== "coming-soon");
+  return (
+    <ul className="space-y-3">
+      {games.map((g) => (
+        <li
+          key={g.id}
+          className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3"
+        >
+          <span
+            aria-hidden
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-lg"
+            style={{ background: `${g.accent ?? "#7c3aed"}22` }}
+          >
+            {g.glyph}
+          </span>
+          <div className="min-w-0">
+            <p className="font-display text-sm font-bold text-white">
+              {g.title}
+            </p>
+            <p className="mt-0.5 text-xs leading-relaxed text-white/55">
+              {g.description}
+            </p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 /** Une étape du tutoriel : titre, kanji décoratif et contenu. */
 type Step = {
@@ -38,32 +81,7 @@ const STEPS: Step[] = [
     kanji: "技",
     title: "Les jeux de l'arcade",
     accent: "#a78bfa",
-    body: (
-      <ul className="space-y-3">
-        {GAMES.filter((g) => g.status !== "coming-soon").map((g) => (
-          <li
-            key={g.id}
-            className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3"
-          >
-            <span
-              aria-hidden
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-lg"
-              style={{ background: `${g.accent ?? "#7c3aed"}22` }}
-            >
-              {g.glyph}
-            </span>
-            <div className="min-w-0">
-              <p className="font-display text-sm font-bold text-white">
-                {g.title}
-              </p>
-              <p className="mt-0.5 text-xs leading-relaxed text-white/55">
-                {g.description}
-              </p>
-            </div>
-          </li>
-        ))}
-      </ul>
-    ),
+    body: <GamesStep />,
   },
   {
     eyebrow: "経験 · Expérience",
@@ -86,7 +104,8 @@ const STEPS: Step[] = [
             donne un bonus.
           </li>
           <li className="flex items-center gap-2">
-            <span aria-hidden>📅</span> Les défis quotidiens (comme JJKdle)
+            <span aria-hidden>📅</span> Les défis quotidiens (comme{" "}
+            <DailyGameName />)
             offrent un gain supplémentaire chaque jour.
           </li>
         </ul>

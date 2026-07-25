@@ -58,6 +58,17 @@ export const csm: UniverseConfig = {
     glow: "0 0 20px rgba(214, 40, 40, 0.45)",
     glowAccent: "0 0 20px rgba(232, 177, 0, 0.45)",
   },
+  // Noms des jeux côté CSM : mêmes jeux, vocabulaire Chainsaw Man. Les jeux non
+  // listés (« Qui est-ce ? ») gardent leur titre neutre du registre.
+  gameTitles: {
+    builder: "Build the Perfect Devil",
+    ranking: "CSM Pyramid",
+    "jujutsu-draft": "Chainsaw Draft",
+    battle: "CSM Random Battle",
+    codenames: "CSM Codenames",
+    jjkdle: "CSMdle",
+    "higher-lower": "CSM Higher/Lower",
+  },
   labels: {
     // Équivalent CSM de « Énergie occulte » : la jauge de puissance du monde.
     energyLabel: "Niveau de menace",

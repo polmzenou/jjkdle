@@ -1,11 +1,34 @@
 /**
+ * Identifiants des jeux du registre. Union fermée (et non `string`) pour que la
+ * surcharge de titres d'un univers (`UniverseConfig.gameTitles`) soit vérifiée à
+ * la compilation : une clé mal orthographiée serait sinon ignorée en silence.
+ *
+ * Ajouter un jeu = ajouter son id ici + son entrée dans `registry.ts`.
+ */
+export type GameId =
+  | "builder"
+  | "ranking"
+  | "jujutsu-draft"
+  | "battle"
+  | "guesswho"
+  | "codenames"
+  | "jjkdle"
+  | "higher-lower";
+
+/**
+ * Titres de jeux propres à un univers : `{ [id du jeu]: titre affiché }`.
+ * Tout jeu absent garde le titre par défaut du registre.
+ */
+export type GameTitles = Partial<Record<GameId, string>>;
+
+/**
  * Contrat d'un jeu de la plateforme. Le système est *pluggable* : pour ajouter
  * un jeu, on déclare une entrée `Game` dans le registre (`registry.ts`) et on
  * crée sa route sous `app/games/<id>/`.
  */
 export interface Game {
   /** Identifiant unique, sert aussi de segment de route (`/games/<id>`). */
-  id: string;
+  id: GameId;
   title: string;
   description: string;
   /** Chemin vers la page du jeu. */

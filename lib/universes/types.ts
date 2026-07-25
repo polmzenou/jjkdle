@@ -10,6 +10,8 @@
  * via l'admin. Aucun nouveau code métier.
  */
 
+import type { GameTitles } from "@/lib/games/types";
+
 /** Palette de thème d'un univers. Sert à générer des variables CSS (cf. étape 4). */
 export interface UniverseTheme {
   /** Accent principal (JJK : violet « Domain Expansion » #7c3aed). */
@@ -87,4 +89,11 @@ export interface UniverseConfig {
   logo: UniverseLogo;
   theme: UniverseTheme;
   labels: UniverseLabels;
+  /**
+   * Titres des jeux propres à cet univers, par id de jeu (`lib/games/registry.ts`).
+   * Le nom d'un jeu contient souvent du vocabulaire de l'œuvre (« JJKdle »,
+   * « Jujutsu Draft ») : chaque anime le rebaptise ici, sans dupliquer une ligne
+   * de code de jeu. Jeu absent = titre par défaut du registre.
+   */
+  gameTitles?: GameTitles;
 }

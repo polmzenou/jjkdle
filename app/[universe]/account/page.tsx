@@ -24,7 +24,7 @@ import { getTitleGrantKeys, getFrameGrantKeys } from "@/lib/cosmetics/grants";
 import { getRoster } from "@/lib/content/queries";
 import { getCurrentUniverse } from "@/lib/universes/current";
 import { badgesForUniverse } from "@/lib/badges/definitions";
-import { GAMES } from "@/lib/games/registry";
+import { universeGameTitle } from "@/lib/games/universe";
 import { prisma } from "@/lib/prisma";
 import { AccountForms } from "./AccountForms";
 import { ProfileEditor, type AvatarChoice } from "./ProfileEditor";
@@ -114,6 +114,7 @@ export default async function AccountPage() {
 
   // ── Stats résumées (dérivées de données déjà chargées, aucune requête en plus) ──
   const streak = prof?.jjkdleStreak ?? 0;
+  const dailyTitle = await universeGameTitle("jjkdle");
   const bestStreak = prof?.jjkdleBestStreak ?? 0;
   // Progression badges : sur le catalogue de l'univers courant (la possession
   // reste globale, mais on ne compte que ce qui est gagnable ici).
@@ -125,8 +126,7 @@ export default async function AccountPage() {
     ? scores.reduce((best, s) => (s.rank < best.rank ? s : best))
     : null;
   const bestRankGame = bestRanked
-    ? (GAMES.find((g) => g.id === bestRanked.gameId)?.title ??
-      bestRanked.gameId)
+    ? await universeGameTitle(bestRanked.gameId)
     : null;
 
   return (
@@ -206,7 +206,7 @@ export default async function AccountPage() {
       <section className="mb-12 grid gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border border-white/10 bg-void-800/60 p-5 backdrop-blur">
           <p className="text-xs font-bold uppercase tracking-wider text-white/45">
-            🔥 Streak JJKdle
+            🔥 Streak {dailyTitle}
           </p>
           <p className="mt-3 font-display text-3xl font-black text-white">
             {streak}

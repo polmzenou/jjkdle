@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import type { CSSProperties } from "react";
-import { GAMES } from "@/lib/games/registry";
+import { useUniverseGames } from "@/components/universe/UniverseProvider";
 import { UniverseLink } from "@/components/universe/UniverseLink";
 
 /**
@@ -11,7 +11,7 @@ import { UniverseLink } from "@/components/universe/UniverseLink";
  * "arcade" avec le glow de l'accent du jeu. Se synchronise sur le registre.
  */
 export function GameShowcase() {
-  const games = GAMES.filter((g) => g.status !== "coming-soon");
+  const games = useUniverseGames().filter((g) => g.status !== "coming-soon");
 
   return (
     <div className="flex flex-col gap-20 sm:gap-28">

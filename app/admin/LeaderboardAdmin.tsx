@@ -3,7 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { AdminScore } from "@/lib/leaderboard/store";
-import { getGame } from "@/lib/games/registry";
+import { useUniverseGames } from "@/components/universe/UniverseProvider";
 import { VipBadge } from "@/components/VipBadge";
 import {
   updateScoreAction,
@@ -26,6 +26,8 @@ export function LeaderboardAdmin({ scores }: LeaderboardAdminProps) {
   const [feedback, setFeedback] = useState<Feedback>(null);
   // Multi-sélection : ids de scores cochés (uniques tous jeux confondus).
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  // Titres de l'univers administré (« JJKdle » ici, « CSMdle » là).
+  const games = useUniverseGames();
 
   // Regroupe les scores par jeu, en conservant l'ordre (déjà trié côté serveur).
   const groups = useMemo(() => {
@@ -170,7 +172,7 @@ export function LeaderboardAdmin({ scores }: LeaderboardAdminProps) {
       )}
 
       {groups.map(([game, entries]) => {
-        const title = getGame(game)?.title ?? game;
+        const title = games.find((g) => g.id === game)?.title ?? game;
         return (
           <section
             key={game}

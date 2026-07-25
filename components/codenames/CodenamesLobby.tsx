@@ -53,7 +53,10 @@ import { CodenamesClueBanner } from "./CodenamesClueBanner";
 import { CodenamesClueInput } from "./CodenamesClueInput";
 import { CodenamesPassButton } from "./CodenamesPassButton";
 import { CodenamesResultModal } from "./CodenamesResultModal";
-import { useUniverseHref } from "@/components/universe/UniverseProvider";
+import {
+  useGameTitle,
+  useUniverseHref,
+} from "@/components/universe/UniverseProvider";
 
 interface CodenamesLobbyProps {
   initialLobby: SerializedLobby;
@@ -75,6 +78,7 @@ export function CodenamesLobby({
 }: CodenamesLobbyProps) {
   const router = useRouter();
   const withUniverse = useUniverseHref();
+  const gameTitle = useGameTitle("codenames");
   const [lobby, setLobby] = useState<SerializedLobby>(initialLobby);
   const [publicState, setPublicState] = useState<CodenamesPublicState | null>(
     initialPublicState,
@@ -373,7 +377,7 @@ export function CodenamesLobby({
             pending={pending}
             onStart={handleEnterTeamSelect}
             onLeave={handleLeave}
-            title="JJK Codenames"
+            title={gameTitle}
             maxPlayers={CODENAMES_MAX_PLAYERS}
             minPlayers={CODENAMES_MIN_PLAYERS}
             startLabel="Jouer"
@@ -384,7 +388,7 @@ export function CodenamesLobby({
           <>
             <div className="mb-2 flex shrink-0 items-center justify-between gap-3">
               <p className="font-display text-lg font-bold text-white">
-                JJK Codenames{" "}
+                {gameTitle}{" "}
                 <span className="ml-1 text-sm font-normal tracking-[0.3em] text-white/40">
                   {code}
                 </span>
