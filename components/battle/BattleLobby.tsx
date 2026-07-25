@@ -25,7 +25,10 @@ import {
 import { DraftPhase } from "./DraftPhase";
 import { BattleCombat } from "./BattleCombat";
 import { BattleResult } from "./BattleResult";
-import { useUniverseHref } from "@/components/universe/UniverseProvider";
+import {
+  useGameTitle,
+  useUniverseHref,
+} from "@/components/universe/UniverseProvider";
 
 interface BattleLobbyProps {
   initialLobby: SerializedLobby;
@@ -44,6 +47,7 @@ export function BattleLobby({
 }: BattleLobbyProps) {
   const router = useRouter();
   const withUniverse = useUniverseHref();
+  const gameTitle = useGameTitle("battle");
   const [lobby, setLobby] = useState<SerializedLobby>(initialLobby);
   const [gameState, setGameState] = useState<BattleState | null>(initialGameState);
   const [connError, setConnError] = useState<string | null>(null);
@@ -186,7 +190,7 @@ export function BattleLobby({
           pending={pending}
           onStart={handleStart}
           onLeave={handleLeave}
-          title="JJK Random Battle"
+          title={gameTitle}
           maxPlayers={2}
           hostExtra={
             <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-cursed/40 bg-cursed/5 px-4 py-3 text-left">

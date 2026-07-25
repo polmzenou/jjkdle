@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { AttributeKind } from "@prisma/client";
 import type { AdminAttribute } from "@/lib/admin/attribute-store";
+import { useGameTitle } from "@/components/universe/UniverseProvider";
 import {
   saveAttributeAction,
   deleteAttributeAction,
@@ -69,6 +70,8 @@ export function AttributesAdmin({
   universeName: string;
 }) {
   const router = useRouter();
+  // Les attributs sont les colonnes du jeu du jour : son nom dépend de l'univers.
+  const dailyTitle = useGameTitle("jjkdle");
   const [pending, startTransition] = useTransition();
   const [feedback, setFeedback] = useState<Feedback>(null);
   const [form, setForm] = useState<AttrForm>(emptyAttr(attributes.length));
@@ -131,7 +134,8 @@ export function AttributesAdmin({
       <div className="rounded-2xl border border-domain/30 bg-domain/5 p-4">
         <p className="text-sm text-white/70">
           Attributs de <span className="font-bold text-domain-light">{universeName}</span>{" "}
-          — ce sont les colonnes de la grille JJKdle. Un personnage n&apos;entre dans
+          — ce sont les colonnes de la grille {dailyTitle}. Un personnage
+          n&apos;entre dans
           le tirage quotidien que si <em>tous</em> sont renseignés.
         </p>
       </div>
@@ -259,7 +263,8 @@ export function AttributesAdmin({
       {/* ── Liste ── */}
       {attributes.length === 0 ? (
         <p className="rounded-xl border border-cursed/40 bg-cursed/10 px-4 py-3 text-sm text-cursed-light">
-          Aucun attribut : JJKdle ne peut pas fonctionner pour cet univers. Crée au
+          Aucun attribut : {dailyTitle} ne peut pas fonctionner pour cet univers.
+          Crée au
           moins un attribut ci-dessus.
         </p>
       ) : (

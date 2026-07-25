@@ -1,8 +1,14 @@
-import type { Game } from "./types";
+import type { Game, GameTitles } from "./types";
 
 /**
  * Registre central des jeux. Le hub (`app/page.tsx`) mappe sur ce tableau.
  * Ajouter un jeu = ajouter une entrée ici + sa route sous `app/games/<id>/`.
+ *
+ * ⚠️ Les `title` ci-dessous sont ceux de l'univers PAR DÉFAUT (JJK). Un univers
+ * peut les renommer via `UniverseConfig.gameTitles` (ex. « JJKdle » → « CSMdle » ) :
+ * ne JAMAIS afficher `GAMES[i].title` directement dans l'UI, passer par
+ * `gamesForUniverse()` / `gameForUniverse()` (ou, côté serveur/client, par
+ * `lib/games/universe.ts` et `useUniverseGames()`).
  */
 export const GAMES: Game[] = [
   {
@@ -120,4 +126,28 @@ export const GAMES: Game[] = [
 
 export function getGame(id: string): Game | undefined {
   return GAMES.find((g) => g.id === id);
+}
+
+/**
+ * Registre vu par un univers : mêmes jeux, mêmes routes, titres renommés selon
+ * sa config. Un anime ne change QUE des libellés — aucun code de jeu n'est
+ * dupliqué (cf. `lib/universes/types.ts`).
+ *
+ * Fonction PURE (client + serveur). Les appelants serveur passent par
+ * `lib/games/universe.ts`, les composants client par `useUniverseGames()`.
+ */
+export function gamesForUniverse(titles?: GameTitles): Game[] {
+  if (!titles) return GAMES;
+  return GAMES.map((g) => (titles[g.id] ? { ...g, title: titles[g.id]! } : g));
+}
+
+/** Idem `getGame`, avec le titre de l'univers. */
+export function gameForUniverse(
+  id: string,
+  titles?: GameTitles,
+): Game | undefined {
+  const game = getGame(id);
+  if (!game) return undefined;
+  const title = titles?.[game.id];
+  return title ? { ...game, title } : game;
 }

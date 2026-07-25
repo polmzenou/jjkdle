@@ -8,6 +8,7 @@ import { loadAttributeSchema } from "@/lib/games/jjkdle/attributes-db";
 import { eligibleRoster, pickDailyTarget, todayKey } from "@/lib/games/jjkdle/daily";
 import { resolveDailyTarget } from "@/lib/games/jjkdle/daily-server";
 import { getForcedTarget } from "@/lib/config/app-config";
+import { universeGames } from "@/lib/games/universe";
 import { recentDateKeys } from "@/lib/date";
 
 /**
@@ -134,15 +135,19 @@ async function gamesPlayed(): Promise<GamePlayCount[]> {
       prisma.codenamesScore.count(),
     ]);
   const byGame = new Map(scoreByGame.map((r) => [r.gameId, r._count._all]));
+  // Les jeux dont le nom porte celui de l'œuvre sont libellés avec le titre de
+  // l'univers administré ; les autres gardent un libellé court et neutre.
+  const games = await universeGames();
+  const label = (id: string) => games.find((g) => g.id === id)?.title ?? id;
 
   return [
     { gameId: "builder", label: "Builder", count: byGame.get("builder") ?? 0 },
-    { gameId: "ranking", label: "JJK Pyramid", count: byGame.get("ranking") ?? 0 },
-    { gameId: "jujutsu-draft", label: "Jujutsu Draft", count: draft },
-    { gameId: "jjkdle", label: "JJKdle", count: jjkdle },
+    { gameId: "ranking", label: label("ranking"), count: byGame.get("ranking") ?? 0 },
+    { gameId: "jujutsu-draft", label: label("jujutsu-draft"), count: draft },
+    { gameId: "jjkdle", label: label("jjkdle"), count: jjkdle },
     { gameId: "higher-lower", label: "Higher/Lower", count: higherLower },
     { gameId: "guesswho", label: "Qui est-ce ?", count: guessWho },
-    { gameId: "codenames", label: "JJK Codenames", count: codenames },
+    { gameId: "codenames", label: label("codenames"), count: codenames },
     { gameId: "battle", label: "Random Battle", count: null },
   ];
 }

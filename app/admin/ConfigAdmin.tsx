@@ -8,7 +8,10 @@ import {
   isCompleteFor,
   type AttributeSpec,
 } from "@/lib/games/jjkdle/attribute-schema";
-import { GAMES } from "@/lib/games/registry";
+import {
+  useGameTitle,
+  useUniverseGames,
+} from "@/components/universe/UniverseProvider";
 import type { MaintenanceConfig } from "@/lib/config/app-config";
 import {
   setGameEnabledAction,
@@ -40,6 +43,9 @@ export function ConfigAdmin({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [feedback, setFeedback] = useState<Feedback>(null);
+  // Titres de l'univers administré (l'admin est scopé par cookie, cf. admin-scope).
+  const games = useUniverseGames();
+  const dailyTitle = useGameTitle("jjkdle");
 
   const [maintMsg, setMaintMsg] = useState(maintenance.message ?? "");
   const [targetId, setTargetId] = useState(forcedTarget ?? "");
@@ -115,7 +121,7 @@ export function ConfigAdmin({
           Un jeu désactivé est grisé sur le hub et sa route redirige vers /games.
         </p>
         <div className="space-y-2">
-          {GAMES.map((g) => {
+          {games.map((g) => {
             const enabled = gameFlags[g.id] !== false;
             return (
               <div
@@ -213,7 +219,7 @@ export function ConfigAdmin({
       <section className="rounded-2xl border border-white/10 bg-void-800/40 p-5">
         <div className="mb-3 flex flex-wrap items-center gap-3">
           <h2 className="font-display text-lg font-bold text-white">
-            Mot du jour JJKdle (test)
+            Mot du jour {dailyTitle} (test)
           </h2>
           {forcedTarget && (
             <span className="rounded-full border border-amber-400/40 bg-amber-400/10 px-2.5 py-0.5 text-[11px] font-bold text-amber-300">
@@ -222,7 +228,8 @@ export function ConfigAdmin({
           )}
         </div>
         <p className="mb-3 text-xs text-white/45">
-          Force le personnage cible du JJKdle du jour (tous les joueurs). Pour tests
+          Force le personnage cible du {dailyTitle} du jour (tous les joueurs). Pour
+          tests
           uniquement — laisse « aucun » pour le tirage déterministe normal.
         </p>
         <div className="flex flex-wrap items-center gap-2">

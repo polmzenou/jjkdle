@@ -6,6 +6,7 @@ import { isPusherConfigured } from "@/lib/pusher/server";
 import { MpHubForm } from "@/components/multiplayer/MpHubForm";
 import { GameJsonLd } from "@/components/seo/JsonLd";
 import { gameMetadata } from "@/lib/seo/config";
+import { universeGameTitle } from "@/lib/games/universe";
 import { UniverseLink } from "@/components/universe/UniverseLink";
 import { universeHref } from "@/lib/universes/current";
 import {
@@ -25,6 +26,7 @@ export default async function BattleHubPage() {
   if (!(await isGameEnabled("battle"))) redirect(await universeHref("/games"));
   const user = await getCurrentUser();
   const pusherReady = isPusherConfigured();
+  const title = await universeGameTitle("battle");
 
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col px-6 py-14 sm:py-20">
@@ -35,7 +37,7 @@ export default async function BattleHubPage() {
           Multijoueur · 1v1
         </span>
         <h1 className="mt-5 font-display text-4xl font-bold tracking-tight text-white sm:text-5xl">
-          JJK Random Battle
+          {title}
         </h1>
         <p className="mx-auto mt-4 max-w-md text-balance text-white/55">
           Lobby privé en 1v1, en temps réel. Drafte une carte tirée au hasard à

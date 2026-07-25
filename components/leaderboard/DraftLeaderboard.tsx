@@ -8,6 +8,7 @@ import { TitleBadge } from "@/components/TitleBadge";
 import { UserAvatar } from "@/components/UserAvatar";
 import { ScopeToggle } from "./ScopeToggle";
 import { UniverseLink } from "@/components/universe/UniverseLink";
+import { universeGameTitle } from "@/lib/games/universe";
 
 /** Couleurs des médailles : 1er Or, 2e Argent, 3e Bronze. */
 const MEDALS = [
@@ -29,7 +30,10 @@ export async function DraftLeaderboard({
   limit = 8,
   scope = "all-time",
 }: DraftLeaderboardProps) {
-  const entries = await topDraftEntries(limit, scope);
+  const [entries, title] = await Promise.all([
+    topDraftEntries(limit, scope),
+    universeGameTitle("jujutsu-draft"),
+  ]);
 
   return (
     <section
@@ -38,7 +42,7 @@ export async function DraftLeaderboard({
     >
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <h2 className="font-display text-sm font-bold uppercase tracking-[0.2em] text-amber-200">
-          🏆 Leaderboard ⚔️ Jujutsu Draft
+          🏆 Leaderboard ⚔️ {title}
         </h2>
         <span className="h-px flex-1 bg-gradient-to-r from-amber-300/30 to-transparent" />
         <ScopeToggle scope={scope} />

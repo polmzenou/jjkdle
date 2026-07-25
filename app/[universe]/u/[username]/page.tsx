@@ -16,6 +16,7 @@ import { getUserJjkdleScore } from "@/lib/games/jjkdle/leaderboard";
 import { getUserHigherLowerScore } from "@/lib/games/higher-lower/store";
 import { getUserGuessWhoStats } from "@/lib/games/guesswho/stats";
 import { UniverseLink } from "@/components/universe/UniverseLink";
+import { universeGameTitle } from "@/lib/games/universe";
 
 export const dynamic = "force-dynamic";
 
@@ -88,6 +89,8 @@ export default async function PublicProfilePage({
   const banner = bannerStyle(prof?.bannerKey);
   const layout = normalizeProfileLayout(prof?.profileLayout ?? null);
   const jjkdleStreak = prof?.jjkdleStreak ?? 0;
+  // Le streak porte le nom du jeu du jour DANS CET UNIVERS.
+  const dailyTitle = await universeGameTitle("jjkdle");
 
   // Scores agrégés (un seul fetch ; non rendus si la section est masquée).
   const showScores = layout.sections.some(
@@ -218,8 +221,8 @@ export default async function PublicProfilePage({
             )}
             {jjkdleStreak > 0 && (
               <p className="mt-1 text-sm font-bold text-white/85">
-                🔥 {jjkdleStreak} jour{jjkdleStreak > 1 ? "s" : ""} de streak
-                JJKdle
+                🔥 {jjkdleStreak} jour{jjkdleStreak > 1 ? "s" : ""} de streak{" "}
+                {dailyTitle}
               </p>
             )}
           </div>

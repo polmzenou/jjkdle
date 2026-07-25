@@ -1,19 +1,23 @@
 import { MAX_SCORE, type LeaderboardGame, type UserScore } from "@/lib/leaderboard/store";
 import { BOSSES } from "@/lib/games/draft/scoring";
 import { getGrade } from "@/lib/scoring/grades";
-import { GAMES } from "@/lib/games/registry";
+import { universeGames } from "@/lib/games/universe";
 
 /**
  * Grille des cartes de score d'un joueur (récap perso `/account` et profil
  * public `/u/[username]`). Purement présentationnel : le tri/agrégation est fait
  * en amont. Ne gère pas l'état vide → le caller décide quoi afficher si la liste
  * est vide.
+ *
+ * Server Component : les titres viennent du registre de l'UNIVERS courant (un
+ * même jeu s'appelle « JJKdle » sur /jjk et « CSMdle » sur /csm).
  */
-export function ScoreCards({ scores }: { scores: UserScore[] }) {
+export async function ScoreCards({ scores }: { scores: UserScore[] }) {
+  const games = await universeGames();
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       {scores.map((s) => {
-        const meta = GAMES.find((g) => g.id === s.gameId);
+        const meta = games.find((g) => g.id === s.gameId);
         const title = meta?.title ?? s.gameId;
         const glyph = meta?.glyph ?? "🎮";
         const accent = meta?.accent ?? "#7c3aed";

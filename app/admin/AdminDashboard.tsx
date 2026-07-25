@@ -2,7 +2,10 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useUniverseHref } from "@/components/universe/UniverseProvider";
+import {
+  useGameTitle,
+  useUniverseHref,
+} from "@/components/universe/UniverseProvider";
 import type { CategoryConfig, CategoryId } from "@/data/roster/categories";
 import type { Character, CharacterTier } from "@/data/roster/characters";
 import { CharacterImage } from "@/components/CharacterImage";
@@ -106,6 +109,11 @@ type Tab =
   | "users"
   | "config";
 
+/**
+ * Libellés des onglets. Deux d'entre eux nomment un JEU : leur libellé dépend de
+ * l'univers administré (« Analytics JJKdle » / « Analytics CSMdle ») — d'où le
+ * `useTabLabels()` plus bas plutôt qu'une constante figée.
+ */
 const TAB_LABELS: Record<Tab, string> = {
   overview: "Vue d'ensemble",
   roster: "Roster",
@@ -117,6 +125,20 @@ const TAB_LABELS: Record<Tab, string> = {
   users: "Utilisateurs",
   config: "Config",
 };
+
+/** `TAB_LABELS` avec les noms de jeux de l'univers administré. */
+function useTabLabels(): Record<Tab, string> {
+  const dailyTitle = useGameTitle("jjkdle");
+  const draftTitle = useGameTitle("jujutsu-draft");
+  return useMemo(
+    () => ({
+      ...TAB_LABELS,
+      jjkdle: `Analytics ${dailyTitle}`,
+      draft: draftTitle,
+    }),
+    [dailyTitle, draftTitle],
+  );
+}
 const TAB_ORDER: Tab[] = [
   "overview",
   "roster",
@@ -162,6 +184,9 @@ export function AdminDashboard({
   // Les appels d'API doivent porter l'univers ADMINISTRÉ (cf. admin/layout.tsx),
   // sinon le middleware les résout sur le dernier univers VISITÉ.
   const withUniverse = useUniverseHref();
+  const tabLabels = useTabLabels();
+  // Nom du jeu du jour dans l'univers administré (libellés du formulaire roster).
+  const dailyTitle = useGameTitle("jjkdle");
   const [pending, startTransition] = useTransition();
   const [tab, setTab] = useState<Tab>("overview");
   // Schéma d'attributs de l'univers courant : complétude, libellés, options.
@@ -479,7 +504,7 @@ export function AdminDashboard({
       <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-2xl font-black uppercase tracking-wider text-white">
-            Admin · <span className="text-domain-light">{TAB_LABELS[tab]}</span>
+            Admin · <span className="text-domain-light">{tabLabels[tab]}</span>
           </h1>
           <p className="text-sm text-white/45">{subtitle}</p>
         </div>
@@ -527,7 +552,7 @@ export function AdminDashboard({
               tab === t ? "bg-domain text-white" : "text-white/55 hover:text-white"
             }`}
           >
-            {TAB_LABELS[t]}
+            {tabLabels[t]}
           </button>
         ))}
       </div>
@@ -772,7 +797,7 @@ export function AdminDashboard({
           {/* Attributs du personnage (définis par univers) */}
           <div className="rounded-xl border border-domain/30 bg-domain/5 p-3">
             <p className="mb-3 text-xs uppercase tracking-wider text-domain-light">
-              Attributs JJKdle{" "}
+              Attributs {dailyTitle}{" "}
               <span className="text-white/35">(pool quotidien si tous remplis)</span>
             </p>
             <div className="grid grid-cols-2 gap-3">
@@ -936,9 +961,9 @@ export function AdminDashboard({
                       {!isCompleteFor(attributeSchema, c) && (
                         <span
                           className="ml-1.5 rounded bg-cursed/20 px-1.5 py-0.5 text-[10px] font-bold text-cursed-light"
-                          title="Attributs JJKdle manquants — exclu du pool quotidien"
+                          title={`Attributs ${dailyTitle} manquants — exclu du pool quotidien`}
                         >
-                          JJKdle incomplet
+                          {dailyTitle} incomplet
                         </span>
                       )}
                     </p>
@@ -1015,6 +1040,7 @@ function CharacterPreviewModal({
   schema: AttributeSchema;
   onClose: () => void;
 }) {
+  const dailyTitle = useGameTitle("jjkdle");
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -1089,9 +1115,9 @@ function CharacterPreviewModal({
             </div>
           )}
 
-          {/* Attributs JJKdle */}
+          {/* Attributs du jeu du jour */}
           <p className="mt-4 mb-1.5 text-[11px] uppercase tracking-wider text-white/40">
-            Attributs JJKdle
+            Attributs {dailyTitle}
           </p>
           <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm">
             {schema.columns.map((col) => (

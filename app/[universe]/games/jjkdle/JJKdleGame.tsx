@@ -23,6 +23,7 @@ import { CharacterSearch } from "./CharacterSearch";
 import { GuessHeader, GuessRow } from "./GuessRow";
 import { SubmitJjkdleScore } from "./SubmitJjkdleScore";
 import { UniverseLink } from "@/components/universe/UniverseLink";
+import { useGameTitle } from "@/components/universe/UniverseProvider";
 
 /** Forme minimale d'un perso transmise au client (aucune donnée secrète). */
 export interface PublicCharacter {
@@ -282,9 +283,11 @@ function VictoryPanel({
   msUntilMidnight: number;
 }) {
   const [copied, setCopied] = useState(false);
+  // Le partage porte le nom du jeu DANS CET UNIVERS (« JJKdle » / « CSMdle »).
+  const gameTitle = useGameTitle("jjkdle");
 
   const share = useCallback(() => {
-    const text = buildShareText(rows, attempts);
+    const text = buildShareText(rows, attempts, gameTitle);
     navigator.clipboard?.writeText(text).then(
       () => {
         setCopied(true);
@@ -292,7 +295,7 @@ function VictoryPanel({
       },
       () => setCopied(false),
     );
-  }, [rows, attempts]);
+  }, [rows, attempts, gameTitle]);
 
   return (
     <motion.div
@@ -376,7 +379,11 @@ function Countdown({ ms }: { ms: number }) {
 }
 
 /** Grille d'émojis façon Wordle (sans spoiler du nom). */
-function buildShareText(rows: GuessRowData[], attempts: number): string {
+function buildShareText(
+  rows: GuessRowData[],
+  attempts: number,
+  gameTitle: string,
+): string {
   const emoji: Record<string, string> = {
     correct: "🟩",
     close: "🟧",
