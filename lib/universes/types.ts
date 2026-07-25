@@ -52,6 +52,31 @@ export interface UniverseLabels {
   tagline: string;
 }
 
+/**
+ * Synchro d'images automatique (bouton « OUAIS ») pour cet univers.
+ *
+ * Vit ici et non dans `.env` : le tag de série change d'un anime à l'autre, alors
+ * qu'une variable d'environnement est unique pour tout le déploiement — avec elle,
+ * la synchro CSM ramenait des images de Jujutsu Kaisen.
+ *
+ * Absent = pas de synchro pour cet univers (le bouton le dit au lieu d'interroger
+ * l'API avec le tag d'un autre anime).
+ */
+export interface UniverseBooru {
+  /** Tag de série ajouté à chaque requête (ex. `chainsaw_man`). */
+  seriesTag: string;
+  /**
+   * Restreint la synchro aux personnages portant cette valeur d'attribut. La CLÉ
+   * est propre à l'univers (les attributs sont data-driven : `gender` en JJK,
+   * `csmgender` en CSM), d'où sa présence dans la config plutôt qu'en dur.
+   * Absent = tout le roster.
+   */
+  filter?: {
+    attributeKey: string;
+    value: string;
+  };
+}
+
 /** Branding logo d'un univers. */
 export interface UniverseLogo {
   /** Chemin de l'image (asset statique). */
@@ -99,4 +124,6 @@ export interface UniverseConfig {
    * nouvel univers doit donc fournir un bloc COMPLET pour chaque jeu proposé.
    */
   gameCopy?: UniverseGameCopy;
+  /** Synchro d'images automatique (bouton « OUAIS »). Absent = désactivée. */
+  booru?: UniverseBooru;
 }

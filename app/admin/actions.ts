@@ -255,9 +255,16 @@ export async function deleteCharactersAction(
 
 /**
  * Bouton « OUAIS » : récupère automatiquement une image depuis l'API booru pour
- * les personnages FÉMININS du roster (gender === FEMALE en base) et met leur URL
- * d'image en cache. Le roster Jujutsu Draft n'a pas d'attribut de genre : il est
- * donc exclu. Réservé ADMIN et VIP.
+ * les personnages du roster et met leur URL d'image en cache. Réservé ADMIN et VIP.
+ *
+ * Tout ce qui dépend de l'anime — tag de série, et attribut servant de filtre —
+ * vient de `UniverseConfig.booru`. Les deux étaient codés en dur sur JJK
+ * (`jujutsu_kaisen` via `.env`, et la clé d'attribut `gender`), si bien que sur un
+ * autre univers le bouton ramenait les images du mauvais anime… ou ne trouvait
+ * personne, la clé de l'attribut de sexe étant elle aussi propre à chaque univers.
+ *
+ * Le roster Jujutsu Draft reste exclu : il n'a pas d'attributs, donc aucun filtre
+ * applicable.
  */
 export async function refreshRosterImagesFromApiAction(): Promise<ImageRefreshResult> {
   const fail = (error: string): ImageRefreshResult => ({
@@ -274,6 +281,14 @@ export async function refreshRosterImagesFromApiAction(): Promise<ImageRefreshRe
     return fail("Accès réservé aux administrateurs et VIP.");
   }
 
+  const universe = await getCurrentUniverse();
+  const booru = universe.config.booru;
+  if (!booru) {
+    return fail(
+      `Aucune synchro d'images configurée pour ${universe.config.name} (UniverseConfig.booru).`,
+    );
+  }
+
   let roster: Character[];
   try {
     roster = await readRoster();
@@ -281,14 +296,22 @@ export async function refreshRosterImagesFromApiAction(): Promise<ImageRefreshRe
     return fail(`Lecture du roster impossible : ${(e as Error).message}`);
   }
 
-  // Filtre demandé : uniquement les persos marqués FEMALE en base. Lu depuis les
-  // attributs data-driven (l'attribut "gender" est propre à l'univers JJK ; un
-  // univers sans cet attribut ne renvoie simplement personne).
-  const females = roster.filter((c) => c.attributes?.gender === "FEMALE");
+  // Filtre optionnel sur un attribut data-driven (JJK : gender = FEMALE).
+  const { filter } = booru;
+  const targets = filter
+    ? roster.filter((c) => c.attributes?.[filter.attributeKey] === filter.value)
+    : roster;
+  if (targets.length === 0) {
+    return fail(
+      filter
+        ? `Aucun personnage avec ${filter.attributeKey} = ${filter.value} dans ${universe.config.name}.`
+        : `Roster vide pour ${universe.config.name}.`,
+    );
+  }
 
   let summary: Omit<ImageRefreshResult, "ok" | "error">;
   try {
-    summary = await refreshAllRosterImages(females, []);
+    summary = await refreshAllRosterImages(targets, [], booru.seriesTag);
   } catch (e) {
     return fail((e as Error).message);
   }
