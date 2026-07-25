@@ -117,4 +117,10 @@ export const csm: UniverseConfig = {
     tagline:
       "Une collection de mini-jeux nerveux pour tester ta connaissance de l'univers et faire hurler la tronçonneuse.",
   },
+  booru: {
+    seriesTag: "chainsaw_man",
+    // La clé de l'attribut de sexe est propre à l'univers : « csmgender » ici,
+    // « gender » en JJK. Un `gender` codé en dur ne trouvait donc personne.
+    filter: { attributeKey: "csmgender", value: "FEMALE" },
+  },
 };

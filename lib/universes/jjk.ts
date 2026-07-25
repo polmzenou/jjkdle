@@ -63,4 +63,9 @@ export const jjk: UniverseConfig = {
     tagline:
       "Une collection de mini-jeux nerveux pour tester ta connaissance de l'univers et libérer ton énergie maudite.",
   },
+  booru: {
+    seriesTag: "jujutsu_kaisen",
+    // Filtre historique du bouton « OUAIS » : uniquement les persos féminins.
+    filter: { attributeKey: "gender", value: "FEMALE" },
+  },
 };

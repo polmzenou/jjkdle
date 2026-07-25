@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { GAMES, gamesForUniverse } from "@/lib/games/registry";
 import { csm } from "./csm";
+import { jjk } from "./jjk";
 
 /**
  * Textes des jeux côté CSM. Le registre (`lib/games/registry.ts`) porte les
@@ -30,5 +31,27 @@ describe("copy des jeux CSM", () => {
         );
       }
     }
+  });
+});
+
+/**
+ * Synchro d'images (bouton « OUAIS »). Le tag de série et la clé de l'attribut de
+ * filtrage étaient codés en dur sur JJK : la copie du bloc d'un univers à l'autre
+ * sans en changer les valeurs ramènerait les images du mauvais anime, ou ne
+ * trouverait personne. Ces tests attrapent précisément ce copier-coller.
+ */
+describe("synchro d'images CSM", () => {
+  it("cible la série Chainsaw Man, pas celle de JJK", () => {
+    expect(csm.booru?.seriesTag).toBe("chainsaw_man");
+    expect(csm.booru?.seriesTag).not.toBe(jjk.booru?.seriesTag);
+  });
+
+  it("filtre sur un attribut qui existe VRAIMENT dans l'univers CSM", () => {
+    // Les attributs CSM sont préfixés `csm…` (ils sont créés par univers) : une
+    // clé JJK comme « gender » ne renverrait aucun personnage.
+    expect(csm.booru?.filter?.attributeKey).toMatch(/^csm/);
+    expect(csm.booru?.filter?.attributeKey).not.toBe(
+      jjk.booru?.filter?.attributeKey,
+    );
   });
 });

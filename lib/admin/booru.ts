@@ -12,10 +12,13 @@ import { setCachedImage } from "@/lib/admin/image-cache";
  *   BOORU_API_BASE    URL de base de l'endpoint posts (sans &tags=...).
  *   BOORU_API_KEY     clé d'API (rule34.xxx l'exige désormais).
  *   BOORU_USER_ID     identifiant utilisateur associé à la clé.
- *   BOORU_SERIES_TAG  tag de série ajouté à chaque requête (déf. jujutsu_kaisen).
+ *
+ * Le TAG DE SÉRIE, lui, n'est PAS une variable d'environnement : il dépend de
+ * l'anime (`UniverseConfig.booru.seriesTag`, cf. lib/universes/types.ts). Une
+ * variable d'environnement est unique pour tout le déploiement — elle faisait
+ * ramener des images de Jujutsu Kaisen dans le roster de Chainsaw Man. Il est donc
+ * passé en paramètre par l'appelant, qui seul sait quel univers il synchronise.
  */
-
-const SERIES_TAG = process.env.BOORU_SERIES_TAG?.trim() || "jujutsu_kaisen";
 
 // Certaines API booru rejettent les requêtes sans User-Agent identifiable.
 const USER_AGENT = "jjkdle/1.0 (+roster image sync)";
@@ -92,8 +95,12 @@ type PostsResult =
  * Réessaie avec backoff sur les échecs transitoires (HTTP non-2xx, réseau,
  * erreur applicative type rate-limit).
  */
-async function fetchPosts(base: string, tag: string): Promise<PostsResult> {
-  const url = buildUrl(base, [SERIES_TAG, tag]);
+async function fetchPosts(
+  base: string,
+  seriesTag: string,
+  tag: string,
+): Promise<PostsResult> {
+  const url = buildUrl(base, [seriesTag, tag]);
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     await throttle();
@@ -136,7 +143,10 @@ export type ImageLookup =
  *
  * Lève une erreur uniquement si BOORU_API_BASE n'est pas configuré.
  */
-export async function lookupImage(name: string): Promise<ImageLookup> {
+export async function lookupImage(
+  name: string,
+  seriesTag: string,
+): Promise<ImageLookup> {
   const base = process.env.BOORU_API_BASE?.trim();
   if (!base) {
     throw new Error(
@@ -147,7 +157,7 @@ export async function lookupImage(name: string): Promise<ImageLookup> {
   let anyOk = false;
   let best: { count: number; fileUrl: string | null } | null = null;
   for (const tag of candidateTags(name)) {
-    const res = await fetchPosts(base, tag);
+    const res = await fetchPosts(base, seriesTag, tag);
     if (!res.ok) continue;
     anyOk = true;
     if (!best || res.count > best.count) best = res;
@@ -177,10 +187,14 @@ export type ImageRefreshResult = {
  * Parcourt les deux rosters et met en cache (mémoire, pas en base) la première
  * image trouvée sur l'API pour chaque perso (tag dérivé du nom). Le roster
  * superpose ensuite ce cache à l'affichage. Renvoie un récapitulatif chiffré.
+ *
+ * `seriesTag` vient de la config de l'univers synchronisé : c'est lui qui garantit
+ * qu'on ne mélange pas les animes.
  */
 export async function refreshAllRosterImages(
   roster: { id: string; name: string }[],
   draftRoster: { id: string; name: string }[],
+  seriesTag: string,
 ): Promise<Omit<ImageRefreshResult, "ok" | "error">> {
   let builderUpdated = 0;
   let draftUpdated = 0;
@@ -194,7 +208,7 @@ export async function refreshAllRosterImages(
 
   // L'espacement entre appels est géré par le throttle global de fetchPosts.
   for (const c of all) {
-    const res = await lookupImage(c.name);
+    const res = await lookupImage(c.name, seriesTag);
     if (res.status === "failed") {
       failed++;
       continue;
