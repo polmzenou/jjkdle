@@ -18,6 +18,7 @@ import {
   getForcedTarget,
 } from "@/lib/config/app-config";
 import { todayKey } from "@/lib/games/jjkdle/daily";
+import { loadAttributeSchema } from "@/lib/games/jjkdle/attributes-db";
 import type { Character } from "@/data/roster/characters";
 import type { DraftCharacter } from "@/lib/games/draft/types";
 import { AdminDashboard } from "./AdminDashboard";
@@ -92,10 +93,11 @@ export default async function AdminPage({
   } catch {
     draftRoster = [];
   }
-  const [categories, scores, users] = await Promise.all([
+  const [categories, scores, users, attributeSchema] = await Promise.all([
     getCategories(),
     listAllScores(),
     listUsers(),
+    loadAttributeSchema(),
   ]);
   let draftScores: AdminScore[] = [];
   try {
@@ -132,6 +134,7 @@ export default async function AdminPage({
   return (
     <AdminDashboard
       roster={roster}
+      attributeColumns={attributeSchema.columns}
       draftRoster={draftRoster}
       categories={categories}
       scores={[...scores, ...draftScores, ...jjkdleScores, ...higherLowerScores]}

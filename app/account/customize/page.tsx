@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth/session";
-import { prisma } from "@/lib/prisma";
+import { getUniverseLoadout } from "@/lib/universes/profile";
 import { normalizeProfileLayout } from "@/lib/profile/layout";
 import { ProfileLayoutEditor } from "./ProfileLayoutEditor";
 
@@ -22,11 +22,8 @@ export default async function CustomizeProfilePage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  const profile = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { profileLayout: true },
-  });
-  const layout = normalizeProfileLayout(profile?.profileLayout);
+  const loadout = await getUniverseLoadout(user.id);
+  const layout = normalizeProfileLayout(loadout.profileLayout);
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-12 sm:py-16">

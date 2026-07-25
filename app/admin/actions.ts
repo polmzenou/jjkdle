@@ -65,15 +65,8 @@ import type {
 } from "@/lib/games/draft/types";
 import type { Character, CharacterTier } from "@/data/roster/characters";
 import { CATEGORY_BY_ID, type CategoryId } from "@/data/roster/categories";
-import {
-  RACES,
-  GENDERS,
-  GRADES_ORDER,
-  AFFILIATIONS,
-  CLANS,
-  ARCS_ORDER,
-} from "@/lib/games/jjkdle/attributes";
 import { eligibleRoster } from "@/lib/games/jjkdle/daily";
+import { loadAttributeSchema } from "@/lib/games/jjkdle/attributes-db";
 import { getGame } from "@/lib/games/registry";
 import {
   setConfig,
@@ -136,32 +129,23 @@ export async function saveCharacterAction(
     }
   }
 
-  // ── Attributs JJKdle : chaque enum validé contre ses valeurs ; omis si vide.
-  const jjkdle: Partial<
-    Pick<
-      Character,
-      | "race"
-      | "gender"
-      | "grade"
-      | "affiliation"
-      | "clan"
-      | "appearanceArc"
-      | "hasDomain"
-      | "cursedEnergy"
-    >
-  > = {};
-  if (input.race && RACES.includes(input.race)) jjkdle.race = input.race;
-  if (input.gender && GENDERS.includes(input.gender)) jjkdle.gender = input.gender;
-  if (input.grade && GRADES_ORDER.includes(input.grade)) jjkdle.grade = input.grade;
-  if (input.affiliation && AFFILIATIONS.includes(input.affiliation))
-    jjkdle.affiliation = input.affiliation;
-  if (input.clan && CLANS.includes(input.clan)) jjkdle.clan = input.clan;
-  if (input.appearanceArc && ARCS_ORDER.includes(input.appearanceArc))
-    jjkdle.appearanceArc = input.appearanceArc;
-  if (typeof input.hasDomain === "boolean") jjkdle.hasDomain = input.hasDomain;
-  if (input.cursedEnergy != null && `${input.cursedEnergy}` !== "") {
-    const ce = Number(input.cursedEnergy);
-    if (Number.isFinite(ce) && ce >= 0) jjkdle.cursedEnergy = Math.round(ce);
+  // ── Attributs DATA-DRIVEN : validés contre le SCHÉMA de l'univers courant
+  // (valeur ∈ options de l'attribut, ou entier ≥ 0 pour un NUMERIC). Une clé
+  // inconnue de l'univers ou une valeur invalide est ignorée — anti-tamper : on
+  // ne fait jamais confiance au client, exactement comme l'ancienne validation
+  // contre les enums.
+  const schema = await loadAttributeSchema();
+  const attributes: Record<string, string | number> = {};
+  for (const col of schema.columns) {
+    const raw = input.attributes?.[col.key];
+    if (raw == null || raw === "") continue;
+    if (col.kind === "NUMERIC") {
+      const n = Number(raw);
+      if (Number.isFinite(n) && n >= 0) attributes[col.key] = Math.round(n);
+      continue;
+    }
+    const value = String(raw);
+    if (col.options.some((o) => o.value === value)) attributes[col.key] = value;
   }
 
   const char: Character = {
@@ -172,7 +156,7 @@ export async function saveCharacterAction(
     ...(image ? { image } : {}),
     ratings,
     ...(battleValue != null ? { battleValue } : {}),
-    ...jjkdle,
+    attributes,
   };
 
   try {
@@ -251,8 +235,10 @@ export async function refreshRosterImagesFromApiAction(): Promise<ImageRefreshRe
     return fail(`Lecture du roster impossible : ${(e as Error).message}`);
   }
 
-  // Filtre demandé : uniquement les persos marqués FEMALE en base.
-  const females = roster.filter((c) => c.gender === "FEMALE");
+  // Filtre demandé : uniquement les persos marqués FEMALE en base. Lu depuis les
+  // attributs data-driven (l'attribut "gender" est propre à l'univers JJK ; un
+  // univers sans cet attribut ne renvoie simplement personne).
+  const females = roster.filter((c) => c.attributes?.gender === "FEMALE");
 
   let summary: Omit<ImageRefreshResult, "ok" | "error">;
   try {
@@ -869,8 +855,11 @@ export async function setForcedTargetAction(
     return { ok: false, error: "Accès réservé aux administrateurs." };
   }
   if (characterId !== null) {
-    const roster = await readRoster();
-    const eligible = eligibleRoster(roster);
+    const [roster, schema] = await Promise.all([
+      readRoster(),
+      loadAttributeSchema(),
+    ]);
+    const eligible = eligibleRoster(roster, schema);
     if (!eligible.some((c) => c.id === characterId)) {
       return {
         ok: false,

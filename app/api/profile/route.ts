@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUniverse } from "@/lib/universes/current";
+import { updateUniverseLoadout } from "@/lib/universes/profile";
 import {
+  isBannerInUniverse,
   isBannerKey,
   isBannerUnlocked,
   bannerRequiredLevel,
@@ -39,10 +42,22 @@ export async function PATCH(req: Request) {
 
   const data: { bannerKey?: string; avatarCharacterId?: string | null } = {};
 
+  // Le loadout est PAR UNIVERS : bannière, avatar et écriture ciblent l'univers
+  // courant (résolu une seule fois pour toute la requête).
+  const universe = await getCurrentUniverse();
+
   if (bannerKey !== undefined) {
     if (!isBannerKey(bannerKey)) {
       return NextResponse.json(
         { ok: false, error: "Bannière inconnue." },
+        { status: 400 },
+      );
+    }
+    // Multi-univers : une bannière ne s'équipe que dans son univers (la clé
+    // `default` est neutre et reste valide partout).
+    if (!isBannerInUniverse(bannerKey, universe.slug)) {
+      return NextResponse.json(
+        { ok: false, error: "Cette bannière n'appartient pas à cet univers." },
         { status: 400 },
       );
     }
@@ -69,8 +84,9 @@ export async function PATCH(req: Request) {
     if (avatarCharacterId === null) {
       data.avatarCharacterId = null;
     } else if (typeof avatarCharacterId === "string") {
-      const exists = await prisma.character.findUnique({
-        where: { id: avatarCharacterId },
+      // L'avatar doit exister DANS l'univers courant (avatar par univers).
+      const exists = await prisma.character.findFirst({
+        where: { id: avatarCharacterId, universeId: universe.id },
         select: { id: true },
       });
       if (!exists) {
@@ -92,7 +108,7 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ ok: false, error: "Rien à mettre à jour." }, { status: 400 });
   }
 
-  await prisma.user.update({ where: { id: user.id }, data });
+  await updateUniverseLoadout(user.id, data, universe.id);
   revalidatePath("/account");
   return NextResponse.json({ ok: true });
 }

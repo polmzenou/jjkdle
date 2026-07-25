@@ -23,7 +23,8 @@ import {
 } from "@/lib/cosmetics/unlock";
 import { getTitleGrantKeys, getFrameGrantKeys } from "@/lib/cosmetics/grants";
 import { getRoster } from "@/lib/content/queries";
-import { BADGES } from "@/lib/badges/definitions";
+import { getCurrentUniverse } from "@/lib/universes/current";
+import { badgesForUniverse } from "@/lib/badges/definitions";
 import { GAMES } from "@/lib/games/registry";
 import { prisma } from "@/lib/prisma";
 import { AccountForms } from "./AccountForms";
@@ -39,6 +40,10 @@ export const dynamic = "force-dynamic";
 export default async function AccountPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
+
+  // Univers courant : filtre le loadout/streak lus et les catalogues de
+  // cosmétiques proposés (résolu une fois pour toute la page).
+  const universe = await getCurrentUniverse();
 
   // Scores classiques (table Score) + scores des jeux à table dédiée
   // (Draft, et JJKdle = score du jour). + profil/progression + badges + roster.
@@ -61,15 +66,20 @@ export default async function AccountPage() {
     prisma.user.findUnique({
       where: { id: user.id },
       select: {
-        bannerKey: true,
-        avatarCharacterId: true,
         totalXp: true,
         level: true,
-        jjkdleStreak: true,
-        jjkdleBestStreak: true,
-        equippedTitleKey: true,
-        equippedFrameKey: true,
-        avatarCharacter: { select: { name: true, image: true } },
+        universeProfiles: {
+          where: { universeId: universe.id },
+          select: {
+            bannerKey: true,
+            avatarCharacterId: true,
+            jjkdleStreak: true,
+            jjkdleBestStreak: true,
+            equippedTitleKey: true,
+            equippedFrameKey: true,
+            avatarCharacter: { select: { name: true, image: true } },
+          },
+        },
       },
     }),
     getUserBadgeKeys(user.id),
@@ -88,7 +98,9 @@ export default async function AccountPage() {
     name: c.name,
     ...(c.image ? { image: c.image } : {}),
   }));
-  const banner = bannerStyle(profile?.bannerKey);
+  // Loadout + streak de l'univers courant (0 ou 1 ligne) ; totalXp/level restent globaux.
+  const prof = profile?.universeProfiles[0];
+  const banner = bannerStyle(prof?.bannerKey);
   const scores = [
     ...classicScores,
     ...(draftScore ? [draftScore] : []),
@@ -97,9 +109,11 @@ export default async function AccountPage() {
   ];
 
   // ── Stats résumées (dérivées de données déjà chargées, aucune requête en plus) ──
-  const streak = profile?.jjkdleStreak ?? 0;
-  const bestStreak = profile?.jjkdleBestStreak ?? 0;
-  const badgeTotal = BADGES.length;
+  const streak = prof?.jjkdleStreak ?? 0;
+  const bestStreak = prof?.jjkdleBestStreak ?? 0;
+  // Progression badges : sur le catalogue de l'univers courant (la possession
+  // reste globale, mais on ne compte que ce qui est gagnable ici).
+  const badgeTotal = badgesForUniverse(universe.slug).length;
   const badgeCount = badgeKeys.length;
   const badgePct = badgeTotal > 0 ? Math.round((badgeCount / badgeTotal) * 100) : 0;
   const bestRanked = scores.length
@@ -135,9 +149,9 @@ export default async function AccountPage() {
             <div className="-mt-12 flex flex-wrap items-end gap-4 sm:-mt-14 sm:gap-5">
               <UserAvatar
                 username={user.username}
-                image={profile?.avatarCharacter?.image}
+                image={prof?.avatarCharacter?.image}
                 level={profile?.level ?? 1}
-                frameKey={profile?.equippedFrameKey}
+                frameKey={prof?.equippedFrameKey}
                 size={104}
                 className="rounded-full ring-4 ring-void-800"
               />
@@ -146,8 +160,8 @@ export default async function AccountPage() {
                   {user.username}
                   {user.role === "VIP" && <VipBadge className="text-sm" />}
                 </h1>
-                {profile?.equippedTitleKey && (
-                  <TitleBadge titleKey={profile.equippedTitleKey} className="mt-2 text-sm" />
+                {prof?.equippedTitleKey && (
+                  <TitleBadge titleKey={prof.equippedTitleKey} className="mt-2 text-sm" />
                 )}
               </div>
             </div>
@@ -253,7 +267,7 @@ export default async function AccountPage() {
         <h2 className="mb-5 font-display text-xl font-bold uppercase tracking-wider text-white/85">
           🎖️ Mes badges
         </h2>
-        <BadgeShelf unlockedKeys={badgeKeys} />
+        <BadgeShelf unlockedKeys={badgeKeys} universeSlug={universe.slug} />
       </section>
 
       {/* ── Personnalisation ── */}
@@ -264,20 +278,23 @@ export default async function AccountPage() {
         <ProfileEditor
           username={user.username}
           roster={avatarChoices}
-          initialBannerKey={profile?.bannerKey ?? "default"}
-          initialAvatarId={profile?.avatarCharacterId ?? null}
+          initialBannerKey={prof?.bannerKey ?? "default"}
+          initialAvatarId={prof?.avatarCharacterId ?? null}
           level={profile?.level ?? 1}
           isAdmin={isAdmin}
+          universeSlug={universe.slug}
         />
         <TitleSelector
           unlockedKeys={unlockedTitleKeys}
-          equippedKey={profile?.equippedTitleKey ?? null}
+          equippedKey={prof?.equippedTitleKey ?? null}
+          universeSlug={universe.slug}
         />
         <FrameSelector
           username={user.username}
-          avatarImage={profile?.avatarCharacter?.image}
+          avatarImage={prof?.avatarCharacter?.image}
           unlockedKeys={unlockedFrameKeys}
-          equippedKey={profile?.equippedFrameKey ?? null}
+          equippedKey={prof?.equippedFrameKey ?? null}
+          universeSlug={universe.slug}
         />
       </section>
 

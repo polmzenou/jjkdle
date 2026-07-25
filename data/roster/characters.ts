@@ -1,12 +1,4 @@
 import type { CategoryId } from "./categories";
-import type {
-  JjkRace,
-  JjkGender,
-  JjkGrade,
-  JjkAffiliation,
-  JjkClan,
-  JjkArc,
-} from "@/lib/games/jjkdle/attributes";
 import rosterData from "./characters.json";
 
 /**
@@ -50,21 +42,17 @@ export interface Character {
    */
   battleValue?: number;
 
-  // ── Attributs JJKdle (jeu de déduction quotidien). Optionnels : remplis via
-  // /admin, absents du seed. Un perso n'est éligible comme cible du jour que si
-  // TOUS sont renseignés (cf. `isComplete` dans lib/games/jjkdle/attributes.ts).
-  race?: JjkRace;
-  gender?: JjkGender;
-  grade?: JjkGrade;
-  affiliation?: JjkAffiliation;
-  /** Clan d'origine. "NONE" = pas de clan (≠ absent = non renseigné). */
-  clan?: JjkClan;
-  /** Arc de première apparition (ordonné chronologiquement). */
-  appearanceArc?: JjkArc;
-  /** Possède une extension du territoire (domain expansion) ou non. */
-  hasDomain?: boolean;
-  /** Énergie occulte "lore" (indice numérique ↑/↓), distincte de la note builder. */
-  cursedEnergy?: number;
+  /**
+   * Attributs du personnage, DATA-DRIVEN et propres à l'univers (étape 3) :
+   * `clé d'attribut → valeur`, où une valeur d'option est une `string` et un
+   * attribut NUMERIC un `number`. Clé absente = attribut NON RENSEIGNÉ.
+   *
+   * Alimentent JJKdle (grille d'indices, éligibilité au pool quotidien) et
+   * Higher/Lower. Le schéma qui donne le sens de ces clés vit en base par univers
+   * (cf. lib/games/jjkdle/attribute-schema.ts, amorcé par
+   * lib/universes/jjk-attributes.ts). Remplis via /admin, absents du seed.
+   */
+  attributes?: Record<string, string | number>;
 }
 
 // Le JSON est validé/écrit par la couche admin ; cast direct vers le type métier.

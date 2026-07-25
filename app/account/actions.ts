@@ -3,23 +3,26 @@
 import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { getCurrentUser } from "@/lib/auth/session";
-import { prisma } from "@/lib/prisma";
-import { isTitleKey } from "@/lib/titles/definitions";
-import { isFrameKey } from "@/lib/frames/definitions";
+import { isTitleKey, isTitleInUniverse } from "@/lib/titles/definitions";
+import { isFrameKey, isFrameInUniverse } from "@/lib/frames/definitions";
 import {
   buildUnlockContext,
   isTitleUnlocked,
   isFrameUnlocked,
 } from "@/lib/cosmetics/unlock";
 import { getTitleGrantKeys, getFrameGrantKeys } from "@/lib/cosmetics/grants";
+import { getCurrentUniverse } from "@/lib/universes/current";
+import { updateUniverseLoadout } from "@/lib/universes/profile";
 import { normalizeProfileLayout, type ProfileLayout } from "@/lib/profile/layout";
 
 export type ActionResult = { ok: boolean; error?: string };
 
 /**
- * Équipe (ou retire avec `null`) un TITRE pour l'utilisateur connecté.
+ * Équipe (ou retire avec `null`) un TITRE pour l'utilisateur connecté, DANS
+ * L'UNIVERS COURANT (le loadout est par univers, cf. UserUniverseProfile).
  * Anti-tamper : le déblocage est RE-VÉRIFIÉ côté serveur (jamais de confiance au
- * client) — clé connue ∧ (règle dérivée ∨ octroi manuel ∨ admin).
+ * client) — clé connue ∧ titre de cet univers ∧ (règle dérivée ∨ octroi manuel
+ * ∨ admin).
  */
 export async function equipTitleAction(
   titleKey: string | null,
@@ -27,8 +30,15 @@ export async function equipTitleAction(
   const user = await getCurrentUser();
   if (!user) return { ok: false, error: "Connecte-toi pour équiper un titre." };
 
+  const universe = await getCurrentUniverse();
+
   if (titleKey !== null) {
     if (!isTitleKey(titleKey)) return { ok: false, error: "Titre inconnu." };
+    // Multi-univers : la POSSESSION est globale (un titre gagné sur JJK reste
+    // acquis) mais on ne l'ÉQUIPE que dans son univers d'origine.
+    if (!isTitleInUniverse(titleKey, universe.slug)) {
+      return { ok: false, error: "Ce titre n'appartient pas à cet univers." };
+    }
     const [ctx, grantKeys] = await Promise.all([
       buildUnlockContext(user.id),
       getTitleGrantKeys(user.id),
@@ -38,10 +48,11 @@ export async function equipTitleAction(
     }
   }
 
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { equippedTitleKey: titleKey },
-  });
+  await updateUniverseLoadout(
+    user.id,
+    { equippedTitleKey: titleKey },
+    universe.id,
+  );
   revalidatePath("/account");
   revalidatePath(`/u/${encodeURIComponent(user.username)}`);
   return { ok: true };
@@ -57,8 +68,15 @@ export async function equipFrameAction(
   const user = await getCurrentUser();
   if (!user) return { ok: false, error: "Connecte-toi pour équiper un cadre." };
 
+  const universe = await getCurrentUniverse();
+
   if (frameKey !== null) {
     if (!isFrameKey(frameKey)) return { ok: false, error: "Cadre inconnu." };
+    // Idem titres : possession globale, équipement réservé à l'univers du cadre
+    // (le cadre par défaut est neutre, donc équipable partout).
+    if (!isFrameInUniverse(frameKey, universe.slug)) {
+      return { ok: false, error: "Ce cadre n'appartient pas à cet univers." };
+    }
     const [ctx, grantKeys] = await Promise.all([
       buildUnlockContext(user.id),
       getFrameGrantKeys(user.id),
@@ -68,10 +86,11 @@ export async function equipFrameAction(
     }
   }
 
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { equippedFrameKey: frameKey },
-  });
+  await updateUniverseLoadout(
+    user.id,
+    { equippedFrameKey: frameKey },
+    universe.id,
+  );
   revalidatePath("/account");
   revalidatePath(`/u/${encodeURIComponent(user.username)}`);
   return { ok: true };
@@ -90,11 +109,10 @@ export async function updateProfileLayoutAction(
   if (!user) return { ok: false, error: "Connecte-toi pour personnaliser ton profil." };
 
   const normalized = normalizeProfileLayout(layout);
-  await prisma.user.update({
-    where: { id: user.id },
-    // `ProfileLayout` (interface) n'a pas d'index signature → cast vers le type
-    // d'entrée JSON de Prisma. `normalized` est un objet JSON plat et sûr.
-    data: { profileLayout: normalized as unknown as Prisma.InputJsonValue },
+  // `ProfileLayout` (interface) n'a pas d'index signature → cast vers le type
+  // d'entrée JSON de Prisma. `normalized` est un objet JSON plat et sûr.
+  await updateUniverseLoadout(user.id, {
+    profileLayout: normalized as unknown as Prisma.InputJsonValue,
   });
   revalidatePath("/account/customize");
   revalidatePath(`/u/${encodeURIComponent(user.username)}`);

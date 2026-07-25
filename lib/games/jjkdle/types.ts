@@ -1,5 +1,3 @@
-import type { AttributeKey } from "./attributes";
-
 /**
  * Types du jeu JJKdle (module pur, partagé client/serveur).
  */
@@ -15,8 +13,20 @@ import type { AttributeKey } from "./attributes";
 export type HintStatus = "correct" | "wrong" | "close";
 export type HintDirection = "up" | "down" | null;
 
+/**
+ * Colonne de la grille telle qu'elle est transmise au CLIENT : le strict
+ * nécessaire au rendu (en-tête + infobulle), sérialisable. Dérivée du schéma
+ * d'attributs de l'univers courant côté serveur — le nombre de colonnes varie
+ * donc d'un univers à l'autre.
+ */
+export interface AttributeColumn {
+  key: string;
+  label: string;
+}
+
 export interface AttributeHint {
-  key: AttributeKey;
+  /** Clé de l'attribut comparé (définie par univers, cf. attribute-schema.ts). */
+  key: string;
   status: HintStatus;
   /** Libellé affichable de la valeur proposée (ex. "Grade Spécial", "120", "?"). */
   display: string;

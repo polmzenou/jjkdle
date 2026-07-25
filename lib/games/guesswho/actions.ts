@@ -3,6 +3,7 @@
 import type { Prisma } from "@prisma/client";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getRoster } from "@/lib/content/queries";
+import { getCurrentUniverse } from "@/lib/universes/current";
 import { prisma } from "@/lib/prisma";
 import { isPusherConfigured, triggerLobby } from "@/lib/pusher/server";
 import { serializeLobby } from "@/lib/multiplayer/state";
@@ -138,6 +139,9 @@ export async function startGuessWhoAction(codeRaw: string): Promise<MpResult> {
   const player1Id = lobby.hostId;
   const player2Id = lobby.players.find((p) => p.userId !== player1Id)!.userId;
 
+  // La partie hérite de l'univers du lobby (déjà filtré par `findLobby`).
+  const { id: universeId } = await getCurrentUniverse();
+
   // Transaction : création de la partie + passage du lobby en PLAYING.
   await prisma.$transaction([
     prisma.guessWhoGame.create({
@@ -149,6 +153,7 @@ export async function startGuessWhoAction(codeRaw: string): Promise<MpResult> {
         secret1Id,
         secret2Id,
         currentTurn: player1Id, // l'hôte commence
+        universeId,
       },
     }),
     prisma.lobby.update({
@@ -278,10 +283,11 @@ export async function guessAction(
   if (count === 0) return { ok: true }; // spam / double-clic : partie déjà finie
 
   // Persistance des scores (une ligne par joueur) + XP (victoire > défaite).
+  const { id: universeId } = await getCurrentUniverse();
   await prisma.guessWhoScore.createMany({
     data: [
-      { userId: winnerId, won: true },
-      { userId: loserId, won: false },
+      { userId: winnerId, won: true, universeId },
+      { userId: loserId, won: false, universeId },
     ],
   });
   await Promise.all([

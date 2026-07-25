@@ -1,29 +1,39 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
+import { getCurrentUniverse } from "@/lib/universes/current";
 
 /**
  * Accès Prisma aux lobbys multijoueur. La logique de jeu (lockstep, tirages,
  * diffusion Pusher) vit dans `actions.ts` ; ce module ne fait que lire/écrire.
  */
 
-/** Inclut les joueurs (ordonnés) + leur username + avatar pour la sérialisation. */
-export const lobbyInclude = {
-  players: {
-    orderBy: { joinOrder: "asc" },
-    include: {
-      user: {
-        select: {
-          username: true,
-          avatarCharacter: { select: { image: true } },
+/**
+ * Inclut les joueurs (ordonnés) + leur username + avatar POUR L'UNIVERS COURANT
+ * (avatar par univers, UserUniverseProfile) pour la sérialisation. `universeId`
+ * filtre le bon profil.
+ */
+export function lobbyInclude(universeId: string) {
+  return {
+    players: {
+      orderBy: { joinOrder: "asc" },
+      include: {
+        user: {
+          select: {
+            username: true,
+            universeProfiles: {
+              where: { universeId },
+              select: { avatarCharacter: { select: { image: true } } },
+            },
+          },
         },
       },
     },
-  },
-} satisfies Prisma.LobbyInclude;
+  } satisfies Prisma.LobbyInclude;
+}
 
 export type LobbyWithPlayers = Prisma.LobbyGetPayload<{
-  include: typeof lobbyInclude;
+  include: ReturnType<typeof lobbyInclude>;
 }>;
 
 /** Caractères du code (sans 0/O/1/I pour éviter les confusions). */
@@ -38,11 +48,20 @@ function randomCode(): string {
   return code;
 }
 
-/** Lobby + joueurs par code (null si introuvable). */
-export function findLobby(code: string): Promise<LobbyWithPlayers | null> {
-  return prisma.lobby.findUnique({
-    where: { code: code.toUpperCase() },
-    include: lobbyInclude,
+/**
+ * Lobby + joueurs par code, DANS L'UNIVERS COURANT (null si introuvable).
+ *
+ * Le filtre `universeId` est la garde multi-univers centrale : c'est le point
+ * d'entrée unique de résolution par code pour TOUS les jeux à lobby (builder,
+ * battle, guesswho, codenames). Un code appartenant à un autre univers renvoie
+ * `null` — donc exactement le même comportement qu'un code inexistant, sans
+ * message distinctif (aucune fuite d'information entre univers).
+ */
+export async function findLobby(code: string): Promise<LobbyWithPlayers | null> {
+  const { id: universeId } = await getCurrentUniverse();
+  return prisma.lobby.findFirst({
+    where: { code: code.toUpperCase(), universeId },
+    include: lobbyInclude(universeId),
   });
 }
 
@@ -52,9 +71,12 @@ export async function createLobby(
   hostId: string,
   gameId = "builder",
 ): Promise<LobbyWithPlayers> {
+  const { id: universeId } = await getCurrentUniverse();
   // Quelques tentatives en cas de collision improbable du code.
   for (let attempt = 0; attempt < 5; attempt++) {
     const code = randomCode();
+    // Unicité du code vérifiée GLOBALEMENT (tous univers confondus) : `code` est
+    // @unique sans universeId, deux univers ne peuvent donc pas partager un code.
     const existing = await prisma.lobby.findUnique({ where: { code } });
     if (existing) continue;
     return prisma.lobby.create({
@@ -62,9 +84,10 @@ export async function createLobby(
         code,
         gameId,
         hostId,
+        universeId,
         players: { create: { userId: hostId, joinOrder: 0 } },
       },
-      include: lobbyInclude,
+      include: lobbyInclude(universeId),
     });
   }
   throw new Error("Impossible de générer un code de lobby unique, réessaie.");

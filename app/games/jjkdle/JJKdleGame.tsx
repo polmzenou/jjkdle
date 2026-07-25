@@ -11,6 +11,7 @@ import {
   VIP_MAX_REPLAYS,
   type GameMode,
   type GameStatus,
+  type AttributeColumn,
   type GuessRow as GuessRowData,
 } from "@/lib/games/jjkdle/types";
 import {
@@ -34,6 +35,8 @@ type Revealed = { id: string; name: string; title: string; image?: string } | nu
 
 interface JJKdleGameProps {
   roster: PublicCharacter[];
+  /** Colonnes d'attributs de l'univers courant (en-têtes + infobulles). */
+  columns: AttributeColumn[];
   eligibleCount: number;
   initialRows: GuessRowData[];
   initialStatus: GameStatus;
@@ -48,6 +51,7 @@ interface JJKdleGameProps {
 
 export function JJKdleGame({
   roster,
+  columns,
   eligibleCount,
   initialRows,
   initialStatus,
@@ -205,11 +209,12 @@ export function JJKdleGame({
           {/* Grille d'indices */}
           {rows.length > 0 && (
             <div className="mt-8 space-y-2 overflow-x-auto">
-              <GuessHeader />
+              <GuessHeader columns={columns} />
               {displayRows.map((row) => (
                 <GuessRow
                   key={row.characterId}
                   row={row}
+                  columns={columns}
                   animate={row.characterId === lastGuessId}
                 />
               ))}

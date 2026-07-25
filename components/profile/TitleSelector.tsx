@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { TITLES } from "@/lib/titles/definitions";
+import { titlesForUniverse } from "@/lib/titles/definitions";
 import { rarityStyle } from "@/lib/profile/rarity";
 import { equipTitleAction } from "@/app/account/actions";
 
@@ -11,15 +11,21 @@ interface TitleSelectorProps {
   unlockedKeys: string[];
   /** Clé du titre actuellement équipé (ou null). */
   equippedKey: string | null;
+  /** Slug de l'univers courant : seuls ses titres sont proposés. */
+  universeSlug: string;
 }
 
 /**
- * Sélecteur de TITRE (profil). Liste TOUS les titres du catalogue : débloqués
+ * Sélecteur de TITRE (profil). Liste les titres de l'UNIVERS COURANT : débloqués
  * équipables (clic = équipe et remplace le précédent), verrouillés grisés avec
  * la condition de déblocage affichée. Le déblocage est re-vérifié serveur à
  * l'équipement (`equipTitleAction`) — l'UI n'est qu'indicative.
  */
-export function TitleSelector({ unlockedKeys, equippedKey }: TitleSelectorProps) {
+export function TitleSelector({
+  unlockedKeys,
+  equippedKey,
+  universeSlug,
+}: TitleSelectorProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [equipped, setEquipped] = useState<string | null>(equippedKey);
@@ -66,7 +72,7 @@ export function TitleSelector({ unlockedKeys, equippedKey }: TitleSelectorProps)
       )}
 
       <div className="grid gap-2 sm:grid-cols-2">
-        {TITLES.map((t) => {
+        {titlesForUniverse(universeSlug).map((t) => {
           const isUnlocked = unlocked.has(t.key);
           const isEquipped = equipped === t.key;
           const { color, label } = rarityStyle(t.rarity);

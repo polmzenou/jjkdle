@@ -1,5 +1,6 @@
 import type { Character } from "@/data/roster/characters";
 import { getForcedTarget } from "@/lib/config/app-config";
+import type { AttributeSchema } from "./attribute-schema";
 import { eligibleRoster, pickDailyTarget, todayKey } from "./daily";
 
 /**
@@ -13,9 +14,10 @@ import { eligibleRoster, pickDailyTarget, todayKey } from "./daily";
  */
 export async function resolveDailyTarget(
   roster: Character[],
+  schema: AttributeSchema,
   dateKey: string = todayKey(),
 ): Promise<Character | null> {
-  const eligible = eligibleRoster(roster);
+  const eligible = eligibleRoster(roster, schema);
   const forcedId = await getForcedTarget();
   if (forcedId) {
     const forced = eligible.find((c) => c.id === forcedId);

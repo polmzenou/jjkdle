@@ -13,10 +13,21 @@
 
 import { PrismaClient } from "@prisma/client";
 import { CONDITIONS } from "../data/ranking/conditions";
+import { jjk } from "../lib/universes/jjk";
 
 const prisma = new PrismaClient();
 
 async function main() {
+  const universe = await prisma.universe.findUnique({
+    where: { slug: jjk.slug },
+    select: { id: true },
+  });
+  if (!universe) {
+    throw new Error(
+      `Univers "${jjk.slug}" absent — lancer d'abord scripts/backfill-universe.ts.`,
+    );
+  }
+
   for (const [position, cond] of CONDITIONS.entries()) {
     const data = {
       pool: cond.pool,
@@ -24,6 +35,8 @@ async function main() {
       prompt: cond.prompt,
       order: cond.order,
       position,
+      universeId: universe.id,
+      slug: cond.id,
     };
     await prisma.rankingCondition.upsert({
       where: { id: cond.id },
@@ -31,8 +44,9 @@ async function main() {
       update: data,
     });
   }
+  // Purge des obsolètes RÉSERVÉE à l'univers JJK (ne touche pas les autres univers).
   const removed = await prisma.rankingCondition.deleteMany({
-    where: { id: { notIn: CONDITIONS.map((c) => c.id) } },
+    where: { universeId: universe.id, id: { notIn: CONDITIONS.map((c) => c.id) } },
   });
   console.log(
     `✓ ${CONDITIONS.length} consignes Pyramid` +

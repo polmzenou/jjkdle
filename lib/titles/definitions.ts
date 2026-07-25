@@ -1,4 +1,10 @@
 import type { UnlockContext } from "@/lib/cosmetics/types";
+import {
+  inUniverse,
+  isInUniverse,
+  tagUniverse,
+  type UniverseScope,
+} from "@/lib/cosmetics/universe";
 import type { Rarity } from "@/lib/profile/rarity";
 import { MAX_LEVEL } from "@/lib/progress/xp";
 
@@ -23,11 +29,16 @@ export interface TitleDefinition {
   /** Comment le débloquer (visible dans le sélecteur de profil). */
   description: string;
   rarity: Rarity;
+  /** Univers propriétaire (multi-univers, étape 2d). Un titre ne s'équipe que
+   * dans son univers ; la possession reste globale. */
+  universe: UniverseScope;
   /** Règle de déblocage dérivée. `() => false` = titre manuel (admin). */
   isUnlocked: (ctx: UnlockContext) => boolean;
 }
 
-export const TITLES: TitleDefinition[] = [
+// Catalogue JJK (non taggé) → tagué `universe: "jjk"` à l'export. Un futur
+// univers ajoute son propre tableau tagué de son slug, concaténé ci-dessous.
+const JJK_TITLES: Omit<TitleDefinition, "universe">[] = [
   // ── Progression par niveau (titre de départ → légendaire au niveau max) ──
   {
     key: "NEW_SORCERER",
@@ -114,6 +125,18 @@ export const TITLES: TitleDefinition[] = [
   },
 ];
 
+/**
+ * Catalogue COMPLET (tous univers). Sert à la possession/au déblocage, qui sont
+ * globaux ; pour l'affichage et l'équipement, filtrer par univers courant via
+ * `titlesForUniverse`.
+ */
+export const TITLES: TitleDefinition[] = tagUniverse(JJK_TITLES, "jjk");
+
+/** Titres d'un univers (slug) — catalogue affiché par le sélecteur de profil. */
+export function titlesForUniverse(slug: string): TitleDefinition[] {
+  return inUniverse(TITLES, slug);
+}
+
 const BY_KEY = new Map(TITLES.map((t) => [t.key, t]));
 
 /** Récupère une définition de titre par sa clé (ou undefined). */
@@ -124,4 +147,14 @@ export function getTitle(key: string): TitleDefinition | undefined {
 /** Vrai si la clé correspond à un titre connu (garde anti-tamper). */
 export function isTitleKey(key: unknown): key is string {
   return typeof key === "string" && BY_KEY.has(key);
+}
+
+/**
+ * Garde d'équipement multi-univers : le titre doit exister ET appartenir à
+ * l'univers (ou être neutre). Orthogonal au DÉBLOCAGE (possession globale) : les
+ * deux sont vérifiés côté serveur à l'équipement.
+ */
+export function isTitleInUniverse(key: string, slug: string): boolean {
+  const def = BY_KEY.get(key);
+  return def !== undefined && isInUniverse(def.universe, slug);
 }

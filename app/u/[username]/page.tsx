@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUniverse } from "@/lib/universes/current";
 import { bannerStyle } from "@/lib/profile/banners";
 import { normalizeProfileLayout } from "@/lib/profile/layout";
 import { UserAvatar } from "@/components/UserAvatar";
@@ -18,8 +19,10 @@ import { getUserGuessWhoStats } from "@/lib/games/guesswho/stats";
 
 export const dynamic = "force-dynamic";
 
-/** Charge le profil public (données non sensibles) d'un utilisateur par pseudo. */
+/** Charge le profil public (données non sensibles) d'un utilisateur par pseudo.
+ * Le loadout et le streak sont ceux de l'UNIVERS COURANT (UserUniverseProfile). */
 async function getPublicProfile(username: string) {
+  const { id: universeId } = await getCurrentUniverse();
   return prisma.user.findUnique({
     where: { username },
     select: {
@@ -28,13 +31,18 @@ async function getPublicProfile(username: string) {
       role: true,
       level: true,
       totalXp: true,
-      bannerKey: true,
-      jjkdleStreak: true,
-      equippedTitleKey: true,
-      equippedFrameKey: true,
-      profileLayout: true,
-      avatarCharacter: { select: { name: true, image: true } },
       badges: { select: { badgeKey: true } },
+      universeProfiles: {
+        where: { universeId },
+        select: {
+          bannerKey: true,
+          jjkdleStreak: true,
+          equippedTitleKey: true,
+          equippedFrameKey: true,
+          profileLayout: true,
+          avatarCharacter: { select: { name: true, image: true } },
+        },
+      },
     },
   });
 }
@@ -69,11 +77,17 @@ export default async function PublicProfilePage({
   params: Promise<{ username: string }>;
 }) {
   const { username } = await params;
-  const profile = await getPublicProfile(username);
+  const [profile, { slug: universeSlug }] = await Promise.all([
+    getPublicProfile(username),
+    getCurrentUniverse(),
+  ]);
   if (!profile) notFound();
 
-  const banner = bannerStyle(profile.bannerKey);
-  const layout = normalizeProfileLayout(profile.profileLayout);
+  // Loadout + streak de l'univers courant (0 ou 1 ligne).
+  const prof = profile.universeProfiles[0];
+  const banner = bannerStyle(prof?.bannerKey);
+  const layout = normalizeProfileLayout(prof?.profileLayout ?? null);
+  const jjkdleStreak = prof?.jjkdleStreak ?? 0;
 
   // Scores agrégés (un seul fetch ; non rendus si la section est masquée).
   const showScores = layout.sections.some((s) => s.key === "scores" && s.visible);
@@ -103,7 +117,10 @@ export default async function PublicProfilePage({
           <h2 className="mb-4 font-display text-lg font-bold uppercase tracking-wider text-white/80">
             🎖️ Badges
           </h2>
-          <BadgeShelf unlockedKeys={profile.badges.map((b) => b.badgeKey)} />
+          <BadgeShelf
+            unlockedKeys={profile.badges.map((b) => b.badgeKey)}
+            universeSlug={universeSlug}
+          />
         </section>
       );
     }
@@ -170,9 +187,9 @@ export default async function PublicProfilePage({
         <div className="flex flex-wrap items-center gap-4">
           <UserAvatar
             username={profile.username}
-            image={profile.avatarCharacter?.image}
+            image={prof?.avatarCharacter?.image}
             level={profile.level}
-            frameKey={layout.showFrame ? profile.equippedFrameKey : null}
+            frameKey={layout.showFrame ? (prof?.equippedFrameKey ?? null) : null}
             size={72}
           />
           <div className="min-w-0">
@@ -180,12 +197,12 @@ export default async function PublicProfilePage({
               {profile.username}
               {profile.role === "VIP" && <VipBadge className="ml-2 text-sm" />}
             </h1>
-            {layout.showTitle && profile.equippedTitleKey && (
-              <TitleBadge titleKey={profile.equippedTitleKey} className="mt-1.5 text-sm" />
+            {layout.showTitle && prof?.equippedTitleKey && (
+              <TitleBadge titleKey={prof.equippedTitleKey} className="mt-1.5 text-sm" />
             )}
-            {profile.jjkdleStreak > 0 && (
+            {jjkdleStreak > 0 && (
               <p className="mt-1 text-sm font-bold text-white/85">
-                🔥 {profile.jjkdleStreak} jour{profile.jjkdleStreak > 1 ? "s" : ""} de streak JJKdle
+                🔥 {jjkdleStreak} jour{jjkdleStreak > 1 ? "s" : ""} de streak JJKdle
               </p>
             )}
           </div>

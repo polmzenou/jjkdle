@@ -1,5 +1,5 @@
 import type { Character } from "@/data/roster/characters";
-import { isComplete } from "./attributes";
+import { isCompleteFor, type AttributeSchema } from "./attribute-schema";
 
 /**
  * Sélection déterministe du personnage mystère du jour (module PUR, testable).
@@ -13,9 +13,20 @@ import { isComplete } from "./attributes";
 
 const TIMEZONE = "Europe/Paris";
 
-/** Pool éligible : persos complets, triés par id (ordre stable indépendant du tri d'affichage). */
-export function eligibleRoster(roster: Character[]): Character[] {
-  return roster.filter(isComplete).sort((a, b) => a.id.localeCompare(b.id));
+/**
+ * Pool éligible : persos dont TOUS les attributs de l'univers sont renseignés,
+ * triés par id (ordre stable indépendant du tri d'affichage).
+ *
+ * ⚠️ Le tri par `id` conditionne la cible du jour (`pickDailyTarget` indexe dans
+ * ce tableau) : ne jamais le changer sans casser la continuité du daily.
+ */
+export function eligibleRoster(
+  roster: Character[],
+  schema: AttributeSchema,
+): Character[] {
+  return roster
+    .filter((c) => isCompleteFor(schema, c))
+    .sort((a, b) => a.id.localeCompare(b.id));
 }
 
 /** Clé du jour "YYYY-MM-DD" dans le fuseau de référence (jour partagé par tous). */

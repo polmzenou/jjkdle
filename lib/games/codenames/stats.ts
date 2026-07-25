@@ -1,5 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUniverse } from "@/lib/universes/current";
 
 /** Bilan « JJK Codenames » d'un joueur (ratio victoires/défaites). */
 export interface CodenamesStats {
@@ -12,9 +13,10 @@ export interface CodenamesStats {
 export async function getUserCodenamesStats(
   userId: string,
 ): Promise<CodenamesStats | null> {
+  const { id: universeId } = await getCurrentUniverse();
   const rows = await prisma.codenamesScore.groupBy({
     by: ["won"],
-    where: { userId },
+    where: { userId, universeId },
     _count: { _all: true },
   });
   if (rows.length === 0) return null;

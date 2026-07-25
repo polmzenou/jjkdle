@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import type { Character } from "@/data/roster/characters";
+import type { AttributeSpec } from "@/lib/games/jjkdle/attribute-schema";
 import type { SerializedLobby } from "@/lib/multiplayer/events";
 import { buildRosterMap } from "@/lib/multiplayer/state";
 import { createPusherClient } from "@/lib/pusher/client";
@@ -51,6 +52,8 @@ interface GuessWhoLobbyProps {
   initialPublicState: GuessWhoPublicState | null;
   initialMySecretId: string | null;
   roster: Character[];
+  /** Attributs de l'univers courant (fiche d'aide sous la carte secrète). */
+  attributeColumns: AttributeSpec[];
   currentUserId: string;
   pusherReady: boolean;
 }
@@ -60,6 +63,7 @@ export function GuessWhoLobby({
   initialPublicState,
   initialMySecretId,
   roster,
+  attributeColumns,
   currentUserId,
   pusherReady,
 }: GuessWhoLobbyProps) {
@@ -474,6 +478,7 @@ export function GuessWhoLobby({
             />
             <GuessWhoCharacterInfo
               character={hoveredId ? (rosterMap[hoveredId] ?? null) : null}
+              attributeColumns={attributeColumns}
             />
           </div>
           {publicState && (

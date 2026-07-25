@@ -10,6 +10,7 @@ import { SiteJsonLd } from "@/components/seo/JsonLd";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getCachedImageCount } from "@/lib/admin/image-cache";
 import { getMaintenance } from "@/lib/config/app-config";
+import { getCurrentUniverse } from "@/lib/universes/current";
 import { prisma } from "@/lib/prisma";
 import {
   SITE_URL,
@@ -83,18 +84,25 @@ export default async function RootLayout({
   ]);
   const isAdmin = user?.role === "ADMIN";
   const maintenanceActive = maintenance.enabled && !isAdmin;
-  // Profil (avatar + niveau) pour la barre de nav.
+  // Profil (avatar + niveau) pour la barre de nav. Niveau = global (User) ;
+  // loadout équipé (avatar/titre/cadre) = univers courant (UserUniverseProfile).
   const profile = user
     ? await prisma.user.findUnique({
         where: { id: user.id },
         select: {
           level: true,
-          equippedTitleKey: true,
-          equippedFrameKey: true,
-          avatarCharacter: { select: { image: true } },
+          universeProfiles: {
+            where: { universeId: (await getCurrentUniverse()).id },
+            select: {
+              equippedTitleKey: true,
+              equippedFrameKey: true,
+              avatarCharacter: { select: { image: true } },
+            },
+          },
         },
       })
     : null;
+  const navProfile = profile?.universeProfiles[0];
   const navUser = user
     ? {
         username: user.username,
@@ -102,10 +110,10 @@ export default async function RootLayout({
         isVip: user.role === "VIP",
         // ADMIN et VIP peuvent lancer/vider la synchro d'images.
         canSyncImages: user.role === "ADMIN" || user.role === "VIP",
-        avatarImage: profile?.avatarCharacter?.image ?? null,
+        avatarImage: navProfile?.avatarCharacter?.image ?? null,
         level: profile?.level ?? 1,
-        titleKey: profile?.equippedTitleKey ?? null,
-        frameKey: profile?.equippedFrameKey ?? null,
+        titleKey: navProfile?.equippedTitleKey ?? null,
+        frameKey: navProfile?.equippedFrameKey ?? null,
       }
     : null;
   // Compteur du cache d'images (pour afficher « Vider le cache »).

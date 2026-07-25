@@ -4,12 +4,13 @@ import { isGameEnabled } from "@/lib/config/app-config";
 import { getRoster } from "@/lib/content/queries";
 import { eligibleRoster, msUntilMidnight } from "@/lib/games/jjkdle/daily";
 import { resolveDailyTarget } from "@/lib/games/jjkdle/daily-server";
+import { loadAttributeSchema } from "@/lib/games/jjkdle/attributes-db";
 import { buildRows, isStateFresh } from "@/lib/games/jjkdle/game";
 import { readState } from "@/lib/games/jjkdle/state";
 import type { GameMode, GameStatus, GuessRow } from "@/lib/games/jjkdle/types";
 import { JjkdleLeaderboard } from "@/components/leaderboard/JjkdleLeaderboard";
 import { parseScope } from "@/lib/leaderboard/store";
-import { prisma } from "@/lib/prisma";
+import { getUniverseLoadout } from "@/lib/universes/profile";
 import { JJKdleGame, type PublicCharacter } from "./JJKdleGame";
 import { GameJsonLd } from "@/components/seo/JsonLd";
 import { gameMetadata } from "@/lib/seo/config";
@@ -33,24 +34,18 @@ export default async function JjkdlePage({
   searchParams: Promise<{ scope?: string }>;
 }) {
   if (!(await isGameEnabled("jjkdle"))) redirect("/games");
-  const [{ scope }, roster, user] = await Promise.all([
+  const [{ scope }, roster, user, schema] = await Promise.all([
     searchParams,
     getRoster(),
     getCurrentUser(),
+    loadAttributeSchema(),
   ]);
 
-  const eligibleCount = eligibleRoster(roster).length;
+  const eligibleCount = eligibleRoster(roster, schema).length;
   const isAdmin = user?.role === "ADMIN";
   const isVip = user?.role === "VIP";
-  // Streak courant pour l'en-tête (affiché si > 0).
-  const streak = user
-    ? (
-        await prisma.user.findUnique({
-          where: { id: user.id },
-          select: { jjkdleStreak: true },
-        })
-      )?.jjkdleStreak ?? 0
-    : 0;
+  // Streak courant (univers courant) pour l'en-tête (affiché si > 0).
+  const streak = user ? (await getUniverseLoadout(user.id)).jjkdleStreak : 0;
 
   // Réhydratation de l'état (si toujours valide).
   const map = Object.fromEntries(roster.map((c) => [c.id, c]));
@@ -60,12 +55,12 @@ export default async function JjkdlePage({
   let revealed: JJKdleRevealed = null;
   let vipReplaysUsed = 0;
 
-  const dailyTarget = await resolveDailyTarget(roster);
+  const dailyTarget = await resolveDailyTarget(roster, schema);
   const state = await readState();
-  if (state && isStateFresh(state, roster, dailyTarget?.id)) {
+  if (state && isStateFresh(state, roster, schema, dailyTarget?.id)) {
     mode = state.mode;
     status = state.status;
-    rows = buildRows(state, map);
+    rows = buildRows(state, map, schema);
     if (state.mode === "vip") vipReplaysUsed = state.replays ?? 0;
     if (status === "won") {
       const t = map[state.targetId];
@@ -88,6 +83,13 @@ export default async function JjkdlePage({
     ...(c.image ? { image: c.image } : {}),
   }));
 
+  // Colonnes de la grille : uniquement clé + libellé (les valeurs et les indices
+  // restent calculés serveur, cf. `compareGuess`).
+  const columns = schema.columns.map((col) => ({
+    key: col.key,
+    label: col.label,
+  }));
+
   return (
     <main className="mx-auto max-w-5xl px-4 pb-16 sm:px-6">
       <GameJsonLd id="jjkdle" />
@@ -98,6 +100,7 @@ export default async function JjkdlePage({
       )}
       <JJKdleGame
         roster={publicRoster}
+        columns={columns}
         eligibleCount={eligibleCount}
         initialRows={rows}
         initialStatus={status}

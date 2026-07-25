@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { isPusherConfigured } from "@/lib/pusher/server";
 import { loadGuessWhoView } from "@/lib/games/guesswho/load";
 import { GuessWhoLobby } from "@/components/guesswho/GuessWhoLobby";
+import { loadAttributeSchema } from "@/lib/games/jjkdle/attributes-db";
 
 interface PageProps {
   params: Promise<{ code: string }>;
@@ -11,7 +12,10 @@ interface PageProps {
 
 export default async function GuessWhoLobbyPage({ params }: PageProps) {
   const { code } = await params;
-  const view = await loadGuessWhoView(code.toUpperCase());
+  const [view, attributeSchema] = await Promise.all([
+    loadGuessWhoView(code.toUpperCase()),
+    loadAttributeSchema(),
+  ]);
   if (!view) notFound();
 
   const user = await getCurrentUser();
@@ -35,6 +39,7 @@ export default async function GuessWhoLobbyPage({ params }: PageProps) {
       initialPublicState={view.publicState}
       initialMySecretId={view.mySecretId}
       roster={view.roster}
+      attributeColumns={attributeSchema.columns}
       currentUserId={user.id}
       pusherReady={isPusherConfigured()}
     />

@@ -6,9 +6,9 @@ import { CharacterImage } from "@/components/CharacterImage";
 import { UserAvatar } from "@/components/UserAvatar";
 import {
   BANNER_PALETTE,
+  bannerKeysForUniverse,
   bannerStyle,
   isBannerUnlocked,
-  type BannerKey,
 } from "@/lib/profile/banners";
 
 /** Forme minimale d'un personnage pour le sélecteur d'avatar. */
@@ -27,9 +27,9 @@ interface ProfileEditorProps {
   level: number;
   /** Admin : toutes les bannières débloquées (bypass du niveau requis). */
   isAdmin: boolean;
+  /** Slug de l'univers courant : seules ses bannières (+ la neutre) sont proposées. */
+  universeSlug: string;
 }
-
-const BANNER_KEYS = Object.keys(BANNER_PALETTE) as BannerKey[];
 
 /**
  * Éditeur de profil : bannière (palette fermée) + avatar (personnage du roster).
@@ -43,9 +43,15 @@ export function ProfileEditor({
   initialAvatarId,
   level,
   isAdmin,
+  universeSlug,
 }: ProfileEditorProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  // Bannières proposées : celles de l'univers courant (+ la neutre `default`).
+  const bannerKeys = useMemo(
+    () => bannerKeysForUniverse(universeSlug),
+    [universeSlug],
+  );
   const [bannerKey, setBannerKey] = useState<string>(initialBannerKey);
   const [avatarId, setAvatarId] = useState<string | null>(initialAvatarId);
   const [query, setQuery] = useState("");
@@ -116,7 +122,7 @@ export function ProfileEditor({
       <div className="mt-5">
         <p className="mb-2 text-xs uppercase tracking-wider text-white/45">Bannière</p>
         <div className="flex flex-wrap gap-2">
-          {BANNER_KEYS.map((key) => {
+          {bannerKeys.map((key) => {
             const banner = BANNER_PALETTE[key];
             const selected = key === bannerKey;
             const unlocked = isBannerUnlocked(key, level, isAdmin);

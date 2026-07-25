@@ -9,6 +9,7 @@ import {
   todayKey,
 } from "@/lib/games/jjkdle/daily";
 import { resolveDailyTarget } from "@/lib/games/jjkdle/daily-server";
+import { loadAttributeSchema } from "@/lib/games/jjkdle/attributes-db";
 import { compareGuess } from "@/lib/games/jjkdle/scoring";
 import { isStateFresh } from "@/lib/games/jjkdle/game";
 import { saveJjkdleScore } from "@/lib/games/jjkdle/leaderboard";
@@ -35,7 +36,11 @@ import { VIP_MAX_REPLAYS, type GuessResult } from "@/lib/games/jjkdle/types";
 
 /** Propose un personnage et renvoie les indices colorés. */
 export async function guessAction(characterId: string): Promise<GuessResult> {
-  const [roster, user] = await Promise.all([getRoster(), getCurrentUser()]);
+  const [roster, user, schema] = await Promise.all([
+    getRoster(),
+    getCurrentUser(),
+    loadAttributeSchema(),
+  ]);
   const map = Object.fromEntries(roster.map((c) => [c.id, c]));
 
   const guess = map[characterId];
@@ -43,11 +48,11 @@ export async function guessAction(characterId: string): Promise<GuessResult> {
 
   // Cible du jour résolue (avec override admin éventuel) : sert à valider la
   // fraîcheur de l'état ET à créer une nouvelle partie daily.
-  const dailyTarget = await resolveDailyTarget(roster);
+  const dailyTarget = await resolveDailyTarget(roster, schema);
 
   // Résolution de l'état : on repart à zéro si la partie daily a expiré.
   let state = await readState();
-  if (state && !isStateFresh(state, roster, dailyTarget?.id)) state = null;
+  if (state && !isStateFresh(state, roster, schema, dailyTarget?.id)) state = null;
 
   if (!state) {
     if (!dailyTarget) {
@@ -78,7 +83,7 @@ export async function guessAction(characterId: string): Promise<GuessResult> {
     return { ok: false, error: "Partie invalide, recharge la page." };
   }
 
-  const row = compareGuess(guess, target);
+  const row = compareGuess(guess, target, schema);
   state.guesses.push(characterId);
   if (characterId === state.targetId) state.status = "won";
 
@@ -133,8 +138,8 @@ export async function newAdminGameAction(): Promise<{ ok: boolean; error?: strin
   if (!(await getAdminUser())) {
     return { ok: false, error: "Accès réservé aux administrateurs." };
   }
-  const roster = await getRoster();
-  const target = pickRandomTarget(eligibleRoster(roster));
+  const [roster, schema] = await Promise.all([getRoster(), loadAttributeSchema()]);
+  const target = pickRandomTarget(eligibleRoster(roster, schema));
   if (!target) {
     return { ok: false, error: "Pas assez de personnages configurés." };
   }
@@ -168,9 +173,9 @@ export async function awardJjkdleExpAction(): Promise<ExpResult & { streak?: num
     return { ok: false };
   }
 
-  const roster = await getRoster();
-  const dailyTarget = await resolveDailyTarget(roster);
-  if (!isStateFresh(state, roster, dailyTarget?.id)) return { ok: false };
+  const [roster, schema] = await Promise.all([getRoster(), loadAttributeSchema()]);
+  const dailyTarget = await resolveDailyTarget(roster, schema);
+  if (!isStateFresh(state, roster, schema, dailyTarget?.id)) return { ok: false };
 
   // Streak AVANT l'octroi : il sert au multiplicateur ×(streak+1) et au badge
   // JJKDLE_STREAK_7. `firstToday: false` (déjà compté aujourd'hui) ⇒ 0 XP.
@@ -209,9 +214,9 @@ export async function submitJjkdleScoreAction(): Promise<{
     return { ok: false, error: "Aucune victoire quotidienne à enregistrer." };
   }
 
-  const roster = await getRoster();
-  const dailyTarget = await resolveDailyTarget(roster);
-  if (!isStateFresh(state, roster, dailyTarget?.id)) {
+  const [roster, schema] = await Promise.all([getRoster(), loadAttributeSchema()]);
+  const dailyTarget = await resolveDailyTarget(roster, schema);
+  if (!isStateFresh(state, roster, schema, dailyTarget?.id)) {
     return { ok: false, error: "Partie expirée, recharge la page." };
   }
 
@@ -254,8 +259,8 @@ export async function newVipGameAction(): Promise<{
     return { ok: false, error: "Réservé aux membres VIP." };
   }
 
-  const roster = await getRoster();
-  const target = pickRandomTarget(eligibleRoster(roster));
+  const [roster, schema] = await Promise.all([getRoster(), loadAttributeSchema()]);
+  const target = pickRandomTarget(eligibleRoster(roster, schema));
   if (!target) {
     return { ok: false, error: "Pas assez de personnages configurés." };
   }

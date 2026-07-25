@@ -2,7 +2,10 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { FRAMES, DEFAULT_FRAME_KEY } from "@/lib/frames/definitions";
+import {
+  framesForUniverse,
+  DEFAULT_FRAME_KEY,
+} from "@/lib/frames/definitions";
 import { rarityStyle } from "@/lib/profile/rarity";
 import { UserAvatar } from "@/components/UserAvatar";
 import { equipFrameAction } from "@/app/account/actions";
@@ -14,6 +17,8 @@ interface FrameSelectorProps {
   unlockedKeys: string[];
   /** Clé du cadre actuellement équipé (ou null = cadre par défaut). */
   equippedKey: string | null;
+  /** Slug de l'univers courant : seuls ses cadres (+ le neutre) sont proposés. */
+  universeSlug: string;
 }
 
 /**
@@ -26,6 +31,7 @@ export function FrameSelector({
   avatarImage,
   unlockedKeys,
   equippedKey,
+  universeSlug,
 }: FrameSelectorProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -63,7 +69,7 @@ export function FrameSelector({
       )}
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        {FRAMES.map((f) => {
+        {framesForUniverse(universeSlug).map((f) => {
           const isUnlocked = unlocked.has(f.key);
           const isEquipped =
             (equipped ?? DEFAULT_FRAME_KEY) === f.key;

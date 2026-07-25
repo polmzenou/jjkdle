@@ -1,10 +1,12 @@
 import { prisma } from "@/lib/prisma";
+import { getCurrentUniverse } from "@/lib/universes/current";
 import { todayKey } from "@/lib/games/jjkdle/daily";
 
 /**
- * Streak quotidien JJKdle. Le "jour" est défini dans le fuseau de référence
- * Europe/Paris via `todayKey()` (même définition que le perso du jour), ce qui
- * garantit que streak et daily partagent la même frontière de minuit.
+ * Streak quotidien JJKdle, PAR UNIVERS (étape 2c : stocké sur
+ * `UserUniverseProfile`, plus sur `User`). Le "jour" est défini dans le fuseau
+ * de référence Europe/Paris via `todayKey()` (même définition que le perso du
+ * jour), ce qui garantit que streak et daily partagent la même frontière de minuit.
  */
 
 const DAY_MS = 86_400_000;
@@ -22,34 +24,46 @@ export async function updateJjkdleStreak(
 ): Promise<{ streak: number; best: number; firstToday: boolean }> {
   const today = todayKey();
   const yesterday = todayKey(new Date(Date.now() - DAY_MS));
+  const { id: universeId } = await getCurrentUniverse();
 
   return prisma.$transaction(async (tx) => {
-    const user = await tx.user.findUnique({
-      where: { id: userId },
+    const profile = await tx.userUniverseProfile.findUnique({
+      where: { userId_universeId: { userId, universeId } },
       select: {
         jjkdleStreak: true,
         jjkdleBestStreak: true,
         jjkdleLastPlayedAt: true,
       },
     });
-    if (!user) return { streak: 0, best: 0, firstToday: false };
+    const cur = profile ?? {
+      jjkdleStreak: 0,
+      jjkdleBestStreak: 0,
+      jjkdleLastPlayedAt: null as string | null,
+    };
 
     // Déjà compté aujourd'hui → no-op. `firstToday: false` sert de garde à
     // l'octroi d'EXP (une re-soumission du même daily ne doit rien rapporter).
-    if (user.jjkdleLastPlayedAt === today) {
+    if (cur.jjkdleLastPlayedAt === today) {
       return {
-        streak: user.jjkdleStreak,
-        best: user.jjkdleBestStreak,
+        streak: cur.jjkdleStreak,
+        best: cur.jjkdleBestStreak,
         firstToday: false,
       };
     }
 
-    const streak = user.jjkdleLastPlayedAt === yesterday ? user.jjkdleStreak + 1 : 1;
-    const best = Math.max(user.jjkdleBestStreak, streak);
+    const streak = cur.jjkdleLastPlayedAt === yesterday ? cur.jjkdleStreak + 1 : 1;
+    const best = Math.max(cur.jjkdleBestStreak, streak);
 
-    await tx.user.update({
-      where: { id: userId },
-      data: {
+    await tx.userUniverseProfile.upsert({
+      where: { userId_universeId: { userId, universeId } },
+      create: {
+        userId,
+        universeId,
+        jjkdleStreak: streak,
+        jjkdleBestStreak: best,
+        jjkdleLastPlayedAt: today,
+      },
+      update: {
         jjkdleStreak: streak,
         jjkdleBestStreak: best,
         jjkdleLastPlayedAt: today,

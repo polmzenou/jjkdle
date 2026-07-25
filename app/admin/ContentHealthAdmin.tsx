@@ -3,16 +3,17 @@
 import { useMemo, useState } from "react";
 import type { Character } from "@/data/roster/characters";
 import {
-  isComplete,
-  ATTRIBUTE_COLUMNS,
-  ATTRIBUTE_LABELS,
-} from "@/lib/games/jjkdle/attributes";
+  buildAttributeSchema,
+  isCompleteFor,
+  missingAttributeLabels,
+  type AttributeSpec,
+} from "@/lib/games/jjkdle/attribute-schema";
 
 /**
  * Onglet « Santé du contenu » : checklist de complétion du roster. Regroupe ce
  * que signale déjà le badge « JJKdle incomplet » de l'onglet Roster, avec des
- * filtres rapides et un compteur par catégorie. Réutilise `isComplete` (pas de
- * duplication de logique).
+ * filtres rapides et un compteur par catégorie. Réutilise `isCompleteFor` (pas
+ * de duplication de logique) sur les attributs de l'univers courant.
  */
 
 type Filter = "all" | "incomplete" | "no-image" | "no-battle";
@@ -25,33 +26,35 @@ interface Row {
   missingAttrs: string[];
 }
 
-function missingAttributes(c: Character): string[] {
-  return ATTRIBUTE_COLUMNS.filter((k) => c[k] == null).map(
-    (k) => ATTRIBUTE_LABELS[k],
-  );
-}
-
 export function ContentHealthAdmin({
   roster,
+  attributeColumns,
   onEdit,
 }: {
   roster: Character[];
+  /** Attributs de l'univers courant (définissent ce qu'est un perso « complet »). */
+  attributeColumns: AttributeSpec[];
   /** Ouvre le perso dans l'onglet Roster pour édition. */
   onEdit: (c: Character) => void;
 }) {
   const [filter, setFilter] = useState<Filter>("incomplete");
   const [query, setQuery] = useState("");
 
+  const schema = useMemo(
+    () => buildAttributeSchema(attributeColumns),
+    [attributeColumns],
+  );
+
   const rows = useMemo<Row[]>(
     () =>
       roster.map((c) => ({
         character: c,
-        incomplete: !isComplete(c),
+        incomplete: !isCompleteFor(schema, c),
         noImage: !c.image,
         noBattle: c.battleValue == null,
-        missingAttrs: missingAttributes(c),
+        missingAttrs: missingAttributeLabels(schema, c),
       })),
-    [roster],
+    [roster, schema],
   );
 
   const counts = useMemo(

@@ -1,6 +1,19 @@
 import { describe, it, expect } from "vitest";
 import type { Character } from "@/data/roster/characters";
 import { eligibleRoster, pickDailyTarget, todayKey } from "./daily";
+import { JJK_SCHEMA } from "./__fixtures__/jjk-schema";
+
+/** Attributs complets (les 8 du schéma JJK renseignés) → perso éligible. */
+const COMPLETE_ATTRS: Record<string, string | number> = {
+  race: "HUMAN",
+  gender: "MALE",
+  grade: "GRADE_3",
+  affiliation: "TOKYO_SCHOOL",
+  clan: "NONE",
+  appearanceArc: "FEARSOME_WOMB",
+  hasDomain: "false",
+  cursedEnergy: 50,
+};
 
 /** Fabrique un perso complet (éligible) avec un id donné. */
 function complete(id: string): Character {
@@ -10,14 +23,7 @@ function complete(id: string): Character {
     title: "",
     tier: "3",
     ratings: {},
-    race: "HUMAN",
-    gender: "MALE",
-    grade: "GRADE_3",
-    affiliation: "TOKYO_SCHOOL",
-    clan: "NONE",
-    appearanceArc: "FEARSOME_WOMB",
-    hasDomain: false,
-    cursedEnergy: 50,
+    attributes: { ...COMPLETE_ATTRS },
   };
 }
 
@@ -25,9 +31,16 @@ const pool = ["a", "b", "c", "d", "e", "f", "g", "h"].map(complete);
 
 describe("eligibleRoster", () => {
   it("exclut les persos incomplets et trie par id", () => {
-    const incomplete: Character = { ...complete("z"), race: undefined };
+    // Un seul attribut manquant suffit à exclure du pool quotidien.
+    const missingRace = { ...COMPLETE_ATTRS };
+    delete missingRace.race;
+    const incomplete: Character = { ...complete("z"), attributes: missingRace };
     const roster = [complete("c"), incomplete, complete("a"), complete("b")];
-    expect(eligibleRoster(roster).map((c) => c.id)).toEqual(["a", "b", "c"]);
+    expect(eligibleRoster(roster, JJK_SCHEMA).map((c) => c.id)).toEqual([
+      "a",
+      "b",
+      "c",
+    ]);
   });
 });
 

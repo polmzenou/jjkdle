@@ -11,16 +11,29 @@
 
 import { PrismaClient } from "@prisma/client";
 import { CONDITIONS } from "../data/ranking/conditions";
+import { jjk } from "../lib/universes/jjk";
 
 const prisma = new PrismaClient();
 
 async function main() {
+  const universe = await prisma.universe.findUnique({
+    where: { slug: jjk.slug },
+    select: { id: true },
+  });
+  if (!universe) {
+    throw new Error(
+      `Univers "${jjk.slug}" absent — lancer d'abord scripts/backfill-universe.ts.`,
+    );
+  }
+
   for (const [position, cond] of CONDITIONS.entries()) {
     const data = {
       category: cond.category,
       prompt: cond.prompt,
       order: cond.order,
       position,
+      universeId: universe.id,
+      slug: cond.id,
     };
     await prisma.rankingCondition.upsert({
       where: { id: cond.id },

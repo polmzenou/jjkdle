@@ -1,5 +1,6 @@
-import type { Role } from "@prisma/client";
+import { Prisma, type Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUniverse } from "@/lib/universes/current";
 import { getWeekBounds } from "@/lib/date";
 
 /**
@@ -34,15 +35,59 @@ export interface LeaderboardEntry {
   frameKey: string | null;
 }
 
-/** Sélection Prisma commune pour décorer une ligne (avatar + niveau + rôle + cosmétiques). */
-export const USER_DECOR_SELECT = {
-  username: true,
-  role: true,
-  level: true,
-  avatarCharacter: { select: { image: true } },
-  equippedTitleKey: true,
-  equippedFrameKey: true,
-} as const;
+/**
+ * Sélection Prisma pour décorer une ligne de leaderboard : pseudo/rôle/niveau
+ * GLOBAUX (User) + loadout PAR UNIVERS (avatar/titre/cadre équipés dans
+ * l'univers `universeId`). Le profil est filtré sur le bon univers via la
+ * relation `universeProfiles`.
+ */
+export function userDecorSelect(universeId: string) {
+  return {
+    username: true,
+    role: true,
+    level: true,
+    universeProfiles: {
+      where: { universeId },
+      select: {
+        equippedTitleKey: true,
+        equippedFrameKey: true,
+        avatarCharacter: { select: { image: true } },
+      },
+    },
+  } satisfies Prisma.UserSelect;
+}
+
+/** Décor résolu (avatar/titre/cadre de l'univers courant + niveau/rôle). */
+export interface UserDecor {
+  pseudo: string;
+  role: Role;
+  level: number;
+  avatarImage: string | null;
+  titleKey: string | null;
+  frameKey: string | null;
+}
+
+/** Extrait le décor d'un `user` chargé via `userDecorSelect` (profil = 0 ou 1 ligne). */
+export function userDecor(user: {
+  username: string;
+  role: Role;
+  level: number;
+  universeProfiles: {
+    equippedTitleKey: string | null;
+    equippedFrameKey: string | null;
+    avatarCharacter: { image: string | null } | null;
+  }[];
+}): UserDecor {
+  const p = user.universeProfiles[0];
+  return {
+    pseudo: user.username,
+    role: user.role,
+    level: user.level,
+    avatarImage: p?.avatarCharacter?.image ?? null,
+    titleKey: p?.equippedTitleKey ?? null,
+    frameKey: p?.equippedFrameKey ?? null,
+  };
+}
 
 /** Filtre `where` de portée (vide pour all-time, borne lundi pour weekly). */
 export function scopeWhere(scope: LeaderboardScope) {
@@ -72,8 +117,9 @@ export async function saveScore(
   game: LeaderboardGame,
   score: number,
 ): Promise<{ best: number; isNewRecord: boolean }> {
+  const { id: universeId } = await getCurrentUniverse();
   const existing = await prisma.score.findUnique({
-    where: { userId_gameId: { userId, gameId: game } },
+    where: { userId_universeId_gameId: { userId, universeId, gameId: game } },
   });
 
   if (existing && existing.best >= score) {
@@ -81,8 +127,8 @@ export async function saveScore(
   }
 
   await prisma.score.upsert({
-    where: { userId_gameId: { userId, gameId: game } },
-    create: { userId, gameId: game, best: score },
+    where: { userId_universeId_gameId: { userId, universeId, gameId: game } },
+    create: { userId, universeId, gameId: game, best: score },
     update: { best: score },
   });
 
@@ -98,8 +144,9 @@ export async function getBestScore(
   userId: string,
   game: LeaderboardGame,
 ): Promise<number> {
+  const { id: universeId } = await getCurrentUniverse();
   const s = await prisma.score.findUnique({
-    where: { userId_gameId: { userId, gameId: game } },
+    where: { userId_universeId_gameId: { userId, universeId, gameId: game } },
     select: { best: true },
   });
   return s?.best ?? 0;
@@ -113,23 +160,15 @@ export async function topEntries(
   game?: LeaderboardGame,
   scope: LeaderboardScope = "all-time",
 ): Promise<LeaderboardEntry[]> {
+  const { id: universeId } = await getCurrentUniverse();
   const rows = await prisma.score.findMany({
-    where: { ...(game ? { gameId: game } : {}), ...scopeWhere(scope) },
+    where: { universeId, ...(game ? { gameId: game } : {}), ...scopeWhere(scope) },
     orderBy: [{ best: "desc" }, { updatedAt: "asc" }],
     take: limit,
-    include: { user: { select: USER_DECOR_SELECT } },
+    include: { user: { select: userDecorSelect(universeId) } },
   });
 
-  return rows.map((r) => ({
-    id: r.id,
-    pseudo: r.user.username,
-    score: r.best,
-    role: r.user.role,
-    avatarImage: r.user.avatarCharacter?.image ?? null,
-    level: r.user.level,
-    titleKey: r.user.equippedTitleKey,
-    frameKey: r.user.equippedFrameKey,
-  }));
+  return rows.map((r) => ({ id: r.id, score: r.best, ...userDecor(r.user) }));
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -149,8 +188,9 @@ export interface UserScore {
 
 /** Meilleurs scores d'un utilisateur, avec son rang par jeu. */
 export async function getUserScores(userId: string): Promise<UserScore[]> {
+  const { id: universeId } = await getCurrentUniverse();
   const scores = await prisma.score.findMany({
-    where: { userId },
+    where: { userId, universeId },
     orderBy: { gameId: "asc" },
   });
 
@@ -158,9 +198,9 @@ export async function getUserScores(userId: string): Promise<UserScore[]> {
     scores.map(async (s) => {
       const [better, totalPlayers] = await Promise.all([
         prisma.score.count({
-          where: { gameId: s.gameId, best: { gt: s.best } },
+          where: { universeId, gameId: s.gameId, best: { gt: s.best } },
         }),
-        prisma.score.count({ where: { gameId: s.gameId } }),
+        prisma.score.count({ where: { universeId, gameId: s.gameId } }),
       ]);
       return {
         gameId: s.gameId,
@@ -191,7 +231,9 @@ export interface AdminScore {
 
 /** Tous les scores (tous jeux), pour l'admin. Groupé par jeu puis score décroissant. */
 export async function listAllScores(): Promise<AdminScore[]> {
+  const { id: universeId } = await getCurrentUniverse();
   const rows = await prisma.score.findMany({
+    where: { universeId },
     orderBy: [{ gameId: "asc" }, { best: "desc" }, { updatedAt: "asc" }],
     include: { user: { select: { username: true, role: true } } },
   });

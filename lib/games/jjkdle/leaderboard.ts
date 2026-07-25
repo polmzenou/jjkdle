@@ -1,10 +1,12 @@
 import type { Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import {
-  USER_DECOR_SELECT,
+  userDecor,
+  userDecorSelect,
   type AdminScore,
   type UserScore,
 } from "@/lib/leaderboard/store";
+import { getCurrentUniverse } from "@/lib/universes/current";
 import { weekDateKeys } from "@/lib/date";
 import { todayKey } from "./daily";
 
@@ -45,15 +47,16 @@ export async function saveJjkdleScore(
   date: string,
   attempts: number,
 ): Promise<void> {
+  const { id: universeId } = await getCurrentUniverse();
   const existing = await prisma.jjkdleScore.findUnique({
-    where: { userId_date: { userId, date } },
+    where: { userId_universeId_date: { userId, universeId, date } },
     select: { attempts: true },
   });
   if (existing && existing.attempts <= attempts) return;
 
   await prisma.jjkdleScore.upsert({
-    where: { userId_date: { userId, date } },
-    create: { userId, date, attempts },
+    where: { userId_universeId_date: { userId, universeId, date } },
+    create: { userId, universeId, date, attempts },
     update: { attempts },
   });
 }
@@ -63,23 +66,15 @@ export async function topJjkdleEntries(
   limit = 8,
   date: string = todayKey(),
 ): Promise<JjkdleLeaderboardEntry[]> {
+  const { id: universeId } = await getCurrentUniverse();
   const rows = await prisma.jjkdleScore.findMany({
-    where: { date },
+    where: { universeId, date },
     orderBy: [{ attempts: "asc" }, { updatedAt: "asc" }],
     take: limit,
-    include: { user: { select: USER_DECOR_SELECT } },
+    include: { user: { select: userDecorSelect(universeId) } },
   });
 
-  return rows.map((r) => ({
-    id: r.id,
-    pseudo: r.user.username,
-    attempts: r.attempts,
-    role: r.user.role,
-    avatarImage: r.user.avatarCharacter?.image ?? null,
-    level: r.user.level,
-    titleKey: r.user.equippedTitleKey,
-    frameKey: r.user.equippedFrameKey,
-  }));
+  return rows.map((r) => ({ id: r.id, attempts: r.attempts, ...userDecor(r.user) }));
 }
 
 /**
@@ -90,9 +85,10 @@ export async function topJjkdleEntries(
 export async function topJjkdleWeeklyEntries(
   limit = 8,
 ): Promise<JjkdleLeaderboardEntry[]> {
+  const { id: universeId } = await getCurrentUniverse();
   const dates = weekDateKeys();
   const rows = await prisma.jjkdleScore.findMany({
-    where: { date: { in: dates } },
+    where: { universeId, date: { in: dates } },
     select: { userId: true, attempts: true },
   });
 
@@ -112,21 +108,22 @@ export async function topJjkdleWeeklyEntries(
 
   const users = await prisma.user.findMany({
     where: { id: { in: ranked.map(([id]) => id) } },
-    select: { id: true, ...USER_DECOR_SELECT },
+    select: { id: true, ...userDecorSelect(universeId) },
   });
   const userById = new Map(users.map((u) => [u.id, u]));
 
   return ranked.map(([userId, agg]) => {
     const u = userById.get(userId);
+    const d = u ? userDecor(u) : null;
     return {
       id: userId,
-      pseudo: u?.username ?? "—",
+      pseudo: d?.pseudo ?? "—",
       attempts: agg.total,
-      role: u?.role ?? "PLAYER",
-      avatarImage: u?.avatarCharacter?.image ?? null,
-      level: u?.level ?? 1,
-      titleKey: u?.equippedTitleKey ?? null,
-      frameKey: u?.equippedFrameKey ?? null,
+      role: d?.role ?? "PLAYER",
+      avatarImage: d?.avatarImage ?? null,
+      level: d?.level ?? 1,
+      titleKey: d?.titleKey ?? null,
+      frameKey: d?.frameKey ?? null,
       daysSolved: agg.days,
     };
   });
@@ -145,16 +142,17 @@ export async function getUserJjkdleScore(
   userId: string,
   date: string = todayKey(),
 ): Promise<UserScore | null> {
+  const { id: universeId } = await getCurrentUniverse();
   const mine = await prisma.jjkdleScore.findUnique({
-    where: { userId_date: { userId, date } },
+    where: { userId_universeId_date: { userId, universeId, date } },
   });
   if (!mine) return null;
 
   const [better, totalPlayers] = await Promise.all([
     prisma.jjkdleScore.count({
-      where: { date, attempts: { lt: mine.attempts } },
+      where: { universeId, date, attempts: { lt: mine.attempts } },
     }),
-    prisma.jjkdleScore.count({ where: { date } }),
+    prisma.jjkdleScore.count({ where: { universeId, date } }),
   ]);
 
   return {
@@ -176,7 +174,9 @@ export async function getUserJjkdleScore(
  * croissants. `date` = jour du perso (parseable pour l'affichage).
  */
 export async function listAllJjkdleScores(): Promise<AdminScore[]> {
+  const { id: universeId } = await getCurrentUniverse();
   const rows = await prisma.jjkdleScore.findMany({
+    where: { universeId },
     orderBy: [{ date: "desc" }, { attempts: "asc" }, { updatedAt: "asc" }],
     include: { user: { select: { username: true, role: true } } },
   });

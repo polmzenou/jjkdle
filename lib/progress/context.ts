@@ -1,5 +1,6 @@
 import type { Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUniverse } from "@/lib/universes/current";
 
 /**
  * Agrégat des stats d'un utilisateur, construit en UNE passe groupée à partir
@@ -47,33 +48,47 @@ export interface UserStatsContext {
   playedGuessWho: boolean;
 }
 
-/** Construit le contexte de stats d'un utilisateur (une passe groupée). */
+/**
+ * Construit le contexte de stats d'un utilisateur (une passe groupée).
+ *
+ * PORTÉE = un univers. Les scores/résultats sont filtrés par `universeId`
+ * (défaut = univers courant) : les cosmétiques et badges étant PAR univers, un
+ * badge/titre JJK se débloque à partir du jeu JJK. L'XP/le niveau restent
+ * GLOBAUX et ne passent PAS par ce contexte (cf. lib/progress/recompute).
+ */
 export async function buildUserStatsContext(
   userId: string,
+  universeId?: string,
 ): Promise<UserStatsContext> {
-  const [user, scores, draft, jjkdleAgg, guessWhoAgg] = await Promise.all([
+  const uid = universeId ?? (await getCurrentUniverse()).id;
+  const [user, profile, scores, draft, jjkdleAgg, guessWhoAgg] = await Promise.all([
     prisma.user.findUnique({
       where: { id: userId },
-      select: { role: true, jjkdleStreak: true, jjkdleBestStreak: true },
+      select: { role: true },
+    }),
+    // Streak PAR univers (déplacé de User vers UserUniverseProfile, étape 2c).
+    prisma.userUniverseProfile.findUnique({
+      where: { userId_universeId: { userId, universeId: uid } },
+      select: { jjkdleStreak: true, jjkdleBestStreak: true },
     }),
     prisma.score.findMany({
-      where: { userId },
+      where: { userId, universeId: uid },
       select: { gameId: true, best: true },
     }),
     prisma.jujutsuDraftScore.findUnique({
-      where: { userId },
+      where: { userId_universeId: { userId, universeId: uid } },
       select: { enemiesKilled: true, outcome: true },
     }),
     // _count = nb de jours joués ; _min.attempts = meilleure perf (essais).
     prisma.jjkdleScore.aggregate({
-      where: { userId },
+      where: { userId, universeId: uid },
       _count: { _all: true },
       _min: { attempts: true },
     }),
     // Victoires/défaites « Qui est-ce ? » (une ligne par partie et par joueur).
     prisma.guessWhoScore.groupBy({
       by: ["won"],
-      where: { userId },
+      where: { userId, universeId: uid },
       _count: { _all: true },
     }),
   ]);
@@ -97,8 +112,8 @@ export async function buildUserStatsContext(
     rankingBest: bestByGame.get("ranking") ?? 0,
     draftKills: draft?.enemiesKilled ?? 0,
     draftVictory: draft?.outcome === "VICTORY",
-    jjkdleStreak: user?.jjkdleStreak ?? 0,
-    jjkdleBestStreak: user?.jjkdleBestStreak ?? 0,
+    jjkdleStreak: profile?.jjkdleStreak ?? 0,
+    jjkdleBestStreak: profile?.jjkdleBestStreak ?? 0,
     jjkdleBestAttempts: jjkdleAgg._min.attempts ?? 0,
     guessWhoWins,
     guessWhoLosses,

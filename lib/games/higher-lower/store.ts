@@ -1,8 +1,10 @@
 import { Prisma, type Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUniverse } from "@/lib/universes/current";
 import { getWeekBounds } from "@/lib/date";
 import {
-  USER_DECOR_SELECT,
+  userDecor,
+  userDecorSelect,
   type AdminScore,
   type LeaderboardScope,
   type UserScore,
@@ -120,6 +122,7 @@ export async function createSession(
   const right = pickRight(pool, left, [left.id]);
   if (!right) return null;
 
+  const { id: universeId } = await getCurrentUniverse();
   const row = await prisma.higherLowerSession.create({
     data: {
       userId,
@@ -129,6 +132,7 @@ export async function createSession(
       rightId: right.id,
       rightCursedEnergy: right.cursedEnergy,
       usedIds: [left.id, right.id],
+      universeId,
     },
   });
 
@@ -137,10 +141,17 @@ export async function createSession(
   return { runId: row.id, view };
 }
 
-/** Charge une session par runId (ou null). */
+/**
+ * Charge une session par runId, DANS L'UNIVERS COURANT (ou null).
+ *
+ * Le `runId` est un cuid détenu par le client : le filtre `universeId` garantit
+ * qu'une partie démarrée sur un univers ne peut pas être poursuivie depuis un
+ * autre (le pool y serait différent). Sinon, comportement de session expirée.
+ */
 export async function getSession(runId: string): Promise<SessionRow | null> {
-  return prisma.higherLowerSession.findUnique({
-    where: { id: runId },
+  const { id: universeId } = await getCurrentUniverse();
+  return prisma.higherLowerSession.findFirst({
+    where: { id: runId, universeId },
     select: SESSION_SELECT,
   });
 }
@@ -223,8 +234,9 @@ export async function saveHigherLowerScore(
   score: number,
   xpEarned: number,
 ): Promise<void> {
+  const { id: universeId } = await getCurrentUniverse();
   await prisma.higherLowerScore.create({
-    data: { userId, score, xpEarned },
+    data: { userId, score, xpEarned, universeId },
   });
 }
 
@@ -261,16 +273,18 @@ export async function topHigherLowerEntries(
   limit = 20,
   scope: LeaderboardScope = "all-time",
 ): Promise<HigherLowerLeaderboardEntry[]> {
+  const { id: universeId } = await getCurrentUniverse();
   const bestPerUser = await prisma.$queryRaw<BestRow[]>(
     scope === "weekly"
       ? Prisma.sql`
           SELECT DISTINCT ON ("userId") "id", "userId", "score", "createdAt"
           FROM "HigherLowerScore"
-          WHERE "createdAt" >= ${getWeekBounds().start}
+          WHERE "universeId" = ${universeId} AND "createdAt" >= ${getWeekBounds().start}
           ORDER BY "userId", "score" DESC, "createdAt" ASC`
       : Prisma.sql`
           SELECT DISTINCT ON ("userId") "id", "userId", "score", "createdAt"
           FROM "HigherLowerScore"
+          WHERE "universeId" = ${universeId}
           ORDER BY "userId", "score" DESC, "createdAt" ASC`,
   );
 
@@ -284,21 +298,22 @@ export async function topHigherLowerEntries(
 
   const users = await prisma.user.findMany({
     where: { id: { in: ranked.map((r) => r.userId) } },
-    select: { id: true, ...USER_DECOR_SELECT },
+    select: { id: true, ...userDecorSelect(universeId) },
   });
   const userById = new Map(users.map((u) => [u.id, u]));
 
   return ranked.map((r) => {
     const u = userById.get(r.userId);
+    const d = u ? userDecor(u) : null;
     return {
       id: r.id,
-      pseudo: u?.username ?? "—",
+      pseudo: d?.pseudo ?? "—",
       score: r.score,
-      role: u?.role ?? "PLAYER",
-      avatarImage: u?.avatarCharacter?.image ?? null,
-      level: u?.level ?? 1,
-      titleKey: u?.equippedTitleKey ?? null,
-      frameKey: u?.equippedFrameKey ?? null,
+      role: d?.role ?? "PLAYER",
+      avatarImage: d?.avatarImage ?? null,
+      level: d?.level ?? 1,
+      titleKey: d?.titleKey ?? null,
+      frameKey: d?.frameKey ?? null,
     };
   });
 }
@@ -315,9 +330,11 @@ export async function topHigherLowerEntries(
 export async function getUserHigherLowerScore(
   userId: string,
 ): Promise<UserScore | null> {
-  // Bests de tous les joueurs (un max par userId).
+  // Bests de tous les joueurs de l'univers (un max par userId).
+  const { id: universeId } = await getCurrentUniverse();
   const grouped = await prisma.higherLowerScore.groupBy({
     by: ["userId"],
+    where: { universeId },
     _max: { score: true, createdAt: true },
   });
 
@@ -349,7 +366,9 @@ export async function getUserHigherLowerScore(
  * son best. L'`id` renvoyé reste celui de la ligne réelle → édition/suppression admin OK.
  */
 export async function listAllHigherLowerScores(): Promise<AdminScore[]> {
+  const { id: universeId } = await getCurrentUniverse();
   const rows = await prisma.higherLowerScore.findMany({
+    where: { universeId },
     orderBy: [{ score: "desc" }, { createdAt: "asc" }],
     include: { user: { select: { username: true, role: true } } },
   });
