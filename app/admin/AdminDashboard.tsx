@@ -25,6 +25,12 @@ import { OverviewAdmin } from "./OverviewAdmin";
 import { ContentHealthAdmin } from "./ContentHealthAdmin";
 import { JjkdleAnalyticsAdmin } from "./JjkdleAnalyticsAdmin";
 import { ConfigAdmin } from "./ConfigAdmin";
+import {
+  UniverseSwitcher,
+  type UniverseOption,
+} from "./UniverseSwitcher";
+import { AttributesAdmin } from "./AttributesAdmin";
+import type { AdminAttribute } from "@/lib/admin/attribute-store";
 import type { OverviewStats } from "@/lib/admin/analytics";
 import type { JjkdleAnalytics } from "@/lib/admin/jjkdle-analytics";
 import type { MaintenanceConfig } from "@/lib/config/app-config";
@@ -78,6 +84,14 @@ interface AdminDashboardProps {
   forcedTarget: string | null;
   /** Attributs (colonnes) de l'univers courant — pilotent le formulaire roster. */
   attributeColumns: AttributeSpec[];
+  /** Univers administrables (sélecteur). */
+  universes: UniverseOption[];
+  /** Slug de l'univers actuellement administré. */
+  currentUniverse: string;
+  /** Nom affichable de l'univers administré. */
+  universeName: string;
+  /** Attributs de l'univers administré (onglet Attributs). */
+  attributes: AdminAttribute[];
 }
 
 type Tab =
@@ -85,6 +99,7 @@ type Tab =
   | "roster"
   | "content"
   | "jjkdle"
+  | "attributes"
   | "draft"
   | "leaderboard"
   | "users"
@@ -95,6 +110,7 @@ const TAB_LABELS: Record<Tab, string> = {
   roster: "Roster",
   content: "Santé contenu",
   jjkdle: "Analytics JJKdle",
+  attributes: "Attributs",
   draft: "Jujutsu Draft",
   leaderboard: "Leaderboard",
   users: "Utilisateurs",
@@ -105,6 +121,7 @@ const TAB_ORDER: Tab[] = [
   "roster",
   "content",
   "jjkdle",
+  "attributes",
   "draft",
   "leaderboard",
   "users",
@@ -135,6 +152,10 @@ export function AdminDashboard({
   maintenance,
   forcedTarget,
   attributeColumns,
+  universes,
+  currentUniverse,
+  universeName,
+  attributes,
 }: AdminDashboardProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -438,13 +459,15 @@ export function AdminDashboard({
           ? `${overview.content.incomplete} incomplets · ${overview.content.missingImage} sans image`
           : tab === "jjkdle"
             ? `Jour ${jjkdleAnalytics.date}`
-            : tab === "draft"
-              ? `${draftRoster.length} personnages (draft)`
-              : tab === "leaderboard"
-                ? `${scores.length} scores`
-                : tab === "config"
-                  ? "Feature flags & maintenance"
-                  : `${users.length} utilisateurs`;
+            : tab === "attributes"
+              ? `${attributes.length} attribut(s) · ${universeName}`
+              : tab === "draft"
+                ? `${draftRoster.length} personnages (draft)`
+                : tab === "leaderboard"
+                  ? `${scores.length} scores`
+                  : tab === "config"
+                    ? "Feature flags & maintenance"
+                    : `${users.length} utilisateurs`;
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
@@ -456,7 +479,8 @@ export function AdminDashboard({
           </h1>
           <p className="text-sm text-white/45">{subtitle}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <UniverseSwitcher universes={universes} current={currentUniverse} />
           <Link
             href="/"
             className="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-white/60 hover:text-white"
@@ -510,6 +534,10 @@ export function AdminDashboard({
       )}
 
       {tab === "jjkdle" && <JjkdleAnalyticsAdmin data={jjkdleAnalytics} />}
+
+      {tab === "attributes" && (
+        <AttributesAdmin attributes={attributes} universeName={universeName} />
+      )}
 
       {tab === "config" && (
         <ConfigAdmin

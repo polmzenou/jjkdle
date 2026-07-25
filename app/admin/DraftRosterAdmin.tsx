@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { CharacterImage } from "@/components/CharacterImage";
 import { DRAFT_CATEGORIES, DRAFT_CATEGORY_BY_ID } from "@/lib/games/draft/categories";
-import { MIN_DRAFT_ROSTER } from "@/lib/games/draft/queries";
+import { MIN_DRAFT_ROSTER } from "@/lib/games/draft/types";
 import type {
   DraftCharacter,
   DraftCategoryId,

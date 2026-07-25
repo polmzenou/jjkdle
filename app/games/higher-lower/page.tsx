@@ -1,5 +1,9 @@
+import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth/session";
-import { getHigherLowerPool, MIN_HL_POOL } from "@/lib/games/higher-lower/queries";
+import {
+  getHigherLowerPool,
+  MIN_HL_POOL,
+} from "@/lib/games/higher-lower/queries";
 import { HigherLowerLeaderboard } from "@/components/leaderboard/HigherLowerLeaderboard";
 import { parseScope } from "@/lib/leaderboard/store";
 import { redirect } from "next/navigation";
@@ -8,7 +12,10 @@ import { HigherLowerGame } from "./HigherLowerGame";
 import { GameJsonLd } from "@/components/seo/JsonLd";
 import { gameMetadata } from "@/lib/seo/config";
 
-export const metadata = gameMetadata("higher-lower");
+/** Métadonnées de l'univers courant (résolu par hostname). */
+export async function generateMetadata(): Promise<Metadata> {
+  return gameMetadata("higher-lower");
+}
 
 // Auth par cookie + leaderboard à jour à chaque requête.
 export const dynamic = "force-dynamic";

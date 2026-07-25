@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { GAMES } from "@/lib/games/registry";
+import { getCurrentUniverseSlug } from "@/lib/universes/current";
 
 /**
  * Configuration globale de l'application (feature flags, maintenance, override du
@@ -11,19 +12,35 @@ import { GAMES } from "@/lib/games/registry";
  * `getCurrentUser`, cf. lib/auth/session.ts) → une seule requête `findMany` par
  * rendu, même si plusieurs jeux interrogent leur flag. L'écriture se fait depuis
  * /admin (Server Actions) et invalide le cache via `revalidatePath("/", "layout")`.
+ *
+ * MULTI-UNIVERS (étape 4) : toutes les clés sont PRÉFIXÉES PAR L'UNIVERS
+ * (`u.<slug>.…`). Désactiver un jeu ou passer en maintenance sur JJK ne doit rien
+ * changer sur les autres animes, et chaque univers a son propre mot du jour
+ * forcé. Les lectures ciblent l'univers courant par défaut ; un slug explicite
+ * permet à l'admin d'agir sur un autre univers (étape 5).
  */
 
-// ── Clés typées ────────────────────────────────────────────────────────────
+// ── Clés typées (toutes préfixées par l'univers) ───────────────────────────
 
-/** Flag d'activation d'un jeu (défaut : activé). */
-export function gameEnabledKey(gameId: string): string {
-  return `game.${gameId}.enabled`;
+/** Préfixe de namespace d'un univers. */
+function ns(slug: string): string {
+  return `u.${slug}.`;
 }
 
-/** Clé du mode maintenance du site. */
-export const MAINTENANCE_KEY = "site.maintenance";
-/** Clé de l'override du mot du jour JJKdle (id de perso ou absent). */
-export const FORCED_TARGET_KEY = "jjkdle.forcedTarget";
+/** Flag d'activation d'un jeu dans un univers (défaut : activé). */
+export function gameEnabledKey(slug: string, gameId: string): string {
+  return `${ns(slug)}game.${gameId}.enabled`;
+}
+
+/** Clé du mode maintenance d'un univers. */
+export function maintenanceKey(slug: string): string {
+  return `${ns(slug)}site.maintenance`;
+}
+
+/** Clé de l'override du mot du jour JJKdle d'un univers. */
+export function forcedTargetKey(slug: string): string {
+  return `${ns(slug)}jjkdle.forcedTarget`;
+}
 
 /** Forme persistée du mode maintenance. */
 export interface MaintenanceConfig {
@@ -52,19 +69,30 @@ export async function getConfig<T>(key: string, fallback: T): Promise<T> {
   return all.has(key) ? (all.get(key) as T) : fallback;
 }
 
-/** Vrai si un jeu est activé (défaut : true tant qu'aucun flag n'est posé). */
-export async function isGameEnabled(gameId: string): Promise<boolean> {
-  return getConfig<boolean>(gameEnabledKey(gameId), true);
+/**
+ * Vrai si un jeu est activé dans l'univers (défaut : true tant qu'aucun flag
+ * n'est posé). `slug` par défaut = univers courant.
+ */
+export async function isGameEnabled(
+  gameId: string,
+  slug?: string,
+): Promise<boolean> {
+  const s = slug ?? (await getCurrentUniverseSlug());
+  return getConfig<boolean>(gameEnabledKey(s, gameId), true);
 }
 
-/** Config du mode maintenance (repli : désactivé). */
-export async function getMaintenance(): Promise<MaintenanceConfig> {
-  return getConfig<MaintenanceConfig>(MAINTENANCE_KEY, MAINTENANCE_DEFAULT);
+/** Config du mode maintenance de l'univers (repli : désactivé). */
+export async function getMaintenance(
+  slug?: string,
+): Promise<MaintenanceConfig> {
+  const s = slug ?? (await getCurrentUniverseSlug());
+  return getConfig<MaintenanceConfig>(maintenanceKey(s), MAINTENANCE_DEFAULT);
 }
 
-/** Id du perso forcé comme mot du jour JJKdle, ou null. */
-export async function getForcedTarget(): Promise<string | null> {
-  return getConfig<string | null>(FORCED_TARGET_KEY, null);
+/** Id du perso forcé comme mot du jour de l'univers, ou null. */
+export async function getForcedTarget(slug?: string): Promise<string | null> {
+  const s = slug ?? (await getCurrentUniverseSlug());
+  return getConfig<string | null>(forcedTargetKey(s), null);
 }
 
 /**
@@ -77,14 +105,17 @@ export async function getAllConfig(): Promise<Record<string, unknown>> {
 }
 
 /**
- * État d'activation de chaque jeu du registre (défaut true). Pratique pour le
- * hub et l'onglet admin Config.
+ * État d'activation de chaque jeu du registre dans l'univers (défaut true).
+ * Pratique pour le hub et l'onglet admin Config.
  */
-export async function getGameFlags(): Promise<Record<string, boolean>> {
+export async function getGameFlags(
+  slug?: string,
+): Promise<Record<string, boolean>> {
+  const s = slug ?? (await getCurrentUniverseSlug());
   const all = await loadAllConfig();
   return Object.fromEntries(
     GAMES.map((g) => {
-      const v = all.get(gameEnabledKey(g.id));
+      const v = all.get(gameEnabledKey(s, g.id));
       return [g.id, v === undefined ? true : Boolean(v)];
     }),
   );

@@ -43,6 +43,11 @@ export interface UniverseLabels {
    * (par défaut) par l'attribut numérique JJKdle. JJK : « Énergie occulte ».
    */
   energyLabel: string;
+  /**
+   * Accroche de la landing (1–2 phrases). Contient du vocabulaire lore, donc
+   * propre à chaque anime — d'où sa place ici plutôt qu'en dur dans la page.
+   */
+  tagline: string;
 }
 
 /** Branding logo d'un univers. */
@@ -59,6 +64,12 @@ export interface UniverseConfig {
   slug: string;
   /** Nom de marque affiché (ex. « JJK Arcade »). */
   name: string;
+  /**
+   * Nom de l'ŒUVRE dont le site est un fan-site (ex. « Jujutsu Kaisen »).
+   * Distinct de `name` (la marque) : sert au JSON-LD (`isBasedOn`) et aux textes
+   * qui parlent de l'anime lui-même, pas du site.
+   */
+  sourceWork: string;
   /** Titre SEO complet (balise <title> racine). */
   title: string;
   /** Meta description par défaut. */

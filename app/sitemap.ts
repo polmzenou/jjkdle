@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { GAMES } from "@/lib/games/registry";
-import { SITE_URL } from "@/lib/seo/config";
+import { siteSeo } from "@/lib/seo/config";
 
 /**
  * Sitemap généré depuis le registre des jeux (source unique). N'inclut que les
@@ -8,7 +8,9 @@ import { SITE_URL } from "@/lib/seo/config";
  * routes éphémères (`[code]` de lobby), privées (`/account`, `/admin`) et
  * d'auth — déjà en `noindex`.
  */
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // URL du domaine réellement servi → un sitemap correct par univers.
+  const { url: SITE_URL } = await siteSeo();
   const now = new Date();
 
   const staticPages: MetadataRoute.Sitemap = [

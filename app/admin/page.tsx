@@ -19,6 +19,11 @@ import {
 } from "@/lib/config/app-config";
 import { todayKey } from "@/lib/games/jjkdle/daily";
 import { loadAttributeSchema } from "@/lib/games/jjkdle/attributes-db";
+import {
+  getCurrentUniverseSlug,
+  listAvailableUniverses,
+} from "@/lib/universes/current";
+import { listAttributes } from "@/lib/admin/attribute-store";
 import type { Character } from "@/data/roster/characters";
 import type { DraftCharacter } from "@/lib/games/draft/types";
 import { AdminDashboard } from "./AdminDashboard";
@@ -93,12 +98,20 @@ export default async function AdminPage({
   } catch {
     draftRoster = [];
   }
-  const [categories, scores, users, attributeSchema] = await Promise.all([
-    getCategories(),
-    listAllScores(),
-    listUsers(),
-    loadAttributeSchema(),
-  ]);
+  const [categories, scores, users, attributeSchema, universes] =
+    await Promise.all([
+      getCategories(),
+      listAllScores(),
+      listUsers(),
+      loadAttributeSchema(),
+      listAvailableUniverses(),
+    ]);
+  // Attributs de l'univers administré (onglet Attributs).
+  const attributes = await listAttributes();
+  // Univers administré : le middleware l'a déjà appliqué à toutes les lectures
+  // ci-dessus (cf. lib/universes/admin-scope.ts) ; on ne lit ici que son slug
+  // pour l'afficher dans le sélecteur.
+  const currentUniverse = await getCurrentUniverseSlug();
   let draftScores: AdminScore[] = [];
   try {
     draftScores = await listAllDraftScores();
@@ -135,6 +148,12 @@ export default async function AdminPage({
     <AdminDashboard
       roster={roster}
       attributeColumns={attributeSchema.columns}
+      universes={universes.map((u) => ({ slug: u.slug, name: u.name }))}
+      currentUniverse={currentUniverse}
+      universeName={
+        universes.find((u) => u.slug === currentUniverse)?.name ?? currentUniverse
+      }
+      attributes={attributes}
       draftRoster={draftRoster}
       categories={categories}
       scores={[...scores, ...draftScores, ...jjkdleScores, ...higherLowerScores]}

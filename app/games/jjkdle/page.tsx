@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
 import { isGameEnabled } from "@/lib/config/app-config";
@@ -15,10 +16,13 @@ import { JJKdleGame, type PublicCharacter } from "./JJKdleGame";
 import { GameJsonLd } from "@/components/seo/JsonLd";
 import { gameMetadata } from "@/lib/seo/config";
 
-export const metadata = gameMetadata(
-  "jjkdle",
-  "JJKdle : le jeu du jour Jujutsu Kaisen. Devine le personnage JJK mystère avec des indices par attribut (race, grade, clan, arc). Un nouveau perso chaque jour, essais illimités, gratuit et sans compte.",
-);
+/** Métadonnées de l'univers courant (résolu par hostname). */
+export async function generateMetadata(): Promise<Metadata> {
+  return gameMetadata(
+    "jjkdle",
+    "JJKdle : le jeu du jour Jujutsu Kaisen. Devine le personnage JJK mystère avec des indices par attribut (race, grade, clan, arc). Un nouveau perso chaque jour, essais illimités, gratuit et sans compte.",
+  );
+}
 
 // État quotidien lu à chaque requête (cookie httpOnly) → toujours à jour.
 export const dynamic = "force-dynamic";

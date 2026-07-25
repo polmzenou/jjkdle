@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -11,10 +12,13 @@ import {
   joinGuessWhoLobbyAction,
 } from "@/lib/games/guesswho/actions";
 
-export const metadata = gameMetadata(
-  "guesswho",
-  "Qui est-ce ? version Jujutsu Kaisen : devine le personnage secret de ton adversaire en 1v1. Grille de 25, questions, éliminations et un seul guess pour gagner.",
-);
+/** Métadonnées de l'univers courant (résolu par hostname). */
+export async function generateMetadata(): Promise<Metadata> {
+  return gameMetadata(
+    "guesswho",
+    "Qui est-ce ? version Jujutsu Kaisen : devine le personnage secret de ton adversaire en 1v1. Grille de 25, questions, éliminations et un seul guess pour gagner.",
+  );
+}
 
 export default async function GuessWhoHubPage() {
   if (!(await isGameEnabled("guesswho"))) redirect("/games");
@@ -66,7 +70,10 @@ export default async function GuessWhoHubPage() {
       </section>
 
       <footer className="mt-auto pt-16 text-center text-xs text-white/30">
-        <Link href="/games" className="transition-colors hover:text-domain-light">
+        <Link
+          href="/games"
+          className="transition-colors hover:text-domain-light"
+        >
           ← Retour aux jeux
         </Link>
       </footer>

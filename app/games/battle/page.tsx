@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -11,10 +12,13 @@ import {
   joinBattleLobbyAction,
 } from "@/lib/games/battle/actions";
 
-export const metadata = gameMetadata(
-  "battle",
-  "JJK Random Battle : affronte un ami en 1v1 sur Jujutsu Kaisen. Drafte une équipe de 5 à tour de rôle, puis laisse parler le combat.",
-);
+/** Métadonnées de l'univers courant (résolu par hostname). */
+export async function generateMetadata(): Promise<Metadata> {
+  return gameMetadata(
+    "battle",
+    "JJK Random Battle : affronte un ami en 1v1 sur Jujutsu Kaisen. Drafte une équipe de 5 à tour de rôle, puis laisse parler le combat.",
+  );
+}
 
 export default async function BattleHubPage() {
   if (!(await isGameEnabled("battle"))) redirect("/games");
@@ -65,7 +69,10 @@ export default async function BattleHubPage() {
       </section>
 
       <footer className="mt-auto pt-16 text-center text-xs text-white/30">
-        <Link href="/games" className="transition-colors hover:text-cursed-light">
+        <Link
+          href="/games"
+          className="transition-colors hover:text-cursed-light"
+        >
           ← Retour aux jeux
         </Link>
       </footer>

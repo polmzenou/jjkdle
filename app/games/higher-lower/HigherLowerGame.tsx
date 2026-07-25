@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { Logo } from "@/components/Logo";
+import { useUniverse } from "@/components/universe/UniverseProvider";
 import { CharacterImage } from "@/components/CharacterImage";
 import { ExpReward } from "@/components/progress/ExpReward";
 import type { HLChoice, HLTurnView } from "@/lib/games/higher-lower/types";
@@ -50,6 +51,11 @@ function useCountUp(target: number, durationMs = 900): number {
 }
 
 export function HigherLowerGame({ isAuthed, hasEnoughRoster }: HigherLowerGameProps) {
+  // Libellé de la jauge de puissance de l'univers (JJK : « Énergie occulte »).
+  const { labels } = useUniverse();
+  const energyLabel = labels.energyLabel;
+  // Les phrases du jeu l'emploient en milieu de phrase (« plus ou moins de … »).
+  const energyLabelLower = energyLabel.toLocaleLowerCase("fr-FR");
   const [phase, setPhase] = useState<Phase>("idle");
   const [view, setView] = useState<HLTurnView | null>(null);
   const [score, setScore] = useState(0);
@@ -148,13 +154,13 @@ export function HigherLowerGame({ isAuthed, hasEnoughRoster }: HigherLowerGamePr
         <Header score={0} />
         <div className="mx-auto mt-6 max-w-md rounded-3xl border border-white/10 bg-void-800/50 p-8 text-center backdrop-blur">
           <p className="font-display text-2xl font-black text-white">
-            Plus ou moins d&apos;énergie occulte ?
+            Plus ou moins de {energyLabelLower} ?
           </p>
           <p className="mt-3 text-sm leading-relaxed text-white/60">
             Deux personnages s&apos;affichent. Devine si celui de{" "}
             <span className="text-white/90">droite</span> a{" "}
             <span className="text-domain-light">plus</span> ou{" "}
-            <span className="text-cursed-light">moins</span> d&apos;énergie occulte
+            <span className="text-cursed-light">moins</span> de {energyLabelLower}{" "}
             que celui de gauche. Chaque bonne réponse fait avancer la chaîne. Une
             erreur et c&apos;est terminé.
           </p>
@@ -180,8 +186,8 @@ export function HigherLowerGame({ isAuthed, hasEnoughRoster }: HigherLowerGamePr
             </button>
           ) : (
             <p className="mt-6 rounded-xl border border-cursed/40 bg-cursed/10 px-4 py-3 text-sm text-cursed-light">
-              Pas assez de personnages avec une énergie occulte renseignée pour
-              lancer ce jeu.
+              Pas assez de personnages avec une valeur de {energyLabelLower}{" "}
+              renseignée pour lancer ce jeu.
             </p>
           )}
           {error && <p className="mt-4 text-sm text-cursed-light">{error}</p>}
@@ -205,14 +211,22 @@ export function HigherLowerGame({ isAuthed, hasEnoughRoster }: HigherLowerGamePr
       <p className="mb-5 text-center text-sm text-white/55">
         Le personnage de droite a-t-il{" "}
         <span className="text-domain-light">plus</span> ou{" "}
-        <span className="text-cursed-light">moins</span> d&apos;énergie occulte ?
+        <span className="text-cursed-light">moins</span> de {energyLabelLower} ?
       </p>
 
       <div className="relative mx-auto grid max-w-3xl grid-cols-2 gap-6 sm:gap-16">
         {/* Carte GAUCHE (révélée) — slot fixe, contenu animé à l'intérieur */}
         <div className="relative aspect-[3/4] overflow-hidden rounded-3xl border border-white/10 bg-void-800">
           <AnimatePresence initial={false}>
-            {view && <CardFace key={view.left.id} card={view.left} revealValue={view.left.cursedEnergy} tone="neutral" />}
+            {view && (
+              <CardFace
+                key={view.left.id}
+                card={view.left}
+                revealValue={view.left.cursedEnergy}
+                tone="neutral"
+                energyLabel={energyLabel}
+              />
+            )}
           </AnimatePresence>
         </div>
 
@@ -233,6 +247,7 @@ export function HigherLowerGame({ isAuthed, hasEnoughRoster }: HigherLowerGamePr
               card={view?.right ?? { id: "empty", name: "" }}
               revealValue={reveal ? reveal.value : undefined}
               tone={reveal ? (reveal.correct ? "good" : "bad") : "hidden"}
+              energyLabel={energyLabel}
             />
           </AnimatePresence>
         </div>
@@ -322,10 +337,13 @@ function CardFace({
   card,
   revealValue,
   tone,
+  energyLabel,
 }: {
   card: CardData;
   revealValue?: number;
   tone: "neutral" | "hidden" | "good" | "bad";
+  /** Libellé de la valeur comparée, propre à l'univers. */
+  energyLabel: string;
 }) {
   const valueColor =
     tone === "good" ? "#22c55e" : tone === "bad" ? "#f87171" : "#a78bfa";
@@ -343,7 +361,7 @@ function CardFace({
           {card.name}
         </p>
         <p className="mt-1 text-[11px] uppercase tracking-wider text-white/45">
-          Énergie occulte
+          {energyLabel}
         </p>
         {tone === "hidden" ? (
           <p className="font-display text-4xl font-black text-white/30">?</p>

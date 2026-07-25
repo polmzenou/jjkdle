@@ -26,8 +26,8 @@ export default async function MultiplayerHubPage() {
           Affronte tes amis
         </h1>
         <p className="mx-auto mt-4 max-w-md text-balance text-white/55">
-          Lobby privé, jusqu'à 3 joueurs, en temps réel. Chacun compose son sorcier
-          manche après manche — le meilleur build l'emporte.
+          Lobby privé, jusqu'à 3 joueurs, en temps réel. Chacun compose son
+          sorcier manche après manche — le meilleur build l'emporte.
         </p>
       </header>
 
@@ -54,7 +54,10 @@ export default async function MultiplayerHubPage() {
       </section>
 
       <footer className="mt-auto pt-16 text-center text-xs text-white/30">
-        <Link href="/games" className="transition-colors hover:text-domain-light">
+        <Link
+          href="/games"
+          className="transition-colors hover:text-domain-light"
+        >
           ← Retour aux jeux
         </Link>
       </footer>

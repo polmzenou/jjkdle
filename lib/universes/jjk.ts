@@ -11,6 +11,7 @@ import type { UniverseConfig } from "./types";
 export const jjk: UniverseConfig = {
   slug: "jjk",
   name: "JJK Arcade",
+  sourceWork: "Jujutsu Kaisen",
   title: "JJK Arcade — Mini-jeux Jujutsu Kaisen",
   description:
     "L'arcade fan dédiée à Jujutsu Kaisen : une collection de mini-jeux gratuits (JJKdle, Qui est-ce ?, quiz, draft, tier list…) pour tester ta connaissance de l'univers JJK. Sans compte, jouable dans le navigateur.",
@@ -58,5 +59,7 @@ export const jjk: UniverseConfig = {
   },
   labels: {
     energyLabel: "Énergie occulte",
+    tagline:
+      "Une collection de mini-jeux nerveux pour tester ta connaissance de l'univers et libérer ton énergie maudite.",
   },
 };

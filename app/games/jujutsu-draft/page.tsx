@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getUserDraftBest } from "@/lib/games/draft/store";
 import { getDraftRoster } from "@/lib/games/draft/queries";
@@ -9,7 +10,10 @@ import { JujutsuDraftGame } from "./JujutsuDraftGame";
 import { GameJsonLd } from "@/components/seo/JsonLd";
 import { gameMetadata } from "@/lib/seo/config";
 
-export const metadata = gameMetadata("jujutsu-draft");
+/** Métadonnées de l'univers courant (résolu par hostname). */
+export async function generateMetadata(): Promise<Metadata> {
+  return gameMetadata("jujutsu-draft");
+}
 
 // Auth par cookie + leaderboard à jour à chaque requête.
 export const dynamic = "force-dynamic";

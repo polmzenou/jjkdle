@@ -3,6 +3,7 @@ import { Logo } from "@/components/Logo";
 import { GameShowcase } from "@/components/landing/GameShowcase";
 import { MangaDecor } from "@/components/landing/MangaDecor";
 import { GAMES } from "@/lib/games/registry";
+import { getCurrentUniverseConfig } from "@/lib/universes/current";
 
 const liveCount = GAMES.filter((g) => g.status !== "coming-soon").length;
 
@@ -12,8 +13,13 @@ const STATS = [
   { value: "S", label: "grade max à atteindre" },
 ];
 
-/** Landing : présente le site, puis met en scène les jeux (showcase). */
-export default function HomePage() {
+/**
+ * Landing de l'UNIVERS COURANT : présente le site, puis met en scène les jeux.
+ * Nom, œuvre source et accroche viennent de la config de l'univers — la même
+ * page sert donc n'importe quel anime.
+ */
+export default async function HomePage() {
+  const universe = await getCurrentUniverseConfig();
   return (
     <main className="flex flex-col">
       {/* Couche décorative manga / JJK (kanji, ofuda, lignes de concentration) */}
@@ -23,7 +29,7 @@ export default function HomePage() {
       <section className="relative mx-auto flex w-full max-w-5xl flex-col items-center px-6 pb-24 pt-16 text-center sm:pt-24">
         <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 text-xs font-medium uppercase tracking-[0.25em] text-domain-light backdrop-blur">
           <span className="h-1.5 w-1.5 animate-glow-pulse rounded-full bg-domain-light" />
-          Jujutsu Kaisen · Fan Arcade
+          {universe.sourceWork} · Fan Arcade
           <span aria-hidden className="font-display text-sm leading-none text-domain-light/70">
             呪
           </span>
@@ -32,16 +38,15 @@ export default function HomePage() {
         <h1 className="mt-8 flex justify-center">
           {/* Texte lu par les moteurs/lecteurs d'écran ; le logo reste le visuel. */}
           <span className="sr-only">
-            JJK Arcade — mini-jeux Jujutsu Kaisen gratuits
+            {universe.name} — mini-jeux {universe.sourceWork} gratuits
           </span>
           <Logo className="h-44 w-auto sm:h-60" glow />
         </h1>
 
         <p className="mx-auto mt-6 max-w-xl text-balance text-lg leading-relaxed text-white/60">
-          La salle d'arcade maudite dédiée à{" "}
-          <span className="text-white/80">Jujutsu Kaisen</span>. Une collection
-          de mini-jeux nerveux pour tester ta connaissance de l'univers et
-          libérer ton énergie maudite.
+          La salle d&apos;arcade maudite dédiée à{" "}
+          <span className="text-white/80">{universe.sourceWork}</span>.{" "}
+          {universe.labels.tagline}
         </p>
 
         <div className="mt-9 flex flex-col items-center gap-3 sm:flex-row">

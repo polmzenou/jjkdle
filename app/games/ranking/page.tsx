@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getBestScore } from "@/lib/bestScore";
 import { Leaderboard } from "@/components/leaderboard/Leaderboard";
 import { parseScope } from "@/lib/leaderboard/store";
@@ -7,7 +8,10 @@ import { RankingGame } from "./RankingGame";
 import { GameJsonLd } from "@/components/seo/JsonLd";
 import { gameMetadata } from "@/lib/seo/config";
 
-export const metadata = gameMetadata("ranking");
+/** Métadonnées de l'univers courant (résolu par hostname). */
+export async function generateMetadata(): Promise<Metadata> {
+  return gameMetadata("ranking");
+}
 
 // Le leaderboard lit le fichier à chaque requête (scores à jour).
 export const dynamic = "force-dynamic";

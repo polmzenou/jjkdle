@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -11,10 +12,13 @@ import {
   joinCodenamesLobbyAction,
 } from "@/lib/games/codenames/actions";
 
-export const metadata = gameMetadata(
-  "codenames",
-  "JJK Codenames : jeu d'équipe multijoueur (4 à 6 joueurs, rouge vs violet). Les maîtres-espions donnent des indices, les agents révèlent les bons personnages d'une grille de 36. Évitez l'assassin !",
-);
+/** Métadonnées de l'univers courant (résolu par hostname). */
+export async function generateMetadata(): Promise<Metadata> {
+  return gameMetadata(
+    "codenames",
+    "JJK Codenames : jeu d'équipe multijoueur (4 à 6 joueurs, rouge vs violet). Les maîtres-espions donnent des indices, les agents révèlent les bons personnages d'une grille de 36. Évitez l'assassin !",
+  );
+}
 
 export default async function CodenamesHubPage() {
   if (!(await isGameEnabled("codenames"))) redirect("/games");
@@ -67,7 +71,10 @@ export default async function CodenamesHubPage() {
       </section>
 
       <footer className="mt-auto pt-16 text-center text-xs text-white/30">
-        <Link href="/games" className="transition-colors hover:text-domain-light">
+        <Link
+          href="/games"
+          className="transition-colors hover:text-domain-light"
+        >
           ← Retour aux jeux
         </Link>
       </footer>

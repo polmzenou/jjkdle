@@ -1,10 +1,6 @@
 import { GAMES, getGame } from "@/lib/games/registry";
-import {
-  SITE_NAME,
-  SITE_URL,
-  SITE_DESCRIPTION,
-  absoluteUrl,
-} from "@/lib/seo/config";
+import { siteSeo, absoluteUrl } from "@/lib/seo/config";
+import { getCurrentUniverseConfig } from "@/lib/universes/current";
 
 /**
  * Données structurées schema.org (JSON-LD). Aident Google à comprendre le site
@@ -26,8 +22,16 @@ function JsonLd({ data }: { data: object }) {
   );
 }
 
-/** WebSite + Organization : injecté une fois dans le layout racine. */
-export function SiteJsonLd() {
+/** Locale SEO ("fr_FR" → "fr-FR"). */
+function bcp47(locale: string): string {
+  return locale.replace("_", "-");
+}
+
+/** WebSite + Organization de l'univers courant : injecté une fois dans le layout. */
+export async function SiteJsonLd() {
+  const seo = await siteSeo();
+  const universe = await getCurrentUniverseConfig();
+  const SITE_URL = seo.url;
   const data = {
     "@context": "https://schema.org",
     "@graph": [
@@ -35,17 +39,17 @@ export function SiteJsonLd() {
         "@type": "WebSite",
         "@id": `${SITE_URL}/#website`,
         url: SITE_URL,
-        name: SITE_NAME,
-        description: SITE_DESCRIPTION,
-        inLanguage: "fr-FR",
+        name: seo.name,
+        description: seo.description,
+        inLanguage: bcp47(seo.locale),
         publisher: { "@id": `${SITE_URL}/#organization` },
       },
       {
         "@type": "Organization",
         "@id": `${SITE_URL}/#organization`,
-        name: SITE_NAME,
+        name: seo.name,
         url: SITE_URL,
-        logo: absoluteUrl("/logo.png"),
+        logo: await absoluteUrl(universe.logo.src),
       },
     ],
   };
@@ -56,25 +60,27 @@ export function SiteJsonLd() {
  * VideoGame : à poser sur chaque page de jeu. Décrit le jeu à partir du registre
  * (source unique). `id` = identifiant du jeu dans `lib/games/registry.ts`.
  */
-export function GameJsonLd({ id }: { id: string }) {
+export async function GameJsonLd({ id }: { id: string }) {
   const game = getGame(id);
   if (!game) return null;
 
+  const seo = await siteSeo();
+  const universe = await getCurrentUniverseConfig();
   const data = {
     "@context": "https://schema.org",
     "@type": "VideoGame",
     name: game.title,
     description: game.description,
-    url: absoluteUrl(game.route),
-    image: game.previewImage ? absoluteUrl(game.previewImage) : undefined,
+    url: await absoluteUrl(game.route),
+    image: game.previewImage ? await absoluteUrl(game.previewImage) : undefined,
     genre: "Anime fan game",
     gamePlatform: "Web browser",
     applicationCategory: "GameApplication",
     operatingSystem: "Any",
-    inLanguage: "fr-FR",
+    inLanguage: bcp47(seo.locale),
     isAccessibleForFree: true,
-    isBasedOn: "Jujutsu Kaisen",
-    author: { "@type": "Organization", name: SITE_NAME },
+    isBasedOn: universe.sourceWork,
+    author: { "@type": "Organization", name: seo.name },
     offers: {
       "@type": "Offer",
       price: "0",
@@ -89,8 +95,13 @@ export function GameJsonLd({ id }: { id: string }) {
  * ItemList des jeux + fil d'Ariane. À poser sur le hub `/games` (et réutilisable
  * sur la home) pour renforcer le maillage interne et les rich results.
  */
-export function GamesListJsonLd() {
+export async function GamesListJsonLd() {
   const liveGames = GAMES.filter((g) => g.status !== "coming-soon");
+  const seo = await siteSeo();
+  const universe = await getCurrentUniverseConfig();
+  const gamesUrl = await absoluteUrl("/games");
+  // Une seule résolution d'URL par jeu (absoluteUrl est asynchrone).
+  const gameUrls = await Promise.all(liveGames.map((g) => absoluteUrl(g.route)));
   const data = {
     "@context": "https://schema.org",
     "@graph": [
@@ -101,24 +112,24 @@ export function GamesListJsonLd() {
             "@type": "ListItem",
             position: 1,
             name: "Accueil",
-            item: SITE_URL,
+            item: seo.url,
           },
           {
             "@type": "ListItem",
             position: 2,
             name: "Les jeux",
-            item: absoluteUrl("/games"),
+            item: gamesUrl,
           },
         ],
       },
       {
         "@type": "ItemList",
-        name: "Jeux Jujutsu Kaisen — JJK Arcade",
+        name: `Jeux ${universe.sourceWork} — ${seo.name}`,
         itemListElement: liveGames.map((g, i) => ({
           "@type": "ListItem",
           position: i + 1,
           name: g.title,
-          url: absoluteUrl(g.route),
+          url: gameUrls[i],
         })),
       },
     ],

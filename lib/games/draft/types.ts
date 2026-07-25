@@ -5,6 +5,17 @@
  * client, côté serveur (anti-triche) et par un futur mode multijoueur.
  */
 
+/**
+ * Seuils de viabilité du roster de draft : en dessous, `getDraftRoster` retombe
+ * sur la liste maître en code pour que le jeu reste jouable.
+ *
+ * Définis ICI (module pur) et non dans `queries.ts` : l'admin les affiche depuis
+ * un composant CLIENT, qui ne doit pas importer un module serveur (`queries.ts`
+ * tire Prisma et la résolution d'univers, donc `next/headers`).
+ */
+export const MIN_DRAFT_ROSTER = 40;
+export const MIN_DRAFT_TIER_C = 8;
+
 /** Les 8 catégories de stats du draft (slugs kebab, façon repo). */
 export type DraftCategoryId =
   | "occult-energy"

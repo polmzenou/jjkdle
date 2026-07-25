@@ -1,7 +1,17 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { Prisma, type Role } from "@prisma/client";
+import { cookies } from "next/headers";
+import { Prisma, type AttributeKind, type Role } from "@prisma/client";
+import {
+  upsertAttribute,
+  deleteAttribute,
+  upsertAttributeOption,
+  deleteAttributeOption,
+  validateAttributeKey,
+  type AttributeInput,
+  type AttributeOptionInput,
+} from "@/lib/admin/attribute-store";
 import {
   getAdminUser,
   getAdminOrVipUser,
@@ -67,12 +77,17 @@ import type { Character, CharacterTier } from "@/data/roster/characters";
 import { CATEGORY_BY_ID, type CategoryId } from "@/data/roster/categories";
 import { eligibleRoster } from "@/lib/games/jjkdle/daily";
 import { loadAttributeSchema } from "@/lib/games/jjkdle/attributes-db";
+import {
+  getCurrentUniverseSlug,
+  listAvailableUniverses,
+} from "@/lib/universes/current";
+import { ADMIN_UNIVERSE_COOKIE } from "@/lib/universes/admin-scope";
 import { getGame } from "@/lib/games/registry";
 import {
   setConfig,
   gameEnabledKey,
-  MAINTENANCE_KEY,
-  FORCED_TARGET_KEY,
+  maintenanceKey,
+  forcedTargetKey,
   type MaintenanceConfig,
 } from "@/lib/config/app-config";
 
@@ -799,6 +814,154 @@ function revalidateGlobalConfig(): void {
   revalidatePath("/admin");
 }
 
+// ── Attributs de l'univers (étape 5) ──────────────────────────────────────
+// C'est cette section qui permet d'ajouter un anime SANS CODE : on définit ses
+// attributs de personnage et leurs valeurs possibles, et JJKdle en découle.
+
+const ATTRIBUTE_KINDS: AttributeKind[] = [
+  "CATEGORICAL",
+  "ORDINAL",
+  "BOOLEAN",
+  "NUMERIC",
+];
+
+/** Entier ≥ 0 lu depuis un champ de formulaire, ou null si vide/invalide. */
+function optionalInt(raw: unknown): number | null {
+  if (raw == null || `${raw}`.trim() === "") return null;
+  const n = Number(raw);
+  return Number.isFinite(n) && n >= 0 ? Math.round(n) : null;
+}
+
+/** Crée ou met à jour un attribut de l'univers administré. */
+export async function saveAttributeAction(
+  input: AttributeInput,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+
+  const key = String(input.key ?? "").trim();
+  const label = String(input.label ?? "").trim();
+  if (!label) return { ok: false, error: "Le libellé est obligatoire." };
+  if (!ATTRIBUTE_KINDS.includes(input.kind)) {
+    return { ok: false, error: "Type d'attribut invalide." };
+  }
+  // La clé n'est validée qu'à la CRÉATION : elle est immuable ensuite.
+  if (!input.id) {
+    const keyError = validateAttributeKey(key);
+    if (keyError) return { ok: false, error: keyError };
+  }
+
+  try {
+    await upsertAttribute({
+      ...(input.id ? { id: input.id } : {}),
+      key,
+      label,
+      kind: input.kind,
+      position: optionalInt(input.position) ?? 0,
+      comparable: Boolean(input.comparable),
+      tolerance: optionalInt(input.tolerance),
+    });
+  } catch (e) {
+    // Collision de clé (@@unique([universeId, key])) ou écriture refusée.
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidateGlobalConfig();
+  return { ok: true };
+}
+
+/** Supprime un attribut (et, en cascade, ses valeurs saisies). */
+export async function deleteAttributeAction(
+  id: string,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  try {
+    await deleteAttribute(id);
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidateGlobalConfig();
+  return { ok: true };
+}
+
+/** Crée ou met à jour une valeur possible d'un attribut. */
+export async function saveAttributeOptionAction(
+  input: AttributeOptionInput,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  const value = String(input.value ?? "").trim();
+  const label = String(input.label ?? "").trim();
+  if (!value) return { ok: false, error: "La valeur est obligatoire." };
+  if (!label) return { ok: false, error: "Le libellé est obligatoire." };
+
+  try {
+    await upsertAttributeOption({
+      ...(input.id ? { id: input.id } : {}),
+      attributeId: input.attributeId,
+      value,
+      label,
+      // `null` = valeur non ordonnée : aucune flèche ↑/↓ ne sera affichée.
+      order: optionalInt(input.order),
+    });
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidateGlobalConfig();
+  return { ok: true };
+}
+
+/** Supprime une valeur possible (et, en cascade, les valeurs des persos). */
+export async function deleteAttributeOptionAction(
+  id: string,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  try {
+    await deleteAttributeOption(id);
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidateGlobalConfig();
+  return { ok: true };
+}
+
+/**
+ * Change l'UNIVERS CIBLÉ par la session d'administration (étape 5).
+ *
+ * Le slug est posé dans un cookie que le middleware applique aux chemins
+ * `/admin` uniquement : toutes les vues et actions de l'admin (roster, draft,
+ * catégories, classements, attributs, config) basculent d'un coup sur cet
+ * univers, sans changer ce que voient les joueurs sur le site public.
+ */
+export async function setAdminUniverseAction(
+  slug: string,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  // L'univers doit être utilisable : ligne en base ET config en code.
+  const available = await listAvailableUniverses();
+  if (!available.some((u) => u.slug === slug)) {
+    return { ok: false, error: "Univers inconnu ou non configuré." };
+  }
+
+  (await cookies()).set(ADMIN_UNIVERSE_COOKIE, slug, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    // Session longue : l'admin retrouve son univers de travail d'un jour à l'autre.
+    maxAge: 60 * 60 * 24 * 30,
+  });
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
 /** Active ou désactive un jeu du catalogue. */
 export async function setGameEnabledAction(
   gameId: string,
@@ -811,7 +974,8 @@ export async function setGameEnabledAction(
     return { ok: false, error: "Jeu inconnu." };
   }
   try {
-    await setConfig(gameEnabledKey(gameId), Boolean(enabled));
+    const slug = await getCurrentUniverseSlug();
+    await setConfig(gameEnabledKey(slug, gameId), Boolean(enabled));
   } catch (e) {
     return { ok: false, error: `Échec : ${(e as Error).message}` };
   }
@@ -836,7 +1000,8 @@ export async function setMaintenanceAction(
     ...(trimmed ? { message: trimmed } : {}),
   };
   try {
-    await setConfig(MAINTENANCE_KEY, value);
+    const slug = await getCurrentUniverseSlug();
+    await setConfig(maintenanceKey(slug), value);
   } catch (e) {
     return { ok: false, error: `Échec : ${(e as Error).message}` };
   }
@@ -868,7 +1033,8 @@ export async function setForcedTargetAction(
     }
   }
   try {
-    await setConfig(FORCED_TARGET_KEY, characterId);
+    const slug = await getCurrentUniverseSlug();
+    await setConfig(forcedTargetKey(slug), characterId);
   } catch (e) {
     return { ok: false, error: `Échec : ${(e as Error).message}` };
   }

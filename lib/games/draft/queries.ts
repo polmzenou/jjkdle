@@ -5,6 +5,7 @@ import type { DraftCharacter, DraftCategoryId, DraftTier } from "./types";
 import { DRAFT_ROSTER } from "./roster";
 import { DRAFT_CATEGORIES } from "./categories";
 import { DRAW_PER_CATEGORY } from "./draw";
+import { MIN_DRAFT_ROSTER, MIN_DRAFT_TIER_C } from "./types";
 
 /**
  * Lecture du roster « Jujutsu Draft » en base (source de vérité éditable depuis
@@ -16,8 +17,9 @@ import { DRAW_PER_CATEGORY } from "./draw";
  * liste maître en code pour que le jeu reste jouable.
  */
 
-export const MIN_DRAFT_ROSTER = 40;
-export const MIN_DRAFT_TIER_C = 8;
+// Seuils définis dans le module PUR (types.ts) pour rester importables côté
+// client ; réexportés ici par commodité pour les appelants serveur.
+export { MIN_DRAFT_ROSTER, MIN_DRAFT_TIER_C };
 
 type DraftRow = {
   id: string;

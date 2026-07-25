@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getBestScore } from "@/lib/bestScore";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getCategories, getRoster } from "@/lib/content/queries";
@@ -9,7 +10,10 @@ import { BuilderGame } from "./BuilderGame";
 import { GameJsonLd } from "@/components/seo/JsonLd";
 import { gameMetadata } from "@/lib/seo/config";
 
-export const metadata = gameMetadata("builder");
+/** Métadonnées de l'univers courant (résolu par hostname). */
+export async function generateMetadata(): Promise<Metadata> {
+  return gameMetadata("builder");
+}
 
 // Le leaderboard lit le fichier à chaque requête (scores à jour).
 export const dynamic = "force-dynamic";

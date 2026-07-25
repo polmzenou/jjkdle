@@ -1,20 +1,27 @@
 import type { MetadataRoute } from "next";
-import { SITE_NAME, SITE_DESCRIPTION } from "@/lib/seo/config";
+import { siteSeo } from "@/lib/seo/config";
+import { getCurrentUniverseConfig } from "@/lib/universes/current";
 
 /**
  * Web App Manifest : rend le site installable (PWA) et renforce le signal
  * « application » (icône, thème). `icon.png` sert les deux tailles déclarées ;
  * remplacer par des icônes dédiées 192/512 améliorera le rendu à l'installation.
+ *
+ * Par UNIVERS : nom, description et couleurs viennent de l'anime servi.
  */
-export default function manifest(): MetadataRoute.Manifest {
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const [seo, universe] = await Promise.all([
+    siteSeo(),
+    getCurrentUniverseConfig(),
+  ]);
   return {
-    name: SITE_NAME + " — Mini-jeux Jujutsu Kaisen",
-    short_name: SITE_NAME,
-    description: SITE_DESCRIPTION,
+    name: seo.title,
+    short_name: seo.name,
+    description: seo.description,
     start_url: "/",
     display: "standalone",
-    background_color: "#0a0a0f",
-    theme_color: "#7c3aed",
+    background_color: universe.theme.surface.s900,
+    theme_color: universe.theme.primary,
     lang: "fr",
     categories: ["games", "entertainment"],
     icons: [
