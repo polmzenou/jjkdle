@@ -599,6 +599,19 @@ model RankingCondition {
   order    String[]
   position Int      @default(0)
 
+  /// `Category.id` dont ce classement est DÉRIVÉ (consigne générée par le bouton
+  /// « Importer les catégories »). `null` = consigne écrite à la main, dont
+  /// `order` fait foi. Pour une dérivée, `order` n'est qu'un cache : le vrai
+  /// classement est recalculé depuis les notes du roster à chaque lecture, si
+  /// bien qu'un rééquilibrage se répercute sans réimport.
+  criterion String?
+
+  /// Arbitrage d'ÉGALITÉS, rang 1→8 : ordre choisi à la main dans l'admin,
+  /// appliqué UNIQUEMENT entre personnages de note identique. Une note tranche
+  /// toujours avant lui — c'est ce qui permet à cet arbitrage de survivre à une
+  /// modification de notes sans jamais la contredire.
+  tiebreak String[]
+
   // Multi-univers (étape 2a). `id` reste la PK globale ; `slug` = clé lisible
   // unique PAR univers (JJK : slug = id).
   slug       String

@@ -1,6 +1,9 @@
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { getCachedImage } from "@/lib/admin/image-cache";
 import { getCurrentUniverse } from "@/lib/universes/current";
+import { deriveRanking } from "@/lib/ranking/derive";
+import { SLOT_COUNT } from "@/data/ranking/conditions";
 import type { CategoryConfig, CategoryId } from "@/data/roster/categories";
 import type { Character, CharacterTier } from "@/data/roster/characters";
 import type { RankingCondition } from "@/data/ranking/conditions";
@@ -86,13 +89,16 @@ export async function getCategories(
   }));
 }
 
-/** Roster complet de l'univers, dans l'ordre d'affichage.
- * `universeId` par défaut = univers courant (cf. getCurrentUniverse) ; un id
- * explicite permet à l'admin de cibler un autre univers (étape 5).
- * On ne sélectionne PAS `imageData` (les octets) : l'image est servie par la
- * route /api/characters/[id]/image, `image` ne porte que l'URL d'affichage. */
-export async function getRoster(universeId?: string): Promise<Character[]> {
-  const uid = universeId ?? (await getCurrentUniverse()).id;
+/**
+ * Roster complet de l'univers, dans l'ordre d'affichage.
+ *
+ * Mémoïsé PAR REQUÊTE (`cache()`) : plusieurs consommateurs le demandent dans un
+ * même rendu — `getCharacterMap`, et `getConditions` depuis que les consignes
+ * Pyramid dérivées se recalculent depuis les notes. Une seule requête suffit.
+ */
+const loadRoster = cache(async (uid: string): Promise<Character[]> => {
+  // On ne sélectionne PAS `imageData` (les octets) : l'image est servie par la
+  // route /api/characters/[id]/image, `image` ne porte que l'URL d'affichage.
   const rows = await prisma.character.findMany({
     where: { universeId: uid },
     orderBy: { position: "asc" },
@@ -108,6 +114,12 @@ export async function getRoster(universeId?: string): Promise<Character[]> {
     },
   });
   return rows.map(toCharacter);
+});
+
+/** `universeId` par défaut = univers courant ; un id explicite permet à l'admin
+ * de cibler un autre univers. */
+export async function getRoster(universeId?: string): Promise<Character[]> {
+  return loadRoster(universeId ?? (await getCurrentUniverse()).id);
 }
 
 /** Roster indexé par id (pour résoudre un personnage côté client du jeu Pyramid). */
@@ -118,7 +130,19 @@ export async function getCharacterMap(
   return Object.fromEntries(roster.map((c) => [c.id, c]));
 }
 
-/** Conditions du jeu Pyramid de l'univers. */
+/**
+ * Consignes du jeu Pyramid de l'univers, PRÊTES À JOUER.
+ *
+ * Une consigne portant un `criterion` est dérivée d'une catégorie du builder :
+ * son classement est recalculé ici depuis les notes du roster, et non lu tel quel
+ * en base — c'est ce qui fait qu'un rééquilibrage dans l'admin se répercute sans
+ * réimport. Le `tiebreak` saisi à la main n'arbitre que les notes égales.
+ *
+ * Une dérivée qui ne réunit plus assez de personnages notés est ÉCARTÉE plutôt
+ * que servie incomplète : `startRankingRun` tire au hasard, il la proposerait
+ * puis abandonnerait sur « Condition invalide (roster incomplet) », laissant le
+ * joueur sur une erreur dont l'admin n'a aucune trace.
+ */
 export async function getConditions(
   universeId?: string,
 ): Promise<RankingCondition[]> {
@@ -127,11 +151,25 @@ export async function getConditions(
     where: { universeId: uid },
     orderBy: { position: "asc" },
   });
-  return rows.map((c) => ({
-    id: c.id,
-    pool: c.pool,
-    category: c.category,
-    prompt: c.prompt,
-    order: c.order,
-  }));
+
+  // Roster chargé une seule fois, et seulement s'il existe des dérivées.
+  const roster = rows.some((c) => c.criterion) ? await getRoster(uid) : [];
+
+  return rows.flatMap((c) => {
+    const base = {
+      id: c.id,
+      pool: c.pool,
+      category: c.category,
+      prompt: c.prompt,
+    };
+    if (!c.criterion) return [{ ...base, order: c.order }];
+
+    const { order } = deriveRanking(
+      roster,
+      c.criterion,
+      c.tiebreak,
+      SLOT_COUNT,
+    );
+    return order.length === SLOT_COUNT ? [{ ...base, order }] : [];
+  });
 }

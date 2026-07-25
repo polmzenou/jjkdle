@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { slugify } from "@/lib/admin/slug";
 import { getCurrentUniverse } from "@/lib/universes/current";
 
 /**
@@ -45,16 +46,6 @@ export interface AdminCategory {
 
 const MAX_WEIGHT = 10;
 const MAX_DRAW_COUNT = 12;
-
-/** `"Contrat démoniaque"` → `"contrat-demoniaque"`. */
-export function slugifyCategory(label: string): string {
-  return label
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
 
 /**
  * Catégories de l'univers courant, avec leur usage dans le roster.
@@ -130,7 +121,7 @@ export async function upsertCategory(input: CategoryInput): Promise<void> {
     return;
   }
 
-  const slug = slugifyCategory(label);
+  const slug = slugify(label);
   if (!slug) throw new Error("Le libellé ne produit aucun identifiant lisible.");
 
   const max = await prisma.category.aggregate({
@@ -177,6 +168,10 @@ export async function deleteCategory(id: string): Promise<void> {
 
   await prisma.$transaction([
     prisma.category.delete({ where: { id } }),
+    // Les consignes Pyramid DÉRIVÉES de cette catégorie n'ont plus de critère :
+    // les laisser ferait des consignes qui pointent dans le vide, écartées en
+    // silence du jeu et incompréhensibles dans l'admin.
+    prisma.rankingCondition.deleteMany({ where: { universeId, criterion: id } }),
     ...characters.flatMap((c) => {
       const ratings = { ...((c.ratings ?? {}) as Record<string, number>) };
       if (!(id in ratings)) return [];

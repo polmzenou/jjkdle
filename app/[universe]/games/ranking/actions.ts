@@ -25,8 +25,9 @@ import type { RankingCardData } from "./types";
  * Le classement correct (`order`) n'est JAMAIS envoyé au client tant que la partie
  * n'est pas résolue, et les cartes envoyées ne portent AUCUNE statistique (sinon
  * un joueur pourrait re-trier par la stat du critère). L'état de partie
- * (condition + n° de tentative) vit dans un cookie SCELLÉ (chiffré + authentifié)
- * → ni lisible ni falsifiable. Le score est calculé ici, jamais fourni par le client.
+ * (condition, n° de tentative et classement figé) vit dans un cookie SCELLÉ
+ * (chiffré + authentifié) → ni lisible ni falsifiable. Le score est calculé ici,
+ * jamais fourni par le client.
  */
 
 const COOKIE = "ranking_run";
@@ -36,6 +37,20 @@ interface RankingSession {
   conditionId: string;
   /** Tentative courante (1-based). */
   attempt: number;
+  /**
+   * Classement correct FIGÉ au démarrage de la partie.
+   *
+   * Les consignes dérivées d'une catégorie se recalculent à chaque lecture depuis
+   * les notes du roster : sans ce gel, une note éditée dans l'admin pendant une
+   * partie déplacerait le bon classement sous les pieds du joueur — positions
+   * déjà verrouillées devenues fausses, ou placement carrément rejeté si un
+   * personnage a quitté le top 8. Le cookie étant chiffré et authentifié, y
+   * garder l'ordre ne le révèle pas.
+   *
+   * Optionnel : un cookie posé avant cette version n'en a pas, on retombe alors
+   * sur la relecture de la consigne plutôt que d'invalider la partie.
+   */
+  order?: string[];
 }
 
 export type RankingStartResult =
@@ -117,7 +132,11 @@ export async function startRankingRun(): Promise<RankingStartResult> {
     return { ok: false, error: "Condition invalide (roster incomplet)." };
   }
 
-  await writeSession({ conditionId: condition.id, attempt: 1 });
+  await writeSession({
+    conditionId: condition.id,
+    attempt: 1,
+    order: condition.order,
+  });
 
   return {
     ok: true,
@@ -149,6 +168,10 @@ export async function checkRankingRun(
     (await cookies()).delete(COOKIE);
     return { ok: false, error: "Partie invalide, relance une partie.", needsRestart: true };
   }
+  // Le classement de la partie EN COURS est celui figé au démarrage, pas celui
+  // que la consigne donnerait maintenant (cf. `RankingSession.order`).
+  const correctOrder =
+    session.order?.length === SLOT_COUNT ? session.order : condition.order;
 
   // Validation stricte du placement : 8 ids, tous distincts, exactement l'ensemble
   // des personnages de la condition (aucune injection possible).
@@ -160,7 +183,7 @@ export async function checkRankingRun(
     return { ok: false, error: "Placement invalide." };
   }
   const placed = placement as string[];
-  const expected = new Set(condition.order);
+  const expected = new Set(correctOrder);
   if (
     new Set(placed).size !== SLOT_COUNT ||
     placed.some((id) => !expected.has(id))
@@ -168,7 +191,7 @@ export async function checkRankingRun(
     return { ok: false, error: "Placement invalide." };
   }
 
-  const flags = checkPlacement(placed, condition.order);
+  const flags = checkPlacement(placed, correctOrder);
 
   if (isComplete(flags)) {
     const score = scoreForAttempt(session.attempt);
@@ -184,7 +207,7 @@ export async function checkRankingRun(
         status: "won",
         flags,
         score,
-        order: condition.order,
+        order: correctOrder,
         bestScore: best,
         isNewRecord,
         gainedExp: null,
@@ -207,7 +230,7 @@ export async function checkRankingRun(
       status: "won",
       flags,
       score,
-      order: condition.order,
+      order: correctOrder,
       bestScore: best,
       isNewRecord,
       gainedExp: gained,
@@ -220,9 +243,15 @@ export async function checkRankingRun(
   const nextAttempt = session.attempt + 1;
   if (nextAttempt > MAX_ATTEMPTS) {
     (await cookies()).delete(COOKIE);
-    return { ok: true, status: "lost", flags, order: condition.order };
+    return { ok: true, status: "lost", flags, order: correctOrder };
   }
 
-  await writeSession({ conditionId: session.conditionId, attempt: nextAttempt });
+  // `correctOrder` est REPORTÉ : l'oublier ici ferait re-dériver le classement à
+  // la tentative suivante, et le gel du démarrage n'aurait servi à rien.
+  await writeSession({
+    conditionId: session.conditionId,
+    attempt: nextAttempt,
+    order: correctOrder,
+  });
   return { ok: true, status: "playing", flags, attempt: nextAttempt };
 }

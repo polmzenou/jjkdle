@@ -24,6 +24,7 @@ import {
 } from "@/lib/universes/current";
 import { listAttributes } from "@/lib/admin/attribute-store";
 import { listCategories } from "@/lib/admin/category-store";
+import { listRankingConditions } from "@/lib/admin/ranking-store";
 import type { Character } from "@/data/roster/characters";
 import type { DraftCharacter } from "@/lib/games/draft/types";
 import { AdminDashboard } from "./AdminDashboard";
@@ -71,10 +72,11 @@ export default async function AdminPage({
       loadAttributeSchema(),
       listAvailableUniverses(),
     ]);
-  // Attributs et catégories de l'univers administré (onglets dédiés).
-  const [attributes, adminCategories] = await Promise.all([
+  // Attributs, catégories et consignes Pyramid de l'univers administré.
+  const [attributes, adminCategories, rankingConditions] = await Promise.all([
     listAttributes(),
     listCategories(),
+    listRankingConditions(),
   ]);
   // Univers administré : le middleware l'a déjà appliqué à toutes les lectures
   // ci-dessus (cf. lib/universes/admin-scope.ts) ; on ne lit ici que son slug
@@ -124,6 +126,7 @@ export default async function AdminPage({
       }
       attributes={attributes}
       adminCategories={adminCategories}
+      rankingConditions={rankingConditions}
       draftRoster={draftRoster}
       categories={categories}
       scores={[

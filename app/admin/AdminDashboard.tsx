@@ -38,8 +38,10 @@ import {
 } from "./UniverseSwitcher";
 import { AttributesAdmin } from "./AttributesAdmin";
 import { CategoriesAdmin } from "./CategoriesAdmin";
+import { PyramidAdmin } from "./PyramidAdmin";
 import type { AdminAttribute } from "@/lib/admin/attribute-store";
 import type { AdminCategory } from "@/lib/admin/category-store";
+import type { AdminRankingCondition } from "@/lib/admin/ranking-store";
 import type { OverviewStats } from "@/lib/admin/analytics";
 import type { JjkdleAnalytics } from "@/lib/admin/jjkdle-analytics";
 import type { MaintenanceConfig } from "@/lib/config/app-config";
@@ -104,6 +106,8 @@ interface AdminDashboardProps {
   attributes: AdminAttribute[];
   /** Catégories du builder de l'univers administré (onglet Catégories). */
   adminCategories: AdminCategory[];
+  /** Consignes du Pyramid de l'univers administré (onglet Pyramid). */
+  rankingConditions: AdminRankingCondition[];
 }
 
 type Tab =
@@ -113,6 +117,7 @@ type Tab =
   | "jjkdle"
   | "attributes"
   | "categories"
+  | "pyramid"
   | "draft"
   | "leaderboard"
   | "users"
@@ -130,6 +135,7 @@ const TAB_LABELS: Record<Tab, string> = {
   jjkdle: "Analytics JJKdle",
   attributes: "Attributs",
   categories: "Catégories",
+  pyramid: "Pyramid",
   draft: "Jujutsu Draft",
   leaderboard: "Leaderboard",
   users: "Utilisateurs",
@@ -140,26 +146,32 @@ const TAB_LABELS: Record<Tab, string> = {
 function useTabLabels(): Record<Tab, string> {
   const dailyTitle = useGameTitle("jjkdle");
   const draftTitle = useGameTitle("jujutsu-draft");
+  const rankingTitle = useGameTitle("ranking");
   return useMemo(
     () => ({
       ...TAB_LABELS,
       jjkdle: `Analytics ${dailyTitle}`,
       draft: draftTitle,
+      pyramid: rankingTitle,
     }),
-    [dailyTitle, draftTitle],
+    [dailyTitle, draftTitle, rankingTitle],
   );
 }
-const TAB_ORDER: Tab[] = [
-  "overview",
-  "roster",
-  "content",
-  "jjkdle",
-  "attributes",
-  "categories",
-  "draft",
-  "leaderboard",
-  "users",
-  "config",
+/**
+ * Onglets regroupés par NATURE, et non plus alignés sur une seule rangée : à 11
+ * onglets la barre débordait de l'écran à droite. Deux familles, qui ne se
+ * consultent pas dans les mêmes moments — on écrit du contenu de jeu, ou on
+ * regarde tourner la plateforme.
+ */
+const TAB_GROUPS: { label: string; tabs: Tab[] }[] = [
+  {
+    label: "Contenu des jeux",
+    tabs: ["roster", "categories", "pyramid", "draft", "attributes"],
+  },
+  {
+    label: "Pilotage",
+    tabs: ["overview", "content", "jjkdle", "leaderboard", "users", "config"],
+  },
 ];
 
 function slugify(s: string): string {
@@ -191,6 +203,7 @@ export function AdminDashboard({
   universeName,
   attributes,
   adminCategories,
+  rankingConditions,
 }: AdminDashboardProps) {
   const router = useRouter();
   // Les appels d'API doivent porter l'univers ADMINISTRÉ (cf. admin/layout.tsx),
@@ -201,6 +214,8 @@ export function AdminDashboard({
   const dailyTitle = useGameTitle("jjkdle");
   const [pending, startTransition] = useTransition();
   const [tab, setTab] = useState<Tab>("overview");
+  /** Menu de navigation déplié (mobile/tablette uniquement — toujours ouvert ≥ lg). */
+  const [navOpen, setNavOpen] = useState(false);
   // Schéma d'attributs de l'univers courant : complétude, libellés, options.
   const attributeSchema = useMemo(
     () => buildAttributeSchema(attributeColumns),
@@ -508,6 +523,7 @@ export function AdminDashboard({
     jjkdle: `Jour ${jjkdleAnalytics.date}`,
     attributes: `${attributes.length} attribut(s) · ${universeName}`,
     categories: `${adminCategories.length} catégorie(s) · ${universeName}`,
+    pyramid: `${rankingConditions.length} consigne(s) · ${universeName}`,
     draft: `${draftRoster.length} personnages (draft)`,
     leaderboard: `${scores.length} scores`,
     config: "Feature flags & maintenance",
@@ -516,7 +532,7 @@ export function AdminDashboard({
   const subtitle = SUBTITLES[tab];
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       {/* En-tête */}
       <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -558,22 +574,55 @@ export function AdminDashboard({
         </div>
       </header>
 
-      {/* Onglets */}
-      <div className="mb-6 flex w-fit gap-1 rounded-xl border border-white/10 bg-void-800/40 p-1">
-        {TAB_ORDER.map((t) => (
+      <div className="lg:grid lg:grid-cols-[210px_minmax(0,1fr)] lg:gap-8">
+        {/* ── Navigation : colonne collante ≥ lg, menu dépliant en dessous ── */}
+        <nav className="mb-6 lg:mb-0">
+          {/* Mobile / tablette : un seul bouton, qui déplie le même arbre. */}
           <button
-            key={t}
             type="button"
-            onClick={() => setTab(t)}
-            className={`rounded-lg px-4 py-1.5 font-display text-sm font-bold uppercase tracking-wide transition-colors ${
-              tab === t ? "bg-domain text-white" : "text-white/55 hover:text-white"
-            }`}
+            onClick={() => setNavOpen((o) => !o)}
+            aria-expanded={navOpen}
+            className="flex w-full items-center justify-between gap-3 rounded-xl border border-white/10 bg-void-800/40 px-4 py-2.5 lg:hidden"
           >
-            {tabLabels[t]}
+            <span className="font-display text-sm font-bold uppercase tracking-wide text-white">
+              {tabLabels[tab]}
+            </span>
+            <span className="text-white/40">{navOpen ? "▲" : "▼"}</span>
           </button>
-        ))}
-      </div>
 
+          <div
+            className={`${navOpen ? "mt-2" : "hidden"} space-y-4 rounded-xl border border-white/10 bg-void-800/40 p-2 lg:sticky lg:top-6 lg:mt-0 lg:block`}
+          >
+            {TAB_GROUPS.map((group) => (
+              <div key={group.label}>
+                <p className="px-2 pb-1 pt-1 text-[10px] font-bold uppercase tracking-wider text-white/30">
+                  {group.label}
+                </p>
+                <div className="space-y-0.5">
+                  {group.tabs.map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => {
+                        setTab(t);
+                        setNavOpen(false); // referme le menu mobile
+                      }}
+                      className={`block w-full truncate rounded-lg px-3 py-1.5 text-left font-display text-sm font-bold uppercase tracking-wide transition-colors ${
+                        tab === t
+                          ? "bg-domain text-white"
+                          : "text-white/55 hover:bg-white/5 hover:text-white"
+                      }`}
+                    >
+                      {tabLabels[t]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </nav>
+
+        <div className="min-w-0">
       {tab === "overview" && (
         <OverviewAdmin stats={overview} onGotoContent={() => setTab("content")} />
       )}
@@ -595,6 +644,14 @@ export function AdminDashboard({
       {tab === "categories" && (
         <CategoriesAdmin
           categories={adminCategories}
+          universeName={universeName}
+        />
+      )}
+
+      {tab === "pyramid" && (
+        <PyramidAdmin
+          conditions={rankingConditions}
+          roster={roster}
           universeName={universeName}
         />
       )}
@@ -1060,6 +1117,8 @@ export function AdminDashboard({
       </div>
         </>
       )}
+        </div>
+      </div>
 
       {previewChar && (
         <CharacterPreviewModal
