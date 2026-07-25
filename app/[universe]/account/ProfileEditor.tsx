@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { CharacterImage } from "@/components/CharacterImage";
 import { UserAvatar } from "@/components/UserAvatar";
+import { useUniverseHref } from "@/components/universe/UniverseProvider";
 import {
   BANNER_PALETTE,
   bannerKeysForUniverse,
@@ -46,6 +47,7 @@ export function ProfileEditor({
   universeSlug,
 }: ProfileEditorProps) {
   const router = useRouter();
+  const withUniverse = useUniverseHref();
   const [pending, startTransition] = useTransition();
   // Bannières proposées : celles de l'univers courant (+ la neutre `default`).
   const bannerKeys = useMemo(
@@ -73,7 +75,7 @@ export function ProfileEditor({
   const save = (patch: { bannerKey?: string; avatarCharacterId?: string | null }) => {
     setFeedback(null);
     startTransition(async () => {
-      const res = await fetch("/api/profile", {
+      const res = await fetch(withUniverse("/api/profile"), {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(patch),

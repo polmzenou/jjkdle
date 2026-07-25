@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Game } from "@/lib/games/types";
+import { UniverseLink } from "@/components/universe/UniverseLink";
 
 interface MultiplayerPickerProps {
   /** Jeux disposant d'un mode multi (déjà filtrés côté serveur depuis le registre). */
@@ -133,13 +133,13 @@ export function MultiplayerPicker({ games }: MultiplayerPickerProps) {
                   return (
                     <li key={game.id}>
                       {ready ? (
-                        <Link
+                        <UniverseLink
                           href={game.multiplayer!.route!}
                           onClick={() => setOpen(false)}
                           className={`${base} transition-colors hover:border-white/25 hover:bg-void-900`}
                         >
                           {body}
-                        </Link>
+                        </UniverseLink>
                       ) : (
                         <div
                           className={`${base} cursor-not-allowed opacity-60`}

@@ -1,7 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { revalidatePath } from "next/cache";
+import { revalidateUniversePath } from "@/lib/universes/current";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getConditions, getCharacterMap } from "@/lib/content/queries";
 import { seal, unseal } from "@/lib/games/seal";
@@ -200,7 +200,7 @@ export async function checkRankingRun(
     );
     await saveScore(user.id, "ranking", score);
     const { newBadges: recordBadges } = await refreshLevelAndBadges(user.id);
-    revalidatePath("/games/ranking");
+    await revalidateUniversePath("/games/ranking");
 
     return {
       ok: true,

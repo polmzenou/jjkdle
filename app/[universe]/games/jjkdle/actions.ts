@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateUniversePath } from "@/lib/universes/current";
 import { getRoster } from "@/lib/content/queries";
 import { getAdminUser, getCurrentUser } from "@/lib/auth/session";
 import {
@@ -236,7 +236,7 @@ export async function submitJjkdleScoreAction(): Promise<{
     }
     // Le score du jour peut débloquer un badge (ex. IDLE_MASTER au 1er essai).
     const { newBadges } = await refreshLevelAndBadges(user.id);
-    revalidatePath("/games/jjkdle");
+    await revalidateUniversePath("/games/jjkdle");
     return { ok: true, newBadges };
   } catch (e) {
     return { ok: false, error: `Échec d'enregistrement : ${(e as Error).message}` };

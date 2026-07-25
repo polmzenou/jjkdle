@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getUserScores } from "@/lib/leaderboard/store";
 import { getUserDraftScore } from "@/lib/games/draft/store";
@@ -29,6 +28,7 @@ import { GAMES } from "@/lib/games/registry";
 import { prisma } from "@/lib/prisma";
 import { AccountForms } from "./AccountForms";
 import { ProfileEditor, type AvatarChoice } from "./ProfileEditor";
+import { UniverseLink } from "@/components/universe/UniverseLink";
 
 export const metadata: Metadata = {
   title: "Mon compte",
@@ -90,8 +90,12 @@ export default async function AccountPage() {
   ]);
 
   const isAdmin = user.role === "ADMIN";
-  const unlockedTitleKeys = [...getUnlockedTitleKeys(unlockCtx, titleGrantKeys)];
-  const unlockedFrameKeys = [...getUnlockedFrameKeys(unlockCtx, frameGrantKeys)];
+  const unlockedTitleKeys = [
+    ...getUnlockedTitleKeys(unlockCtx, titleGrantKeys),
+  ];
+  const unlockedFrameKeys = [
+    ...getUnlockedFrameKeys(unlockCtx, frameGrantKeys),
+  ];
 
   const avatarChoices: AvatarChoice[] = roster.map((c) => ({
     id: c.id,
@@ -115,19 +119,24 @@ export default async function AccountPage() {
   // reste globale, mais on ne compte que ce qui est gagnable ici).
   const badgeTotal = badgesForUniverse(universe.slug).length;
   const badgeCount = badgeKeys.length;
-  const badgePct = badgeTotal > 0 ? Math.round((badgeCount / badgeTotal) * 100) : 0;
+  const badgePct =
+    badgeTotal > 0 ? Math.round((badgeCount / badgeTotal) * 100) : 0;
   const bestRanked = scores.length
     ? scores.reduce((best, s) => (s.rank < best.rank ? s : best))
     : null;
   const bestRankGame = bestRanked
-    ? GAMES.find((g) => g.id === bestRanked.gameId)?.title ?? bestRanked.gameId
+    ? (GAMES.find((g) => g.id === bestRanked.gameId)?.title ??
+      bestRanked.gameId)
     : null;
 
   return (
     <main className="mx-auto w-full max-w-4xl px-5 py-10 sm:px-6 sm:py-16">
       <header className="mb-12">
         <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.3em] text-domain-light/70">
-          <span aria-hidden className="h-px w-6 bg-gradient-to-r from-transparent to-domain-light/60" />
+          <span
+            aria-hidden
+            className="h-px w-6 bg-gradient-to-r from-transparent to-domain-light/60"
+          />
           管理 · Mon compte
         </span>
 
@@ -161,7 +170,10 @@ export default async function AccountPage() {
                   {user.role === "VIP" && <VipBadge className="text-sm" />}
                 </h1>
                 {prof?.equippedTitleKey && (
-                  <TitleBadge titleKey={prof.equippedTitleKey} className="mt-2 text-sm" />
+                  <TitleBadge
+                    titleKey={prof.equippedTitleKey}
+                    className="mt-2 text-sm"
+                  />
                 )}
               </div>
             </div>
@@ -175,18 +187,18 @@ export default async function AccountPage() {
 
         {/* Actions profil (boutons pilule) */}
         <div className="mt-4 flex flex-wrap gap-3">
-          <Link
+          <UniverseLink
             href={`/u/${encodeURIComponent(user.username)}`}
             className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-void-800/60 px-4 py-2 text-sm font-medium text-white/80 backdrop-blur transition-colors hover:border-domain/50 hover:text-white"
           >
             Voir mon profil public <span aria-hidden>↗</span>
-          </Link>
-          <Link
+          </UniverseLink>
+          <UniverseLink
             href="/account/customize"
             className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-void-800/60 px-4 py-2 text-sm font-medium text-white/80 backdrop-blur transition-colors hover:border-domain/50 hover:text-white"
           >
             🎛️ Customiser mon profil
-          </Link>
+          </UniverseLink>
         </div>
       </header>
 
@@ -227,11 +239,15 @@ export default async function AccountPage() {
               <p className="mt-3 font-display text-3xl font-black text-white">
                 #{bestRanked.rank}
               </p>
-              <p className="mt-1 truncate text-xs text-white/40">{bestRankGame}</p>
+              <p className="mt-1 truncate text-xs text-white/40">
+                {bestRankGame}
+              </p>
             </>
           ) : (
             <>
-              <p className="mt-3 font-display text-3xl font-black text-white/30">—</p>
+              <p className="mt-3 font-display text-3xl font-black text-white/30">
+                —
+              </p>
               <p className="mt-1 text-xs text-white/40">Pas encore classé</p>
             </>
           )}
@@ -249,13 +265,13 @@ export default async function AccountPage() {
             <p className="text-white/55">
               Tu n'as pas encore de score enregistré.
             </p>
-            <Link
+            <UniverseLink
               href="/games"
               className="mt-5 inline-flex items-center gap-2 rounded-full bg-domain px-6 py-2.5 font-display text-sm font-bold uppercase tracking-wider text-white shadow-glow transition-transform hover:scale-105"
             >
               Jouer maintenant
               <span aria-hidden>→</span>
-            </Link>
+            </UniverseLink>
           </div>
         ) : (
           <ScoreCards scores={scores} />

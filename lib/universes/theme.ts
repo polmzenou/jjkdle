@@ -54,14 +54,44 @@ export function themeCssVars(theme: UniverseTheme): Record<string, string> {
   };
 }
 
+/** Sérialise des variables CSS en bloc `:root { … }`. */
+function rootBlock(vars: Record<string, string>): string {
+  return `:root{${Object.entries(vars)
+    .map(([name, value]) => `${name}:${value}`)
+    .join(";")}}`;
+}
+
 /**
  * Bloc CSS `:root { … }` du thème d'un univers, à injecter dans un `<style>` du
  * layout racine. Sert de source unique : la page rend le thème AVANT le premier
  * paint, donc aucun flash de couleurs par défaut.
  */
 export function themeCss(config: UniverseConfig): string {
-  const vars = Object.entries(themeCssVars(config.theme))
-    .map(([name, value]) => `${name}:${value}`)
-    .join(";");
-  return `:root{${vars}}`;
+  return rootBlock(themeCssVars(config.theme));
+}
+
+/**
+ * Palette NEUTRE du hub : la page de choix d'univers ne doit porter la marque
+ * d'AUCUN anime. On garde les surfaces sombres (cohérence de la plateforme) mais
+ * un accent désaturé — chaque carte d'univers injecte ensuite sa propre palette.
+ */
+const HUB_THEME: Record<string, string> = {
+  "--color-domain": "100 116 139", // slate-500
+  "--color-domain-light": "148 163 184", // slate-400
+  "--color-domain-dark": "51 65 85", // slate-700
+  "--color-cursed": "120 113 108", // stone-500
+  "--color-cursed-light": "168 162 158", // stone-400
+  "--color-cursed-dark": "68 64 60", // stone-700
+  "--color-void": "9 9 11",
+  "--color-void-900": "9 9 11",
+  "--color-void-800": "24 24 27",
+  "--color-void-700": "39 39 42",
+  "--color-void-600": "63 63 70",
+  "--glow": "0 0 20px rgb(100 116 139 / 0.35)",
+  "--glow-accent": "0 0 20px rgb(120 113 108 / 0.35)",
+};
+
+/** Bloc CSS du thème neutre du hub. */
+export function hubThemeCss(): string {
+  return rootBlock(HUB_THEME);
 }

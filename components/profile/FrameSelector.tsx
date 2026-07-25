@@ -8,7 +8,7 @@ import {
 } from "@/lib/frames/definitions";
 import { rarityStyle } from "@/lib/profile/rarity";
 import { UserAvatar } from "@/components/UserAvatar";
-import { equipFrameAction } from "@/app/account/actions";
+import { equipFrameAction } from "@/app/[universe]/account/actions";
 
 interface FrameSelectorProps {
   username: string;

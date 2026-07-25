@@ -1,7 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { revalidatePath } from "next/cache";
+import { revalidateUniversePath } from "@/lib/universes/current";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getCategories, getRoster } from "@/lib/content/queries";
 import type { CategoryId } from "@/data/roster/categories";
@@ -178,7 +178,7 @@ export async function lockBuilderCategory(
     );
     await saveScore(user.id, "builder", score);
     const { newBadges: recordBadges } = await refreshLevelAndBadges(user.id);
-    revalidatePath("/games/builder");
+    await revalidateUniversePath("/games/builder");
 
     return {
       ok: true,

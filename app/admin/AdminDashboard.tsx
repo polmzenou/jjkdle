@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useUniverseHref } from "@/components/universe/UniverseProvider";
 import type { CategoryConfig, CategoryId } from "@/data/roster/categories";
 import type { Character, CharacterTier } from "@/data/roster/characters";
 import { CharacterImage } from "@/components/CharacterImage";
@@ -34,6 +34,7 @@ import type { AdminAttribute } from "@/lib/admin/attribute-store";
 import type { OverviewStats } from "@/lib/admin/analytics";
 import type { JjkdleAnalytics } from "@/lib/admin/jjkdle-analytics";
 import type { MaintenanceConfig } from "@/lib/config/app-config";
+import { UniverseLink } from "@/components/universe/UniverseLink";
 import {
   attributeDisplayFor,
   buildAttributeSchema,
@@ -158,6 +159,9 @@ export function AdminDashboard({
   attributes,
 }: AdminDashboardProps) {
   const router = useRouter();
+  // Les appels d'API doivent porter l'univers ADMINISTRÉ (cf. admin/layout.tsx),
+  // sinon le middleware les résout sur le dernier univers VISITÉ.
+  const withUniverse = useUniverseHref();
   const [pending, startTransition] = useTransition();
   const [tab, setTab] = useState<Tab>("overview");
   // Schéma d'attributs de l'univers courant : complétude, libellés, options.
@@ -309,7 +313,7 @@ export function AdminDashboard({
         if (imageFile) {
           const fd = new FormData();
           fd.append("file", imageFile);
-          const up = await fetch(`/api/characters/${char.id}/image`, {
+          const up = await fetch(withUniverse(`/api/characters/${char.id}/image`), {
             method: "POST",
             body: fd,
           });
@@ -323,7 +327,7 @@ export function AdminDashboard({
             return;
           }
         } else if (imageRemoved) {
-          await fetch(`/api/characters/${char.id}/image`, { method: "DELETE" });
+          await fetch(withUniverse(`/api/characters/${char.id}/image`), { method: "DELETE" });
         }
       } catch {
         setFeedback({
@@ -481,12 +485,19 @@ export function AdminDashboard({
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <UniverseSwitcher universes={universes} current={currentUniverse} />
-          <Link
+          {/* Gestion des univers eux-mêmes (créer/renommer/supprimer). */}
+          <a
+            href="/admin/universes"
+            className="rounded-lg border border-domain/40 bg-domain/10 px-3 py-1.5 text-sm font-semibold text-domain-light hover:bg-domain/20"
+          >
+            Univers
+          </a>
+          <UniverseLink
             href="/"
             className="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-white/60 hover:text-white"
           >
             ← Site
-          </Link>
+          </UniverseLink>
           <a
             href="/admin/graph"
             target="_blank"

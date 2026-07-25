@@ -48,7 +48,10 @@ export default async function UniversesHubPage() {
             return (
               <li key={slug}>
                 <Link
-                  href={`https://${config.domains[0]}`}
+                  // Lien INTERNE : l'univers est un préfixe de chemin, donc la
+                  // même URL fonctionne en local comme en prod (plus de renvoi
+                  // vers un domaine de production depuis le dev).
+                  href={`/${slug}`}
                   className="group flex h-full flex-col gap-4 rounded-2xl border p-5 transition-transform hover:scale-[1.02]"
                   style={{
                     ...vars,
@@ -72,7 +75,7 @@ export default async function UniversesHubPage() {
                     </p>
                   </div>
                   <p className="mt-auto text-xs font-semibold uppercase tracking-wider text-white/40 group-hover:text-white/70">
-                    {config.domains[0]} →
+                    Entrer →
                   </p>
                 </Link>
               </li>

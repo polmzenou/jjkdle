@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { getCurrentUser } from "@/lib/auth/session";
 import { isTitleKey, isTitleInUniverse } from "@/lib/titles/definitions";
@@ -11,7 +10,10 @@ import {
   isFrameUnlocked,
 } from "@/lib/cosmetics/unlock";
 import { getTitleGrantKeys, getFrameGrantKeys } from "@/lib/cosmetics/grants";
-import { getCurrentUniverse } from "@/lib/universes/current";
+import {
+  getCurrentUniverse,
+  revalidateUniversePath,
+} from "@/lib/universes/current";
 import { updateUniverseLoadout } from "@/lib/universes/profile";
 import { normalizeProfileLayout, type ProfileLayout } from "@/lib/profile/layout";
 
@@ -53,8 +55,8 @@ export async function equipTitleAction(
     { equippedTitleKey: titleKey },
     universe.id,
   );
-  revalidatePath("/account");
-  revalidatePath(`/u/${encodeURIComponent(user.username)}`);
+  await revalidateUniversePath("/account");
+  await revalidateUniversePath(`/u/${encodeURIComponent(user.username)}`);
   return { ok: true };
 }
 
@@ -91,8 +93,8 @@ export async function equipFrameAction(
     { equippedFrameKey: frameKey },
     universe.id,
   );
-  revalidatePath("/account");
-  revalidatePath(`/u/${encodeURIComponent(user.username)}`);
+  await revalidateUniversePath("/account");
+  await revalidateUniversePath(`/u/${encodeURIComponent(user.username)}`);
   return { ok: true };
 }
 
@@ -114,7 +116,7 @@ export async function updateProfileLayoutAction(
   await updateUniverseLoadout(user.id, {
     profileLayout: normalized as unknown as Prisma.InputJsonValue,
   });
-  revalidatePath("/account/customize");
-  revalidatePath(`/u/${encodeURIComponent(user.username)}`);
+  await revalidateUniversePath("/account/customize");
+  await revalidateUniversePath(`/u/${encodeURIComponent(user.username)}`);
   return { ok: true };
 }

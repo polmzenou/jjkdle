@@ -1,6 +1,9 @@
 import { GAMES, getGame } from "@/lib/games/registry";
 import { siteSeo, absoluteUrl } from "@/lib/seo/config";
-import { getCurrentUniverseConfig } from "@/lib/universes/current";
+import {
+  getCurrentUniverseConfig,
+  universeHref,
+} from "@/lib/universes/current";
 
 /**
  * Données structurées schema.org (JSON-LD). Aident Google à comprendre le site
@@ -31,7 +34,8 @@ function bcp47(locale: string): string {
 export async function SiteJsonLd() {
   const seo = await siteSeo();
   const universe = await getCurrentUniverseConfig();
-  const SITE_URL = seo.url;
+  // L'entité « site » d'un univers est sa landing (/jjk), pas la racine (le hub).
+  const SITE_URL = await absoluteUrl(await universeHref("/"));
   const data = {
     "@context": "https://schema.org",
     "@graph": [
@@ -71,7 +75,7 @@ export async function GameJsonLd({ id }: { id: string }) {
     "@type": "VideoGame",
     name: game.title,
     description: game.description,
-    url: await absoluteUrl(game.route),
+    url: await absoluteUrl(await universeHref(game.route)),
     image: game.previewImage ? await absoluteUrl(game.previewImage) : undefined,
     genre: "Anime fan game",
     gamePlatform: "Web browser",
@@ -99,9 +103,11 @@ export async function GamesListJsonLd() {
   const liveGames = GAMES.filter((g) => g.status !== "coming-soon");
   const seo = await siteSeo();
   const universe = await getCurrentUniverseConfig();
-  const gamesUrl = await absoluteUrl("/games");
+  const gamesUrl = await absoluteUrl(await universeHref("/games"));
   // Une seule résolution d'URL par jeu (absoluteUrl est asynchrone).
-  const gameUrls = await Promise.all(liveGames.map((g) => absoluteUrl(g.route)));
+  const gameUrls = await Promise.all(
+    liveGames.map(async (g) => absoluteUrl(await universeHref(g.route))),
+  );
   const data = {
     "@context": "https://schema.org",
     "@graph": [

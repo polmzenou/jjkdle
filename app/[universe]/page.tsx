@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { GameShowcase } from "@/components/landing/GameShowcase";
 import { MangaDecor } from "@/components/landing/MangaDecor";
 import { GAMES } from "@/lib/games/registry";
 import { getCurrentUniverseConfig } from "@/lib/universes/current";
+import { UniverseLink } from "@/components/universe/UniverseLink";
 
 const liveCount = GAMES.filter((g) => g.status !== "coming-soon").length;
 
@@ -30,7 +30,10 @@ export default async function HomePage() {
         <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 text-xs font-medium uppercase tracking-[0.25em] text-domain-light backdrop-blur">
           <span className="h-1.5 w-1.5 animate-glow-pulse rounded-full bg-domain-light" />
           {universe.sourceWork} · Fan Arcade
-          <span aria-hidden className="font-display text-sm leading-none text-domain-light/70">
+          <span
+            aria-hidden
+            className="font-display text-sm leading-none text-domain-light/70"
+          >
             呪
           </span>
         </span>
@@ -50,19 +53,19 @@ export default async function HomePage() {
         </p>
 
         <div className="mt-9 flex flex-col items-center gap-3 sm:flex-row">
-          <Link
+          <UniverseLink
             href="/games"
             className="inline-flex items-center gap-2 rounded-full bg-domain px-7 py-3 font-display text-sm font-bold uppercase tracking-wider text-white shadow-glow transition-transform hover:scale-105"
           >
             Voir les jeux
             <span aria-hidden>→</span>
-          </Link>
-          <Link
+          </UniverseLink>
+          <UniverseLink
             href="/games/builder"
             className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.03] px-7 py-3 font-display text-sm font-bold uppercase tracking-wider text-white/80 backdrop-blur transition-colors hover:border-white/30 hover:text-white"
           >
             Build the Perfect Sorcerer
-          </Link>
+          </UniverseLink>
         </div>
 
         {/* Bandeau de stats */}
@@ -87,9 +90,15 @@ export default async function HomePage() {
       <section className="mx-auto w-full max-w-5xl px-6 py-16 sm:py-24">
         <div className="mb-14 text-center">
           <span className="mb-3 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.3em] text-domain-light/70">
-            <span aria-hidden className="h-px w-6 bg-gradient-to-r from-transparent to-domain-light/60" />
+            <span
+              aria-hidden
+              className="h-px w-6 bg-gradient-to-r from-transparent to-domain-light/60"
+            />
             遊技 · Arcade
-            <span aria-hidden className="h-px w-6 bg-gradient-to-l from-transparent to-domain-light/60" />
+            <span
+              aria-hidden
+              className="h-px w-6 bg-gradient-to-l from-transparent to-domain-light/60"
+            />
           </span>
           <h2 className="font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
             Liste des jeux
@@ -128,13 +137,13 @@ export default async function HomePage() {
             Choisis ton jeu et lance-toi. Aucun compte, juste ton score à
             battre.
           </p>
-          <Link
+          <UniverseLink
             href="/games"
             className="relative mt-8 inline-flex items-center gap-2 rounded-full bg-domain px-8 py-3.5 font-display text-sm font-bold uppercase tracking-wider text-white shadow-glow transition-transform hover:scale-105"
           >
             Entrer dans l'arcade
             <span aria-hidden>→</span>
-          </Link>
+          </UniverseLink>
         </div>
       </section>
 

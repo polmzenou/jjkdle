@@ -23,6 +23,7 @@ import { createPusherClient } from "@/lib/pusher/client";
 import { WaitingRoom } from "./WaitingRoom";
 import { MultiplayerBoard } from "./MultiplayerBoard";
 import { MultiplayerRecap } from "./MultiplayerRecap";
+import { useUniverseHref } from "@/components/universe/UniverseProvider";
 
 interface MultiplayerLobbyProps {
   initialLobby: SerializedLobby;
@@ -40,6 +41,7 @@ export function MultiplayerLobby({
   pusherReady,
 }: MultiplayerLobbyProps) {
   const router = useRouter();
+  const withUniverse = useUniverseHref();
   const [lobby, setLobby] = useState<SerializedLobby>(initialLobby);
   const [connError, setConnError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -127,7 +129,7 @@ export function MultiplayerLobby({
   const handleLeave = useCallback(() => {
     startTransition(async () => {
       await leaveLobbyAction(code);
-      router.push("/games/multiplayer");
+      router.push(withUniverse("/games/multiplayer"));
     });
   }, [code, router]);
 

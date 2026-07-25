@@ -1,16 +1,19 @@
 import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
 import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { DEFAULT_UNIVERSE_SLUG, getUniverseBySlug } from "./registry";
+import { universePath } from "./routing";
 import type { UniverseConfig } from "./types";
 
 /**
  * Résolution de l'UNIVERS COURANT côté serveur. Module server-only (importe
  * Prisma) : Server Components / Actions / Route Handlers.
  *
- * L'univers est déterminé par le HOSTNAME dans `middleware.ts`, qui pose le slug
- * dans le header `x-universe`. Cette fonction est le SEUL point de lecture de ce
- * header : tout le reste du code appelle simplement `getCurrentUniverse()`.
+ * L'univers est déterminé par le PREMIER SEGMENT DE L'URL (`/jjk/games`) dans
+ * `middleware.ts`, qui pose le slug dans le header `x-universe`. Ce module est le
+ * SEUL point de lecture de ce header : tout le reste du code appelle simplement
+ * `getCurrentUniverse()`.
  *
  * Repli en cascade, pour ne jamais planter :
  *   1. header `x-universe` (cas normal, posé par le middleware) ;
@@ -50,6 +53,51 @@ async function resolveId(slug: string): Promise<string> {
 /** Résout l'id base d'un univers par slug (helper admin/étape 5). */
 export async function getUniverseId(slug: string): Promise<string> {
   return resolveId(slug);
+}
+
+/** Lecture d'un header posé par le middleware, tolérante au rendu statique. */
+async function middlewareFlag(name: string): Promise<boolean> {
+  try {
+    return (await headers()).get(name) === "1";
+  } catch {
+    return false; // hors requête (génération statique)
+  }
+}
+
+/**
+ * Vrai si la requête courante REND la page hub (choix d'univers). Sert à retirer
+ * la nav et la marque d'un anime, et à neutraliser les métadonnées.
+ */
+export const isHubRequest = cache(() => middlewareFlag("x-hub"));
+
+/**
+ * Préfixe un chemin interne par l'univers courant, côté SERVEUR :
+ * `/games` → `/jjk/games`.
+ *
+ * À utiliser pour tout `href`, `redirect()` et URL canonique rendus côté serveur.
+ * L'équivalent client est `useUniverseHref()` (components/universe).
+ */
+export async function universeHref(pathname: string): Promise<string> {
+  return universePath(pathname, await getCurrentUniverseSlug());
+}
+
+/**
+ * Invalide le cache d'une route de l'espace univers depuis son chemin LOGIQUE :
+ * `revalidateUniversePath("/games/jjkdle")` invalide `/jjk/games/jjkdle`.
+ *
+ * À utiliser pour TOUTE invalidation d'une page sous `app/[universe]/`. Un
+ * `revalidatePath("/games/jjkdle")` nu ne correspond à aucune route depuis que
+ * l'univers est un segment réel : il n'invaliderait rien, silencieusement.
+ *
+ * L'univers ciblé est celui de la requête courante — donc, dans une action
+ * `/admin`, celui que l'admin administre (cf. admin-scope) : on invalide bien
+ * l'univers que l'on vient de modifier.
+ */
+export async function revalidateUniversePath(
+  pathname: string,
+  type?: "page" | "layout",
+): Promise<void> {
+  revalidatePath(await universeHref(pathname), type);
 }
 
 /** Univers utilisable : présent en base ET configuré en code. */

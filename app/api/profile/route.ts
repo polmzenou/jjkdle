@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { getCurrentUniverse } from "@/lib/universes/current";
+import {
+  getCurrentUniverse,
+  revalidateUniversePath,
+} from "@/lib/universes/current";
 import { updateUniverseLoadout } from "@/lib/universes/profile";
 import {
   isBannerInUniverse,
@@ -109,6 +111,6 @@ export async function PATCH(req: Request) {
   }
 
   await updateUniverseLoadout(user.id, data, universe.id);
-  revalidatePath("/account");
+  await revalidateUniversePath("/account");
   return NextResponse.json({ ok: true });
 }

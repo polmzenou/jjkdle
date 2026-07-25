@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "framer-motion";
 import { RankingCard, WRONG_COLOR } from "./RankingCard";
+import { UniverseLink } from "@/components/universe/UniverseLink";
 
 interface GameOverScreenProps {
   /** Classement correct révélé en fin de partie. */
@@ -44,12 +44,12 @@ export function GameOverScreen({ order, category, onRetry }: GameOverScreenProps
         </div>
 
         <div className="mt-7 flex items-center justify-center gap-3">
-          <Link
+          <UniverseLink
             href="/"
             className="rounded-xl border border-white/15 px-6 py-3 font-display font-bold uppercase tracking-wide text-white/70 transition-colors hover:text-white"
           >
             Back
-          </Link>
+          </UniverseLink>
           <button
             type="button"
             onClick={onRetry}

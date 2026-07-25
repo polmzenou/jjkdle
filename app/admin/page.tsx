@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { getCurrentUser, isSuperAdmin } from "@/lib/auth/session";
 import { readRoster } from "@/lib/admin/roster-store";
 import { getCategories } from "@/lib/content/queries";
@@ -27,6 +26,7 @@ import { listAttributes } from "@/lib/admin/attribute-store";
 import type { Character } from "@/data/roster/characters";
 import type { DraftCharacter } from "@/lib/games/draft/types";
 import { AdminDashboard } from "./AdminDashboard";
+import { accessDeniedFor } from "./AccessDenied";
 
 export const metadata: Metadata = {
   title: "Admin",
@@ -35,22 +35,6 @@ export const metadata: Metadata = {
 
 // Toujours dynamique (auth par cookie + lecture du fichier à jour).
 export const dynamic = "force-dynamic";
-
-/** Bloc d'accès refusé (non connecté ou rôle insuffisant). */
-function AccessDenied({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <main className="mx-auto max-w-md px-6 py-24 text-center">
-      <h1 className="font-display text-2xl font-bold text-white">{title}</h1>
-      <p className="mt-3 text-sm text-white/55">{children}</p>
-    </main>
-  );
-}
 
 export default async function AdminPage({
   searchParams,
@@ -62,28 +46,8 @@ export default async function AdminPage({
     getCurrentUser(),
   ]);
 
-  if (!user) {
-    return (
-      <AccessDenied title="Connexion requise">
-        Cette section est réservée aux administrateurs.{" "}
-        <Link
-          href="/login"
-          className="font-semibold text-domain-light hover:underline"
-        >
-          Se connecter
-        </Link>
-        .
-      </AccessDenied>
-    );
-  }
-
-  if (user.role !== "ADMIN") {
-    return (
-      <AccessDenied title="Accès refusé">
-        Ton compte (<span className="text-white/80">{user.username}</span>) n
-        &apos;a pas le rôle administrateur.
-      </AccessDenied>
-    );
+  if (!user || user.role !== "ADMIN") {
+    return accessDeniedFor(user);
   }
 
   let roster: Character[] = [];
@@ -151,12 +115,18 @@ export default async function AdminPage({
       universes={universes.map((u) => ({ slug: u.slug, name: u.name }))}
       currentUniverse={currentUniverse}
       universeName={
-        universes.find((u) => u.slug === currentUniverse)?.name ?? currentUniverse
+        universes.find((u) => u.slug === currentUniverse)?.name ??
+        currentUniverse
       }
       attributes={attributes}
       draftRoster={draftRoster}
       categories={categories}
-      scores={[...scores, ...draftScores, ...jjkdleScores, ...higherLowerScores]}
+      scores={[
+        ...scores,
+        ...draftScores,
+        ...jjkdleScores,
+        ...higherLowerScores,
+      ]}
       users={users}
       currentUserId={user.id}
       isSuperAdmin={isSuperAdmin(user)}

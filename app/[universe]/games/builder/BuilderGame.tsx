@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import { motion } from "framer-motion";
-import Link from "next/link";
 import type { CategoryConfig, CategoryId } from "@/data/roster/categories";
 import type { Character } from "@/data/roster/characters";
 import { computeBreakdown } from "@/lib/scoring/scoring";
@@ -18,6 +17,7 @@ import { CategoryTile } from "@/components/CategoryTile";
 import { RankFooter } from "@/components/RankFooter";
 import { Logo } from "@/components/Logo";
 import { ScoreReveal } from "@/components/ScoreReveal";
+import { UniverseLink } from "@/components/universe/UniverseLink";
 
 interface BuilderGameProps {
   categories: CategoryConfig[];
@@ -167,12 +167,12 @@ export function BuilderGame({
     <div>
       {/* Barre de tête unifiée : retour, logo, record */}
       <header className="mb-4 flex items-center justify-between py-4">
-        <Link
+        <UniverseLink
           href="/"
           className="flex items-center gap-1 text-sm text-white/60 transition-colors hover:text-domain-light"
         >
           ← Back
-        </Link>
+        </UniverseLink>
         <Logo className="h-12 w-auto sm:h-14" />
         <span className="rounded-full bg-void-700/60 px-3 py-1 text-xs text-white/60">
           Record&nbsp;:{" "}

@@ -1,6 +1,8 @@
 "use client";
 
-import { createContext, useContext, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import { createContext, useContext, useCallback, type ReactNode } from "react";
+import { universePath, stripUniversePath } from "@/lib/universes/routing";
 import type { UniverseLabels, UniverseLogo } from "@/lib/universes/types";
 
 /**
@@ -54,4 +56,29 @@ export function useUniverse(): UniverseBranding {
     );
   }
   return branding;
+}
+
+/**
+ * Préfixe un chemin interne par l'univers courant : `/games` → `/jjk/games`.
+ *
+ * À utiliser pour TOUT `href`, `router.push` et `fetch("/api/…")` d'un composant
+ * client. Sans préfixe, la navigation quitterait l'univers (le middleware
+ * redirige alors vers le dernier univers visité — correct, mais au prix d'un
+ * aller-retour, et faux si deux onglets visent deux univers différents).
+ */
+export function useUniverseHref(): (pathname: string) => string {
+  const { slug } = useUniverse();
+  return useCallback((pathname: string) => universePath(pathname, slug), [slug]);
+}
+
+/**
+ * Chemin courant SANS le préfixe d'univers : sur `/jjk/games`, renvoie `/games`.
+ *
+ * À utiliser partout où l'on compare la route courante à un chemin « logique »
+ * (lien actif, détection d'une page de jeu). `usePathname()` brut renvoie l'URL
+ * réelle, préfixe compris : le comparer à « /games » échouerait silencieusement.
+ */
+export function useUniversePathname(): string {
+  const { slug } = useUniverse();
+  return stripUniversePath(usePathname(), slug);
 }

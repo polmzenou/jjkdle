@@ -2,12 +2,12 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import type { AdminUser } from "@/lib/admin/users";
 import { BADGES } from "@/lib/badges/definitions";
 import { TITLES } from "@/lib/titles/definitions";
 import { FRAMES } from "@/lib/frames/definitions";
 import { rarityStyle, type Rarity } from "@/lib/profile/rarity";
+import { UniverseLink } from "@/components/universe/UniverseLink";
 import {
   setUserRoleAction,
   setUsernameAction,
@@ -140,7 +140,7 @@ export function UserAdmin({
                 <div className="flex flex-wrap items-center gap-3 px-3 py-2.5">
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold text-white">
-                      <Link
+                      <UniverseLink
                         href={`/u/${encodeURIComponent(u.username)}`}
                         target="_blank"
                         className="underline-offset-2 hover:underline"
@@ -148,7 +148,7 @@ export function UserAdmin({
                       >
                         {u.username}
                         <span aria-hidden className="ml-1 text-white/40">↗</span>
-                      </Link>
+                      </UniverseLink>
                       {u.id === currentUserId && (
                         <span className="ml-1.5 text-[11px] font-normal text-white/40">
                           (vous)

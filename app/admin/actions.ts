@@ -80,8 +80,12 @@ import { loadAttributeSchema } from "@/lib/games/jjkdle/attributes-db";
 import {
   getCurrentUniverseSlug,
   listAvailableUniverses,
+  revalidateUniversePath,
 } from "@/lib/universes/current";
-import { ADMIN_UNIVERSE_COOKIE } from "@/lib/universes/admin-scope";
+import {
+  ADMIN_UNIVERSE_COOKIE,
+  adminUniverseCookieOptions,
+} from "@/lib/universes/admin-scope";
 import { getGame } from "@/lib/games/registry";
 import {
   setConfig,
@@ -332,7 +336,7 @@ export async function saveDraftCharacterAction(
     return { ok: false, error: `Échec d'écriture : ${(e as Error).message}` };
   }
 
-  revalidatePath("/games/jujutsu-draft");
+  await revalidateUniversePath("/games/jujutsu-draft");
   revalidatePath("/admin");
   return { ok: true };
 }
@@ -349,7 +353,7 @@ export async function deleteDraftCharacterAction(
   } catch (e) {
     return { ok: false, error: `Échec de suppression : ${(e as Error).message}` };
   }
-  revalidatePath("/games/jujutsu-draft");
+  await revalidateUniversePath("/games/jujutsu-draft");
   revalidatePath("/admin");
   return { ok: true };
 }
@@ -379,7 +383,7 @@ export async function updateScoreAction(
     } catch (e) {
       return { ok: false, error: `Échec de modification : ${(e as Error).message}` };
     }
-    revalidatePath("/games/jujutsu-draft");
+    await revalidateUniversePath("/games/jujutsu-draft");
     revalidatePath("/admin");
     return { ok: true };
   }
@@ -395,7 +399,7 @@ export async function updateScoreAction(
     } catch (e) {
       return { ok: false, error: `Échec de modification : ${(e as Error).message}` };
     }
-    revalidatePath("/games/jjkdle");
+    await revalidateUniversePath("/games/jjkdle");
     revalidatePath("/admin");
     return { ok: true };
   }
@@ -411,7 +415,7 @@ export async function updateScoreAction(
     } catch (e) {
       return { ok: false, error: `Échec de modification : ${(e as Error).message}` };
     }
-    revalidatePath("/games/higher-lower");
+    await revalidateUniversePath("/games/higher-lower");
     revalidatePath("/admin");
     return { ok: true };
   }
@@ -429,7 +433,7 @@ export async function updateScoreAction(
   } catch (e) {
     return { ok: false, error: `Échec de modification : ${(e as Error).message}` };
   }
-  revalidatePath(`/games/${game}`);
+  await revalidateUniversePath(`/games/${game}`);
   revalidatePath("/admin");
   return { ok: true };
 }
@@ -463,7 +467,7 @@ export async function deleteScoreAction(
   } catch (e) {
     return { ok: false, error: `Échec de suppression : ${(e as Error).message}` };
   }
-  revalidatePath(gamePath(game));
+  await revalidateUniversePath(gamePath(game));
   revalidatePath("/admin");
   return { ok: true };
 }
@@ -487,7 +491,7 @@ export async function deleteScoresAction(
       errors.push(`${id} : ${(e as Error).message}`);
     }
   }
-  for (const game of games) revalidatePath(gamePath(game));
+  for (const game of games) await revalidateUniversePath(gamePath(game));
   revalidatePath("/admin");
   return {
     ok: errors.length === 0,
@@ -586,8 +590,8 @@ export async function setUsernameAction(
   }
 
   revalidatePath("/admin");
-  if (previous) revalidatePath(`/u/${previous}`);
-  revalidatePath(`/u/${username}`);
+  if (previous) await revalidateUniversePath(`/u/${previous}`);
+  await revalidateUniversePath(`/u/${username}`);
   return { ok: true };
 }
 
@@ -950,14 +954,11 @@ export async function setAdminUniverseAction(
     return { ok: false, error: "Univers inconnu ou non configuré." };
   }
 
-  (await cookies()).set(ADMIN_UNIVERSE_COOKIE, slug, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    // Session longue : l'admin retrouve son univers de travail d'un jour à l'autre.
-    maxAge: 60 * 60 * 24 * 30,
-  });
+  (await cookies()).set(
+    ADMIN_UNIVERSE_COOKIE,
+    slug,
+    adminUniverseCookieOptions(),
+  );
   revalidatePath("/admin");
   return { ok: true };
 }
@@ -1040,6 +1041,6 @@ export async function setForcedTargetAction(
   }
   revalidateGlobalConfig();
   // Le mot du jour change → invalider aussi la page du jeu.
-  revalidatePath("/games/jjkdle");
+  await revalidateUniversePath("/games/jjkdle");
   return { ok: true };
 }

@@ -7,6 +7,7 @@ import { isGameEnabled } from "@/lib/config/app-config";
 import { RankingGame } from "./RankingGame";
 import { GameJsonLd } from "@/components/seo/JsonLd";
 import { gameMetadata } from "@/lib/seo/config";
+import { universeHref } from "@/lib/universes/current";
 
 /** Métadonnées de l'univers courant (résolu par hostname). */
 export async function generateMetadata(): Promise<Metadata> {
@@ -25,7 +26,7 @@ export default async function RankingPage({
 }: {
   searchParams: Promise<{ scope?: string }>;
 }) {
-  if (!(await isGameEnabled("ranking"))) redirect("/games");
+  if (!(await isGameEnabled("ranking"))) redirect(await universeHref("/games"));
   const [{ scope }, bestScore] = await Promise.all([
     searchParams,
     getBestScore("ranking"),

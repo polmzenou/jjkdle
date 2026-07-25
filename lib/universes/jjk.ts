@@ -3,10 +3,10 @@ import type { UniverseConfig } from "./types";
 /**
  * Univers Jujutsu Kaisen — l'univers historique (et défaut) de la plateforme.
  *
- * Les valeurs reprennent à l'identique ce qui est aujourd'hui codé en dur dans
- * lib/seo/config.ts, tailwind.config.ts et components/Logo.tsx. Tant que ces
- * sources n'ont pas basculé sur le registre (étape 4), ce fichier n'est qu'une
- * copie inerte : il ne modifie aucun comportement.
+ * Il est servi sous le préfixe `/jjk` (branding, thème, SEO et libellés viennent
+ * tous d'ici). Ajouter un anime = un fichier voisin de même forme, ajouté à
+ * `UNIVERSES` dans registry.ts, plus une ligne `Universe` en base
+ * (`npx tsx scripts/seed-universe.ts <slug>`).
  */
 export const jjk: UniverseConfig = {
   slug: "jjk",
@@ -15,9 +15,10 @@ export const jjk: UniverseConfig = {
   title: "JJK Arcade — Mini-jeux Jujutsu Kaisen",
   description:
     "L'arcade fan dédiée à Jujutsu Kaisen : une collection de mini-jeux gratuits (JJKdle, Qui est-ce ?, quiz, draft, tier list…) pour tester ta connaissance de l'univers JJK. Sans compte, jouable dans le navigateur.",
-  // jjk-arcade.com prévu ; l'URL Vercel actuelle et localhost servent au dev/preview
-  // (à défaut de match, la résolution retombe sur DEFAULT_UNIVERSE, cf. registry).
-  domains: ["jjk-arcade.com", "jjkdle-arcade.vercel.app", "localhost"],
+  // Le routage se fait par PRÉFIXE DE CHEMIN, pas par domaine : ce champ ne sert
+  // plus qu'à deux choses — repli si un jour un domaine dédié est branché sur
+  // l'app, et URL canonique de dernier recours en rendu statique.
+  domains: ["jjk-arcade.com"],
   locale: "fr_FR",
   keywords: [
     "Jujutsu Kaisen",

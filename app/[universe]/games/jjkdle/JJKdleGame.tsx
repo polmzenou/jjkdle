@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { motion } from "framer-motion";
 import { CharacterImage } from "@/components/CharacterImage";
 import { ExpReward } from "@/components/progress/ExpReward";
@@ -23,6 +22,7 @@ import {
 import { CharacterSearch } from "./CharacterSearch";
 import { GuessHeader, GuessRow } from "./GuessRow";
 import { SubmitJjkdleScore } from "./SubmitJjkdleScore";
+import { UniverseLink } from "@/components/universe/UniverseLink";
 
 /** Forme minimale d'un perso transmise au client (aucune donnée secrète). */
 export interface PublicCharacter {
@@ -237,12 +237,12 @@ function Header({ attempts, mode }: { attempts: number; mode: GameMode }) {
     <>
       {/* Barre de tête unifiée : retour, logo, donnée (essais) — cf. JJK Pyramid */}
       <header className="mb-4 flex items-center justify-between py-4">
-        <Link
+        <UniverseLink
           href="/"
           className="flex items-center gap-1 text-sm text-white/60 transition-colors hover:text-domain-light"
         >
           ← Back
-        </Link>
+        </UniverseLink>
         <Logo className="h-12 w-auto sm:h-14" />
         <span className="rounded-full bg-void-700/60 px-3 py-1 text-xs text-white/60">
           Essais&nbsp;:{" "}

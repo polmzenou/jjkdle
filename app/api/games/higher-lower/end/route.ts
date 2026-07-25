@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { revalidatePath } from "next/cache";
+import { revalidateUniversePath } from "@/lib/universes/current";
 import { getCurrentUser } from "@/lib/auth/session";
 import {
   consumeSession,
@@ -47,6 +47,6 @@ export async function POST() {
   await saveHigherLowerScore(user.id, score, xpEarned);
   const { newBadges } = await refreshLevelAndBadges(user.id);
 
-  revalidatePath("/games/higher-lower");
+  await revalidateUniversePath("/games/higher-lower");
   return NextResponse.json({ ok: true, score, xpEarned, newBadges });
 }

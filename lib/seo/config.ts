@@ -2,20 +2,23 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { cache } from "react";
 import { getGame } from "@/lib/games/registry";
-import { getCurrentUniverseConfig } from "@/lib/universes/current";
+import {
+  getCurrentUniverseConfig,
+  universeHref,
+} from "@/lib/universes/current";
 import type { UniverseConfig } from "@/lib/universes/types";
 
 /**
  * SEO du site, PAR UNIVERS (étape 4). Alimente les métadonnées
  * (`app/layout.tsx`), le sitemap, le robots, le manifest et le JSON-LD.
  *
- * Chaque anime a son propre domaine, son nom, sa description et ses mots-clés :
- * tout vient donc de la config de l'univers courant (`lib/universes/`), résolue
- * par hostname via le middleware. Il n'y a plus de constante globale.
+ * Chaque anime a son nom, sa description et ses mots-clés : tout vient de la
+ * config de l'univers courant (`lib/universes/`), résolu par le PRÉFIXE DE CHEMIN
+ * (`/jjk/games`) via le middleware. Il n'y a plus de constante globale.
  *
- * L'URL du site est dérivée du HOST RÉEL de la requête : canonical et URLs OG
- * correspondent toujours au domaine réellement visité (domaine de prod de
- * l'anime, preview Vercel ou localhost), sans variable d'env par univers.
+ * Un seul domaine sert tous les animes : l'ORIGINE est dérivée du host réel de la
+ * requête (prod, preview Vercel ou localhost) et les CHEMINS canoniques portent le
+ * préfixe d'univers (cf. `universeHref`).
  */
 
 export interface SiteSeo {
@@ -108,6 +111,9 @@ export async function gameMetadata(
     return { title: seo.name, description: seo.description };
   }
 
+  // L'univers est un préfixe de chemin : canonical et og:url doivent le porter,
+  // sinon toutes les URLs canoniques des animes se confondraient.
+  const route = await universeHref(game.route);
   const description = seoDescription ?? game.description;
   const images = game.previewImage
     ? [{ url: game.previewImage, alt: `${game.title} — ${seo.name}` }]
@@ -116,12 +122,12 @@ export async function gameMetadata(
   return {
     title: game.title,
     description,
-    alternates: { canonical: game.route },
+    alternates: { canonical: route },
     openGraph: {
       type: "website",
       siteName: seo.name,
       locale: seo.locale,
-      url: game.route,
+      url: route,
       title: `${game.title} · ${seo.name}`,
       description,
       images,

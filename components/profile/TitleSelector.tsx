@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { titlesForUniverse } from "@/lib/titles/definitions";
 import { rarityStyle } from "@/lib/profile/rarity";
-import { equipTitleAction } from "@/app/account/actions";
+import { equipTitleAction } from "@/app/[universe]/account/actions";
 
 interface TitleSelectorProps {
   /** Clés des titres débloqués (calculées serveur : règle + grants + admin). */

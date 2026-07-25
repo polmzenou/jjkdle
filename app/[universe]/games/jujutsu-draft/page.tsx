@@ -9,6 +9,7 @@ import { isGameEnabled } from "@/lib/config/app-config";
 import { JujutsuDraftGame } from "./JujutsuDraftGame";
 import { GameJsonLd } from "@/components/seo/JsonLd";
 import { gameMetadata } from "@/lib/seo/config";
+import { universeHref } from "@/lib/universes/current";
 
 /** Métadonnées de l'univers courant (résolu par hostname). */
 export async function generateMetadata(): Promise<Metadata> {
@@ -27,7 +28,8 @@ export default async function JujutsuDraftPage({
 }: {
   searchParams: Promise<{ scope?: string }>;
 }) {
-  if (!(await isGameEnabled("jujutsu-draft"))) redirect("/games");
+  if (!(await isGameEnabled("jujutsu-draft")))
+    redirect(await universeHref("/games"));
   const user = await getCurrentUser();
   const [{ scope }, initialBest, roster] = await Promise.all([
     searchParams,

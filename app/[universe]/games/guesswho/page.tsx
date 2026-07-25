@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
 import { isGameEnabled } from "@/lib/config/app-config";
@@ -7,6 +6,8 @@ import { isPusherConfigured } from "@/lib/pusher/server";
 import { MpHubForm } from "@/components/multiplayer/MpHubForm";
 import { GameJsonLd } from "@/components/seo/JsonLd";
 import { gameMetadata } from "@/lib/seo/config";
+import { UniverseLink } from "@/components/universe/UniverseLink";
+import { universeHref } from "@/lib/universes/current";
 import {
   createGuessWhoLobbyAction,
   joinGuessWhoLobbyAction,
@@ -21,7 +22,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function GuessWhoHubPage() {
-  if (!(await isGameEnabled("guesswho"))) redirect("/games");
+  if (!(await isGameEnabled("guesswho")))
+    redirect(await universeHref("/games"));
   const user = await getCurrentUser();
   const pusherReady = isPusherConfigured();
 
@@ -53,12 +55,12 @@ export default async function GuessWhoHubPage() {
             <p className="text-white/70">
               Connecte-toi pour créer ou rejoindre un lobby.
             </p>
-            <Link
+            <UniverseLink
               href="/login"
               className="mt-5 inline-block rounded-xl bg-domain px-6 py-3 font-display font-bold uppercase tracking-wide text-white shadow-glow transition-transform hover:scale-105 active:scale-95"
             >
               Se connecter
-            </Link>
+            </UniverseLink>
           </div>
         ) : (
           <MpHubForm
@@ -70,12 +72,12 @@ export default async function GuessWhoHubPage() {
       </section>
 
       <footer className="mt-auto pt-16 text-center text-xs text-white/30">
-        <Link
+        <UniverseLink
           href="/games"
           className="transition-colors hover:text-domain-light"
         >
           ← Retour aux jeux
-        </Link>
+        </UniverseLink>
       </footer>
     </main>
   );

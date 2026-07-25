@@ -9,6 +9,7 @@ import { isGameEnabled } from "@/lib/config/app-config";
 import { BuilderGame } from "./BuilderGame";
 import { GameJsonLd } from "@/components/seo/JsonLd";
 import { gameMetadata } from "@/lib/seo/config";
+import { universeHref } from "@/lib/universes/current";
 
 /** Métadonnées de l'univers courant (résolu par hostname). */
 export async function generateMetadata(): Promise<Metadata> {
@@ -28,7 +29,7 @@ export default async function BuilderPage({
 }: {
   searchParams: Promise<{ scope?: string }>;
 }) {
-  if (!(await isGameEnabled("builder"))) redirect("/games");
+  if (!(await isGameEnabled("builder"))) redirect(await universeHref("/games"));
   const [{ scope }, bestScore, user, categories, roster] = await Promise.all([
     searchParams,
     getBestScore("builder"),

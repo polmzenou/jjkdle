@@ -53,6 +53,7 @@ import { CodenamesClueBanner } from "./CodenamesClueBanner";
 import { CodenamesClueInput } from "./CodenamesClueInput";
 import { CodenamesPassButton } from "./CodenamesPassButton";
 import { CodenamesResultModal } from "./CodenamesResultModal";
+import { useUniverseHref } from "@/components/universe/UniverseProvider";
 
 interface CodenamesLobbyProps {
   initialLobby: SerializedLobby;
@@ -73,6 +74,7 @@ export function CodenamesLobby({
   pusherReady,
 }: CodenamesLobbyProps) {
   const router = useRouter();
+  const withUniverse = useUniverseHref();
   const [lobby, setLobby] = useState<SerializedLobby>(initialLobby);
   const [publicState, setPublicState] = useState<CodenamesPublicState | null>(
     initialPublicState,
@@ -250,7 +252,7 @@ export function CodenamesLobby({
   const handleLeave = useCallback(() => {
     startTransition(async () => {
       await leaveCodenamesLobbyAction(code);
-      router.push("/games/codenames");
+      router.push(withUniverse("/games/codenames"));
     });
   }, [code, router]);
   const handleJoin = useCallback(() => {

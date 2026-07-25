@@ -27,6 +27,16 @@ function ns(slug: string): string {
   return `u.${slug}.`;
 }
 
+/**
+ * Préfixe de TOUTES les clés d'un univers. Exposé pour pouvoir purger sa config
+ * quand l'univers est supprimé (cf. lib/admin/universe-store.ts) : sans ça, des
+ * clés orphelines survivraient et seraient réappliquées à un univers recréé avec
+ * le même slug.
+ */
+export function universeConfigPrefix(slug: string): string {
+  return ns(slug);
+}
+
 /** Flag d'activation d'un jeu dans un univers (défaut : activé). */
 export function gameEnabledKey(slug: string, gameId: string): string {
   return `${ns(slug)}game.${gameId}.enabled`;

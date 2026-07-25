@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
-import Link from "next/link";
 import {
   DndContext,
   DragOverlay,
@@ -29,6 +28,7 @@ import { RankingCard } from "@/components/ranking/RankingCard";
 import { VictoryModal } from "@/components/ranking/VictoryModal";
 import { GameOverScreen } from "@/components/ranking/GameOverScreen";
 import { Logo } from "@/components/Logo";
+import { UniverseLink } from "@/components/universe/UniverseLink";
 
 interface RankingGameProps {
   initialBestScore: number;
@@ -237,12 +237,12 @@ export function RankingGame({ initialBestScore }: RankingGameProps) {
     <div>
       {/* En-tête */}
       <header className="mb-4 flex items-center justify-between py-4">
-        <Link
+        <UniverseLink
           href="/"
           className="flex items-center gap-1 text-sm text-white/60 transition-colors hover:text-domain-light"
         >
           ← Back
-        </Link>
+        </UniverseLink>
         <Logo className="h-12 w-auto sm:h-14" />
         <span className="rounded-full bg-void-700/60 px-3 py-1 text-xs text-white/60">
           Record&nbsp;:{" "}

@@ -15,6 +15,7 @@ import { getUniverseLoadout } from "@/lib/universes/profile";
 import { JJKdleGame, type PublicCharacter } from "./JJKdleGame";
 import { GameJsonLd } from "@/components/seo/JsonLd";
 import { gameMetadata } from "@/lib/seo/config";
+import { universeHref } from "@/lib/universes/current";
 
 /** Métadonnées de l'univers courant (résolu par hostname). */
 export async function generateMetadata(): Promise<Metadata> {
@@ -37,7 +38,7 @@ export default async function JjkdlePage({
 }: {
   searchParams: Promise<{ scope?: string }>;
 }) {
-  if (!(await isGameEnabled("jjkdle"))) redirect("/games");
+  if (!(await isGameEnabled("jjkdle"))) redirect(await universeHref("/games"));
   const [{ scope }, roster, user, schema] = await Promise.all([
     searchParams,
     getRoster(),

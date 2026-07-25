@@ -11,6 +11,7 @@ import { isGameEnabled } from "@/lib/config/app-config";
 import { HigherLowerGame } from "./HigherLowerGame";
 import { GameJsonLd } from "@/components/seo/JsonLd";
 import { gameMetadata } from "@/lib/seo/config";
+import { universeHref } from "@/lib/universes/current";
 
 /** Métadonnées de l'univers courant (résolu par hostname). */
 export async function generateMetadata(): Promise<Metadata> {
@@ -30,7 +31,8 @@ export default async function HigherLowerPage({
 }: {
   searchParams: Promise<{ scope?: string }>;
 }) {
-  if (!(await isGameEnabled("higher-lower"))) redirect("/games");
+  if (!(await isGameEnabled("higher-lower")))
+    redirect(await universeHref("/games"));
   const user = await getCurrentUser();
   const [{ scope }, pool] = await Promise.all([
     searchParams,

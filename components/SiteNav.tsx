@@ -1,13 +1,14 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { Logo } from "@/components/Logo";
 import { VipBadge } from "@/components/VipBadge";
 import { TitleBadge } from "@/components/TitleBadge";
 import { UserAvatar } from "@/components/UserAvatar";
 import { logoutAction } from "@/lib/auth/actions";
+import { UniverseLink } from "@/components/universe/UniverseLink";
+import { useUniversePathname } from "@/components/universe/UniverseProvider";
 import {
   refreshRosterImagesFromApiAction,
   clearImageCacheAction,
@@ -37,9 +38,13 @@ export type NavUser = {
 /**
  * Barre de navigation globale du site.
  *
- * Montée dans le layout racine, mais elle s'efface sur les pages de jeu
- * (`/games/<id>`) et l'admin, qui possèdent déjà leur propre en-tête (logo +
- * retour). Sticky + backdrop blur pour rester lisible par-dessus le contenu.
+ * Montée par le chrome d'univers (cf. UniverseChrome), mais elle s'efface sur les
+ * pages de jeu (`/games/<id>`) et l'admin, qui possèdent déjà leur propre en-tête
+ * (logo + retour). Sticky + backdrop blur pour rester lisible par-dessus le
+ * contenu.
+ *
+ * Le chemin est comparé DÉPRÉFIXÉ (`/jjk/games` → `/games`) : l'URL réelle porte
+ * le slug de l'univers, un `startsWith("/games/")` brut ne matcherait jamais.
  *
  * `user` est résolu côté serveur (layout) et passé en prop.
  */
@@ -50,7 +55,7 @@ export function SiteNav({
   user: NavUser | null;
   cachedImageCount?: number;
 }) {
-  const pathname = usePathname();
+  const pathname = useUniversePathname();
 
   if (pathname.startsWith("/games/") || pathname.startsWith("/admin")) {
     return null;
@@ -69,7 +74,7 @@ export function SiteNav({
                 : pathname.startsWith(link.href);
 
             return (
-              <Link
+              <UniverseLink
                 key={link.href}
                 href={link.href}
                 aria-current={active ? "page" : undefined}
@@ -80,19 +85,19 @@ export function SiteNav({
                 }`}
               >
                 {link.label}
-              </Link>
+              </UniverseLink>
             );
           })}
 
           {user ? (
             <UserMenu user={user} cachedImageCount={cachedImageCount} />
           ) : (
-            <Link
+            <UniverseLink
               href="/login"
               className="ml-1 inline-flex items-center rounded-full bg-domain px-4 py-1.5 text-sm font-bold text-white shadow-glow transition-transform hover:scale-105"
             >
               Connexion
-            </Link>
+            </UniverseLink>
           )}
         </div>
       </nav>
@@ -179,14 +184,14 @@ function UserMenu({
         </button>
       )}
       {user.isAdmin && (
-        <Link
+        <UniverseLink
           href="/admin"
           className="rounded-full border border-domain/40 bg-domain/10 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-domain-light transition-colors hover:bg-domain/20"
         >
           Admin
-        </Link>
+        </UniverseLink>
       )}
-      <Link
+      <UniverseLink
         href="/account"
         aria-label="Mon compte"
         className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] py-1 pl-1 pr-3 text-sm font-semibold text-white/80 transition-colors hover:border-white/25 hover:text-white"
@@ -203,7 +208,7 @@ function UserMenu({
         </span>
         {user.isVip && <VipBadge />}
         {user.titleKey && <TitleBadge titleKey={user.titleKey} className="hidden sm:inline-flex" />}
-      </Link>
+      </UniverseLink>
       <button
         type="button"
         onClick={logout}

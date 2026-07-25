@@ -7,7 +7,7 @@ import {
   type ProfileLayout,
   type ProfileSectionPref,
 } from "@/lib/profile/layout";
-import { updateProfileLayoutAction } from "@/app/account/actions";
+import { updateProfileLayoutAction } from "@/app/[universe]/account/actions";
 
 interface ProfileLayoutEditorProps {
   username: string;

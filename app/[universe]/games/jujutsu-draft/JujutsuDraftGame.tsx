@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { DraftBoard } from "@/components/draft/DraftBoard";
 import { CombatScene } from "@/components/draft/CombatScene";
@@ -10,6 +9,7 @@ import { pickDraw } from "@/lib/games/draft/draw";
 import { evaluateDraft } from "@/lib/games/draft/scoring";
 import { awardDraftExpAction } from "./actions";
 import { COMBAT_AVATAR_CATEGORY } from "@/lib/games/draft/categories";
+import { UniverseLink } from "@/components/universe/UniverseLink";
 import type {
   CombatResult,
   DraftCategoryId,
@@ -98,12 +98,12 @@ export function JujutsuDraftGame({
     <div>
       {/* En-tête */}
       <header className="mb-4 flex items-center justify-between py-4">
-        <Link
+        <UniverseLink
           href="/"
           className="flex items-center gap-1 text-sm text-white/60 transition-colors hover:text-domain-light"
         >
           ← Back
-        </Link>
+        </UniverseLink>
         <Logo className="h-12 w-auto sm:h-14" />
         <span className="rounded-full bg-void-700/60 px-3 py-1 text-xs text-white/60">
           Record&nbsp;:{" "}

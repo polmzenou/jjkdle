@@ -21,7 +21,33 @@
 /** Nom du cookie portant le slug d'univers ciblé par l'admin. */
 export const ADMIN_UNIVERSE_COOKIE = "admin_universe";
 
+/**
+ * Paramètre d'URL désignant l'univers à administrer : `/admin?universe=csm`.
+ *
+ * Le cookie seul rendait la cible invisible et non partageable — impossible de
+ * mettre en favori « l'admin de CSM ». Le middleware accepte donc ce paramètre
+ * sur les chemins `/admin`, l'applique à la requête ET le mémorise dans le
+ * cookie : les navigations suivantes (sans paramètre) restent sur cet univers.
+ */
+export const ADMIN_UNIVERSE_PARAM = "universe";
+
 /** Vrai si le chemin appartient à l'espace d'administration. */
 export function isAdminPath(pathname: string): boolean {
   return pathname === "/admin" || pathname.startsWith("/admin/");
+}
+
+/**
+ * Options du cookie de ciblage. Posé à deux endroits (le middleware sur
+ * `?universe=`, la Server Action du sélecteur) : les options doivent être
+ * IDENTIQUES, sinon le navigateur garde deux cookies distincts.
+ */
+export function adminUniverseCookieOptions() {
+  return {
+    httpOnly: true,
+    sameSite: "lax" as const,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    // Session longue : l'admin retrouve son univers de travail d'un jour à l'autre.
+    maxAge: 60 * 60 * 24 * 30,
+  };
 }

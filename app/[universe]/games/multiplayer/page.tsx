@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth/session";
 import { isPusherConfigured } from "@/lib/pusher/server";
 import { MpHubForm } from "@/components/multiplayer/MpHubForm";
+import { UniverseLink } from "@/components/universe/UniverseLink";
 
 export const metadata: Metadata = {
   title: "Multijoueur",
@@ -41,12 +41,12 @@ export default async function MultiplayerHubPage() {
             <p className="text-white/70">
               Connecte-toi pour créer ou rejoindre un lobby.
             </p>
-            <Link
+            <UniverseLink
               href="/login"
               className="mt-5 inline-block rounded-xl bg-domain px-6 py-3 font-display font-bold uppercase tracking-wide text-white shadow-glow transition-transform hover:scale-105 active:scale-95"
             >
               Se connecter
-            </Link>
+            </UniverseLink>
           </div>
         ) : (
           <MpHubForm />
@@ -54,12 +54,12 @@ export default async function MultiplayerHubPage() {
       </section>
 
       <footer className="mt-auto pt-16 text-center text-xs text-white/30">
-        <Link
+        <UniverseLink
           href="/games"
           className="transition-colors hover:text-domain-light"
         >
           ← Retour aux jeux
-        </Link>
+        </UniverseLink>
       </footer>
     </main>
   );

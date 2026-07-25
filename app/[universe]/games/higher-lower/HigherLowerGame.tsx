@@ -1,13 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { Logo } from "@/components/Logo";
-import { useUniverse } from "@/components/universe/UniverseProvider";
+import {
+  useUniverse,
+  useUniverseHref,
+} from "@/components/universe/UniverseProvider";
 import { CharacterImage } from "@/components/CharacterImage";
 import { ExpReward } from "@/components/progress/ExpReward";
 import type { HLChoice, HLTurnView } from "@/lib/games/higher-lower/types";
+import { UniverseLink } from "@/components/universe/UniverseLink";
 
 type Phase = "idle" | "playing" | "gameover";
 
@@ -53,6 +56,9 @@ function useCountUp(target: number, durationMs = 900): number {
 export function HigherLowerGame({ isAuthed, hasEnoughRoster }: HigherLowerGameProps) {
   // Libellé de la jauge de puissance de l'univers (JJK : « Énergie occulte »).
   const { labels } = useUniverse();
+  // Les appels d'API doivent porter l'univers : deux onglets ouverts sur deux
+  // animes différents feraient sinon des parties dans le mauvais roster.
+  const withUniverse = useUniverseHref();
   const energyLabel = labels.energyLabel;
   // Les phrases du jeu l'emploient en milieu de phrase (« plus ou moins de … »).
   const energyLabelLower = energyLabel.toLocaleLowerCase("fr-FR");
@@ -70,7 +76,7 @@ export function HigherLowerGame({ isAuthed, hasEnoughRoster }: HigherLowerGamePr
     setError(null);
     setBusy(true);
     try {
-      const res = await fetch("/api/games/higher-lower/start", { method: "POST" });
+      const res = await fetch(withUniverse("/api/games/higher-lower/start"), { method: "POST" });
       const data = await res.json();
       if (!res.ok || !data.ok) {
         setError(data.error ?? "Impossible de démarrer la partie.");
@@ -94,7 +100,7 @@ export function HigherLowerGame({ isAuthed, hasEnoughRoster }: HigherLowerGamePr
     if (endingRef.current) return;
     endingRef.current = true;
     try {
-      const res = await fetch("/api/games/higher-lower/end", { method: "POST" });
+      const res = await fetch(withUniverse("/api/games/higher-lower/end"), { method: "POST" });
       const data = await res.json();
       setGameOver({
         score: data.score ?? fallbackScore,
@@ -115,7 +121,7 @@ export function HigherLowerGame({ isAuthed, hasEnoughRoster }: HigherLowerGamePr
       if (busy || !view) return;
       setBusy(true);
       try {
-        const res = await fetch("/api/games/higher-lower/guess", {
+        const res = await fetch(withUniverse("/api/games/higher-lower/guess"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ choice }),
@@ -167,9 +173,9 @@ export function HigherLowerGame({ isAuthed, hasEnoughRoster }: HigherLowerGamePr
           {!isAuthed && (
             <p className="mt-4 text-xs text-white/40">
               Tu peux jouer sans compte, mais{" "}
-              <Link href="/login" className="text-domain-light hover:underline">
+              <UniverseLink href="/login" className="text-domain-light hover:underline">
                 connecte-toi
-              </Link>{" "}
+              </UniverseLink>{" "}
               pour enregistrer ton score et gagner de l&apos;XP.
             </p>
           )}
@@ -312,12 +318,12 @@ export function HigherLowerGame({ isAuthed, hasEnoughRoster }: HigherLowerGamePr
 function Header({ score }: { score: number }) {
   return (
     <header className="mb-4 flex items-center justify-between py-4">
-      <Link
+      <UniverseLink
         href="/"
         className="flex items-center gap-1 text-sm text-white/60 transition-colors hover:text-domain-light"
       >
         ← Back
-      </Link>
+      </UniverseLink>
       <Logo className="h-12 w-auto sm:h-14" />
       <span className="rounded-full bg-void-700/60 px-3 py-1 text-xs text-white/60">
         Score&nbsp;: <span className="font-bold text-domain-light">{score}</span>
@@ -431,12 +437,12 @@ function ResultModal({
               🔒 Connecte-toi pour gagner de l&apos;XP, enregistrer ton score et
               apparaître au classement.
             </p>
-            <Link
+            <UniverseLink
               href="/login"
               className="mt-2 inline-block font-display text-xs font-bold uppercase tracking-wide text-domain-light underline-offset-4 hover:underline"
             >
               Se connecter / créer un compte →
-            </Link>
+            </UniverseLink>
           </div>
         ) : (
           <>

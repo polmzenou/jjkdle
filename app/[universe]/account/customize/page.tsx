@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getUniverseLoadout } from "@/lib/universes/profile";
 import { normalizeProfileLayout } from "@/lib/profile/layout";
 import { ProfileLayoutEditor } from "./ProfileLayoutEditor";
+import { UniverseLink } from "@/components/universe/UniverseLink";
 
 export const metadata: Metadata = {
   title: "Customiser mon profil",
@@ -27,16 +27,19 @@ export default async function CustomizeProfilePage() {
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-12 sm:py-16">
-      <Link
+      <UniverseLink
         href="/account"
         className="mb-6 inline-flex items-center gap-1.5 text-sm text-white/50 transition-colors hover:text-white"
       >
         ← Retour à mon compte
-      </Link>
+      </UniverseLink>
 
       <header className="mb-8">
         <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.3em] text-domain-light/70">
-          <span aria-hidden className="h-px w-6 bg-gradient-to-r from-transparent to-domain-light/60" />
+          <span
+            aria-hidden
+            className="h-px w-6 bg-gradient-to-r from-transparent to-domain-light/60"
+          />
           管理 · Customisation
         </span>
         <h1 className="mt-3 font-display text-3xl font-black tracking-tight text-white sm:text-4xl">
@@ -48,17 +51,14 @@ export default async function CustomizeProfilePage() {
         </p>
       </header>
 
-      <ProfileLayoutEditor
-        username={user.username}
-        initialLayout={layout}
-      />
+      <ProfileLayoutEditor username={user.username} initialLayout={layout} />
 
-      <Link
+      <UniverseLink
         href={`/u/${encodeURIComponent(user.username)}`}
         className="mt-6 inline-flex items-center gap-1.5 text-sm text-domain-light underline-offset-2 hover:underline"
       >
         Voir mon profil public <span aria-hidden>↗</span>
-      </Link>
+      </UniverseLink>
     </main>
   );
 }

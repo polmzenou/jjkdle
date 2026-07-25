@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "framer-motion";
 import type { CSSProperties } from "react";
 import { GAMES } from "@/lib/games/registry";
+import { UniverseLink } from "@/components/universe/UniverseLink";
 
 /**
  * Présentation des jeux sur la landing : pour chaque jeu en ligne, une rangée
@@ -96,7 +96,7 @@ export function GameShowcase() {
                 </div>
               )}
 
-              <Link
+              <UniverseLink
                 href={game.route}
                 className="mt-7 inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-display text-sm font-bold uppercase tracking-wider text-white transition-transform hover:scale-105"
                 style={{
@@ -106,7 +106,7 @@ export function GameShowcase() {
               >
                 Jouer maintenant
                 <span aria-hidden>→</span>
-              </Link>
+              </UniverseLink>
             </div>
           </motion.article>
         );

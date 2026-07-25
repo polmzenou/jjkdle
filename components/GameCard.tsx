@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "framer-motion";
 import type { CSSProperties } from "react";
 import type { Game } from "@/lib/games/types";
+import { UniverseLink } from "@/components/universe/UniverseLink";
 
 interface GameCardProps {
   game: Game;
@@ -148,13 +148,13 @@ export function GameCard({ game, index, disabled = false }: GameCardProps) {
           {inner}
         </div>
       ) : (
-        <Link
+        <UniverseLink
           href={game.route}
           className="group/card block h-full rounded-3xl focus:outline-none"
           aria-label={`Jouer à ${game.title}`}
         >
           {inner}
-        </Link>
+        </UniverseLink>
       )}
     </motion.div>
   );
