@@ -1,4 +1,5 @@
 import type { UnlockContext } from "@/lib/cosmetics/types";
+import { gameTitleIn } from "@/lib/cosmetics/game-title";
 import {
   ANY_UNIVERSE,
   inUniverse,
@@ -8,6 +9,9 @@ import {
 import type { Rarity } from "@/lib/profile/rarity";
 import { MAX_LEVEL } from "@/lib/progress/xp";
 import { frameRingForStyle, type FrameStyleKey } from "./styles";
+
+/** Nom d'un jeu côté CSM (suit `lib/universes/csm.ts`, jamais figé en dur ici). */
+const csmGame = (id: string) => gameTitleIn("csm", id);
 
 /**
  * Catalogue des CADRES (nameplates) — source de vérité = code (aucune table
@@ -99,6 +103,66 @@ export const FRAMES: FrameDefinition[] = [
     rarity: "epic",
     styleKey: "idleLegend",
     universe: "jjk",
+    isUnlocked: (u) => u.stats.jjkdleBestAttempts === 1,
+  },
+
+  // ── Cadres CSM ────────────────────────────────────────────────────────────
+  // Mêmes paliers que JJK, noms Chainsaw Man, clés PRÉFIXÉES (possession
+  // globale indexée par clé). Les `styleKey` sont réutilisés : un style est un
+  // simple jeu de classes CSS, sans saveur d'anime, et sa clé n'est jamais
+  // affichée au joueur (cf. lib/frames/styles).
+  {
+    key: "CSM_BLOOD_PACT",
+    name: "Pacte de Sang",
+    description: "Atteindre le niveau 5.",
+    rarity: "common",
+    styleKey: "idleLegend",
+    universe: "csm",
+    isUnlocked: (u) => u.level >= 5,
+  },
+  {
+    key: "CSM_DEVIL_HORNS",
+    name: "Cornes de Démon",
+    description: "Atteindre le niveau 20.",
+    rarity: "epic",
+    styleKey: "domainGlow",
+    universe: "csm",
+    isUnlocked: (u) => u.level >= 20,
+  },
+  {
+    key: "CSM_CHAINSAW_HEART",
+    name: "Cœur de Tronçonneuse",
+    description: `Atteindre le niveau maximum (${MAX_LEVEL}).`,
+    rarity: "legendary",
+    styleKey: "infinity",
+    universe: "csm",
+    isUnlocked: (u) => u.level >= MAX_LEVEL,
+  },
+  {
+    key: "CSM_BURNING_STREAK",
+    name: "Feu Continu",
+    description: `Atteindre un streak ${csmGame("jjkdle")} de 7 jours.`,
+    rarity: "rare",
+    styleKey: "flameStreak",
+    universe: "csm",
+    isUnlocked: (u) => u.stats.jjkdleBestStreak >= 7,
+  },
+  {
+    key: "CSM_VIP_HUNTER",
+    name: "Tueur de VIP",
+    description: `Battre un membre VIP en ${csmGame("battle")} — décerné par le staff.`,
+    rarity: "rare",
+    styleKey: "vipHunter",
+    universe: "csm",
+    isUnlocked: () => false,
+  },
+  {
+    key: "CSM_DAILY_LEGEND",
+    name: "Légende du Quotidien",
+    description: `Trouver le ${csmGame("jjkdle")} du jour en un seul essai.`,
+    rarity: "epic",
+    styleKey: "cursedEnergy",
+    universe: "csm",
     isUnlocked: (u) => u.stats.jjkdleBestAttempts === 1,
   },
 ];

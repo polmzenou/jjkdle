@@ -1,4 +1,5 @@
 import type { UnlockContext } from "@/lib/cosmetics/types";
+import { gameTitleIn } from "@/lib/cosmetics/game-title";
 import {
   inUniverse,
   isInUniverse,
@@ -7,6 +8,9 @@ import {
 } from "@/lib/cosmetics/universe";
 import type { Rarity } from "@/lib/profile/rarity";
 import { MAX_LEVEL } from "@/lib/progress/xp";
+
+/** Nom d'un jeu côté CSM (suit `lib/universes/csm.ts`, jamais figé en dur ici). */
+const csmGame = (id: string) => gameTitleIn("csm", id);
 
 /**
  * Catalogue des TITRES (source de vérité = code, comme les badges/bannières —
@@ -125,12 +129,103 @@ const JJK_TITLES: Omit<TitleDefinition, "universe">[] = [
   },
 ];
 
+// Catalogue CSM : mêmes règles de déblocage, vocabulaire Chainsaw Man, clés
+// PRÉFIXÉES (la possession est globale et indexée par clé).
+const CSM_TITLES: Omit<TitleDefinition, "universe">[] = [
+  // ── Progression par niveau (titre de départ → légendaire au niveau max) ──
+  {
+    key: "CSM_NEW_HUNTER",
+    name: "Chasseur Novice",
+    description: "Titre de départ — disponible dès le niveau 1.",
+    rarity: "common",
+    isUnlocked: (u) => u.level >= 1,
+  },
+  {
+    key: "CSM_PUBLIC_SAFETY",
+    name: "Agent de la Sécurité Publique",
+    description: "Atteindre le niveau 5.",
+    rarity: "common",
+    isUnlocked: (u) => u.level >= 5,
+  },
+  {
+    key: "CSM_ELITE_HUNTER",
+    name: "Chasseur d'Élite",
+    description: "Atteindre le niveau 15.",
+    rarity: "rare",
+    isUnlocked: (u) => u.level >= 15,
+  },
+  {
+    key: "CSM_HYBRID",
+    name: "Hybride",
+    description: "Atteindre le niveau 30.",
+    rarity: "epic",
+    isUnlocked: (u) => u.level >= 30,
+  },
+  {
+    key: "CSM_HERO_OF_HELL",
+    name: "Héros de l'Enfer",
+    description: `Atteindre le niveau maximum (${MAX_LEVEL}).`,
+    rarity: "legendary",
+    isUnlocked: (u) => u.level >= MAX_LEVEL,
+  },
+  // ── Exploits méta-site ──
+  {
+    key: "CSM_DAILY_MASTER",
+    name: "Maître de l'Énigme",
+    description: `Trouver le ${csmGame("jjkdle")} du jour en un seul essai.`,
+    rarity: "epic",
+    isUnlocked: (u) => u.stats.jjkdleBestAttempts === 1,
+  },
+  {
+    key: "CSM_PERFECT_WEEK",
+    name: "Semaine Sans Faille",
+    description: `Atteindre un streak ${csmGame("jjkdle")} de 7 jours.`,
+    rarity: "rare",
+    isUnlocked: (u) => u.stats.jjkdleBestStreak >= 7,
+  },
+  {
+    key: "CSM_CHAINSAW_RUSH",
+    name: "Tronçonneuse Déchaînée",
+    description:
+      "Atteindre le score maximal d'un jeu (rang S au Builder ou Pyramide parfaite).",
+    rarity: "epic",
+    isUnlocked: (u) =>
+      u.stats.builderBest >= 980 || u.stats.rankingBest >= 10000,
+  },
+  {
+    key: "CSM_COLLECTOR",
+    name: "Collectionneur",
+    description: "Débloquer au moins 10 badges.",
+    rarity: "epic",
+    isUnlocked: (u) => u.badgeCount >= 10,
+  },
+  // ── Titres MANUELS (octroi admin uniquement) ──
+  {
+    key: "CSM_UNDEFEATED",
+    name: "Invaincu",
+    description: `Battre un membre VIP en ${csmGame("battle")} — distinction décernée par le staff.`,
+    rarity: "rare",
+    isUnlocked: () => false,
+  },
+  {
+    key: "CSM_DRAFT_KING",
+    name: "Roi du Draft",
+    description:
+      "Terminer 1er d'un classement hebdomadaire — distinction décernée par le staff.",
+    rarity: "legendary",
+    isUnlocked: () => false,
+  },
+];
+
 /**
  * Catalogue COMPLET (tous univers). Sert à la possession/au déblocage, qui sont
  * globaux ; pour l'affichage et l'équipement, filtrer par univers courant via
  * `titlesForUniverse`.
  */
-export const TITLES: TitleDefinition[] = tagUniverse(JJK_TITLES, "jjk");
+export const TITLES: TitleDefinition[] = [
+  ...tagUniverse(JJK_TITLES, "jjk"),
+  ...tagUniverse(CSM_TITLES, "csm"),
+];
 
 /** Titres d'un univers (slug) — catalogue affiché par le sélecteur de profil. */
 export function titlesForUniverse(slug: string): TitleDefinition[] {

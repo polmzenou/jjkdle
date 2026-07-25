@@ -24,15 +24,21 @@ import {
 } from "@/lib/profile/banners";
 
 /**
- * Portée d'univers des cosmétiques (étape 2d). Deux garanties testées ici :
+ * Portée d'univers des cosmétiques (étape 2d). Trois garanties testées ici :
  *   1. NON-RÉGRESSION JJK : le catalogue vu depuis "jjk" est exactement le
- *      catalogue complet d'aujourd'hui (rien ne disparaît du site actuel) ;
- *   2. ISOLATION : depuis un autre univers, seuls les cosmétiques NEUTRES
+ *      sous-catalogue tagué "jjk" (rien ne disparaît du site actuel, et rien
+ *      d'un autre anime n'y apparaît) ;
+ *   2. CATALOGUE CSM : peuplé, disjoint de JJK, sans vocabulaire JJK ;
+ *   3. ISOLATION : depuis un univers inconnu, seuls les cosmétiques NEUTRES
  *      passent — c'est la validation appelée par equipTitleAction /
  *      equipFrameAction / PATCH /api/profile.
  */
 
-const OTHER = "csm"; // univers tiers (pas encore peuplé) — doit tout rejeter
+const OTHER = "unknown-universe"; // univers non peuplé — doit tout rejeter
+
+/** Sous-catalogue tagué d'un univers, vu depuis le catalogue complet. */
+const taggedJjk = <T extends { universe: string }>(items: readonly T[]) =>
+  items.filter((i) => i.universe === "jjk");
 
 describe("isInUniverse", () => {
   it("accepte le même univers et refuse les autres", () => {
@@ -64,29 +70,74 @@ describe("inUniverse / tagUniverse", () => {
 });
 
 describe("catalogues JJK (non-régression)", () => {
-  it("expose tout le catalogue de titres sur jjk", () => {
-    expect(titlesForUniverse("jjk")).toHaveLength(TITLES.length);
-    expect(TITLES.every((t) => t.universe === "jjk")).toBe(true);
+  it("expose tout le catalogue de titres JJK sur jjk, et rien d'un autre anime", () => {
+    expect(titlesForUniverse("jjk")).toEqual(taggedJjk(TITLES));
   });
 
-  it("expose tout le catalogue de badges sur jjk", () => {
-    expect(badgesForUniverse("jjk")).toHaveLength(BADGES.length);
-    expect(BADGES.every((b) => b.universe === "jjk")).toBe(true);
+  it("expose tout le catalogue de badges JJK sur jjk", () => {
+    expect(badgesForUniverse("jjk")).toEqual(taggedJjk(BADGES));
   });
 
-  it("expose tout le catalogue de cadres sur jjk", () => {
-    expect(framesForUniverse("jjk")).toHaveLength(FRAMES.length);
-  });
-
-  it("expose toute la palette de bannières sur jjk", () => {
-    expect(bannerKeysForUniverse("jjk")).toHaveLength(
-      Object.keys(BANNER_PALETTE).length,
+  it("expose les cadres JJK + le cadre neutre sur jjk", () => {
+    expect(framesForUniverse("jjk")).toHaveLength(
+      taggedJjk(FRAMES).length + 1, // + DEFAULT (neutre)
     );
+  });
+
+  it("expose les bannières JJK + la bannière neutre sur jjk", () => {
+    const jjkKeys = Object.values(BANNER_PALETTE).filter(
+      (b) => b.universe === "jjk",
+    );
+    expect(bannerKeysForUniverse("jjk")).toHaveLength(jjkKeys.length + 1);
+  });
+});
+
+describe("catalogue CSM", () => {
+  const csmBadges = badgesForUniverse("csm");
+  const csmTitles = titlesForUniverse("csm");
+  const csmFrames = framesForUniverse("csm").filter(
+    (f) => f.key !== DEFAULT_FRAME_KEY,
+  );
+
+  it("est peuplé (un univers sans cosmétiques n'a rien à afficher)", () => {
+    expect(csmBadges.length).toBeGreaterThan(0);
+    expect(csmTitles.length).toBeGreaterThan(0);
+    expect(csmFrames.length).toBeGreaterThan(0);
+    expect(bannerKeysForUniverse("csm").length).toBeGreaterThan(1);
+  });
+
+  it("n'a AUCUNE clé en commun avec JJK (la possession est globale)", () => {
+    const jjkKeys = new Set([
+      ...taggedJjk(BADGES).map((b) => b.key),
+      ...taggedJjk(TITLES).map((t) => t.key),
+      ...taggedJjk(FRAMES).map((f) => f.key),
+    ]);
+    for (const k of [...csmBadges, ...csmTitles, ...csmFrames].map((c) => c.key)) {
+      expect(jjkKeys.has(k)).toBe(false);
+    }
+  });
+
+  it("nomme les jeux avec les titres CSM (et non l'id en repli)", () => {
+    // `gameTitleIn("csm", …)` doit vraiment résoudre : un slug mal orthographié
+    // retomberait sur l'id du jeu (« jjkdle »), sans autre signe visible.
+    const daily = [...csmBadges, ...csmTitles].map((c) => c.description);
+    expect(daily.some((d) => d.includes("CSMdle"))).toBe(true);
+    expect(daily.some((d) => d.includes("jjkdle"))).toBe(false);
+  });
+
+  it("ne contient aucun vocabulaire JJK dans ses libellés", () => {
+    const texts = [...csmBadges, ...csmTitles, ...csmFrames].flatMap((c) => [
+      c.name,
+      c.description,
+    ]);
+    for (const t of texts) {
+      expect(t).not.toMatch(/JJK|Jujutsu|sorcier|exorcis|occulte/i);
+    }
   });
 });
 
 describe("isolation d'un univers tiers", () => {
-  it("ne propose aucun titre ni badge JJK ailleurs", () => {
+  it("ne propose aucun titre ni badge ailleurs", () => {
     expect(titlesForUniverse(OTHER)).toEqual([]);
     expect(badgesForUniverse(OTHER)).toEqual([]);
   });
@@ -109,6 +160,10 @@ describe("garde d'équipement (validation serveur)", () => {
 
   it("REFUSE un titre appartenant à un autre univers", () => {
     expect(isTitleInUniverse("STRONGEST", OTHER)).toBe(false);
+    // Croisement JJK ↔ CSM : chacun refuse le titre de l'autre.
+    expect(isTitleInUniverse("STRONGEST", "csm")).toBe(false);
+    expect(isTitleInUniverse("CSM_HERO_OF_HELL", "csm")).toBe(true);
+    expect(isTitleInUniverse("CSM_HERO_OF_HELL", "jjk")).toBe(false);
   });
 
   it("REFUSE un cadre d'un autre univers mais garde le neutre équipable", () => {

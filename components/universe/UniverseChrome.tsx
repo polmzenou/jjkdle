@@ -89,7 +89,7 @@ export async function UniverseChrome({
           name: universe.config.name,
           logo: universe.config.logo,
           labels: universe.config.labels,
-          gameTitles: universe.config.gameTitles,
+          gameCopy: universe.config.gameCopy,
         }}
       >
         {jsonLd && <SiteJsonLd />}
