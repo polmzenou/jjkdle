@@ -3,11 +3,12 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { AdminUser } from "@/lib/admin/users";
-import { BADGES } from "@/lib/badges/definitions";
-import { TITLES } from "@/lib/titles/definitions";
-import { FRAMES } from "@/lib/frames/definitions";
+import { badgesForUniverse } from "@/lib/badges/definitions";
+import { titlesForUniverse } from "@/lib/titles/definitions";
+import { framesForUniverse } from "@/lib/frames/definitions";
 import { rarityStyle, type Rarity } from "@/lib/profile/rarity";
 import { UniverseLink } from "@/components/universe/UniverseLink";
+import { useUniverse } from "@/components/universe/UniverseProvider";
 import {
   setUserRoleAction,
   setUsernameAction,
@@ -356,6 +357,13 @@ function ProgressionPanel({
   const [level, setLevel] = useState(String(user.level));
   const [xpBonus, setXpBonus] = useState(String(user.xpBonus));
   const owned = new Set(user.badgeKeys);
+  // Catalogues de l'univers ADMINISTRÉ : un cosmétique ne se gagne et ne
+  // s'équipe que dans son univers, on n'octroie donc que ceux d'ici. (La
+  // possession, elle, reste globale.)
+  const { slug } = useUniverse();
+  const badges = badgesForUniverse(slug);
+  const titles = titlesForUniverse(slug);
+  const frames = framesForUniverse(slug);
 
   const applyLevel = () =>
     run(async () => {
@@ -466,7 +474,7 @@ function ProgressionPanel({
           Badges
         </p>
         <div className="flex flex-wrap gap-2">
-          {BADGES.map((b) => {
+          {badges.map((b) => {
             const has = owned.has(b.key);
             return (
               <button
@@ -493,7 +501,7 @@ function ProgressionPanel({
       {/* Titres */}
       <CosmeticManager
         label="Titres"
-        items={TITLES}
+        items={titles}
         autoKeys={autoTitles}
         grantedKeys={grantedTitles}
         equippedKey={user.equippedTitleKey}
@@ -505,7 +513,7 @@ function ProgressionPanel({
       {/* Cadres */}
       <CosmeticManager
         label="Cadres"
-        items={FRAMES}
+        items={frames}
         autoKeys={autoFrames}
         grantedKeys={grantedFrames}
         equippedKey={user.equippedFrameKey}

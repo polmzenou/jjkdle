@@ -1,12 +1,13 @@
-import type { Game, GameTitles } from "./types";
+import type { Game, GameId, UniverseGameCopy } from "./types";
 
 /**
  * Registre central des jeux. Le hub (`app/page.tsx`) mappe sur ce tableau.
  * Ajouter un jeu = ajouter une entrée ici + sa route sous `app/games/<id>/`.
  *
- * ⚠️ Les `title` ci-dessous sont ceux de l'univers PAR DÉFAUT (JJK). Un univers
- * peut les renommer via `UniverseConfig.gameTitles` (ex. « JJKdle » → « CSMdle » ) :
- * ne JAMAIS afficher `GAMES[i].title` directement dans l'UI, passer par
+ * ⚠️ `title`, `description` et `tags` ci-dessous sont ceux de l'univers PAR
+ * DÉFAUT (JJK) : ils contiennent du vocabulaire Jujutsu Kaisen. Chaque univers
+ * réécrit les siens dans `UniverseConfig.gameCopy` (ex. « JJKdle » → « CSMdle »).
+ * Ne JAMAIS afficher ces champs directement dans l'UI : passer par
  * `gamesForUniverse()` / `gameForUniverse()` (ou, côté serveur/client, par
  * `lib/games/universe.ts` et `useUniverseGames()`).
  */
@@ -129,25 +130,44 @@ export function getGame(id: string): Game | undefined {
 }
 
 /**
- * Registre vu par un univers : mêmes jeux, mêmes routes, titres renommés selon
- * sa config. Un anime ne change QUE des libellés — aucun code de jeu n'est
- * dupliqué (cf. `lib/universes/types.ts`).
+ * Registre vu par un univers : mêmes jeux, mêmes routes, mais nom, description
+ * et tags réécrits selon sa config. Un anime ne change QUE des textes — aucun
+ * code de jeu n'est dupliqué (cf. `lib/universes/types.ts`).
  *
  * Fonction PURE (client + serveur). Les appelants serveur passent par
  * `lib/games/universe.ts`, les composants client par `useUniverseGames()`.
  */
-export function gamesForUniverse(titles?: GameTitles): Game[] {
-  if (!titles) return GAMES;
-  return GAMES.map((g) => (titles[g.id] ? { ...g, title: titles[g.id]! } : g));
+export function gamesForUniverse(copy?: UniverseGameCopy): Game[] {
+  if (!copy) return GAMES;
+  return GAMES.map((g) => applyCopy(g, copy));
 }
 
-/** Idem `getGame`, avec le titre de l'univers. */
+/** Idem `getGame`, avec les textes de l'univers. */
 export function gameForUniverse(
   id: string,
-  titles?: GameTitles,
+  copy?: UniverseGameCopy,
 ): Game | undefined {
   const game = getGame(id);
-  if (!game) return undefined;
-  const title = titles?.[game.id];
-  return title ? { ...game, title } : game;
+  if (!game || !copy) return game;
+  return applyCopy(game, copy);
+}
+
+/** Titre d'un jeu dans un univers (repli sur l'id si le jeu est inconnu). */
+export function gameTitleForUniverse(
+  id: string,
+  copy?: UniverseGameCopy,
+): string {
+  return gameForUniverse(id, copy)?.title ?? id;
+}
+
+/** Fusionne les textes de l'univers sur l'entrée du registre (champ par champ). */
+function applyCopy(game: Game, copy: UniverseGameCopy): Game {
+  const c = copy[game.id as GameId];
+  if (!c) return game;
+  return {
+    ...game,
+    ...(c.title ? { title: c.title } : {}),
+    ...(c.description ? { description: c.description } : {}),
+    ...(c.tags ? { tags: c.tags } : {}),
+  };
 }

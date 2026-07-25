@@ -10,7 +10,7 @@
  * via l'admin. Aucun nouveau code métier.
  */
 
-import type { GameTitles } from "@/lib/games/types";
+import type { UniverseGameCopy } from "@/lib/games/types";
 
 /** Palette de thème d'un univers. Sert à générer des variables CSS (cf. étape 4). */
 export interface UniverseTheme {
@@ -90,10 +90,13 @@ export interface UniverseConfig {
   theme: UniverseTheme;
   labels: UniverseLabels;
   /**
-   * Titres des jeux propres à cet univers, par id de jeu (`lib/games/registry.ts`).
-   * Le nom d'un jeu contient souvent du vocabulaire de l'œuvre (« JJKdle »,
-   * « Jujutsu Draft ») : chaque anime le rebaptise ici, sans dupliquer une ligne
-   * de code de jeu. Jeu absent = titre par défaut du registre.
+   * Textes des jeux propres à cet univers (nom, description, tags), par id de
+   * jeu (`lib/games/registry.ts`). Nom et description portent le vocabulaire de
+   * l'œuvre (« JJKdle », « ton sorcier idéal », « roster JJK ») : chaque anime
+   * les réécrit ici, sans dupliquer une ligne de code de jeu.
+   *
+   * Champ absent = valeur par défaut du registre, qui est celle de JJK : un
+   * nouvel univers doit donc fournir un bloc COMPLET pour chaque jeu proposé.
    */
-  gameTitles?: GameTitles;
+  gameCopy?: UniverseGameCopy;
 }

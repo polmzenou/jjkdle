@@ -58,16 +58,58 @@ export const csm: UniverseConfig = {
     glow: "0 0 20px rgba(214, 40, 40, 0.45)",
     glowAccent: "0 0 20px rgba(232, 177, 0, 0.45)",
   },
-  // Noms des jeux côté CSM : mêmes jeux, vocabulaire Chainsaw Man. Les jeux non
-  // listés (« Qui est-ce ? ») gardent leur titre neutre du registre.
-  gameTitles: {
-    builder: "Build the Perfect Devil",
-    ranking: "CSM Pyramid",
-    "jujutsu-draft": "Chainsaw Draft",
-    battle: "CSM Random Battle",
-    codenames: "CSM Codenames",
-    jjkdle: "CSMdle",
-    "higher-lower": "CSM Higher/Lower",
+  // Textes des jeux côté CSM : mêmes jeux, vocabulaire Chainsaw Man. Bloc
+  // COMPLET (les 8 jeux, description et tags inclus) — sans quoi le registre
+  // retomberait sur ses valeurs par défaut, qui sont celles de JJK.
+  gameCopy: {
+    builder: {
+      title: "Build the Perfect Devil",
+      description:
+        "Compose ton démon idéal catégorie par catégorie. Chaque choix verrouille une stat et re-mélange le reste. Score sur 1000, du rang le plus bas au rang S.",
+      tags: ["tap game", "roster CSM", "score"],
+    },
+    ranking: {
+      title: "CSM Pyramid",
+      description:
+        "Classe 8 personnages du plus fort au plus faible selon la consigne. Les bonnes positions se verrouillent, les fausses reviennent. 4 tentatives, jusqu'à 10 000 points.",
+      tags: ["ranking", "drag & drop", "roster CSM"],
+    },
+    "jujutsu-draft": {
+      title: "Chainsaw Draft",
+      description:
+        "Drafte 1 chasseur par catégorie sous budget, place chacun au bon poste, puis affronte une série de démons de plus en plus féroces. Va le plus loin possible.",
+      tags: ["draft", "combat", "roster CSM"],
+    },
+    battle: {
+      title: "CSM Random Battle",
+      description:
+        "Affronte un ami en 1v1 : drafte une carte tirée au hasard à tour de rôle (garde-la ou refile-la), compose ton équipe de 5, puis laisse parler la tronçonneuse. Le cumul le plus fort gagne.",
+      tags: ["1v1", "multijoueur", "draft", "roster CSM"],
+    },
+    guesswho: {
+      title: "Qui est-ce ?",
+      description:
+        "Affronte un ami en 1v1 : une grille de 25 personnages, un secret pour chacun. Pose des questions, élimine des cartes et devine le perso secret de l'adversaire avant lui. Un mauvais guess et c'est perdu.",
+      tags: ["1v1", "multijoueur", "déduction", "roster CSM"],
+    },
+    codenames: {
+      title: "CSM Codenames",
+      description:
+        "En équipe (4 à 6 joueurs, rouge vs violet) : les maîtres-espions donnent des indices, les agents révèlent les bons personnages d'une grille de 36. Évitez l'assassin, révélez vos 8 cartes avant l'équipe adverse.",
+      tags: ["multijoueur", "2-6", "déduction", "roster CSM"],
+    },
+    jjkdle: {
+      title: "CSMdle",
+      description:
+        "Devine le personnage Chainsaw Man mystère du jour. Chaque proposition révèle des indices par attribut (espèce, camp, contrat, arc…) avec des flèches ↑/↓. Un perso par jour, essais illimités.",
+      tags: ["quotidien", "déduction", "roster CSM"],
+    },
+    "higher-lower": {
+      title: "CSM Higher/Lower",
+      description:
+        "Plus ou moins dangereux ? Compare deux personnages du roster, devine si celui de droite dépasse celui de gauche au niveau de menace et enchaîne les bonnes réponses le plus loin possible.",
+      tags: ["quickfire", "déduction", "roster CSM"],
+    },
   },
   labels: {
     // Équivalent CSM de « Énergie occulte » : la jauge de puissance du monde.

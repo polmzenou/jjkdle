@@ -5,8 +5,8 @@ import type { Game } from "./types";
 /**
  * Registre des jeux DE L'UNIVERS COURANT, côté serveur.
  *
- * Même contenu que `GAMES`, mais avec les titres de l'univers résolu par le
- * middleware (`gameTitles` de sa config) : « JJKdle » sur /jjk, « CSMdle » sur
+ * Même contenu que `GAMES`, mais avec les textes de l'univers résolu par le
+ * middleware (`gameCopy` de sa config) : « JJKdle » sur /jjk, « CSMdle » sur
  * /csm. À utiliser dans tout Server Component / metadata qui AFFICHE un nom de
  * jeu ; `GAMES` reste correct pour les ids, routes et flags.
  *
@@ -14,12 +14,12 @@ import type { Game } from "./types";
  * client est `useUniverseGames()` / `useGameTitle()` (components/universe).
  */
 export async function universeGames(): Promise<Game[]> {
-  return gamesForUniverse((await getCurrentUniverseConfig()).gameTitles);
+  return gamesForUniverse((await getCurrentUniverseConfig()).gameCopy);
 }
 
-/** Un jeu du registre avec le titre de l'univers courant. */
+/** Un jeu du registre avec les textes de l'univers courant. */
 export async function universeGame(id: string): Promise<Game | undefined> {
-  return gameForUniverse(id, (await getCurrentUniverseConfig()).gameTitles);
+  return gameForUniverse(id, (await getCurrentUniverseConfig()).gameCopy);
 }
 
 /**

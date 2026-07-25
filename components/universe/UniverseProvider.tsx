@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { createContext, useContext, useCallback, useMemo, type ReactNode } from "react";
 import { universePath, stripUniversePath } from "@/lib/universes/routing";
 import { gameForUniverse, gamesForUniverse } from "@/lib/games/registry";
-import type { Game, GameTitles } from "@/lib/games/types";
+import type { Game, UniverseGameCopy } from "@/lib/games/types";
 import type { UniverseLabels, UniverseLogo } from "@/lib/universes/types";
 
 /**
@@ -28,8 +28,8 @@ export interface UniverseBranding {
   name: string;
   logo: UniverseLogo;
   labels: UniverseLabels;
-  /** Titres de jeux propres à l'univers (cf. `useUniverseGames`). */
-  gameTitles?: GameTitles;
+  /** Textes des jeux propres à l'univers (cf. `useUniverseGames`). */
+  gameCopy?: UniverseGameCopy;
 }
 
 const UniverseContext = createContext<UniverseBranding | null>(null);
@@ -63,15 +63,15 @@ export function useUniverse(): UniverseBranding {
 }
 
 /**
- * Registre des jeux avec les titres de l'univers courant, côté CLIENT.
+ * Registre des jeux avec les textes de l'univers courant, côté CLIENT.
  * Pendant du serveur : `universeGames()` (`lib/games/universe.ts`).
  *
  * Un composant client ne doit jamais afficher `GAMES[i].title` : ce titre est
  * celui de l'univers par défaut, il resterait « JJKdle » sur /csm.
  */
 export function useUniverseGames(): Game[] {
-  const { gameTitles } = useUniverse();
-  return useMemo(() => gamesForUniverse(gameTitles), [gameTitles]);
+  const { gameCopy } = useUniverse();
+  return useMemo(() => gamesForUniverse(gameCopy), [gameCopy]);
 }
 
 /**
@@ -79,8 +79,8 @@ export function useUniverseGames(): Game[] {
  * écrans qui affichent le nom d'UN jeu en dur (lobbies, modales de fin…).
  */
 export function useGameTitle(id: string): string {
-  const { gameTitles } = useUniverse();
-  return gameForUniverse(id, gameTitles)?.title ?? id;
+  const { gameCopy } = useUniverse();
+  return gameForUniverse(id, gameCopy)?.title ?? id;
 }
 
 /**

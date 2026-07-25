@@ -28,8 +28,10 @@ export interface BannerStyle {
 }
 
 export const BANNER_PALETTE = {
+  // Bannière NEUTRE (valeur `@default` du schéma) : son libellé ne doit porter
+  // le vocabulaire d'aucune œuvre, elle s'affiche dans tous les univers.
   default: {
-    label: "Cursed Energy",
+    label: "Standard",
     gradient: "linear-gradient(120deg, #1b1b2b 0%, #5b21b6 60%, #7c3aed 100%)",
     requiredLevel: 1,
     universe: ANY_UNIVERSE,
@@ -99,6 +101,74 @@ export const BANNER_PALETTE = {
     gradient: "linear-gradient(120deg, #1e1b4b 0%, #6d28d9 45%, #f43f5e 100%)",
     requiredLevel: MAX_LEVEL,
     universe: "jjk",
+  },
+
+  // ── Bannières CSM (mêmes paliers, palette sang & or) ──
+  csmBlood: {
+    label: "Sang & Tronçonneuse",
+    gradient: "linear-gradient(120deg, #0c0908 0%, #8f1616 55%, #d62828 100%)",
+    requiredLevel: 1,
+    universe: "csm",
+  },
+  csmPochita: {
+    label: "Pochita",
+    gradient: "linear-gradient(120deg, #241a18 0%, #a37a00 50%, #ffd54a 100%)",
+    requiredLevel: 3,
+    universe: "csm",
+  },
+  csmContract: {
+    label: "Contrat",
+    gradient: "linear-gradient(120deg, #0c0908 0%, #4a3200 55%, #e8b100 100%)",
+    requiredLevel: 5,
+    universe: "csm",
+  },
+  csmGunDevil: {
+    label: "Démon Pistolet",
+    gradient: "linear-gradient(120deg, #0c0908 0%, #3f3f46 55%, #a1a1aa 100%)",
+    requiredLevel: 8,
+    universe: "csm",
+  },
+  csmBombDevil: {
+    label: "Démon Bombe",
+    gradient: "linear-gradient(120deg, #171110 0%, #9d174d 50%, #fb7185 100%)",
+    requiredLevel: 11,
+    universe: "csm",
+  },
+  csmPublicSafety: {
+    label: "Sécurité Publique",
+    gradient: "linear-gradient(120deg, #0c0908 0%, #1e293b 55%, #475569 100%)",
+    requiredLevel: 15,
+    universe: "csm",
+  },
+  csmDarkness: {
+    label: "Démon Ténèbres",
+    gradient: "linear-gradient(120deg, #000000 0%, #1a1327 55%, #4c1d95 100%)",
+    requiredLevel: 20,
+    universe: "csm",
+  },
+  csmHell: {
+    label: "Enfer",
+    gradient: "linear-gradient(120deg, #0c0908 0%, #7f1d1d 50%, #ea580c 100%)",
+    requiredLevel: 26,
+    universe: "csm",
+  },
+  csmControl: {
+    label: "Démon Contrôle",
+    gradient: "linear-gradient(120deg, #171110 0%, #6d28d9 50%, #e8b100 100%)",
+    requiredLevel: 33,
+    universe: "csm",
+  },
+  csmFuture: {
+    label: "Démon Futur",
+    gradient: "linear-gradient(120deg, #022c22 0%, #0f766e 55%, #5eead4 100%)",
+    requiredLevel: 41,
+    universe: "csm",
+  },
+  csmChainsawHeart: {
+    label: "Cœur de Tronçonneuse",
+    gradient: "linear-gradient(120deg, #0c0908 0%, #d62828 45%, #ffd54a 100%)",
+    requiredLevel: MAX_LEVEL,
+    universe: "csm",
   },
 } as const satisfies Record<string, BannerStyle>;
 

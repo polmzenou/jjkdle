@@ -16,10 +16,19 @@ export type GameId =
   | "higher-lower";
 
 /**
- * Titres de jeux propres à un univers : `{ [id du jeu]: titre affiché }`.
- * Tout jeu absent garde le titre par défaut du registre.
+ * Textes d'un jeu propres à un univers. Tout champ absent garde la valeur par
+ * défaut du registre. Le NOM, la DESCRIPTION et les TAGS d'un jeu contiennent du
+ * vocabulaire de l'œuvre (« sorcier », « roster JJK ») : ils sont donc écrits
+ * par univers, pas dans le registre.
  */
-export type GameTitles = Partial<Record<GameId, string>>;
+export interface GameCopy {
+  title?: string;
+  description?: string;
+  tags?: string[];
+}
+
+/** Textes des jeux d'un univers : `{ [id du jeu]: textes }`. */
+export type UniverseGameCopy = Partial<Record<GameId, GameCopy>>;
 
 /**
  * Contrat d'un jeu de la plateforme. Le système est *pluggable* : pour ajouter
