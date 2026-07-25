@@ -21,7 +21,7 @@
  * roster). Pour un perso manquant : l'ajouter d'abord au roster.
  */
 
-import type { CategoryId } from "../roster/categories";
+import type { JjkCategoryId } from "../roster/categories";
 import { CHARACTER_BY_ID, type Character } from "../roster/characters";
 
 export const SLOT_COUNT = 8;
@@ -41,11 +41,16 @@ export interface RankingCondition {
 
 /**
  * Critère de classement :
- *  - "battle"        → trie sur `battleValue` ;
- *  - un `CategoryId` → trie sur `ratings[categoryId]` ;
- *  - "lore"          → ordre manuel (canon / subjectif).
+ *  - "battle"           → trie sur `battleValue` ;
+ *  - un `JjkCategoryId` → trie sur `ratings[categoryId]` ;
+ *  - "lore"             → ordre manuel (canon / subjectif).
+ *
+ * Volontairement l'union FERMÉE des catégories JJK, et non `CategoryId` (qui est
+ * un `string` puisque les catégories sont définies en base) : ce fichier est la
+ * donnée d'amorçage du Pyramid de JJK, et l'union est ce qui permet à
+ * `ConditionDef` de rester discriminable par `criterion === "lore"`.
  */
-export type StatCriterion = "battle" | CategoryId;
+export type StatCriterion = "battle" | JjkCategoryId;
 
 /** Libellé + tournure de phrase pour chaque critère dérivé. */
 const CRITERION_META: Record<StatCriterion, { label: string; verb: string }> = {

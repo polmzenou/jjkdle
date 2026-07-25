@@ -73,11 +73,13 @@ import type {
   DraftCategoryId,
   DraftTier,
 } from "@/lib/games/draft/types";
-import type { Character, CharacterTier } from "@/data/roster/characters";
-import { CATEGORY_BY_ID, type CategoryId } from "@/data/roster/categories";
+import { normalizeTier, type Character } from "@/data/roster/characters";
+import type { CategoryId } from "@/data/roster/categories";
+import { getCategories } from "@/lib/content/queries";
 import { eligibleRoster } from "@/lib/games/jjkdle/daily";
 import { loadAttributeSchema } from "@/lib/games/jjkdle/attributes-db";
 import {
+  getCurrentUniverse,
   getCurrentUniverseSlug,
   listAvailableUniverses,
   revalidateUniversePath,
@@ -97,7 +99,9 @@ import {
 
 export type ActionResult = { ok: boolean; error?: string };
 
-const TIERS: CharacterTier[] = ["4minus", "4", "3", "2", "1", "s"];
+/** Résultat d'un enregistrement de personnage : nomme l'univers écrit. */
+export type SaveCharacterResult = ActionResult & { universe?: string };
+
 const GAMES: LeaderboardGame[] = ["builder", "ranking"];
 const DRAFT_GAME = "jujutsu-draft";
 const JJKDLE_GAME = "jjkdle";
@@ -106,12 +110,28 @@ const JJKDLE_MAX_ATTEMPTS = 999; // garde-fou : nombre d'essais réaliste
 const HIGHER_LOWER_MAX_SCORE = 100000; // garde-fou : score réaliste (bonnes réponses)
 const DRAFT_TIERS: DraftTier[] = ["S", "A", "B", "C"];
 
-/** Valide + enregistre (ajout ou édition) un personnage en base. */
+/**
+ * Valide + enregistre (ajout ou édition) un personnage en base.
+ *
+ * `expectedUniverse` est le slug que le CLIENT croit administrer. On le compare à
+ * l'univers réellement résolu côté serveur et on refuse en cas d'écart : un
+ * cookie d'admin désynchronisé (autre onglet, session reprise) faisait sinon
+ * atterrir en silence un personnage dans le roster du mauvais anime.
+ */
 export async function saveCharacterAction(
   input: Character,
-): Promise<ActionResult> {
+  expectedUniverse?: string,
+): Promise<SaveCharacterResult> {
   if (!(await getAdminUser())) {
     return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+
+  const universe = await getCurrentUniverse();
+  if (expectedUniverse && expectedUniverse !== universe.slug) {
+    return {
+      ok: false,
+      error: `Univers désynchronisé : le serveur cible « ${universe.slug} », pas « ${expectedUniverse} ». Recharge la page.`,
+    };
   }
 
   const id = String(input.id ?? "").trim();
@@ -124,17 +144,24 @@ export async function saveCharacterAction(
     };
   }
   if (!name) return { ok: false, error: "Le nom est obligatoire." };
-  if (!TIERS.includes(input.tier)) {
-    return { ok: false, error: "Tier invalide." };
+  // Tier normalisé (casse/espaces) : une ligne importée en « S » majuscule ne
+  // correspondait à aucune option du <select>, qui affichait « s » tout en
+  // renvoyant « S » — d'où un « Tier invalide » sur une fiche d'apparence saine.
+  const tier = normalizeTier(input.tier);
+  if (!tier) {
+    return { ok: false, error: `Tier invalide : « ${String(input.tier)} ».` };
   }
 
-  // Nettoyage des ratings : uniquement des catégories connues, valeurs 0–100.
+  // Nettoyage des ratings contre les catégories de l'univers, lues EN BASE.
+  // (Anciennement validées contre la liste JJK codée en dur : toute note d'un
+  // autre anime était jetée en silence, et son builder tirait dans le vide.)
+  const known = new Set((await getCategories(universe.id)).map((c) => c.id));
   const ratings: Partial<Record<CategoryId, number>> = {};
   for (const [key, raw] of Object.entries(input.ratings ?? {})) {
-    if (!(key in CATEGORY_BY_ID)) continue;
+    if (!known.has(key)) continue;
     const n = Number(raw);
     if (!Number.isFinite(n)) continue;
-    ratings[key as CategoryId] = Math.max(0, Math.min(100, Math.round(n)));
+    ratings[key] = Math.max(0, Math.min(100, Math.round(n)));
   }
 
   const image = String(input.image ?? "").trim();
@@ -153,7 +180,7 @@ export async function saveCharacterAction(
   // inconnue de l'univers ou une valeur invalide est ignorée — anti-tamper : on
   // ne fait jamais confiance au client, exactement comme l'ancienne validation
   // contre les enums.
-  const schema = await loadAttributeSchema();
+  const schema = await loadAttributeSchema(universe.id);
   const attributes: Record<string, string | number> = {};
   for (const col of schema.columns) {
     const raw = input.attributes?.[col.key];
@@ -171,7 +198,7 @@ export async function saveCharacterAction(
     id,
     name,
     title: String(input.title ?? "").trim(),
-    tier: input.tier,
+    tier,
     ...(image ? { image } : {}),
     ratings,
     ...(battleValue != null ? { battleValue } : {}),
@@ -179,13 +206,13 @@ export async function saveCharacterAction(
   };
 
   try {
-    await upsertCharacter(char);
+    await upsertCharacter(char, universe.id);
   } catch (e) {
     return { ok: false, error: `Échec d'écriture : ${(e as Error).message}` };
   }
 
   revalidatePath("/", "layout"); // hub + jeux + admin relisent le roster
-  return { ok: true };
+  return { ok: true, universe: universe.slug };
 }
 
 export async function deleteCharacterAction(id: string): Promise<ActionResult> {

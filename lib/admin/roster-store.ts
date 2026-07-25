@@ -1,7 +1,7 @@
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import type { Character } from "@/data/roster/characters";
 import { getRoster } from "@/lib/content/queries";
-import { getCurrentUniverse } from "@/lib/universes/current";
 
 /**
  * Lecture/écriture du roster en base (Neon Postgres).
@@ -24,11 +24,11 @@ export async function readRoster(): Promise<Character[]> {
  * Les clés inconnues de l'univers sont ignorées : la validation a déjà eu lieu
  * dans `saveCharacterAction`, on ne fait ici que persister.
  */
-async function writeCharacterAttributes(
+async function characterAttributeWrites(
   characterId: string,
   universeId: string,
   attributes: Record<string, string | number>,
-): Promise<void> {
+): Promise<Prisma.PrismaPromise<unknown>[]> {
   const attrs = await prisma.attribute.findMany({
     where: { universeId },
     select: {
@@ -39,16 +39,14 @@ async function writeCharacterAttributes(
     },
   });
 
-  for (const attr of attrs) {
+  const clear = (attributeId: string) =>
+    prisma.characterAttribute.deleteMany({ where: { characterId, attributeId } });
+
+  return attrs.map((attr) => {
     const raw = attributes[attr.key];
 
     // Valeur absente/vide → l'attribut n'est plus renseigné.
-    if (raw == null || raw === "") {
-      await prisma.characterAttribute.deleteMany({
-        where: { characterId, attributeId: attr.id },
-      });
-      continue;
-    }
+    if (raw == null || raw === "") return clear(attr.id);
 
     const data =
       attr.kind === "NUMERIC"
@@ -60,25 +58,34 @@ async function writeCharacterAttributes(
           };
 
     // Valeur non reconnue pour une liste fermée → traitée comme non renseignée.
-    if (attr.kind !== "NUMERIC" && data.optionId == null) {
-      await prisma.characterAttribute.deleteMany({
-        where: { characterId, attributeId: attr.id },
-      });
-      continue;
-    }
+    if (attr.kind !== "NUMERIC" && data.optionId == null) return clear(attr.id);
 
-    await prisma.characterAttribute.upsert({
+    return prisma.characterAttribute.upsert({
       where: {
         characterId_attributeId: { characterId, attributeId: attr.id },
       },
       create: { characterId, attributeId: attr.id, ...data },
       update: data,
     });
-  }
+  });
 }
 
-/** Ajoute (ou met à jour si l'id existe) un personnage. */
-export async function upsertCharacter(char: Character): Promise<void> {
+/**
+ * Ajoute (ou met à jour si l'id existe) un personnage, DANS UNE TRANSACTION.
+ *
+ * L'atomicité n'est pas un luxe : la version précédente créait la ligne PUIS
+ * écrivait les attributs. Une erreur sur la seconde étape affichait un échec à
+ * l'admin tout en laissant le personnage créé — impossible de savoir, depuis
+ * l'interface, si l'enregistrement avait pris ou pas.
+ *
+ * `universeId` est EXPLICITE (résolu par l'appelant) : le rattachement d'un
+ * nouveau personnage est trop lourd de conséquences pour dépendre d'un contexte
+ * de requête lu au fond de la pile.
+ */
+export async function upsertCharacter(
+  char: Character,
+  universeId: string,
+): Promise<void> {
   const data = {
     name: char.name,
     title: char.title,
@@ -93,33 +100,39 @@ export async function upsertCharacter(char: Character): Promise<void> {
     select: { id: true, universeId: true },
   });
 
-  let universeId: string;
+  // Un personnage existant garde SON univers : on ne déplace jamais un perso
+  // d'un anime à l'autre par une simple édition.
+  const targetUniverseId = existing?.universeId ?? universeId;
+
+  let save: Prisma.PrismaPromise<unknown>;
   if (existing) {
-    universeId = existing.universeId;
-    await prisma.character.update({ where: { id: char.id }, data });
+    save = prisma.character.update({ where: { id: char.id }, data });
   } else {
-    // Nouveau personnage : rattaché à l'univers courant, positionné en fin de
-    // liste DE CET UNIVERS (max position par univers). `slug` = id (clé lisible).
-    const current = await getCurrentUniverse();
-    universeId = current.id;
+    // Nouveau personnage : positionné en fin de liste DE SON UNIVERS.
     const max = await prisma.character.aggregate({
-      where: { universeId: current.id },
+      where: { universeId: targetUniverseId },
       _max: { position: true },
     });
-    await prisma.character.create({
+    save = prisma.character.create({
       data: {
         id: char.id,
         ...data,
         position: (max._max.position ?? -1) + 1,
-        universeId: current.id,
-        slug: char.id,
+        universeId: targetUniverseId,
+        slug: char.id, // `slug` = id (clé lisible, unique par univers)
       },
     });
   }
 
-  // Attributs écrits dans l'univers DU PERSONNAGE (pas forcément le courant :
-  // l'admin multi-univers de l'étape 5 pourra éditer un autre univers).
-  await writeCharacterAttributes(char.id, universeId, char.attributes ?? {});
+  const attributeWrites = await characterAttributeWrites(
+    char.id,
+    targetUniverseId,
+    char.attributes ?? {},
+  );
+
+  // Ordre significatif : la ligne doit exister avant que ses attributs ne la
+  // référencent (FK). `$transaction` exécute le tableau en séquence.
+  await prisma.$transaction([save, ...attributeWrites]);
 }
 
 /** Supprime un personnage par id (ignore s'il n'existe pas). */

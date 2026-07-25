@@ -12,7 +12,17 @@
  * « éligible » à une catégorie uniquement s'il possède une note pour cet ID.
  */
 
-export type CategoryId =
+/**
+ * Identifiant d'une catégorie. Volontairement `string` : les catégories sont
+ * DÉFINIES EN BASE, par univers (table `Category`, CRUD dans /admin et dans le
+ * panneau admin de la vue builder). Une union fermée ne pourrait décrire que
+ * l'univers JJK — et c'est exactement ce qui a fait jeter silencieusement les
+ * notes des personnages CSM à l'enregistrement.
+ */
+export type CategoryId = string;
+
+/** Les 9 catégories historiques de JJK — sert au SEED uniquement. */
+export type JjkCategoryId =
   | "innate-technique"
   | "speed"
   | "curse-status"
@@ -24,6 +34,7 @@ export type CategoryId =
   | "endurance";
 
 export interface CategoryConfig {
+  /** Clé utilisée dans `Character.ratings` — c'est `Category.id` en base. */
   id: CategoryId;
   label: string;
   description: string;
@@ -33,7 +44,8 @@ export interface CategoryConfig {
   drawCount: number;
 }
 
-export const CATEGORIES: CategoryConfig[] = [
+/** Données d'amorçage des catégories JJK (cf. prisma/seed.ts). */
+export const CATEGORIES: (CategoryConfig & { id: JjkCategoryId })[] = [
   {
     id: "innate-technique",
     label: "Sort inné",
@@ -99,7 +111,9 @@ export const CATEGORIES: CategoryConfig[] = [
   },
 ];
 
-/** Accès rapide à une catégorie par son ID. */
-export const CATEGORY_BY_ID: Record<CategoryId, CategoryConfig> = Object.fromEntries(
-  CATEGORIES.map((c) => [c.id, c]),
-) as Record<CategoryId, CategoryConfig>;
+/** Accès rapide à une catégorie JJK par son ID (seed/tests). */
+export const CATEGORY_BY_ID: Record<JjkCategoryId, CategoryConfig> =
+  Object.fromEntries(CATEGORIES.map((c) => [c.id, c])) as Record<
+    JjkCategoryId,
+    CategoryConfig
+  >;

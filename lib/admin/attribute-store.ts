@@ -1,6 +1,5 @@
 import type { AttributeKind } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { invalidateAttributeSchema } from "@/lib/games/jjkdle/attributes-db";
 import { getCurrentUniverse } from "@/lib/universes/current";
 
 /**
@@ -8,9 +7,9 @@ import { getCurrentUniverse } from "@/lib/universes/current";
  * anime ajoutable SANS CODE : définir ses attributs et leurs valeurs possibles
  * suffit à faire fonctionner JJKdle pour lui.
  *
- * Module server-only. Toute écriture invalide le cache du schéma
- * (`invalidateAttributeSchema`) : sans ça, le jeu continuerait de servir
- * l'ancienne définition jusqu'au prochain démarrage.
+ * Module server-only. Aucune invalidation de cache à faire ici : le schéma est
+ * mémoïsé PAR REQUÊTE (cf. `loadAttributeSchema`), donc la modification est
+ * visible dès le rendu suivant, sur toutes les instances.
  *
  * L'univers ciblé est l'univers COURANT, que le middleware fait correspondre à
  * l'univers sélectionné dans l'admin (cf. lib/universes/admin-scope.ts).
@@ -154,7 +153,6 @@ export async function upsertAttribute(input: AttributeInput): Promise<void> {
       },
     });
   }
-  invalidateAttributeSchema(universeId);
 }
 
 /**
@@ -166,7 +164,6 @@ export async function deleteAttribute(id: string): Promise<void> {
   const { id: universeId } = await getCurrentUniverse();
   // `deleteMany` borné à l'univers : un id d'un autre univers ne peut rien casser.
   await prisma.attribute.deleteMany({ where: { id, universeId } });
-  invalidateAttributeSchema(universeId);
 }
 
 /** Crée ou met à jour une valeur possible d'un attribut. */
@@ -196,7 +193,6 @@ export async function upsertAttributeOption(
       },
     });
   }
-  invalidateAttributeSchema(universeId);
 }
 
 /**
@@ -211,5 +207,4 @@ export async function deleteAttributeOption(id: string): Promise<void> {
   });
   if (!option) throw new Error("Valeur introuvable dans cet univers.");
   await prisma.attributeOption.delete({ where: { id } });
-  invalidateAttributeSchema(universeId);
 }

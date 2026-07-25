@@ -7,7 +7,11 @@ import {
   useUniverseHref,
 } from "@/components/universe/UniverseProvider";
 import type { CategoryConfig, CategoryId } from "@/data/roster/categories";
-import type { Character, CharacterTier } from "@/data/roster/characters";
+import {
+  normalizeTier,
+  type Character,
+  type CharacterTier,
+} from "@/data/roster/characters";
 import { CharacterImage } from "@/components/CharacterImage";
 import type { AdminScore } from "@/lib/leaderboard/store";
 import type { AdminUser } from "@/lib/admin/users";
@@ -33,7 +37,9 @@ import {
   type UniverseOption,
 } from "./UniverseSwitcher";
 import { AttributesAdmin } from "./AttributesAdmin";
+import { CategoriesAdmin } from "./CategoriesAdmin";
 import type { AdminAttribute } from "@/lib/admin/attribute-store";
+import type { AdminCategory } from "@/lib/admin/category-store";
 import type { OverviewStats } from "@/lib/admin/analytics";
 import type { JjkdleAnalytics } from "@/lib/admin/jjkdle-analytics";
 import type { MaintenanceConfig } from "@/lib/config/app-config";
@@ -96,6 +102,8 @@ interface AdminDashboardProps {
   universeName: string;
   /** Attributs de l'univers administré (onglet Attributs). */
   attributes: AdminAttribute[];
+  /** Catégories du builder de l'univers administré (onglet Catégories). */
+  adminCategories: AdminCategory[];
 }
 
 type Tab =
@@ -104,6 +112,7 @@ type Tab =
   | "content"
   | "jjkdle"
   | "attributes"
+  | "categories"
   | "draft"
   | "leaderboard"
   | "users"
@@ -120,6 +129,7 @@ const TAB_LABELS: Record<Tab, string> = {
   content: "Santé contenu",
   jjkdle: "Analytics JJKdle",
   attributes: "Attributs",
+  categories: "Catégories",
   draft: "Jujutsu Draft",
   leaderboard: "Leaderboard",
   users: "Utilisateurs",
@@ -145,6 +155,7 @@ const TAB_ORDER: Tab[] = [
   "content",
   "jjkdle",
   "attributes",
+  "categories",
   "draft",
   "leaderboard",
   "users",
@@ -179,6 +190,7 @@ export function AdminDashboard({
   currentUniverse,
   universeName,
   attributes,
+  adminCategories,
 }: AdminDashboardProps) {
   const router = useRouter();
   // Les appels d'API doivent porter l'univers ADMINISTRÉ (cf. admin/layout.tsx),
@@ -262,7 +274,11 @@ export function AdminDashboard({
       id: c.id,
       name: c.name,
       title: c.title ?? "",
-      tier: c.tier,
+      // Normalisé : une valeur hors liste (« S » majuscule d'un import) ne
+      // correspondrait à aucune option, le <select> afficherait la première tout
+      // en gardant l'ancienne valeur dans l'état — et l'enregistrement serait
+      // refusé sur une fiche d'apparence correcte.
+      tier: normalizeTier(c.tier) ?? "3",
       battleValue: c.battleValue?.toString() ?? "",
       image: c.image ?? "",
       cats: Object.fromEntries(
@@ -327,7 +343,9 @@ export function AdminDashboard({
     const char = buildCharacter();
     startTransition(async () => {
       // 1) Enregistre les champs texte/ratings (crée la ligne si nouvelle).
-      const res = await saveCharacterAction(char);
+      // L'univers administré est envoyé : le serveur refuse si le sien diffère,
+      // plutôt que de créer le personnage dans le roster du mauvais anime.
+      const res = await saveCharacterAction(char, currentUniverse);
       if (!res.ok) {
         setFeedback({ ok: false, msg: res.error ?? "Échec." });
         return;
@@ -363,7 +381,10 @@ export function AdminDashboard({
         return;
       }
 
-      setFeedback({ ok: true, msg: `« ${char.name} » enregistré.` });
+      setFeedback({
+        ok: true,
+        msg: `« ${char.name} » enregistré dans ${universeName}.`,
+      });
       resetForm();
       router.refresh();
     });
@@ -479,24 +500,20 @@ export function AdminDashboard({
     loadCharacter(c);
   };
 
-  const subtitle =
-    tab === "overview"
-      ? `${overview.players.total} joueurs · ${roster.length} personnages`
-      : tab === "roster"
-        ? `${roster.length} personnages`
-        : tab === "content"
-          ? `${overview.content.incomplete} incomplets · ${overview.content.missingImage} sans image`
-          : tab === "jjkdle"
-            ? `Jour ${jjkdleAnalytics.date}`
-            : tab === "attributes"
-              ? `${attributes.length} attribut(s) · ${universeName}`
-              : tab === "draft"
-                ? `${draftRoster.length} personnages (draft)`
-                : tab === "leaderboard"
-                  ? `${scores.length} scores`
-                  : tab === "config"
-                    ? "Feature flags & maintenance"
-                    : `${users.length} utilisateurs`;
+  /** Sous-titre de l'en-tête, propre à l'onglet affiché. */
+  const SUBTITLES: Record<Tab, string> = {
+    overview: `${overview.players.total} joueurs · ${roster.length} personnages`,
+    roster: `${roster.length} personnages · ${universeName}`,
+    content: `${overview.content.incomplete} incomplets · ${overview.content.missingImage} sans image`,
+    jjkdle: `Jour ${jjkdleAnalytics.date}`,
+    attributes: `${attributes.length} attribut(s) · ${universeName}`,
+    categories: `${adminCategories.length} catégorie(s) · ${universeName}`,
+    draft: `${draftRoster.length} personnages (draft)`,
+    leaderboard: `${scores.length} scores`,
+    config: "Feature flags & maintenance",
+    users: `${users.length} utilisateurs`,
+  };
+  const subtitle = SUBTITLES[tab];
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
@@ -575,6 +592,13 @@ export function AdminDashboard({
         <AttributesAdmin attributes={attributes} universeName={universeName} />
       )}
 
+      {tab === "categories" && (
+        <CategoriesAdmin
+          categories={adminCategories}
+          universeName={universeName}
+        />
+      )}
+
       {tab === "config" && (
         <ConfigAdmin
           roster={roster}
@@ -599,6 +623,28 @@ export function AdminDashboard({
 
       {tab === "roster" && (
         <>
+      {/* Univers ciblé, rappelé en permanence : un nouveau personnage part dans
+          CE roster, et le sélecteur d'univers vit tout en haut de la page. */}
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/10 bg-void-800/40 px-4 py-3">
+        <p className="text-sm text-white/60">
+          Roster édité :{" "}
+          <span className="font-bold text-domain-light">{universeName}</span>
+        </p>
+        {categories.length === 0 ? (
+          <button
+            type="button"
+            onClick={() => setTab("categories")}
+            className="text-xs font-semibold text-cursed-light underline decoration-dotted"
+          >
+            Aucune catégorie dans cet univers — en créer
+          </button>
+        ) : (
+          <span className="text-xs text-white/35">
+            {categories.length} catégorie(s) notables ci-dessous
+          </span>
+        )}
+      </div>
+
       {feedback && (
         <div
           className={`mb-5 rounded-xl px-4 py-3 text-sm ${
