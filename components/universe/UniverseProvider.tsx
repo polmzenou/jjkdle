@@ -26,6 +26,12 @@ export interface UniverseBranding {
   slug: string;
   /** Nom de marque affiché (ex. « JJK Arcade »). */
   name: string;
+  /**
+   * Nom de l'ŒUVRE (ex. « Jujutsu Kaisen »), distinct de la marque. Les textes
+   * qui parlent de l'anime lui-même (tutoriel, accroches) doivent l'utiliser :
+   * l'écrire en dur donnait « l'arcade Jujutsu Kaisen » sur /csm.
+   */
+  sourceWork: string;
   logo: UniverseLogo;
   labels: UniverseLabels;
   /** Textes des jeux propres à l'univers (cf. `useUniverseGames`). */
