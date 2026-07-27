@@ -9,14 +9,14 @@ import {
   type LeaderboardScope,
   type UserScore,
 } from "@/lib/leaderboard/store";
-import type { HLCharacter, HLTurnView } from "./types";
+import { compareHL, type HLCharacter, type HLTurnView } from "./types";
 
 /**
- * Persistance « JJK Higher/Lower » (Neon Postgres via Prisma).
+ * Persistance « Higher/Lower » (Neon Postgres via Prisma).
  *
  * Deux responsabilités :
  *  1. État de partie EN COURS (`HigherLowerSession`) : autorité serveur anti-triche.
- *     La vraie `cursedEnergy` du perso de droite vit ici et n'est jamais exposée
+ *     La vraie valeur du perso de droite vit ici et n'est jamais exposée
  *     au client avant réponse.
  *  2. Scores terminés (`HigherLowerScore`, append) : leaderboard best-par-joueur,
  *     récap profil, administration.
@@ -32,9 +32,11 @@ const SESSION_SELECT = {
   userId: true,
   score: true,
   leftId: true,
-  leftCursedEnergy: true,
+  leftValue: true,
+  leftTiebreak: true,
   rightId: true,
-  rightCursedEnergy: true,
+  rightValue: true,
+  rightTiebreak: true,
   usedIds: true,
 } as const;
 
@@ -48,23 +50,28 @@ function randOf<T>(arr: T[]): T {
 
 /**
  * Choisit le perso de DROITE face à `left` :
- *  - jamais le même perso que la gauche (ni le perso à éviter — droite précédente) ;
- *  - valeur strictement différente si possible (évite l'ambiguïté d'égalité) ;
+ *  - jamais le même perso que la gauche ;
+ *  - jamais une paire INDÉPARTAGEABLE : même valeur comparée ET même départage
+ *    (`battleValue`) → la question n'aurait pas de bonne réponse, on écarte
+ *    purement et simplement ces candidats. Avec un attribut ORDINAL (CSM), deux
+ *    « Puissant » restent en revanche une paire valide : c'est `battleValue` qui
+ *    tranche ;
  *  - privilégie un perso pas encore apparu (`usedIds`) pour varier.
- * Renvoie null si le pool est épuisé (aucun candidat).
+ *
+ * Renvoie null quand il ne reste AUCUN candidat départageable : traité comme un
+ * pool épuisé (fin de partie) plutôt que de poser une question impossible.
  */
 function pickRight(
   pool: HLCharacter[],
   left: HLCharacter,
   usedIds: string[],
 ): HLCharacter | null {
-  const others = pool.filter((c) => c.id !== left.id);
-  if (others.length === 0) return null;
-  const strict = others.filter((c) => c.cursedEnergy !== left.cursedEnergy);
-  const base = strict.length > 0 ? strict : others; // évite l'égalité si possible
-  const fresh = base.filter((c) => !usedIds.includes(c.id));
-  const pickFrom = fresh.length > 0 ? fresh : base;
-  return randOf(pickFrom);
+  const comparable = pool.filter(
+    (c) => c.id !== left.id && compareHL(c, left) !== 0,
+  );
+  if (comparable.length === 0) return null;
+  const fresh = comparable.filter((c) => !usedIds.includes(c.id));
+  return randOf(fresh.length > 0 ? fresh : comparable);
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -76,11 +83,23 @@ type SessionRow = {
   userId: string | null;
   score: number;
   leftId: string;
-  leftCursedEnergy: number;
+  leftValue: number;
+  leftTiebreak: number;
   rightId: string;
-  rightCursedEnergy: number;
+  rightValue: number;
+  rightTiebreak: number;
   usedIds: string[];
 };
+
+/**
+ * Libellé d'affichage d'une valeur comparée (« 87 », « Puissant »), déduit du
+ * pool : valeur ↔ libellé est une bijection (nombre affiché tel quel en NUMERIC,
+ * rang ↔ option en ORDINAL). Repli sur le nombre brut si la valeur a disparu du
+ * pool (attribut réédité en /admin pendant la partie).
+ */
+function labelFor(pool: HLCharacter[], value: number): string {
+  return pool.find((c) => c.value === value)?.valueLabel ?? String(value);
+}
 
 /**
  * Construit la vue client d'un tour à partir d'une session + du pool courant
@@ -101,13 +120,17 @@ export function buildTurnView(
       id: left.id,
       name: left.name,
       ...(left.image ? { image: left.image } : {}),
-      cursedEnergy: session.leftCursedEnergy,
+      value: session.leftValue,
+      // Départage de la carte GAUCHE : déjà révélée, donc rien à cacher — c'est
+      // ce qui permet d'expliquer un ex æquo au moment de la révélation.
+      tiebreak: session.leftTiebreak,
+      valueLabel: labelFor(pool, session.leftValue),
     },
     right: {
       id: right.id,
       name: right.name,
       ...(right.image ? { image: right.image } : {}),
-      // cursedEnergy volontairement OMISE (anti-triche).
+      // value / tiebreak volontairement OMIS (anti-triche).
     },
   };
 }
@@ -128,9 +151,11 @@ export async function createSession(
       userId,
       score: 0,
       leftId: left.id,
-      leftCursedEnergy: left.cursedEnergy,
+      leftValue: left.value,
+      leftTiebreak: left.tiebreak,
       rightId: right.id,
-      rightCursedEnergy: right.cursedEnergy,
+      rightValue: right.value,
+      rightTiebreak: right.tiebreak,
       usedIds: [left.id, right.id],
       universeId,
     },
@@ -184,13 +209,14 @@ export async function advanceSession(
 ): Promise<HLTurnView | null> {
   const byId = new Map(pool.map((c) => [c.id, c]));
   // La nouvelle gauche = l'ancienne droite (avec sa vraie valeur mémorisée).
+  const previousRight = byId.get(session.rightId);
   const newLeft: HLCharacter = {
     id: session.rightId,
-    name: byId.get(session.rightId)?.name ?? "",
-    ...(byId.get(session.rightId)?.image
-      ? { image: byId.get(session.rightId)!.image! }
-      : {}),
-    cursedEnergy: session.rightCursedEnergy,
+    name: previousRight?.name ?? "",
+    ...(previousRight?.image ? { image: previousRight.image } : {}),
+    value: session.rightValue,
+    tiebreak: session.rightTiebreak,
+    valueLabel: labelFor(pool, session.rightValue),
   };
   const next = pickRight(pool, newLeft, session.usedIds);
   if (!next) {
@@ -208,9 +234,11 @@ export async function advanceSession(
     data: {
       score: { increment: 1 },
       leftId: newLeft.id,
-      leftCursedEnergy: newLeft.cursedEnergy,
+      leftValue: newLeft.value,
+      leftTiebreak: newLeft.tiebreak,
       rightId: next.id,
-      rightCursedEnergy: next.cursedEnergy,
+      rightValue: next.value,
+      rightTiebreak: next.tiebreak,
       usedIds: { set: [...session.usedIds, next.id] },
     },
     select: SESSION_SELECT,

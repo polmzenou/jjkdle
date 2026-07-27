@@ -1,0 +1,358 @@
+{
+  "angel-devil": {
+    "csmspecies": "DEVIL",
+    "csmgender": "MALE",
+    "csmAppearanceArc": "KATANA",
+    "csmaffiliation": "SPECIAL_DIVISION_4",
+    "csmpower": "HIGH"
+  },
+  "princi": {
+    "csmspecies": "FIEND",
+    "csmgender": "FEMALE",
+    "csmAppearanceArc": "KATANA",
+    "csmaffiliation": "SPECIAL_DIVISION_4",
+    "csmpower": "MODERATE"
+  },
+  "future-devil": {
+    "csmspecies": "DEVIL",
+    "csmgender": "OTHER",
+    "csmAppearanceArc": "KATANA",
+    "csmaffiliation": "NONE",
+    "csmpower": "HIGH"
+  },
+  "fox-devil": {
+    "csmspecies": "DEVIL",
+    "csmgender": "OTHER",
+    "csmAppearanceArc": "ARC_CHAINSAWMAN",
+    "csmaffiliation": "NONE",
+    "csmpower": "MODERATE"
+  },
+  "curse-devil": {
+    "csmspecies": "DEVIL",
+    "csmgender": "OTHER",
+    "csmaffiliation": "NONE",
+    "csmpower": "HIGH"
+  },
+  "ghost-devil": {
+    "csmspecies": "DEVIL",
+    "csmgender": "OTHER",
+    "csmAppearanceArc": "ETERNITY",
+    "csmaffiliation": "NONE",
+    "csmpower": "MODERATE"
+  },
+  "gun-devil": {
+    "csmspecies": "DEVIL",
+    "csmgender": "OTHER",
+    "csmAppearanceArc": "GUNDEVIL",
+    "csmaffiliation": "NONE",
+    "csmpower": "EXTREME"
+  },
+  "gun-fiend": {
+    "csmspecies": "FIEND",
+    "csmAppearanceArc": "CONTROLDEVIL",
+    "csmpower": "HIGH"
+  },
+  "falling-devil": {
+    "csmspecies": "DEVIL",
+    "csmgender": "FEMALE",
+    "csmAppearanceArc": "FALLINGDEVIL",
+    "csmaffiliation": "PRIMAL_DEVIL",
+    "csmpower": "EXTREME"
+  },
+  "yoru": {
+    "csmspecies": "DEVIL",
+    "csmgender": "FEMALE",
+    "csmAppearanceArc": "JUSTICEDEVIL",
+    "csmaffiliation": "PRIMAL_DEVIL",
+    "csmpower": "EXTREME"
+  },
+  "asa-mitaka": {
+    "csmspecies": "HYBRID",
+    "csmgender": "FEMALE",
+    "csmAppearanceArc": "JUSTICEDEVIL",
+    "csmaffiliation": "DEVIL_CLUB",
+    "csmpower": "LOW"
+  },
+  "fami": {
+    "csmspecies": "DEVIL",
+    "csmgender": "FEMALE",
+    "csmaffiliation": "PRIMAL_DEVIL",
+    "csmpower": "EXTREME"
+  },
+  "nayuta": {
+    "csmspecies": "DEVIL",
+    "csmgender": "FEMALE",
+    "csmAppearanceArc": "CONTROLDEVIL",
+    "csmaffiliation": "NONE",
+    "csmpower": "MODERATE"
+  },
+  "barem-bridge": {
+    "csmspecies": "HYBRID",
+    "csmgender": "MALE",
+    "csmAppearanceArc": "GUNDEVIL",
+    "csmpower": "HIGH"
+  },
+  "miri-sugo": {
+    "csmspecies": "HYBRID",
+    "csmgender": "MALE",
+    "csmAppearanceArc": "GUNDEVIL",
+    "csmaffiliation": "SPECIAL_DIVISION_4",
+    "csmpower": "MODERATE"
+  },
+  "whip-hybrid": {
+    "csmspecies": "HYBRID",
+    "csmAppearanceArc": "GUNDEVIL",
+    "csmaffiliation": "SPECIAL_DIVISION_4",
+    "csmpower": "MODERATE"
+  },
+  "spear-hybrid": {
+    "csmspecies": "HYBRID",
+    "csmAppearanceArc": "GUNDEVIL",
+    "csmaffiliation": "SPECIAL_DIVISION_4",
+    "csmpower": "MODERATE"
+  },
+  "santa-claus": {
+    "csmgender": "FEMALE",
+    "csmAppearanceArc": "INTERNATIONAL",
+    "csmaffiliation": "NONE",
+    "csmpower": "VERY_HIGH"
+  },
+  "cosmo": {
+    "csmspecies": "FIEND",
+    "csmgender": "FEMALE",
+    "csmAppearanceArc": "INTERNATIONAL",
+    "csmaffiliation": "CHINA",
+    "csmpower": "HIGH"
+  },
+  "pingtsi": {
+    "csmspecies": "FIEND",
+    "csmgender": "FEMALE",
+    "csmAppearanceArc": "INTERNATIONAL",
+    "csmaffiliation": "CHINA",
+    "csmpower": "MODERATE"
+  },
+  "long": {
+    "csmspecies": "FIEND",
+    "csmgender": "FEMALE",
+    "csmAppearanceArc": "INTERNATIONAL",
+    "csmaffiliation": "CHINA",
+    "csmpower": "MODERATE"
+  },
+  "tsugihagi": {
+    "csmspecies": "FIEND",
+    "csmgender": "FEMALE",
+    "csmAppearanceArc": "INTERNATIONAL",
+    "csmaffiliation": "CHINA",
+    "csmpower": "MODERATE"
+  },
+  "hirofumi-yoshida": {
+    "csmspecies": "HUMAN",
+    "csmgender": "MALE",
+    "csmAppearanceArc": "INTERNATIONAL",
+    "csmpower": "HIGH"
+  },
+  "fumiko-mifune": {
+    "csmspecies": "HUMAN",
+    "csmgender": "FEMALE",
+    "csmpower": "MODERATE"
+  },
+  "haruka-iseumi": {
+    "csmspecies": "HUMAN",
+    "csmgender": "MALE",
+    "csmAppearanceArc": "JUSTICEDEVIL",
+    "csmaffiliation": "DEVIL_CLUB",
+    "csmpower": "MODERATE"
+  },
+  "seigi-akoku": {
+    "csmspecies": "HUMAN",
+    "csmAppearanceArc": "JUSTICEDEVIL",
+    "csmaffiliation": "DEVIL_CLUB",
+    "csmpower": "LOW"
+  },
+  "nobana-higashiyama": {
+    "csmspecies": "HUMAN",
+    "csmgender": "FEMALE",
+    "csmAppearanceArc": "JUSTICEDEVIL",
+    "csmaffiliation": "DEVIL_CLUB",
+    "csmpower": "LOW"
+  },
+  "yuko": {
+    "csmspecies": "HUMAN",
+    "csmgender": "FEMALE",
+    "csmAppearanceArc": "JUSTICEDEVIL",
+    "csmaffiliation": "NONE",
+    "csmpower": "LOW"
+  },
+  "arai-hirokazu": {
+    "csmspecies": "HUMAN",
+    "csmgender": "MALE",
+    "csmAppearanceArc": "ETERNITY",
+    "csmaffiliation": "SPECIAL_DIVISION_4",
+    "csmpower": "LOW"
+  },
+  "madoka": {
+    "csmspecies": "HUMAN",
+    "csmgender": "MALE",
+    "csmaffiliation": "SPECIAL_DIVISION_4",
+    "csmpower": "LOW"
+  },
+  "michiko-tendo": {
+    "csmspecies": "HUMAN",
+    "csmgender": "FEMALE",
+    "csmpower": "MODERATE"
+  },
+  "yutaro-kurose": {
+    "csmspecies": "HUMAN",
+    "csmgender": "MALE",
+    "csmpower": "MODERATE"
+  },
+  "aldo": {
+    "csmspecies": "HUMAN",
+    "csmgender": "MALE",
+    "csmAppearanceArc": "INTERNATIONAL",
+    "csmpower": "MODERATE"
+  },
+  "joey": {
+    "csmspecies": "HUMAN",
+    "csmAppearanceArc": "INTERNATIONAL",
+    "csmpower": "LOW"
+  },
+  "bennett": {
+    "csmspecies": "HUMAN",
+    "csmAppearanceArc": "INTERNATIONAL",
+    "csmpower": "MINI"
+  },
+  "hell-devil": {
+    "csmspecies": "DEVIL",
+    "csmgender": "OTHER",
+    "csmAppearanceArc": "INTERNATIONAL",
+    "csmaffiliation": "NONE",
+    "csmpower": "EXTREME"
+  },
+  "zombie-devil": {
+    "csmspecies": "DEVIL",
+    "csmgender": "OTHER",
+    "csmAppearanceArc": "ARC_CHAINSAWMAN",
+    "csmaffiliation": "NONE",
+    "csmpower": "LOW"
+  },
+  "tomato-devil": {
+    "csmspecies": "DEVIL",
+    "csmgender": "OTHER",
+    "csmAppearanceArc": "ARC_CHAINSAWMAN",
+    "csmaffiliation": "NONE",
+    "csmpower": "MINI"
+  },
+  "bat-devil": {
+    "csmspecies": "DEVIL",
+    "csmgender": "OTHER",
+    "csmAppearanceArc": "BATDEVIL",
+    "csmaffiliation": "NONE",
+    "csmpower": "MODERATE"
+  },
+  "leech-devil": {
+    "csmspecies": "DEVIL",
+    "csmgender": "OTHER",
+    "csmaffiliation": "NONE",
+    "csmpower": "LOW"
+  },
+  "eternity-devil": {
+    "csmspecies": "DEVIL",
+    "csmgender": "OTHER",
+    "csmAppearanceArc": "ETERNITY",
+    "csmaffiliation": "NONE",
+    "csmpower": "HIGH"
+  },
+  "typhoon-devil": {
+    "csmspecies": "DEVIL",
+    "csmgender": "OTHER",
+    "csmaffiliation": "NONE",
+    "csmpower": "MODERATE"
+  },
+  "justice-devil": {
+    "csmspecies": "DEVIL",
+    "csmgender": "OTHER",
+    "csmAppearanceArc": "JUSTICEDEVIL",
+    "csmaffiliation": "NONE",
+    "csmpower": "MODERATE"
+  },
+  "fire-devil": {
+    "csmspecies": "DEVIL",
+    "csmgender": "OTHER",
+    "csmaffiliation": "NONE",
+    "csmpower": "MODERATE"
+  },
+  "cockroach-devil": {
+    "csmspecies": "DEVIL",
+    "csmgender": "OTHER",
+    "csmaffiliation": "NONE",
+    "csmpower": "LOW"
+  },
+  "doll-devil": {
+    "csmspecies": "DEVIL",
+    "csmgender": "OTHER",
+    "csmAppearanceArc": "INTERNATIONAL",
+    "csmaffiliation": "NONE",
+    "csmpower": "HIGH"
+  },
+  "punishment-devil": {
+    "csmspecies": "DEVIL",
+    "csmgender": "OTHER",
+    "csmaffiliation": "NONE",
+    "csmpower": "MODERATE"
+  },
+  "stone-devil": {
+    "csmspecies": "DEVIL",
+    "csmgender": "OTHER",
+    "csmaffiliation": "NONE",
+    "csmpower": "MODERATE"
+  },
+  "octopus-devil": {
+    "csmspecies": "DEVIL",
+    "csmgender": "OTHER",
+    "csmAppearanceArc": "INTERNATIONAL",
+    "csmaffiliation": "NONE",
+    "csmpower": "MODERATE"
+  },
+  "mold-devil": {
+    "csmspecies": "DEVIL",
+    "csmgender": "OTHER",
+    "csmaffiliation": "NONE",
+    "csmpower": "LOW"
+  },
+  "bucky": {
+    "csmspecies": "DEVIL",
+    "csmgender": "OTHER",
+    "csmaffiliation": "NONE",
+    "csmpower": "MINI"
+  },
+  "sea-cucumber-devil": {
+    "csmspecies": "DEVIL",
+    "csmgender": "OTHER",
+    "csmaffiliation": "NONE",
+    "csmpower": "MINI"
+  },
+  "muscle-devil": {
+    "csmspecies": "DEVIL",
+    "csmgender": "OTHER",
+    "csmaffiliation": "NONE",
+    "csmpower": "LOW"
+  },
+  "centipede-devil": {
+    "csmspecies": "DEVIL",
+    "csmgender": "OTHER",
+    "csmaffiliation": "NONE",
+    "csmpower": "LOW"
+  },
+  "meowy": {
+    "csmspecies": "OTHER",
+    "csmAppearanceArc": "BATDEVIL",
+    "csmaffiliation": "NONE",
+    "csmpower": "MINI"
+  },
+  "kiga": {
+    "csmspecies": "DEVIL",
+    "csmaffiliation": "PRIMAL_DEVIL",
+    "csmpower": "EXTREME"
+  }
+}

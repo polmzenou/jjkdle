@@ -59,7 +59,6 @@ export const jjk: UniverseConfig = {
     glowAccent: "0 0 20px rgba(220, 38, 38, 0.45)",
   },
   labels: {
-    energyLabel: "Énergie occulte",
     tagline:
       "Une collection de mini-jeux nerveux pour tester ta connaissance de l'univers et libérer ton énergie maudite.",
   },

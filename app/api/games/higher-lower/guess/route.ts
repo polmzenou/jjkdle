@@ -12,9 +12,9 @@ import { computeCorrect, type HLChoice } from "@/lib/games/higher-lower/types";
  * POST /api/games/higher-lower/guess   Body : { choice: "higher" | "lower" }
  *
  * Anti-triche : le comparatif est calculé ICI à partir de la valeur cachée
- * stockée en session — le client n'a jamais reçu la vraie énergie occulte du
- * perso de droite. Bonne réponse → +1 + nouveau perso à droite. Mauvaise → game
- * over (la session est conservée pour que `end` persiste le score final).
+ * stockée en session — le client n'a jamais reçu la vraie valeur du perso de
+ * droite. Bonne réponse → +1 + nouveau perso à droite. Mauvaise → game over
+ * (la session est conservée pour que `end` persiste le score final).
  */
 
 export const dynamic = "force-dynamic";
@@ -49,32 +49,38 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "Choix invalide." }, { status: 400 });
   }
 
-  const revealedCursedEnergy = session.rightCursedEnergy;
-  const correct = computeCorrect(
-    session.leftCursedEnergy,
-    session.rightCursedEnergy,
-    choice,
-  );
+  const left = { value: session.leftValue, tiebreak: session.leftTiebreak };
+  const right = { value: session.rightValue, tiebreak: session.rightTiebreak };
+  const correct = computeCorrect(left, right, choice);
+
+  // Le pool sert aussi au LIBELLÉ révélé (« Puissant ») : il est donc chargé même
+  // en cas de game over, où la partie ne continue pas.
+  const pool = await getHigherLowerPool();
+  const revealed = {
+    ...right,
+    valueLabel:
+      pool.characters.find((c) => c.id === session.rightId)?.valueLabel ??
+      String(right.value),
+  };
 
   if (!correct) {
     // Game over : on garde la session (score inchangé) pour `end`.
     return NextResponse.json({
       ok: true,
       correct: false,
-      revealedCursedEnergy,
+      revealed,
       score: session.score,
       gameOver: true,
     });
   }
 
-  const pool = await getHigherLowerPool();
-  const next = await advanceSession(session, pool);
+  const next = await advanceSession(session, pool.characters);
   if (!next) {
     // Pool épuisé : bonne réponse comptée (score +1), plus de perso à proposer.
     return NextResponse.json({
       ok: true,
       correct: true,
-      revealedCursedEnergy,
+      revealed,
       score: session.score + 1,
       gameOver: true,
     });
@@ -83,7 +89,7 @@ export async function POST(req: Request) {
   return NextResponse.json({
     ok: true,
     correct: true,
-    revealedCursedEnergy,
+    revealed,
     score: next.score,
     next,
     gameOver: false,

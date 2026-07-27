@@ -107,13 +107,15 @@ export const csm: UniverseConfig = {
     "higher-lower": {
       title: "CSM Higher/Lower",
       description:
-        "Plus ou moins dangereux ? Compare deux personnages du roster, devine si celui de droite dépasse celui de gauche au niveau de menace et enchaîne les bonnes réponses le plus loin possible.",
+        "Plus ou moins puissant ? Compare deux personnages du roster, devine si celui de droite dépasse celui de gauche en puissance et enchaîne les bonnes réponses le plus loin possible.",
       tags: ["quickfire", "déduction", "roster CSM"],
     },
   },
+  // Higher/Lower compare la « Puissance » (attribut ORDINAL : Minimum → Surpuissant)
+  // plutôt qu'une jauge chiffrée — CSM n'a pas d'équivalent de l'énergie occulte.
+  // Les ex æquo de rang sont départagés par `battleValue` (cf. lib/games/higher-lower).
+  higherLower: { attributeKey: "csmpower" },
   labels: {
-    // Équivalent CSM de « Énergie occulte » : la jauge de puissance du monde.
-    energyLabel: "Niveau de menace",
     tagline:
       "Une collection de mini-jeux nerveux pour tester ta connaissance de l'univers et faire hurler la tronçonneuse.",
   },

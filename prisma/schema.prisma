@@ -263,9 +263,17 @@ model HigherLowerSession {
   userId            String?
   score             Int      @default(0)
   leftId            String
-  leftCursedEnergy  Int
+  /// Valeur comparée du perso de gauche : le nombre saisi (attribut NUMERIC,
+  /// JJK) ou le RANG de l'option (attribut ORDINAL, CSM « Puissance »). Le nom
+  /// de COLONNE reste `leftCursedEnergy` (@map) : le champ s'est généralisé au
+  /// multi-univers, la donnée en base est la même — aucune migration.
+  leftValue         Int      @map("leftCursedEnergy")
+  /// Départage des ex æquo (`Character.battleValue`), pour les attributs ORDINAL
+  /// dont les rangs sont peu nombreux. 0 = pas de départage (cas NUMERIC).
+  leftTiebreak      Int      @default(0)
   rightId           String
-  rightCursedEnergy Int
+  rightValue        Int      @map("rightCursedEnergy")
+  rightTiebreak     Int      @default(0)
   usedIds           String[]
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
