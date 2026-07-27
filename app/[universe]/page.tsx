@@ -3,16 +3,9 @@ import { GameShowcase } from "@/components/landing/GameShowcase";
 import { MangaDecor } from "@/components/landing/MangaDecor";
 import { GAMES } from "@/lib/games/registry";
 import { universeGameTitle } from "@/lib/games/universe";
+import { getGameFlags } from "@/lib/config/app-config";
 import { getCurrentUniverseConfig } from "@/lib/universes/current";
 import { UniverseLink } from "@/components/universe/UniverseLink";
-
-const liveCount = GAMES.filter((g) => g.status !== "coming-soon").length;
-
-const STATS = [
-  { value: String(liveCount), label: "jeux jouables" },
-  { value: "0", label: "compte requis" },
-  { value: "S", label: "grade max à atteindre" },
-];
 
 /**
  * Landing de l'UNIVERS COURANT : présente le site, puis met en scène les jeux.
@@ -20,10 +13,26 @@ const STATS = [
  * page sert donc n'importe quel anime.
  */
 export default async function HomePage() {
-  const [universe, builderTitle] = await Promise.all([
+  const [universe, builderTitle, flags] = await Promise.all([
     getCurrentUniverseConfig(),
     universeGameTitle("builder"),
+    getGameFlags(),
   ]);
+
+  // Jeux désactivés (maintenance) dans cet univers : retirés de la vitrine, et
+  // décomptés du « jeux jouables » — annoncer 8 jeux tout en n'en montrant que 6
+  // ferait mentir la stat.
+  const disabledIds = GAMES.filter((g) => flags[g.id] === false).map((g) => g.id);
+  const liveCount = GAMES.filter(
+    (g) => g.status !== "coming-soon" && flags[g.id] !== false,
+  ).length;
+
+  const stats = [
+    { value: String(liveCount), label: "jeux jouables" },
+    { value: "0", label: "compte requis" },
+    { value: "S", label: "grade max à atteindre" },
+  ];
+
   return (
     <main className="flex flex-col">
       {/* Couche décorative manga / JJK (kanji, ofuda, lignes de concentration) */}
@@ -74,7 +83,7 @@ export default async function HomePage() {
 
         {/* Bandeau de stats */}
         <div className="mt-16 grid w-full max-w-lg grid-cols-3 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/5">
-          {STATS.map((stat) => (
+          {stats.map((stat) => (
             <div
               key={stat.label}
               className="flex flex-col items-center bg-void-900/60 px-3 py-5 backdrop-blur"
@@ -112,7 +121,7 @@ export default async function HomePage() {
           </p>
         </div>
 
-        <GameShowcase />
+        <GameShowcase disabledIds={disabledIds} />
       </section>
 
       {/* ── CTA final ── */}

@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { GAMES, gamesForUniverse } from "@/lib/games/registry";
 import { csm } from "./csm";
@@ -30,6 +32,23 @@ describe("copy des jeux CSM", () => {
           /JJK|Jujutsu|sorcier|exorcis|occulte|maudit/i,
         );
       }
+    }
+  });
+
+  /**
+   * Même piège que les textes, en visuel : une miniature montre le roster de
+   * l'anime, et celle du registre montre des persos JJK. Un chemin mal écrit
+   * casserait l'image sans bruit, d'où la vérification que l'asset existe.
+   */
+  it("pointe vers des miniatures CSM qui existent", () => {
+    for (const g of GAMES) {
+      const src = csm.gameCopy?.[g.id]?.previewImage;
+      if (!src) continue; // jeu sans capture CSM dédiée : repli assumé sur JJK
+      expect(src, `« ${g.id} » : miniature non CSM`).toMatch(/-csm\.\w+$/);
+      expect(
+        existsSync(resolve(__dirname, "../../public", src.replace(/^\//, ""))),
+        `« ${g.id} » : asset introuvable (${src})`,
+      ).toBe(true);
     }
   });
 });

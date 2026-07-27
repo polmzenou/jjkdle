@@ -61,18 +61,26 @@ export const csm: UniverseConfig = {
   // Textes des jeux côté CSM : mêmes jeux, vocabulaire Chainsaw Man. Bloc
   // COMPLET (les 8 jeux, description et tags inclus) — sans quoi le registre
   // retomberait sur ses valeurs par défaut, qui sont celles de JJK.
+  //
+  // `previewImage` suit la même règle : une capture montre le roster de l'anime,
+  // celle du registre montre donc des persos JJK. Les jeux sans capture CSM
+  // (Chainsaw Draft, CSM Codenames) gardent temporairement celle de JJK : y
+  // ajouter `/assets/draft-screen-csm.png` / `codenames-screen-csm.png` dès que
+  // les visuels existent.
   gameCopy: {
     builder: {
       title: "Build the Perfect Devil",
       description:
         "Compose ton démon idéal catégorie par catégorie. Chaque choix verrouille une stat et re-mélange le reste. Score sur 1000, du rang le plus bas au rang S.",
       tags: ["tap game", "roster CSM", "score"],
+      previewImage: "/assets/builder-screen-csm.png",
     },
     ranking: {
       title: "CSM Pyramid",
       description:
         "Classe 8 personnages du plus fort au plus faible selon la consigne. Les bonnes positions se verrouillent, les fausses reviennent. 4 tentatives, jusqu'à 10 000 points.",
       tags: ["ranking", "drag & drop", "roster CSM"],
+      previewImage: "/assets/pyramid-screen-csm.png",
     },
     "jujutsu-draft": {
       title: "Chainsaw Draft",
@@ -85,12 +93,14 @@ export const csm: UniverseConfig = {
       description:
         "Affronte un ami en 1v1 : drafte une carte tirée au hasard à tour de rôle (garde-la ou refile-la), compose ton équipe de 5, puis laisse parler la tronçonneuse. Le cumul le plus fort gagne.",
       tags: ["1v1", "multijoueur", "draft", "roster CSM"],
+      previewImage: "/assets/battle-screen-csm.png",
     },
     guesswho: {
       title: "Qui est-ce ?",
       description:
         "Affronte un ami en 1v1 : une grille de 25 personnages, un secret pour chacun. Pose des questions, élimine des cartes et devine le perso secret de l'adversaire avant lui. Un mauvais guess et c'est perdu.",
       tags: ["1v1", "multijoueur", "déduction", "roster CSM"],
+      previewImage: "/assets/guesswho-screen-csm.png",
     },
     codenames: {
       title: "CSM Codenames",
@@ -103,12 +113,14 @@ export const csm: UniverseConfig = {
       description:
         "Devine le personnage Chainsaw Man mystère du jour. Chaque proposition révèle des indices par attribut (espèce, camp, contrat, arc…) avec des flèches ↑/↓. Un perso par jour, essais illimités.",
       tags: ["quotidien", "déduction", "roster CSM"],
+      previewImage: "/assets/idle-screen-csm.png",
     },
     "higher-lower": {
       title: "CSM Higher/Lower",
       description:
         "Plus ou moins puissant ? Compare deux personnages du roster, devine si celui de droite dépasse celui de gauche en puissance et enchaîne les bonnes réponses le plus loin possible.",
       tags: ["quickfire", "déduction", "roster CSM"],
+      previewImage: "/assets/higher-lower-screen-csm.png",
     },
   },
   // Higher/Lower compare la « Puissance » (attribut ORDINAL : Minimum → Surpuissant)

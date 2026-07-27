@@ -25,6 +25,12 @@ export interface GameCopy {
   title?: string;
   description?: string;
   tags?: string[];
+  /**
+   * Miniature/screenshot du jeu propre à l'univers (chemin sous public/). Une
+   * capture montre le roster de l'anime : celle du registre est donc celle de
+   * JJK. Absent = miniature par défaut du registre.
+   */
+  previewImage?: string;
 }
 
 /** Textes des jeux d'un univers : `{ [id du jeu]: textes }`. */
