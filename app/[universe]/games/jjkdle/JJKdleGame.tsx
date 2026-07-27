@@ -392,5 +392,5 @@ function buildShareText(
   const grid = rows
     .map((r) => r.hints.map((h) => emoji[h.status] ?? "⬜").join(""))
     .join("\n");
-  return `JJKdle — ${attempts} essai${attempts > 1 ? "s" : ""}\n${grid}`;
+  return `${gameTitle} — ${attempts} essai${attempts > 1 ? "s" : ""}\n${grid}`;
 }

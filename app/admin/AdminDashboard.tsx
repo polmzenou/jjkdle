@@ -56,6 +56,13 @@ import {
 
 const TIERS: CharacterTier[] = ["s", "1", "2", "3", "4", "4minus"];
 
+/**
+ * Valeur sentinelle des filtres d'attributs du roster : « attribut non
+ * renseigné ». Préfixée pour ne jamais entrer en collision avec une vraie
+ * valeur d'option (qui est un slug type "GRADE_1").
+ */
+const ATTR_MISSING = "__missing__";
+
 type CatField = { enabled: boolean; value: string };
 interface FormState {
   id: string;
@@ -227,6 +234,9 @@ export function AdminDashboard({
   );
   const [query, setQuery] = useState("");
   const [rosterCat, setRosterCat] = useState<CategoryId | "all">("all");
+  // Filtres par attribut : `clé d'attribut → valeur retenue`. "" = pas de filtre,
+  // ATTR_MISSING = ne garder que les persos dont l'attribut n'est pas renseigné.
+  const [attrFilters, setAttrFilters] = useState<Record<string, string>>({});
   // Perso affiché en grand dans le modal (clic sur sa vignette).
   const [previewChar, setPreviewChar] = useState<Character | null>(null);
   // Multi-sélection du roster (ids de personnages cochés).
@@ -502,9 +512,53 @@ export function AdminDashboard({
     router.refresh();
   });
 
+  /**
+   * Valeurs proposées par le filtre de chaque attribut. Listes fermées : les
+   * options du schéma. NUMERIC (pas d'options) : les valeurs présentes dans le
+   * roster, triées, pour rester utilisable sans champ de saisie.
+   */
+  const attrFilterOptions = useMemo(
+    () =>
+      attributeColumns.map((col) => {
+        if (col.options.length > 0) {
+          return {
+            col,
+            options: col.options.map((o) => [o.value, o.label] as const),
+          };
+        }
+        const seen = new Set<string>();
+        for (const c of roster) {
+          const v = c.attributes?.[col.key];
+          if (v != null) seen.add(String(v));
+        }
+        return {
+          col,
+          options: [...seen]
+            .sort((a, b) => Number(a) - Number(b))
+            .map((v) => [v, v] as const),
+        };
+      }),
+    [attributeColumns, roster],
+  );
+
+  // Filtres d'attributs réellement actifs (les autres sont sur « tous »).
+  const activeAttrFilters = useMemo(
+    () => Object.entries(attrFilters).filter(([, v]) => v !== ""),
+    [attrFilters],
+  );
+
+  const matchesAttrFilters = (c: Character) =>
+    activeAttrFilters.every(([key, wanted]) => {
+      const value = c.attributes?.[key];
+      return wanted === ATTR_MISSING
+        ? value == null
+        : value != null && String(value) === wanted;
+    });
+
   const filtered = roster.filter(
     (c) =>
       (rosterCat === "all" || c.ratings[rosterCat] !== undefined) &&
+      matchesAttrFilters(c) &&
       (c.name.toLowerCase().includes(query.toLowerCase()) ||
         c.id.includes(query.toLowerCase())),
   );
@@ -1004,6 +1058,47 @@ export function AdminDashboard({
               className="w-40 rounded-lg border border-white/10 bg-void-900 px-3 py-1.5 text-sm text-white outline-none focus:border-domain"
             />
           </div>
+
+          {/* Filtres par attribut (un select par attribut de l'univers). */}
+          {attributeColumns.length > 0 && (
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+              {attrFilterOptions.map(({ col, options }) => (
+                <select
+                  key={col.key}
+                  value={attrFilters[col.key] ?? ""}
+                  onChange={(e) =>
+                    setAttrFilters((prev) => ({
+                      ...prev,
+                      [col.key]: e.target.value,
+                    }))
+                  }
+                  title={col.label}
+                  className={`rounded-lg border bg-void-900 px-3 py-1.5 text-sm outline-none focus:border-domain ${
+                    attrFilters[col.key]
+                      ? "border-domain/60 text-domain-light"
+                      : "border-white/10 text-white/70"
+                  }`}
+                >
+                  <option value="">{col.label} : tous</option>
+                  {options.map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                  <option value={ATTR_MISSING}>— non renseigné —</option>
+                </select>
+              ))}
+              {activeAttrFilters.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setAttrFilters({})}
+                  className="text-xs text-white/50 hover:text-white"
+                >
+                  Réinitialiser les attributs
+                </button>
+              )}
+            </div>
+          )}
 
           {/* Barre d'action multi-sélection (visible dès qu'un perso est coché). */}
           {selectedIds.size > 0 && (
