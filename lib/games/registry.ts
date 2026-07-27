@@ -4,8 +4,8 @@ import type { Game, GameId, UniverseGameCopy } from "./types";
  * Registre central des jeux. Le hub (`app/page.tsx`) mappe sur ce tableau.
  * Ajouter un jeu = ajouter une entrée ici + sa route sous `app/games/<id>/`.
  *
- * ⚠️ `title`, `description` et `tags` ci-dessous sont ceux de l'univers PAR
- * DÉFAUT (JJK) : ils contiennent du vocabulaire Jujutsu Kaisen. Chaque univers
+ * ⚠️ `title`, `description`, `tags` et `previewImage` ci-dessous sont ceux de
+ * l'univers PAR DÉFAUT (JJK) : ils montrent/contiennent du Jujutsu Kaisen. Chaque univers
  * réécrit les siens dans `UniverseConfig.gameCopy` (ex. « JJKdle » → « CSMdle »).
  * Ne JAMAIS afficher ces champs directement dans l'UI : passer par
  * `gamesForUniverse()` / `gameForUniverse()` (ou, côté serveur/client, par
@@ -169,5 +169,6 @@ function applyCopy(game: Game, copy: UniverseGameCopy): Game {
     ...(c.title ? { title: c.title } : {}),
     ...(c.description ? { description: c.description } : {}),
     ...(c.tags ? { tags: c.tags } : {}),
+    ...(c.previewImage ? { previewImage: c.previewImage } : {}),
   };
 }

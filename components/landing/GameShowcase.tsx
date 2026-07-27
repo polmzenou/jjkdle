@@ -9,9 +9,16 @@ import { UniverseLink } from "@/components/universe/UniverseLink";
  * Présentation des jeux sur la landing : pour chaque jeu en ligne, une rangée
  * alternée screenshot / texte. Le screenshot est mis en valeur dans un cadre
  * "arcade" avec le glow de l'accent du jeu. Se synchronise sur le registre.
+ *
+ * `disabledIds` = les jeux désactivés/en maintenance dans l'univers (flags
+ * admin, lus côté serveur). Ils sont RETIRÉS d'ici : la landing est une vitrine,
+ * mettre en avant un jeu injouable enverrait le visiteur dans le mur. Le hub
+ * /games les garde, lui, en carte grisée.
  */
-export function GameShowcase() {
-  const games = useUniverseGames().filter((g) => g.status !== "coming-soon");
+export function GameShowcase({ disabledIds = [] }: { disabledIds?: string[] }) {
+  const games = useUniverseGames().filter(
+    (g) => g.status !== "coming-soon" && !disabledIds.includes(g.id),
+  );
 
   return (
     <div className="flex flex-col gap-20 sm:gap-28">
