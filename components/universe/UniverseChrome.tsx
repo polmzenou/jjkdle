@@ -87,6 +87,7 @@ export async function UniverseChrome({
         branding={{
           slug: universe.slug,
           name: universe.config.name,
+          sourceWork: universe.config.sourceWork,
           logo: universe.config.logo,
           labels: universe.config.labels,
           gameCopy: universe.config.gameCopy,

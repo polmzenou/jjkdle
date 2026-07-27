@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   useGameTitle,
+  useUniverse,
   useUniverseGames,
 } from "@/components/universe/UniverseProvider";
 
@@ -14,7 +15,7 @@ function DailyGameName() {
 
 /**
  * Liste des jeux jouables affichée par l'étape « Les jeux ». Composant à part
- * (et non du JSX inline dans `STEPS`) parce qu'il lui faut un hook : les titres
+ * (et non du JSX inline dans `buildSteps`) parce qu'il lui faut un hook : les titres
  * dépendent de l'univers courant (« JJKdle » / « CSMdle »).
  */
 function GamesStep() {
@@ -60,19 +61,35 @@ type Step = {
   body: React.ReactNode;
 };
 
-const STEPS: Step[] = [
+/**
+ * Étapes du tutoriel, construites pour l'UNIVERS COURANT.
+ *
+ * C'était une constante de module, donc du vocabulaire Jujutsu Kaisen écrit en
+ * dur (« l'arcade Jujutsu Kaisen », « JJK Arcade », le kanji 呪 « malédiction ») :
+ * la modale accueillait le joueur de Chainsaw Man dans le mauvais anime. Le nom
+ * de l'ŒUVRE (`sourceWork`) et celui de la MARQUE (`name`) viennent maintenant de
+ * la config de l'univers, et les kanji décoratifs restants sont génériques
+ * (accueil, jeu, expérience…) pour valoir dans n'importe quel anime.
+ *
+ * Les deux premières étapes prennent l'accent de l'univers via ses variables CSS ;
+ * les suivantes gardent des couleurs SÉMANTIQUES (XP, grades, cosmétiques), qui
+ * sont celles de la plateforme et non d'un anime.
+ */
+function buildSteps(name: string, sourceWork: string): Step[] {
+  return [
   {
-    eyebrow: "呪 · Bienvenue",
-    kanji: "呪",
-    title: "Bienvenue dans l'arcade Jujutsu Kaisen",
-    accent: "#7c3aed",
+    eyebrow: "歓迎 · Bienvenue",
+    kanji: "歓",
+    title: `Bienvenue dans l'arcade ${sourceWork}`,
+    accent: "rgb(var(--color-domain))",
     body: (
       <p className="text-white/70">
-        JJK Arcade est une salle de mini-jeux dédiée à l'univers{" "}
-        <span className="text-white">Jujutsu Kaisen</span>. Enchaîne les jeux,
-        grimpe les classements, gagne de l'expérience et débloque des
-        cosmétiques. Ce petit guide te montre comment tout fonctionne — clique
-        sur <span className="text-domain-light">Suivant</span> pour continuer.
+        <span className="text-white">{name}</span> est une salle de mini-jeux
+        dédiée à l'univers <span className="text-white">{sourceWork}</span>.
+        Enchaîne les jeux, grimpe les classements, gagne de l'expérience et
+        débloque des cosmétiques. Ce petit guide te montre comment tout
+        fonctionne — clique sur{" "}
+        <span className="text-domain-light">Suivant</span> pour continuer.
       </p>
     ),
   },
@@ -80,7 +97,7 @@ const STEPS: Step[] = [
     eyebrow: "遊技 · Les jeux",
     kanji: "技",
     title: "Les jeux de l'arcade",
-    accent: "#a78bfa",
+    accent: "rgb(var(--color-domain-light))",
     body: <GamesStep />,
   },
   {
@@ -121,7 +138,7 @@ const STEPS: Step[] = [
       <div className="space-y-3 text-white/70">
         <p>
           L'XP accumulée fait grimper ton <span className="text-white">niveau</span>,
-          calqué sur les grades des exorcistes : du{" "}
+          gradué sur l'échelle de l'arcade : du{" "}
           <span className="text-grade-4minus">Grade 4−</span> jusqu'au{" "}
           <span className="font-bold text-grade-s">Grade S</span>.
         </p>
@@ -181,7 +198,8 @@ const STEPS: Step[] = [
       </div>
     ),
   },
-];
+  ];
+}
 
 /**
  * Bouton flottant circulaire (bas-droite) ouvrant un tutoriel pas-à-pas.
@@ -190,13 +208,18 @@ const STEPS: Step[] = [
  * Suivant / Précédent, se ferme avec la croix, l'arrière-plan ou Échap.
  */
 export function TutorialButton() {
+  const { name, sourceWork } = useUniverse();
+  const steps = useMemo(
+    () => buildSteps(name, sourceWork),
+    [name, sourceWork],
+  );
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
 
   const close = useCallback(() => setOpen(false), []);
   const next = useCallback(
-    () => setStep((s) => Math.min(s + 1, STEPS.length - 1)),
-    [],
+    () => setStep((s) => Math.min(s + 1, steps.length - 1)),
+    [steps.length],
   );
   const prev = useCallback(() => setStep((s) => Math.max(s - 1, 0)), []);
 
@@ -223,8 +246,8 @@ export function TutorialButton() {
     };
   }, [open, close, next, prev]);
 
-  const current = STEPS[step];
-  const isLast = step === STEPS.length - 1;
+  const current = steps[step];
+  const isLast = step === steps.length - 1;
 
   return (
     <>
@@ -253,7 +276,7 @@ export function TutorialButton() {
             className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-void-900/80 p-4 backdrop-blur-sm"
             role="dialog"
             aria-modal="true"
-            aria-label="Tutoriel JJK Arcade"
+            aria-label={`Tutoriel ${name}`}
           >
             <motion.div
               key={step}
@@ -309,7 +332,7 @@ export function TutorialButton() {
 
               {/* Indicateurs de progression */}
               <div className="relative mt-7 flex items-center justify-center gap-2">
-                {STEPS.map((_, i) => (
+                {steps.map((_, i) => (
                   <button
                     key={i}
                     type="button"

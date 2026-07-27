@@ -1,88 +1,74 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+import { getGameFlags, getMaintenance } from "@/lib/config/app-config";
+import { gamesForUniverse } from "@/lib/games/registry";
 import { listAvailableUniverses } from "@/lib/universes/current";
 import { themeCssVars } from "@/lib/universes/theme";
+import { UniverseHub, type HubUniverse } from "./UniverseHub";
 
 /**
  * HUB multi-univers (étape 5) : liste les animes disponibles sur la plateforme.
  *
  * Alimenté par la BASE (table `Universe`) croisée avec le registre de configs :
- * un anime ajouté apparaît ici automatiquement, sans toucher cette page.
+ * un anime ajouté apparaît ici automatiquement, sans toucher cette page ni le
+ * composant de rendu (la grille s'étend d'elle-même, cf. `UniverseHub`).
  *
- * Chaque carte est rendue avec la PALETTE de son univers (variables CSS posées
- * en style inline sur la carte) : on voit d'un coup d'œil l'identité de chacun,
- * alors même que la page est servie sous le thème de l'univers courant.
+ * Ce fichier ne fait que RÉSOUDRE les données ; la mise en forme vit dans
+ * `UniverseHub` (composant client, pour les animations d'entrée).
  */
 export const metadata: Metadata = {
   title: "Les univers",
   description:
-    "Tous les univers d'arcade de la plateforme : un anime, un domaine, ses jeux et son roster.",
+    "Tous les univers d'arcade de la plateforme : un anime, ses jeux et son roster. Un seul compte pour tous.",
 };
 
 export const dynamic = "force-dynamic";
 
+/** Nombre de titres de jeux mis en avant sur une carte (le reste tient en « +N »). */
+const HIGHLIGHT_COUNT = 3;
+
 export default async function UniversesHubPage() {
   const universes = await listAvailableUniverses();
 
-  return (
-    <main className="mx-auto w-full max-w-4xl px-6 py-16">
-      <header className="text-center">
-        <h1 className="font-display text-3xl font-black uppercase tracking-wider text-white sm:text-4xl">
-          Les univers
-        </h1>
-        <p className="mx-auto mt-3 max-w-xl text-balance text-white/55">
-          Chaque anime a sa propre arcade, son roster et ses classements. Ton
-          compte, ton XP et tes cosmétiques débloqués te suivent partout.
-        </p>
-      </header>
-
-      {universes.length === 0 ? (
-        <p className="mt-12 rounded-xl border border-cursed/40 bg-cursed/10 px-4 py-3 text-center text-sm text-cursed-light">
-          Aucun univers configuré.
-        </p>
-      ) : (
-        <ul className="mt-12 grid gap-5 sm:grid-cols-2">
-          {universes.map(({ slug, name, config }) => {
-            // Palette de CET univers, appliquée à la carte uniquement.
-            const vars = themeCssVars(config.theme);
-            return (
-              <li key={slug}>
-                <Link
-                  // Lien INTERNE : l'univers est un préfixe de chemin, donc la
-                  // même URL fonctionne en local comme en prod (plus de renvoi
-                  // vers un domaine de production depuis le dev).
-                  href={`/${slug}`}
-                  className="group flex h-full flex-col gap-4 rounded-2xl border p-5 transition-transform hover:scale-[1.02]"
-                  style={{
-                    ...vars,
-                    borderColor: "rgb(var(--color-domain) / 0.45)",
-                    background:
-                      "linear-gradient(140deg, rgb(var(--color-void-800)) 0%, rgb(var(--color-domain) / 0.18) 100%)",
-                  }}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={config.logo.src}
-                    alt={config.logo.alt}
-                    className="h-16 w-auto self-start object-contain"
-                  />
-                  <div>
-                    <p className="font-display text-lg font-black text-white">
-                      {name}
-                    </p>
-                    <p className="mt-1 text-sm text-white/60">
-                      {config.sourceWork}
-                    </p>
-                  </div>
-                  <p className="mt-auto text-xs font-semibold uppercase tracking-wider text-white/40 group-hover:text-white/70">
-                    Entrer →
-                  </p>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </main>
+  // Taille de chaque roster en UNE requête : un `count` par univers ferait
+  // grossir le coût de la page à chaque anime ajouté.
+  const rosterRows = await prisma.character.groupBy({
+    by: ["universeId"],
+    _count: { _all: true },
+  });
+  const rosterByUniverse = new Map(
+    rosterRows.map((row) => [row.universeId, row._count._all]),
   );
+
+  const cards: HubUniverse[] = await Promise.all(
+    universes.map(async ({ id, slug, name, config }) => {
+      // Les deux lectures tapent le même cache de requête (`loadAllConfig`) :
+      // toute la config du site tient en une seule requête, tous univers confondus.
+      const [flags, maintenance] = await Promise.all([
+        getGameFlags(slug),
+        getMaintenance(slug),
+      ]);
+      // Les jeux tels que les voit CET univers : titres réécrits par sa config,
+      // « à venir » et jeux désactivés en admin exclus — la carte annonce donc ce
+      // qui est réellement jouable.
+      const games = gamesForUniverse(config.gameCopy).filter(
+        (game) => game.status !== "coming-soon" && flags[game.id] !== false,
+      );
+
+      return {
+        slug,
+        name,
+        sourceWork: config.sourceWork,
+        tagline: config.labels.tagline,
+        logo: config.logo,
+        vars: themeCssVars(config.theme),
+        gameCount: games.length,
+        rosterCount: rosterByUniverse.get(id) ?? 0,
+        highlights: games.slice(0, HIGHLIGHT_COUNT).map((game) => game.title),
+        maintenance: maintenance.enabled,
+      };
+    }),
+  );
+
+  return <UniverseHub universes={cards} />;
 }

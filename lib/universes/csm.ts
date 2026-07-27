@@ -7,7 +7,7 @@ import type { UniverseConfig } from "./types";
  * univers n'est QUE cette config (branding, palette, libellés, SEO) plus des
  * données taggées `universeId`, saisies via /admin.
  *
- * ⚠️ Le logo est un PLACEHOLDER (`public/logo-csm.svg`) : à remplacer par le
+ * ⚠️ Le logo est un PLACEHOLDER (`public/logo-csm.png`) : à remplacer par le
  * visuel définitif, sans rien changer d'autre ici.
  */
 export const csm: UniverseConfig = {
@@ -36,7 +36,7 @@ export const csm: UniverseConfig = {
     "Aki",
   ],
   logo: {
-    src: "/logo-csm.svg",
+    src: "/logo-csm.png",
     alt: "CSM Arcade",
   },
   // Palette « Blood & Chainsaw » : rouge sang en accent principal, or en

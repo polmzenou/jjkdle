@@ -8,6 +8,7 @@ import { TitleBadge } from "@/components/TitleBadge";
 import { UserAvatar } from "@/components/UserAvatar";
 import { logoutAction } from "@/lib/auth/actions";
 import { UniverseLink } from "@/components/universe/UniverseLink";
+import { HubLink } from "@/components/universe/HubLink";
 import { useUniversePathname } from "@/components/universe/UniverseProvider";
 import {
   refreshRosterImagesFromApiAction,
@@ -64,7 +65,13 @@ export function SiteNav({
   return (
     <header className="sticky top-0 z-50 border-b border-white/5 bg-void-900/70 backdrop-blur-xl">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3 sm:px-6">
-        <Logo className="h-9 w-auto sm:h-10" />
+        {/* Sortie vers le hub + logo de l'univers : deux destinations distinctes
+            (tous les animes / la landing de celui-ci), d'où le séparateur. */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          <HubLink />
+          <span aria-hidden className="h-6 w-px bg-white/10" />
+          <Logo className="h-9 w-auto sm:h-10" />
+        </div>
 
         <div className="flex items-center gap-1 sm:gap-2">
           {LINKS.map((link) => {
