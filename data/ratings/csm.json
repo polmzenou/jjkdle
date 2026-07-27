@@ -1,0 +1,529 @@
+{
+  "denji": {
+    "combat-overall": 60,
+    "hax": 70,
+    "devil-hunters": 60,
+    "speed": 60,
+    "division-4": 75,
+    "hybrid": 100,
+    "coequipier": 30
+  },
+  "pochita": {
+    "combat-overall": 100,
+    "hax": 100,
+    "devils": 100,
+    "speed": 100,
+    "coequipier": 100
+  },
+  "makima": {
+    "combat-overall": 85,
+    "hax": 90,
+    "devils": 90,
+    "devil-hunters": 95,
+    "antagonistes": 95,
+    "speed": 55,
+    "division-4": 100,
+    "coequipier": 75
+  },
+  "aki-hayakawa": {
+    "combat-overall": 50,
+    "hax": 70,
+    "devil-hunters": 75,
+    "speed": 65,
+    "division-4": 75,
+    "coequipier": 100
+  },
+  "power": {
+    "combat-overall": 70,
+    "hax": 60,
+    "devils": 55,
+    "devil-hunters": 50,
+    "speed": 55,
+    "division-4": 50,
+    "coequipier": 35
+  },
+  "himeno": {
+    "combat-overall": 30,
+    "hax": 50,
+    "devil-hunters": 35,
+    "speed": 40,
+    "division-4": 35,
+    "coequipier": 45
+  },
+  "kobeni-higashiyama": {
+    "combat-overall": 5,
+    "devil-hunters": 5,
+    "speed": 30,
+    "division-4": 5,
+    "coequipier": 5
+  },
+  "kishibe": {
+    "combat-overall": 90,
+    "devil-hunters": 100,
+    "speed": 80,
+    "division-4": 96,
+    "coequipier": 90
+  },
+  "quanxi": {
+    "combat-overall": 100,
+    "hax": 93,
+    "devil-hunters": 98,
+    "antagonistes": 85,
+    "speed": 90,
+    "hybrid": 88,
+    "coequipier": 70
+  },
+  "reze": {
+    "combat-overall": 67,
+    "hax": 85,
+    "antagonistes": 75,
+    "speed": 100,
+    "hybrid": 84
+  },
+  "katana-man": {
+    "combat-overall": 55,
+    "hax": 65,
+    "antagonistes": 71,
+    "speed": 50,
+    "hybrid": 65,
+    "coequipier": 40
+  },
+  "akane-sawatari": {
+    "combat-overall": 35,
+    "hax": 60,
+    "antagonistes": 45,
+    "speed": 30,
+    "coequipier": 45
+  },
+  "beam": {
+    "combat-overall": 45,
+    "hax": 35,
+    "devils": 35,
+    "devil-hunters": 50,
+    "speed": 55,
+    "division-4": 55,
+    "coequipier": 75
+  },
+  "galgali": {
+    "combat-overall": 50,
+    "hax": 45,
+    "devils": 45,
+    "devil-hunters": 50,
+    "speed": 45,
+    "division-4": 50,
+    "coequipier": 50
+  },
+  "angel-devil": {
+    "combat-overall": 65,
+    "hax": 90,
+    "devils": 75,
+    "devil-hunters": 55,
+    "speed": 50,
+    "division-4": 70,
+    "coequipier": 60
+  },
+  "princi": {
+    "combat-overall": 40,
+    "devils": 30,
+    "devil-hunters": 45,
+    "speed": 40,
+    "division-4": 45,
+    "coequipier": 55
+  },
+  "future-devil": {
+    "combat-overall": 25,
+    "hax": 85,
+    "devils": 60,
+    "speed": 20,
+    "coequipier": 50
+  },
+  "fox-devil": {
+    "combat-overall": 55,
+    "hax": 40,
+    "devils": 55,
+    "speed": 45,
+    "division-4": 40,
+    "coequipier": 60
+  },
+  "curse-devil": {
+    "combat-overall": 60,
+    "hax": 95,
+    "devils": 70,
+    "speed": 25,
+    "coequipier": 40
+  },
+  "ghost-devil": {
+    "combat-overall": 50,
+    "hax": 70,
+    "devils": 60,
+    "speed": 55,
+    "division-4": 35,
+    "coequipier": 55
+  },
+  "gun-devil": {
+    "combat-overall": 92,
+    "hax": 88,
+    "devils": 95,
+    "antagonistes": 100,
+    "speed": 88
+  },
+  "gun-fiend": {
+    "combat-overall": 70,
+    "hax": 55,
+    "devils": 65,
+    "antagonistes": 60,
+    "speed": 55
+  },
+  "darkness-devil": {
+    "combat-overall": 97,
+    "hax": 98,
+    "devils": 100,
+    "antagonistes": 80,
+    "speed": 95
+  },
+  "falling-devil": {
+    "combat-overall": 55,
+    "hax": 92,
+    "devils": 80,
+    "antagonistes": 70,
+    "speed": 45
+  },
+  "aging-devil": {
+    "combat-overall": 55,
+    "hax": 95,
+    "devils": 90,
+    "antagonistes": 78,
+    "speed": 30
+  },
+  "yoru": {
+    "combat-overall": 78,
+    "hax": 95,
+    "devils": 88,
+    "antagonistes": 72,
+    "speed": 55
+  },
+  "asa-mitaka": {
+    "combat-overall": 30,
+    "hax": 60,
+    "devil-hunters": 25,
+    "speed": 25,
+    "coequipier": 30
+  },
+  "fami": {
+    "combat-overall": 70,
+    "hax": 92,
+    "devils": 90,
+    "antagonistes": 75,
+    "speed": 50,
+    "coequipier": 40
+  },
+  "nayuta": {
+    "combat-overall": 35,
+    "hax": 88,
+    "devils": 78,
+    "speed": 25,
+    "coequipier": 55
+  },
+  "barem-bridge": {
+    "combat-overall": 62,
+    "hax": 55,
+    "antagonistes": 70,
+    "speed": 45,
+    "hybrid": 62
+  },
+  "miri-sugo": {
+    "combat-overall": 58,
+    "hax": 45,
+    "devil-hunters": 45,
+    "antagonistes": 40,
+    "speed": 55,
+    "division-4": 40,
+    "hybrid": 58
+  },
+  "whip-hybrid": {
+    "combat-overall": 50,
+    "hax": 40,
+    "antagonistes": 55,
+    "speed": 55,
+    "hybrid": 52
+  },
+  "spear-hybrid": {
+    "combat-overall": 52,
+    "hax": 40,
+    "antagonistes": 55,
+    "speed": 50,
+    "hybrid": 54
+  },
+  "santa-claus": {
+    "combat-overall": 60,
+    "hax": 90,
+    "devil-hunters": 60,
+    "antagonistes": 82,
+    "speed": 35,
+    "coequipier": 40
+  },
+  "cosmo": {
+    "combat-overall": 55,
+    "hax": 88,
+    "devils": 55,
+    "antagonistes": 50,
+    "speed": 45,
+    "coequipier": 55
+  },
+  "pingtsi": {
+    "combat-overall": 45,
+    "devils": 40,
+    "antagonistes": 40,
+    "speed": 45,
+    "coequipier": 50
+  },
+  "long": {
+    "combat-overall": 50,
+    "devils": 42,
+    "antagonistes": 42,
+    "speed": 48,
+    "coequipier": 50
+  },
+  "tsugihagi": {
+    "combat-overall": 45,
+    "devils": 40,
+    "antagonistes": 40,
+    "speed": 40,
+    "coequipier": 50
+  },
+  "hirofumi-yoshida": {
+    "combat-overall": 72,
+    "hax": 70,
+    "devil-hunters": 78,
+    "speed": 65,
+    "division-4": 40,
+    "coequipier": 55
+  },
+  "fumiko-mifune": {
+    "combat-overall": 45,
+    "hax": 35,
+    "devil-hunters": 45,
+    "speed": 40,
+    "division-4": 35,
+    "coequipier": 45
+  },
+  "haruka-iseumi": {
+    "combat-overall": 40,
+    "hax": 45,
+    "devil-hunters": 40,
+    "speed": 35,
+    "coequipier": 50
+  },
+  "seigi-akoku": {
+    "combat-overall": 20,
+    "devil-hunters": 20,
+    "speed": 20,
+    "coequipier": 30
+  },
+  "nobana-higashiyama": {
+    "combat-overall": 25,
+    "devil-hunters": 25,
+    "speed": 25,
+    "coequipier": 25
+  },
+  "yuko": {
+    "combat-overall": 25,
+    "hax": 45,
+    "antagonistes": 35,
+    "speed": 25,
+    "coequipier": 20
+  },
+  "arai-hirokazu": {
+    "combat-overall": 30,
+    "hax": 35,
+    "devil-hunters": 35,
+    "speed": 35,
+    "division-4": 30,
+    "coequipier": 45
+  },
+  "madoka": {
+    "combat-overall": 25,
+    "hax": 30,
+    "devil-hunters": 30,
+    "speed": 30,
+    "division-4": 25,
+    "coequipier": 40
+  },
+  "michiko-tendo": {
+    "combat-overall": 40,
+    "hax": 35,
+    "devil-hunters": 45,
+    "speed": 35,
+    "division-4": 40,
+    "coequipier": 30
+  },
+  "yutaro-kurose": {
+    "combat-overall": 45,
+    "hax": 40,
+    "devil-hunters": 50,
+    "speed": 45,
+    "division-4": 45,
+    "coequipier": 55
+  },
+  "aldo": {
+    "combat-overall": 45,
+    "hax": 40,
+    "devil-hunters": 40,
+    "antagonistes": 45,
+    "speed": 45
+  },
+  "joey": {
+    "combat-overall": 35,
+    "devil-hunters": 30,
+    "antagonistes": 35,
+    "speed": 35
+  },
+  "bennett": {
+    "combat-overall": 20,
+    "devil-hunters": 20,
+    "antagonistes": 25,
+    "speed": 25
+  },
+  "hell-devil": {
+    "combat-overall": 80,
+    "hax": 100,
+    "devils": 92,
+    "antagonistes": 70,
+    "speed": 40
+  },
+  "zombie-devil": {
+    "combat-overall": 30,
+    "hax": 55,
+    "devils": 35,
+    "antagonistes": 40,
+    "speed": 25
+  },
+  "tomato-devil": {
+    "combat-overall": 12,
+    "devils": 10,
+    "antagonistes": 10,
+    "speed": 15
+  },
+  "bat-devil": {
+    "combat-overall": 50,
+    "hax": 25,
+    "devils": 45,
+    "antagonistes": 45,
+    "speed": 55
+  },
+  "leech-devil": {
+    "combat-overall": 35,
+    "hax": 25,
+    "devils": 30,
+    "antagonistes": 30,
+    "speed": 35
+  },
+  "eternity-devil": {
+    "combat-overall": 45,
+    "hax": 88,
+    "devils": 75,
+    "antagonistes": 65,
+    "speed": 20
+  },
+  "typhoon-devil": {
+    "combat-overall": 55,
+    "hax": 45,
+    "devils": 50,
+    "antagonistes": 45,
+    "speed": 50
+  },
+  "justice-devil": {
+    "combat-overall": 55,
+    "hax": 70,
+    "devils": 65,
+    "antagonistes": 60,
+    "speed": 40
+  },
+  "fire-devil": {
+    "combat-overall": 60,
+    "hax": 40,
+    "devils": 62,
+    "antagonistes": 50,
+    "speed": 45
+  },
+  "cockroach-devil": {
+    "combat-overall": 35,
+    "hax": 25,
+    "devils": 32,
+    "antagonistes": 35,
+    "speed": 40
+  },
+  "doll-devil": {
+    "combat-overall": 50,
+    "hax": 85,
+    "devils": 70,
+    "antagonistes": 65,
+    "speed": 35
+  },
+  "punishment-devil": {
+    "combat-overall": 40,
+    "hax": 60,
+    "devils": 45,
+    "antagonistes": 40,
+    "speed": 35
+  },
+  "stone-devil": {
+    "combat-overall": 45,
+    "hax": 30,
+    "devils": 42,
+    "antagonistes": 35,
+    "speed": 20
+  },
+  "octopus-devil": {
+    "combat-overall": 45,
+    "hax": 40,
+    "devils": 40,
+    "speed": 35,
+    "coequipier": 50
+  },
+  "mold-devil": {
+    "combat-overall": 25,
+    "hax": 30,
+    "devils": 25,
+    "antagonistes": 25,
+    "speed": 20
+  },
+  "bucky": {
+    "combat-overall": 10,
+    "devils": 10,
+    "speed": 20,
+    "coequipier": 25
+  },
+  "sea-cucumber-devil": {
+    "combat-overall": 12,
+    "devils": 12,
+    "antagonistes": 12,
+    "speed": 10
+  },
+  "muscle-devil": {
+    "combat-overall": 35,
+    "devils": 30,
+    "antagonistes": 30,
+    "speed": 25
+  },
+  "centipede-devil": {
+    "combat-overall": 35,
+    "hax": 25,
+    "devils": 32,
+    "antagonistes": 30,
+    "speed": 30
+  },
+  "meowy": {
+    "combat-overall": 5,
+    "devils": 5,
+    "speed": 15,
+    "coequipier": 30
+  },
+  "kiga": {
+    "combat-overall": 65,
+    "hax": 88,
+    "devils": 85,
+    "antagonistes": 70,
+    "speed": 45
+  }
+}

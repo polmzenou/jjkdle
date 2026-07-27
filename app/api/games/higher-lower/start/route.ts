@@ -11,8 +11,8 @@ import {
 /**
  * POST /api/games/higher-lower/start
  *
- * Démarre une partie. Le serveur pioche la 1re paire, stocke la vraie énergie
- * occulte du perso de droite en base (`HigherLowerSession`) et ne renvoie au
+ * Démarre une partie. Le serveur pioche la 1re paire, stocke la vraie valeur
+ * comparée du perso de droite en base (`HigherLowerSession`) et ne renvoie au
  * client que le nom + image des deux persos (valeur de droite MASQUÉE).
  * Jouable sans compte : `userId` est nullable.
  */
@@ -22,7 +22,7 @@ export const dynamic = "force-dynamic";
 export async function POST() {
   const user = await getCurrentUser();
   const pool = await getHigherLowerPool();
-  if (pool.length < MIN_HL_POOL) {
+  if (pool.characters.length < MIN_HL_POOL) {
     return NextResponse.json(
       { ok: false, error: "Pas assez de personnages notés pour lancer ce jeu." },
       { status: 400 },
@@ -34,7 +34,7 @@ export async function POST() {
   const prev = store.get(HL_COOKIE)?.value;
   if (prev) await deleteSession(prev);
 
-  const started = await createSession(user?.id ?? null, pool);
+  const started = await createSession(user?.id ?? null, pool.characters);
   if (!started) {
     return NextResponse.json(
       { ok: false, error: "Impossible de démarrer la partie." },

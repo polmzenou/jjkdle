@@ -3,19 +3,19 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Logo } from "@/components/Logo";
-import {
-  useUniverse,
-  useUniverseHref,
-} from "@/components/universe/UniverseProvider";
+import { useUniverseHref } from "@/components/universe/UniverseProvider";
 import { CharacterImage } from "@/components/CharacterImage";
 import { ExpReward } from "@/components/progress/ExpReward";
-import type { HLChoice, HLTurnView } from "@/lib/games/higher-lower/types";
+import type {
+  HLChoice,
+  HLReveal,
+  HLTurnView,
+} from "@/lib/games/higher-lower/types";
 import { UniverseLink } from "@/components/universe/UniverseLink";
 
 type Phase = "idle" | "playing" | "gameover";
 
-interface RevealState {
-  value: number;
+interface RevealState extends HLReveal {
   correct: boolean;
 }
 
@@ -29,11 +29,22 @@ interface GameOverState {
 interface HigherLowerGameProps {
   isAuthed: boolean;
   hasEnoughRoster: boolean;
+  /** Libellé de l'attribut comparé (« Énergie occulte », « Puissance »). */
+  attributeLabel: string;
 }
 
-type CardData = { id: string; name: string; image?: string; cursedEnergy?: number };
+type CardData = { id: string; name: string; image?: string };
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * « de » élidé devant une voyelle : d'énergie occulte / de puissance. Le libellé
+ * comparé vient de la base et change d'un univers à l'autre, donc la phrase ne
+ * peut pas figer sa préposition.
+ */
+function de(label: string): string {
+  return /^[aàâeéèêëiîïoôuùûyh]/i.test(label) ? `d'${label}` : `de ${label}`;
+}
 
 /** Petit compteur animé (ease-out cubic) pour le score / l'XP de fin de partie. */
 function useCountUp(target: number, durationMs = 900): number {
@@ -53,15 +64,16 @@ function useCountUp(target: number, durationMs = 900): number {
   return value;
 }
 
-export function HigherLowerGame({ isAuthed, hasEnoughRoster }: HigherLowerGameProps) {
-  // Libellé de la jauge de puissance de l'univers (JJK : « Énergie occulte »).
-  const { labels } = useUniverse();
+export function HigherLowerGame({
+  isAuthed,
+  hasEnoughRoster,
+  attributeLabel,
+}: HigherLowerGameProps) {
   // Les appels d'API doivent porter l'univers : deux onglets ouverts sur deux
   // animes différents feraient sinon des parties dans le mauvais roster.
   const withUniverse = useUniverseHref();
-  const energyLabel = labels.energyLabel;
   // Les phrases du jeu l'emploient en milieu de phrase (« plus ou moins de … »).
-  const energyLabelLower = energyLabel.toLocaleLowerCase("fr-FR");
+  const deAttribute = de(attributeLabel.toLocaleLowerCase("fr-FR"));
   const [phase, setPhase] = useState<Phase>("idle");
   const [view, setView] = useState<HLTurnView | null>(null);
   const [score, setScore] = useState(0);
@@ -133,7 +145,7 @@ export function HigherLowerGame({ isAuthed, hasEnoughRoster }: HigherLowerGamePr
         }
 
         // Révèle la valeur du perso de droite (animation).
-        setReveal({ value: data.revealedCursedEnergy, correct: data.correct });
+        setReveal({ ...(data.revealed as HLReveal), correct: data.correct });
         await sleep(950);
 
         if (data.correct && !data.gameOver) {
@@ -160,14 +172,14 @@ export function HigherLowerGame({ isAuthed, hasEnoughRoster }: HigherLowerGamePr
         <Header score={0} />
         <div className="mx-auto mt-6 max-w-md rounded-3xl border border-white/10 bg-void-800/50 p-8 text-center backdrop-blur">
           <p className="font-display text-2xl font-black text-white">
-            Plus ou moins de {energyLabelLower} ?
+            Plus ou moins {deAttribute} ?
           </p>
           <p className="mt-3 text-sm leading-relaxed text-white/60">
             Deux personnages s&apos;affichent. Devine si celui de{" "}
             <span className="text-white/90">droite</span> a{" "}
             <span className="text-domain-light">plus</span> ou{" "}
-            <span className="text-cursed-light">moins</span> de {energyLabelLower}{" "}
-            que celui de gauche. Chaque bonne réponse fait avancer la chaîne. Une
+            <span className="text-cursed-light">moins</span> {deAttribute} que
+            celui de gauche. Chaque bonne réponse fait avancer la chaîne. Une
             erreur et c&apos;est terminé.
           </p>
           {!isAuthed && (
@@ -192,8 +204,8 @@ export function HigherLowerGame({ isAuthed, hasEnoughRoster }: HigherLowerGamePr
             </button>
           ) : (
             <p className="mt-6 rounded-xl border border-cursed/40 bg-cursed/10 px-4 py-3 text-sm text-cursed-light">
-              Pas assez de personnages avec une valeur de {energyLabelLower}{" "}
-              renseignée pour lancer ce jeu.
+              Pas assez de personnages avec une valeur {deAttribute} renseignée
+              pour lancer ce jeu.
             </p>
           )}
           {error && <p className="mt-4 text-sm text-cursed-light">{error}</p>}
@@ -217,7 +229,7 @@ export function HigherLowerGame({ isAuthed, hasEnoughRoster }: HigherLowerGamePr
       <p className="mb-5 text-center text-sm text-white/55">
         Le personnage de droite a-t-il{" "}
         <span className="text-domain-light">plus</span> ou{" "}
-        <span className="text-cursed-light">moins</span> de {energyLabelLower} ?
+        <span className="text-cursed-light">moins</span> {deAttribute} ?
       </p>
 
       <div className="relative mx-auto grid max-w-3xl grid-cols-2 gap-6 sm:gap-16">
@@ -228,9 +240,9 @@ export function HigherLowerGame({ isAuthed, hasEnoughRoster }: HigherLowerGamePr
               <CardFace
                 key={view.left.id}
                 card={view.left}
-                revealValue={view.left.cursedEnergy}
+                revealLabel={view.left.valueLabel}
                 tone="neutral"
-                energyLabel={energyLabel}
+                attributeLabel={attributeLabel}
               />
             )}
           </AnimatePresence>
@@ -251,9 +263,9 @@ export function HigherLowerGame({ isAuthed, hasEnoughRoster }: HigherLowerGamePr
             <CardFace
               key={view ? view.right.id : "empty"}
               card={view?.right ?? { id: "empty", name: "" }}
-              revealValue={reveal ? reveal.value : undefined}
+              revealLabel={reveal?.valueLabel}
               tone={reveal ? (reveal.correct ? "good" : "bad") : "hidden"}
-              energyLabel={energyLabel}
+              attributeLabel={attributeLabel}
             />
           </AnimatePresence>
         </div>
@@ -297,6 +309,23 @@ export function HigherLowerGame({ isAuthed, hasEnoughRoster }: HigherLowerGamePr
         </div>
       </div>
 
+      {/* Deux persos au MÊME palier (attribut ORDINAL) : c'est le score de combat
+          qui tranche. Sans cette ligne, la réponse paraîtrait arbitraire — les
+          deux cartes affichent le même libellé. */}
+      {reveal && view && reveal.value === view.left.value && (
+        <p className="mx-auto mt-5 max-w-md text-center text-xs leading-relaxed text-white/45">
+          Même {attributeLabel.toLocaleLowerCase("fr-FR")} des deux côtés —
+          départagé au score de combat :{" "}
+          <span className="text-white/70">
+            {view.left.name} {view.left.tiebreak}
+          </span>{" "}
+          ·{" "}
+          <span className="text-white/70">
+            {view.right.name} {reveal.tiebreak}
+          </span>
+        </p>
+      )}
+
       <AnimatePresence>
         {phase === "gameover" && gameOver && (
           <ResultModal
@@ -333,7 +362,7 @@ function Header({ score }: { score: number }) {
 }
 
 /**
- * Face de carte (image + nom + valeur d'énergie). `tone` :
+ * Face de carte (image + nom + valeur comparée). `tone` :
  *  - "neutral" (gauche révélée) → valeur en violet
  *  - "hidden"  (droite masquée) → « ? »
  *  - "good"/"bad" (droite révélée après réponse) → valeur en vert / rouge
@@ -341,18 +370,27 @@ function Header({ score }: { score: number }) {
  */
 function CardFace({
   card,
-  revealValue,
+  revealLabel,
   tone,
-  energyLabel,
+  attributeLabel,
 }: {
   card: CardData;
-  revealValue?: number;
+  /** Valeur affichée : « 87 » (NUMERIC) ou « Très puissant » (ORDINAL). */
+  revealLabel?: string;
   tone: "neutral" | "hidden" | "good" | "bad";
-  /** Libellé de la valeur comparée, propre à l'univers. */
-  energyLabel: string;
+  /** Nom de l'attribut comparé, propre à l'univers. */
+  attributeLabel: string;
 }) {
   const valueColor =
     tone === "good" ? "#22c55e" : tone === "bad" ? "#f87171" : "#a78bfa";
+  // Un rang lore (« Très puissant ») est bien plus long qu'un nombre : la taille
+  // suit le texte, sinon il déborde de la carte sur mobile.
+  const valueSize =
+    !revealLabel || revealLabel.length <= 4
+      ? "text-4xl"
+      : revealLabel.length <= 9
+        ? "text-2xl"
+        : "text-xl";
   return (
     <motion.div
       initial={{ opacity: 0, x: 40, scale: 0.97 }}
@@ -367,20 +405,20 @@ function CardFace({
           {card.name}
         </p>
         <p className="mt-1 text-[11px] uppercase tracking-wider text-white/45">
-          {energyLabel}
+          {attributeLabel}
         </p>
         {tone === "hidden" ? (
           <p className="font-display text-4xl font-black text-white/30">?</p>
         ) : (
           <motion.p
-            key={valueColor + String(revealValue)}
+            key={valueColor + String(revealLabel)}
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ type: "spring", stiffness: 220, damping: 16 }}
-            className="font-display text-4xl font-black tabular-nums"
+            className={`font-display font-black tabular-nums ${valueSize}`}
             style={{ color: valueColor }}
           >
-            {revealValue ?? "?"}
+            {revealLabel ?? "?"}
           </motion.p>
         )}
       </div>

@@ -41,11 +41,6 @@ export interface UniverseTheme {
  */
 export interface UniverseLabels {
   /**
-   * Nom de la « jauge de puissance » lore du monde, affichée par Higher/Lower et
-   * (par défaut) par l'attribut numérique JJKdle. JJK : « Énergie occulte ».
-   */
-  energyLabel: string;
-  /**
    * Accroche de la landing (1–2 phrases). Contient du vocabulaire lore, donc
    * propre à chaque anime — d'où sa place ici plutôt qu'en dur dans la page.
    */
@@ -75,6 +70,22 @@ export interface UniverseBooru {
     attributeKey: string;
     value: string;
   };
+}
+
+/**
+ * Attribut comparé par le jeu « Higher/Lower » dans cet univers.
+ *
+ * Le jeu classe deux personnages sur UN attribut du roster (défini en /admin,
+ * donc data-driven) : NUMERIC, on compare les nombres ; ORDINAL, on compare le
+ * rang des options et on départage les ex æquo par `Character.battleValue`.
+ * Le LIBELLÉ affiché vient de l'attribut lui-même (`Attribute.label`), pas d'ici :
+ * une seule source de vérité, éditable depuis l'admin.
+ *
+ * Absent = `cursedEnergy` (NUMERIC), l'attribut historique de JJK.
+ */
+export interface UniverseHigherLower {
+  /** Clé de l'attribut comparé (ex. `csmpower` pour CSM). */
+  attributeKey: string;
 }
 
 /** Branding logo d'un univers. */
@@ -124,6 +135,8 @@ export interface UniverseConfig {
    * nouvel univers doit donc fournir un bloc COMPLET pour chaque jeu proposé.
    */
   gameCopy?: UniverseGameCopy;
+  /** Attribut comparé par Higher/Lower. Absent = `cursedEnergy` (JJK). */
+  higherLower?: UniverseHigherLower;
   /** Synchro d'images automatique (bouton « OUAIS »). Absent = désactivée. */
   booru?: UniverseBooru;
 }

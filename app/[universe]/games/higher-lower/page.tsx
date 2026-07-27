@@ -44,7 +44,10 @@ export default async function HigherLowerPage({
       <GameJsonLd id="higher-lower" />
       <HigherLowerGame
         isAuthed={Boolean(user)}
-        hasEnoughRoster={pool.length >= MIN_HL_POOL}
+        hasEnoughRoster={pool.characters.length >= MIN_HL_POOL}
+        // Libellé de l'attribut comparé, propre à l'univers et lu en base
+        // (JJK : « Énergie occulte » ; CSM : « Puissance »).
+        attributeLabel={pool.attributeLabel}
       />
 
       <div className="mt-10">
