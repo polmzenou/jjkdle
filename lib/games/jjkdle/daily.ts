@@ -1,4 +1,5 @@
 import type { Character } from "@/data/roster/characters";
+import { dailyIndexes } from "@/lib/rotation";
 import { isCompleteFor, type AttributeSchema } from "./attribute-schema";
 
 /**
@@ -7,8 +8,8 @@ import { isCompleteFor, type AttributeSchema } from "./attribute-schema";
  * Principe : un hash déterministe de la date "YYYY-MM-DD" donne un index dans le
  * pool éligible (persos complets, triés par id pour un ordre stable). Tous les
  * joueurs partagent donc la même cible un jour donné, sans aucun état persistant.
- * Anti-répétition : on évite de ressortir un perso choisi dans les K jours
- * précédents (recalculés par la même fonction).
+ * L'anti-répétition est assurée par `dailyIndexes` (cf. `lib/rotation.ts`), la
+ * primitive partagée avec l'étal exotic de la boutique.
  */
 
 const TIMEZONE = "Europe/Paris";
@@ -40,61 +41,18 @@ export function todayKey(date: Date = new Date(), tz: string = TIMEZONE): string
   }).format(date);
 }
 
-/** Hash déterministe FNV-1a 32 bits d'une chaîne. */
-function hashString(s: string): number {
-  let h = 0x811c9dc5;
-  for (let i = 0; i < s.length; i++) {
-    h ^= s.charCodeAt(i);
-    h = Math.imul(h, 0x01000193);
-  }
-  return h >>> 0;
-}
-
-/** Nombre de jours (entier) depuis l'époque Unix pour une clé "YYYY-MM-DD". */
-function dayNumber(dateKey: string): number {
-  const [y, m, d] = dateKey.split("-").map(Number);
-  return Math.floor(Date.UTC(y, m - 1, d) / 86_400_000);
-}
-
-/** PGCD. */
-function gcd(a: number, b: number): number {
-  while (b) [a, b] = [b, a % b];
-  return a;
-}
-
-/**
- * Pas premier avec `n`, proche du nombre d'or (≈0.618·n) pour une bonne
- * dispersion. Comme gcd(step, n) = 1, la suite `day·step mod n` parcourt les n
- * indices avant de se répéter.
- */
-function coprimeStep(n: number): number {
-  let step = Math.max(1, Math.round(n * 0.6180339887));
-  while (gcd(step, n) !== 1) step = (step % n) + 1;
-  return step;
-}
-
 /**
  * Cible du jour pour `dateKey` parmi `eligible` (déjà filtré/trié).
  *
- * Anti-répétition GARANTIE : `index = (phase + day·step) mod n` avec `step`
- * premier à `n`. Sur toute fenêtre glissante de `n` jours consécutifs, les n
- * indices sont distincts (suite arithmétique de raison première à n) → aucun
- * perso ne ressort tant que le pool n'a pas été entièrement parcouru. Pas de
- * jonction de blocs, pas de récursion, entièrement déterministe et sans état.
+ * Le sel `"jjkdle"` est celui d'origine : le changer décalerait la phase et
+ * casserait la continuité du daily.
  */
 export function pickDailyTarget(
   dateKey: string,
   eligible: Character[],
 ): Character | null {
-  const n = eligible.length;
-  if (n === 0) return null;
-  if (n === 1) return eligible[0];
-
-  const day = dayNumber(dateKey);
-  const phase = hashString("jjkdle") % n;
-  const step = coprimeStep(n);
-  const index = (((phase + day * step) % n) + n) % n;
-  return eligible[index];
+  const [index] = dailyIndexes(dateKey, eligible.length, "jjkdle");
+  return index === undefined ? null : eligible[index];
 }
 
 /** Cible aléatoire (mode admin illimité) parmi le pool éligible. */

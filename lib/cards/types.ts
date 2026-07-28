@@ -46,3 +46,37 @@ export interface PendingBooster {
   kind: BoosterKind;
   createdAt: Date;
 }
+
+// ──────────────────────────────────────────────────────────────────────────
+// Boutique
+// ──────────────────────────────────────────────────────────────────────────
+
+/** Un booster en rayon : sa définition aplatie + son prix. */
+export interface ShopBoosterOffer {
+  kind: BoosterKind;
+  label: string;
+  accent: string;
+  cardCount: number;
+  price: number;
+  /** Une ligne de teasing sur ce que le booster garantit (FR). */
+  perk: string;
+}
+
+/** Une carte exotic de l'étal du jour. */
+export interface ShopExoticOffer extends CardView {
+  price: number;
+  /** Déjà en collection → affichée, mais pas achetable. */
+  owned: boolean;
+}
+
+/** Tout ce qu'affiche la page boutique, résolu côté serveur. */
+export interface ShopWindow {
+  /** Solde du joueur (global au compte), pour griser ce qu'il ne peut pas payer. */
+  coins: number;
+  boosters: ShopBoosterOffer[];
+  exotics: ShopExoticOffer[];
+  /** Jour de l'étal, "YYYY-MM-DD" (Europe/Paris). */
+  dateKey: string;
+  /** Millisecondes avant la rotation de l'étal (minuit Paris). */
+  msUntilRotation: number;
+}

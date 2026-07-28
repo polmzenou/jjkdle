@@ -6,6 +6,7 @@ import { Logo } from "@/components/Logo";
 import { VipBadge } from "@/components/VipBadge";
 import { UserAvatar } from "@/components/UserAvatar";
 import { CoinWallet } from "@/components/progress/CoinWallet";
+import { ShopLink } from "@/components/shop/ShopLink";
 import { logoutAction } from "@/lib/auth/actions";
 import { UniverseLink } from "@/components/universe/UniverseLink";
 import { HubLink } from "@/components/universe/HubLink";
@@ -198,6 +199,7 @@ function UserMenu({
           Admin
         </UniverseLink>
       )}
+      <ShopLink />
       <CoinWallet coins={user.coins} />
       {/* Volontairement SANS le titre équipé : il reste visible sur la page
           compte et le profil public, la nav garde photo + cadre + pseudo. */}

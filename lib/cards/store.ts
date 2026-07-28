@@ -43,7 +43,7 @@ export type {
 };
 
 /** Projection d'un personnage du roster en carte affichable. */
-function toCardView(character: Character): CardView {
+export function toCardView(character: Character): CardView {
   const rarity = rarityOfTier(character.tier);
   return {
     characterId: character.id,

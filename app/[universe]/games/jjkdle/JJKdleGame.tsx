@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { CharacterImage } from "@/components/CharacterImage";
+import { Countdown } from "@/components/Countdown";
 import { ExpReward } from "@/components/progress/ExpReward";
 import { BoosterDrop } from "@/components/cards/BoosterDrop";
 import type { DroppedBooster } from "@/lib/progress/recompute";
@@ -368,34 +369,10 @@ function VictoryPanel({
       {/* Enregistrement au classement : uniquement pour la partie quotidienne. */}
       {mode === "daily" && <SubmitJjkdleScore isAuthed={isAuthed} />}
 
-      {mode === "daily" && <Countdown ms={msUntilMidnight} />}
+      {mode === "daily" && (
+        <Countdown ms={msUntilMidnight} label="Prochain personnage dans" />
+      )}
     </motion.div>
-  );
-}
-
-/** Compte à rebours jusqu'au prochain perso (minuit). */
-function Countdown({ ms }: { ms: number }) {
-  const [remaining, setRemaining] = useState(ms);
-  useEffect(() => {
-    const end = Date.now() + ms;
-    const t = setInterval(() => {
-      setRemaining(Math.max(0, end - Date.now()));
-    }, 1000);
-    return () => clearInterval(t);
-  }, [ms]);
-
-  const h = Math.floor(remaining / 3_600_000);
-  const m = Math.floor((remaining % 3_600_000) / 60_000);
-  const s = Math.floor((remaining % 60_000) / 1000);
-  const pad = (n: number) => String(n).padStart(2, "0");
-
-  return (
-    <p className="mt-5 text-sm text-white/45">
-      Prochain personnage dans{" "}
-      <span className="font-mono font-bold text-domain-light">
-        {pad(h)}:{pad(m)}:{pad(s)}
-      </span>
-    </p>
   );
 }
 

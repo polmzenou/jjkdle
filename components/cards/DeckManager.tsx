@@ -99,7 +99,7 @@ export function DeckManager({
       {/* ── Boosters à ouvrir ── */}
       <section>
         <h2 className="mb-5 font-display text-xl font-bold uppercase tracking-wider text-white/85">
-          🎴 Boosters à ouvrir
+          Boosters à ouvrir
           {pendingBoosters.length > 0 && (
             <span className="ml-2 rounded-full bg-domain/20 px-2.5 py-0.5 align-middle text-sm text-domain-light">
               {pendingBoosters.length}
@@ -141,7 +141,7 @@ export function DeckManager({
       {/* ── Deck équipé ── */}
       <section>
         <h2 className="mb-5 font-display text-xl font-bold uppercase tracking-wider text-white/85">
-          🃏 Mon deck
+          Mon deck
         </h2>
         <DeckSlots
           cards={deck}
@@ -155,7 +155,7 @@ export function DeckManager({
       {/* ── Collection ── */}
       <section>
         <h2 className="mb-5 font-display text-xl font-bold uppercase tracking-wider text-white/85">
-          📚 Ma collection
+          Ma collection
         </h2>
         <CardGrid
           cards={collection}
