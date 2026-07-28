@@ -19,8 +19,18 @@ import type { CollectionCard } from "@/lib/cards/types";
 
 interface CardGridProps {
   cards: CollectionCard[];
-  /** Rendu des actions sous une carte (Équiper / Vendre, ou toggle admin). */
+  /**
+   * Actions d'une carte (Équiper / Vendre). Rendues EN SURIMPRESSION dans le bas
+   * de la carte, révélées au survol — la grille reste lisible, les commandes
+   * n'apparaissent que sur la carte visée.
+   */
   renderActions?: (card: CollectionCard) => ReactNode;
+  /**
+   * Pastille TOUJOURS visible, en haut à droite de la carte. Indispensable dès
+   * qu'une action est cachée au survol : sans elle, plus rien ne signale d'un
+   * coup d'œil quelles cartes sont équipées.
+   */
+  renderBadge?: (card: CollectionCard) => ReactNode;
   /** Clic sur la carte elle-même (mode admin : toggle direct). */
   onCardClick?: (card: CollectionCard) => void;
   /** Masquer les cartes non possédées (par défaut : grisées et visibles). */
@@ -33,6 +43,7 @@ const ALL = "__all__";
 export function CardGrid({
   cards,
   renderActions,
+  renderBadge,
   onCardClick,
   ownedOnly = false,
   emptyLabel = "Aucune carte pour l'instant.",
@@ -95,23 +106,43 @@ export function CardGrid({
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-5">
-          {visible.map((card) => (
-            <div key={card.characterId} className="flex flex-col gap-2">
-              {onCardClick ? (
-                <button
-                  type="button"
-                  onClick={() => onCardClick(card)}
-                  className="rounded-2xl transition-transform hover:scale-[1.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-domain"
-                  aria-label={`${card.owned ? "Retirer" : "Donner"} la carte ${card.name}`}
-                >
+          {visible.map((card) => {
+            const actions = renderActions?.(card);
+            return (
+              <div key={card.characterId} className="group relative">
+                {onCardClick ? (
+                  <button
+                    type="button"
+                    onClick={() => onCardClick(card)}
+                    className="block w-full rounded-2xl transition-transform hover:scale-[1.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-domain"
+                    aria-label={`${card.owned ? "Retirer" : "Donner"} la carte ${card.name}`}
+                  >
+                    <CardArt card={card} owned={card.owned} />
+                  </button>
+                ) : (
                   <CardArt card={card} owned={card.owned} />
-                </button>
-              ) : (
-                <CardArt card={card} owned={card.owned} />
-              )}
-              {renderActions?.(card)}
-            </div>
-          ))}
+                )}
+
+                {renderBadge && (
+                  <div className="pointer-events-none absolute right-1.5 top-1.5 z-30">
+                    {renderBadge(card)}
+                  </div>
+                )}
+
+                {/* Actions au survol. Le dégradé est opaque en bas : il RECOUVRE
+                    le nom et la rareté, les boutons prennent leur place au lieu
+                    de s'empiler par-dessus. `pointer-events` suit l'opacité pour
+                    qu'un bouton invisible reste incliquable. */}
+                {actions && (
+                  <div
+                    className="pointer-events-none absolute inset-x-0 bottom-0 z-[15] flex flex-col gap-1.5 rounded-b-2xl bg-gradient-to-t from-void-900 via-void-900/95 to-transparent p-2 pt-10 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100 [@media(hover:none)]:pointer-events-auto [@media(hover:none)]:opacity-100"
+                  >
+                    {actions}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

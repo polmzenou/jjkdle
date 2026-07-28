@@ -160,11 +160,22 @@ export function DeckManager({
         <CardGrid
           cards={collection}
           emptyLabel="Aucune carte dans cette rareté."
+          renderBadge={(card) =>
+            card.owned && deckIds.has(card.characterId) ? (
+              <span
+                title="Équipée dans ton deck"
+                className="flex h-6 w-6 items-center justify-center rounded-full border border-domain/60 bg-void-900/90 text-xs text-domain-light shadow-glow"
+              >
+                <span aria-hidden>★</span>
+                <span className="sr-only">Équipée</span>
+              </span>
+            ) : null
+          }
           renderActions={(card) => {
             if (!card.owned) return null;
             const equipped = deckIds.has(card.characterId);
             return (
-              <div className="flex flex-col gap-1.5">
+              <>
                 <button
                   type="button"
                   disabled={pending || (!equipped && deckFull)}
@@ -179,11 +190,11 @@ export function DeckManager({
                   }
                   className={`rounded-full border px-2 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-colors disabled:opacity-40 ${
                     equipped
-                      ? "border-domain/60 bg-domain/15 text-domain-light"
+                      ? "border-domain/60 bg-domain/15 text-domain-light hover:border-cursed/50 hover:text-cursed-light"
                       : "border-white/10 bg-void-800/80 text-white/60 hover:border-domain/50 hover:text-white"
                   }`}
                 >
-                  {equipped ? "✓ Équipée" : deckFull ? "Deck plein" : "Équiper"}
+                  {equipped ? "Retirer" : deckFull ? "Deck plein" : "Équiper"}
                 </button>
                 <button
                   type="button"
@@ -205,7 +216,7 @@ export function DeckManager({
                   Vendre {card.sellValue}
                   <CoinIcon className="h-3 w-3" />
                 </button>
-              </div>
+              </>
             );
           }}
         />
