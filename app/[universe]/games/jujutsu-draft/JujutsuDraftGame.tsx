@@ -5,6 +5,7 @@ import { Logo } from "@/components/Logo";
 import { DraftBoard } from "@/components/draft/DraftBoard";
 import { CombatScene } from "@/components/draft/CombatScene";
 import { DraftResultModal } from "@/components/draft/DraftResultModal";
+import type { DroppedBooster } from "@/lib/progress/recompute";
 import { pickDraw } from "@/lib/games/draft/draw";
 import { evaluateDraft } from "@/lib/games/draft/scoring";
 import { awardDraftExpAction } from "./actions";
@@ -50,6 +51,8 @@ export function JujutsuDraftGame({
   const [gainedExp, setGainedExp] = useState<number | null>(null);
   const [gainedCoins, setGainedCoins] = useState<number | null>(null);
   const [expBadges, setExpBadges] = useState<string[]>([]);
+  const [droppedBooster, setDroppedBooster] =
+    useState<DroppedBooster | null>(null);
 
   const startNewGame = useCallback(() => {
     setDraw(pickDraw(Math.random, roster));
@@ -87,6 +90,7 @@ export function JujutsuDraftGame({
           setGainedExp(res.gainedExp ?? 0);
           setGainedCoins(res.gainedCoins ?? 0);
           setExpBadges(res.newBadges ?? []);
+          setDroppedBooster(res.droppedBooster ?? null);
         }
       });
     }
@@ -162,6 +166,7 @@ export function JujutsuDraftGame({
           gainedExp={gainedExp}
           gainedCoins={gainedCoins}
           expBadges={expBadges}
+          droppedBooster={droppedBooster}
           onReplay={startNewGame}
         />
       )}

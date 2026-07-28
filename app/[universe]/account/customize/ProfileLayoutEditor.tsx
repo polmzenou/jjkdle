@@ -49,7 +49,7 @@ function Toggle({
 
 /**
  * Éditeur de la mise en page du profil public. Toggles d'en-tête (titre, cadre),
- * puis les sections de corps (badges, scores) avec visibilité + réordonnancement
+ * puis les sections de corps (badges, scores, deck) avec visibilité + réordonnancement
  * (↑/↓). Chaque modification est persistée immédiatement via
  * `updateProfileLayoutAction`, puis `router.refresh()` propage l'aperçu.
  */
@@ -142,7 +142,7 @@ export function ProfileLayoutEditor({
         </div>
       </section>
 
-      {/* Sections de corps : badges + scores (visibilité + ordre) */}
+      {/* Sections de corps : badges + scores + deck (visibilité + ordre) */}
       <section className="rounded-2xl border border-white/10 bg-void-800/60 p-5 backdrop-blur">
         <h2 className="mb-1 font-display text-lg font-bold uppercase tracking-wider text-white/80">
           Sections du profil

@@ -17,13 +17,14 @@
  */
 
 /** Sections de corps réordonnables du profil public. */
-export const PROFILE_SECTIONS = ["badges", "scores"] as const;
+export const PROFILE_SECTIONS = ["badges", "scores", "cards"] as const;
 export type ProfileSectionKey = (typeof PROFILE_SECTIONS)[number];
 
 /** Libellé humain d'une section (UI de customisation). */
 export const SECTION_LABELS: Record<ProfileSectionKey, string> = {
   badges: "🎖️ Badges",
   scores: "🏆 Scores leaderboards",
+  cards: "🃏 Deck de cartes",
 };
 
 /** Visibilité + position d'une section de corps. */

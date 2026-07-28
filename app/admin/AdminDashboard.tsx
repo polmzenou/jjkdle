@@ -39,6 +39,8 @@ import {
 import { AttributesAdmin } from "./AttributesAdmin";
 import { CategoriesAdmin } from "./CategoriesAdmin";
 import { PyramidAdmin } from "./PyramidAdmin";
+import { CardsAdmin } from "./CardsAdmin";
+import type { CollectionCard } from "@/lib/cards/types";
 import type { AdminAttribute } from "@/lib/admin/attribute-store";
 import type { AdminCategory } from "@/lib/admin/category-store";
 import type { AdminRankingCondition } from "@/lib/admin/ranking-store";
@@ -115,6 +117,8 @@ interface AdminDashboardProps {
   adminCategories: AdminCategory[];
   /** Consignes du Pyramid de l'univers administré (onglet Pyramid). */
   rankingConditions: AdminRankingCondition[];
+  /** Roster de l'univers en cartes, marqué possédé/non par l'ADMIN connecté. */
+  cardCollection: CollectionCard[];
 }
 
 type Tab =
@@ -128,6 +132,7 @@ type Tab =
   | "draft"
   | "leaderboard"
   | "users"
+  | "cards"
   | "config";
 
 /**
@@ -146,6 +151,7 @@ const TAB_LABELS: Record<Tab, string> = {
   draft: "Jujutsu Draft",
   leaderboard: "Leaderboard",
   users: "Utilisateurs",
+  cards: "Booster Pack",
   config: "Config",
 };
 
@@ -177,7 +183,15 @@ const TAB_GROUPS: { label: string; tabs: Tab[] }[] = [
   },
   {
     label: "Pilotage",
-    tabs: ["overview", "content", "jjkdle", "leaderboard", "users", "config"],
+    tabs: [
+      "overview",
+      "content",
+      "jjkdle",
+      "leaderboard",
+      "users",
+      "cards",
+      "config",
+    ],
   },
 ];
 
@@ -211,6 +225,7 @@ export function AdminDashboard({
   attributes,
   adminCategories,
   rankingConditions,
+  cardCollection,
 }: AdminDashboardProps) {
   const router = useRouter();
   // Les appels d'API doivent porter l'univers ADMINISTRÉ (cf. admin/layout.tsx),
@@ -582,6 +597,7 @@ export function AdminDashboard({
     leaderboard: `${scores.length} scores`,
     config: "Feature flags & maintenance",
     users: `${users.length} utilisateurs`,
+    cards: `${cardCollection.filter((c) => c.owned).length} / ${cardCollection.length} cartes · ${universeName}`,
   };
   const subtitle = SUBTITLES[tab];
 
@@ -729,7 +745,12 @@ export function AdminDashboard({
           users={users}
           currentUserId={currentUserId}
           isSuperAdmin={isSuperAdmin}
+          cardRoster={cardCollection}
         />
+      )}
+
+      {tab === "cards" && (
+        <CardsAdmin collection={cardCollection} universeName={universeName} />
       )}
 
       {tab === "roster" && (

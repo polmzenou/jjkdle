@@ -8,6 +8,8 @@ import type { CategoryBreakdown } from "@/lib/scoring/scoring";
 import { MAX_SCORE } from "@/lib/scoring/scoring";
 import { CategoryTile } from "./CategoryTile";
 import { ExpReward } from "./progress/ExpReward";
+import { BoosterDrop } from "./cards/BoosterDrop";
+import type { DroppedBooster } from "@/lib/progress/recompute";
 
 interface ScoreRevealProps {
   score: number;
@@ -23,6 +25,8 @@ interface ScoreRevealProps {
   gainedCoins: number | null;
   /** Badges débloqués par l'octroi d'XP. */
   expBadges: string[];
+  /** Booster tombé en fin de partie (1 sur 2), à ouvrir sur place. */
+  droppedBooster?: DroppedBooster | null;
   onRestart: () => void;
 }
 
@@ -36,6 +40,7 @@ export function ScoreReveal({
   gainedExp,
   gainedCoins,
   expBadges,
+  droppedBooster,
   onRestart,
 }: ScoreRevealProps) {
   const animatedScore = useCountUp(score, 1100);
@@ -81,6 +86,8 @@ export function ScoreReveal({
         gainedCoins={gainedCoins}
         newBadges={expBadges}
       />
+
+      <BoosterDrop booster={droppedBooster} />
 
       {/* Récap des choix : mêmes cartes que le jeu, sans les points */}
       <p className="mt-7 text-sm uppercase tracking-[0.2em] text-white/40">

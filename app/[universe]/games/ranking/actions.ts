@@ -15,7 +15,11 @@ import { SLOT_COUNT } from "@/data/ranking/conditions";
 import { shuffle } from "@/lib/draw/draw";
 import { saveScore } from "@/lib/leaderboard/store";
 import { saveBestScore } from "@/lib/bestScore";
-import { awardExp, refreshLevelAndBadges } from "@/lib/progress/recompute";
+import {
+  awardExp,
+  refreshLevelAndBadges,
+  type DroppedBooster,
+} from "@/lib/progress/recompute";
 import { rankingExp } from "@/lib/progress/exp-rewards";
 import type { RankingCardData } from "./types";
 
@@ -79,6 +83,8 @@ export type RankingCheckResult =
       gainedExp: number | null;
       gainedCoins: number | null;
       newBadges: string[];
+      /** Booster tombé (1 partie sur 2), déjà persisté non ouvert. */
+      droppedBooster?: DroppedBooster | null;
       needsAuth: boolean;
     }
   | { ok: true; status: "lost"; flags: boolean[]; order: string[] };
@@ -219,10 +225,12 @@ export async function checkRankingRun(
     }
 
     // XP + enregistrement au classement (DB) : autoritatif, score serveur.
-    const { gained, gainedCoins, newBadges: xpBadges } = await awardExp(
-      user.id,
-      rankingExp(score),
-    );
+    const {
+      gained,
+      gainedCoins,
+      newBadges: xpBadges,
+      droppedBooster,
+    } = await awardExp(user.id, rankingExp(score), "ranking");
     await saveScore(user.id, "ranking", score);
     const { newBadges: recordBadges } = await refreshLevelAndBadges(user.id);
     await revalidateUniversePath("/games/ranking");
@@ -238,6 +246,7 @@ export async function checkRankingRun(
       gainedExp: gained,
       gainedCoins,
       newBadges: [...new Set([...xpBadges, ...recordBadges])],
+      droppedBooster,
       needsAuth: false,
     };
   }

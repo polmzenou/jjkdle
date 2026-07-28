@@ -6,7 +6,9 @@ import { motion } from "framer-motion";
 import { CharacterImage } from "@/components/CharacterImage";
 import { BadgeToast } from "@/components/badges/BadgeToast";
 import { ExpReward } from "@/components/progress/ExpReward";
+import { BoosterDrop } from "@/components/cards/BoosterDrop";
 import { DRAFT_CATEGORIES } from "@/lib/games/draft/categories";
+import type { DroppedBooster } from "@/lib/progress/recompute";
 import { useUniverseHref } from "@/components/universe/UniverseProvider";
 import type {
   CombatResult,
@@ -25,6 +27,8 @@ interface DraftResultModalProps {
   gainedCoins: number | null;
   /** Badges débloqués par l'octroi d'XP. */
   expBadges: string[];
+  /** Booster tombé en fin de partie (1 sur 2), à ouvrir sur place. */
+  droppedBooster?: DroppedBooster | null;
   onReplay: () => void;
 }
 
@@ -41,6 +45,7 @@ export function DraftResultModal({
   gainedExp,
   gainedCoins,
   expBadges,
+  droppedBooster,
   onReplay,
 }: DraftResultModalProps) {
   const victory = result.outcome === "VICTORY";
@@ -77,6 +82,8 @@ export function DraftResultModal({
           gainedCoins={gainedCoins}
           newBadges={expBadges}
         />
+
+        <BoosterDrop booster={droppedBooster} />
 
         {/* Récap du draft */}
         <div className="mt-6 grid grid-cols-4 gap-2 sm:grid-cols-8 sm:gap-3">

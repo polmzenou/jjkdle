@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { CharacterImage } from "@/components/CharacterImage";
 import { ExpReward } from "@/components/progress/ExpReward";
+import { BoosterDrop } from "@/components/cards/BoosterDrop";
+import type { DroppedBooster } from "@/lib/progress/recompute";
 import { Logo } from "@/components/Logo";
 import {
   VIP_MAX_REPLAYS,
@@ -76,6 +78,8 @@ export function JJKdleGame({
   const [gainedExp, setGainedExp] = useState<number | null>(null);
   const [gainedCoins, setGainedCoins] = useState<number | null>(null);
   const [expBadges, setExpBadges] = useState<string[]>([]);
+  const [droppedBooster, setDroppedBooster] =
+    useState<DroppedBooster | null>(null);
   const awardedRef = useRef(false);
 
   // Octroi automatique de l'XP dès que le daily est gagné (connecté). Le garde
@@ -94,6 +98,7 @@ export function JJKdleGame({
           setGainedExp(res.gainedExp ?? 0);
           setGainedCoins(res.gainedCoins ?? 0);
           setExpBadges(res.newBadges ?? []);
+          setDroppedBooster(res.droppedBooster ?? null);
         }
       })
       .catch(() => {});
@@ -149,6 +154,7 @@ export function JJKdleGame({
       setLastGuessId(null);
       setGainedExp(null);
       setExpBadges([]);
+      setDroppedBooster(null);
       router.refresh();
     });
   }, [router, isAdmin]);
@@ -178,6 +184,7 @@ export function JJKdleGame({
               gainedExp={gainedExp}
               gainedCoins={gainedCoins}
               expBadges={expBadges}
+              droppedBooster={droppedBooster}
               showReplay={isPrivileged}
               replayLabel={replayLabel}
               replayDisabled={pending || !canReplay}
@@ -267,6 +274,7 @@ function VictoryPanel({
   gainedExp,
   gainedCoins,
   expBadges,
+  droppedBooster,
   showReplay,
   replayLabel,
   replayDisabled,
@@ -281,6 +289,7 @@ function VictoryPanel({
   gainedExp: number | null;
   gainedCoins: number | null;
   expBadges: string[];
+  droppedBooster: DroppedBooster | null;
   showReplay: boolean;
   replayLabel: string;
   replayDisabled: boolean;
@@ -326,11 +335,14 @@ function VictoryPanel({
       )}
 
       {mode === "daily" && (
-        <ExpReward
-          gainedExp={gainedExp}
-          gainedCoins={gainedCoins}
-          newBadges={expBadges}
-        />
+        <>
+          <ExpReward
+            gainedExp={gainedExp}
+            gainedCoins={gainedCoins}
+            newBadges={expBadges}
+          />
+          <BoosterDrop booster={droppedBooster} />
+        </>
       )}
 
       <div className="mt-5 flex flex-wrap items-center justify-center gap-3">

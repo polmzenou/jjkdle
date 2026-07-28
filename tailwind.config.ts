@@ -84,12 +84,24 @@ const config: Config = {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-8px)" },
         },
+        // Rotation de teinte des cartes EXOTIC (contour + libellé arc-en-ciel).
+        rainbow: {
+          "0%": { filter: "hue-rotate(0deg)" },
+          "100%": { filter: "hue-rotate(360deg)" },
+        },
+        // Balayage du dégradé arc-en-ciel sous le texte EXOTIC.
+        "rainbow-pan": {
+          "0%": { backgroundPosition: "0% 50%" },
+          "100%": { backgroundPosition: "200% 50%" },
+        },
       },
       animation: {
         "glow-pulse": "glow-pulse 2.4s ease-in-out infinite",
         glitch: "glitch 0.4s steps(2, end) infinite",
         shuffle: "shuffle 0.5s ease-in-out",
         float: "float 6s ease-in-out infinite",
+        rainbow: "rainbow 4s linear infinite",
+        "rainbow-pan": "rainbow-pan 3s linear infinite",
       },
     },
   },

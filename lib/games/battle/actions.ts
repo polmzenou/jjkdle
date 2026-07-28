@@ -254,7 +254,10 @@ export async function finishCombatAction(codeRaw: string): Promise<MpResult> {
     data: { gameState: toJson(next), status: "FINISHED" },
   });
   if (count === 1 && state.result?.winnerUserId) {
-    await awardExp(state.result.winnerUserId, battleWinExp());
+    // Le booster éventuel n'est pas remonté : l'écran de fin multijoueur est
+    // piloté par Pusher, pas par le retour de cette action. Il attend le
+    // vainqueur dans son onglet Deck.
+    await awardExp(state.result.winnerUserId, battleWinExp(), "battle");
   }
   await broadcastBattle(code, { gameState: next });
   return { ok: true };

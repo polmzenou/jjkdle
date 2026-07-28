@@ -24,9 +24,10 @@ export async function awardDraftExpAction(draft: unknown): Promise<ExpResult> {
   if (!validation.ok) return { ok: false };
 
   const result = evaluateDraft(validation.selection, rosterById);
-  const { gained, gainedCoins, newBadges } = await awardExp(
+  const { gained, gainedCoins, newBadges, droppedBooster } = await awardExp(
     user.id,
     draftExp(result.enemiesKilled),
+    "jujutsu-draft",
   );
-  return { ok: true, gainedExp: gained, gainedCoins, newBadges };
+  return { ok: true, gainedExp: gained, gainedCoins, newBadges, droppedBooster };
 }

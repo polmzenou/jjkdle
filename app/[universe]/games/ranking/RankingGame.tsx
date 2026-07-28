@@ -26,6 +26,7 @@ import { CharacterPool } from "@/components/ranking/CharacterPool";
 import { AttemptsBar } from "@/components/ranking/AttemptsBar";
 import { RankingCard } from "@/components/ranking/RankingCard";
 import { VictoryModal } from "@/components/ranking/VictoryModal";
+import type { DroppedBooster } from "@/lib/progress/recompute";
 import { GameOverScreen } from "@/components/ranking/GameOverScreen";
 import { Logo } from "@/components/Logo";
 import { UniverseLink } from "@/components/universe/UniverseLink";
@@ -62,6 +63,8 @@ export function RankingGame({ initialBestScore }: RankingGameProps) {
   const [gainedExp, setGainedExp] = useState<number | null>(null);
   const [gainedCoins, setGainedCoins] = useState<number | null>(null);
   const [expBadges, setExpBadges] = useState<string[]>([]);
+  const [droppedBooster, setDroppedBooster] =
+    useState<DroppedBooster | null>(null);
   const [order, setOrder] = useState<string[]>([]);
   const [needsAuth, setNeedsAuth] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -203,6 +206,7 @@ export function RankingGame({ initialBestScore }: RankingGameProps) {
         setGainedExp(res.gainedExp);
         setGainedCoins(res.gainedCoins);
         setExpBadges(res.newBadges);
+        setDroppedBooster(res.droppedBooster ?? null);
         setNeedsAuth(res.needsAuth);
         return;
       }
@@ -330,6 +334,7 @@ export function RankingGame({ initialBestScore }: RankingGameProps) {
           gainedExp={gainedExp}
           gainedCoins={gainedCoins}
           expBadges={expBadges}
+          droppedBooster={droppedBooster}
           onReplay={startNewGame}
         />
       )}

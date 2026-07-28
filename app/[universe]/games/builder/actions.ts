@@ -16,7 +16,11 @@ import { evaluateBuild, type Selection } from "@/lib/scoring/scoring";
 import { getGrade } from "@/lib/scoring/grades";
 import { saveBestScore } from "@/lib/bestScore";
 import { saveScore, getBestScore } from "@/lib/leaderboard/store";
-import { awardExp, refreshLevelAndBadges } from "@/lib/progress/recompute";
+import {
+  awardExp,
+  refreshLevelAndBadges,
+  type DroppedBooster,
+} from "@/lib/progress/recompute";
 import { builderExp } from "@/lib/progress/exp-rewards";
 
 /**
@@ -64,6 +68,8 @@ export type BuilderFinish = {
   gainedExp: number | null;
   gainedCoins: number | null;
   newBadges: string[];
+  /** Booster tombé (1 partie sur 2), déjà persisté non ouvert. */
+  droppedBooster?: DroppedBooster | null;
   needsAuth: boolean;
 };
 
@@ -174,10 +180,12 @@ export async function lockBuilderCategory(
 
     // Bonus ×2 si nouveau record en base (comparé AVANT l'enregistrement).
     const dbBest = await getBestScore(user.id, "builder");
-    const { gained, gainedCoins, newBadges: xpBadges } = await awardExp(
-      user.id,
-      builderExp(grade.id, score > dbBest),
-    );
+    const {
+      gained,
+      gainedCoins,
+      newBadges: xpBadges,
+      droppedBooster,
+    } = await awardExp(user.id, builderExp(grade.id, score > dbBest), "builder");
     await saveScore(user.id, "builder", score);
     const { newBadges: recordBadges } = await refreshLevelAndBadges(user.id);
     await revalidateUniversePath("/games/builder");
@@ -192,6 +200,7 @@ export async function lockBuilderCategory(
       gainedExp: gained,
       gainedCoins,
       newBadges: [...new Set([...xpBadges, ...recordBadges])],
+      droppedBooster,
       needsAuth: false,
     };
   }

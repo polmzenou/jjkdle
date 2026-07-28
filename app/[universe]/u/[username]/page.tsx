@@ -3,13 +3,18 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUniverse } from "@/lib/universes/current";
 import { bannerStyle } from "@/lib/profile/banners";
-import { normalizeProfileLayout } from "@/lib/profile/layout";
+import {
+  normalizeProfileLayout,
+  type ProfileSectionKey,
+} from "@/lib/profile/layout";
 import { UserAvatar } from "@/components/UserAvatar";
 import { LevelBar } from "@/components/LevelBar";
 import { VipBadge } from "@/components/VipBadge";
 import { TitleBadge } from "@/components/TitleBadge";
 import { BadgeShelf } from "@/components/badges/BadgeShelf";
+import { CardShelf } from "@/components/cards/CardShelf";
 import { ScoreCards } from "@/components/profile/ScoreCards";
+import { getDeck } from "@/lib/cards/store";
 import { getUserScores } from "@/lib/leaderboard/store";
 import { getUserDraftScore } from "@/lib/games/draft/store";
 import { getUserJjkdleScore } from "@/lib/games/jjkdle/leaderboard";
@@ -119,8 +124,22 @@ export default async function PublicProfilePage({
   ];
   const hasAnyScore = scores.length > 0 || Boolean(guessWhoStats);
 
+  // Deck équipé de l'univers courant (non chargé si la section est masquée).
+  const showCards = layout.sections.some((s) => s.key === "cards" && s.visible);
+  const deck = showCards ? await getDeck(profile.id) : null;
+
   /** Rend une section de corps selon son type (respecte l'ordre du layout). */
-  const renderSection = (key: "badges" | "scores") => {
+  const renderSection = (key: ProfileSectionKey) => {
+    if (key === "cards") {
+      return (
+        <section key="cards" className="mt-10">
+          <h2 className="mb-4 font-display text-lg font-bold uppercase tracking-wider text-white/80">
+            🃏 Deck
+          </h2>
+          <CardShelf cards={deck?.cards ?? []} />
+        </section>
+      );
+    }
     if (key === "badges") {
       return (
         <section key="badges" className="mt-10">

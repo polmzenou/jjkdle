@@ -45,7 +45,8 @@ model User {
 
   // Monnaie du jeu, créditée en fin de partie au prorata de l'EXP gagnée
   // (`coinsForExp` dans lib/progress/exp-rewards). GLOBALE comme l'XP et le
-  // niveau. Aucune dépense pour l'instant : on accumule, l'usage viendra.
+  // niveau. Sources : fin de partie, doublons de cartes et revente de cartes
+  // (lib/cards/store). Aucune dépense pour l'instant.
   coins Int @default(0)
 
   sessions     Session[]
@@ -61,6 +62,55 @@ model User {
   frameGrants  UserFrameGrant[]
   jjkdleResults JjkdleResult[]
   universeProfiles UserUniverseProfile[]
+  cards        UserCard[]
+  boosters     UserBooster[]
+}
+
+/// Une carte POSSÉDÉE (système de collection, cf. lib/cards/).
+///
+/// La carte n'a pas de métadonnée propre : elle EST son personnage, et sa rareté
+/// est dérivée de `Character.tier` (cf. lib/cards/rarity.ts) — retierer un perso
+/// dans /admin change donc la rareté des cartes déjà distribuées, c'est voulu.
+///
+/// Possession GLOBALE et à vie (même règle que les cosmétiques, cf.
+/// lib/cosmetics/universe.ts) ; l'univers de la carte est celui de son
+/// personnage. Pas de compteur d'exemplaires : un doublon est converti en coins
+/// à l'ouverture du booster, jamais stocké.
+model UserCard {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  obtainedAt  DateTime @default(now())
+
+  @@unique([userId, characterId])
+  @@index([userId])
+}
+
+/// Booster possédé. Créé NON OUVERT (openedAt = null) au moment du drop de fin
+/// de partie (`awardExp`) ou par un admin : il survit à la fermeture de l'écran
+/// de fin et se retrouve dans l'onglet Deck du compte.
+///
+/// L'ouverture est gardée par un `updateMany` conditionné à `openedAt: null`
+/// (même garde d'idempotence que consumeSession en Higher/Lower) : un double
+/// clic ne peut pas tirer les cartes deux fois.
+model UserBooster {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Univers du drop → détermine le pool de personnages tirables à l'ouverture.
+  /// Scalaire sans FK, comme les tables de scores (haute fréquence d'écriture).
+  universeId String
+  /// Rareté du booster : "simple" | "bronze" | "silver" | "gold".
+  /// Réfère une clé de BOOSTERS (lib/cards/boosters.ts).
+  kind       String
+  /// Origine : `gameId` du jeu qui l'a fait tomber, ou "admin".
+  source     String
+  createdAt  DateTime  @default(now())
+  openedAt   DateTime?
+
+  @@index([userId, universeId, openedAt])
 }
 
 /// Profil PAR UNIVERS d'un utilisateur (étape 2c). Le compte reste global
@@ -81,6 +131,13 @@ model UserUniverseProfile {
   avatarCharacterId String?
   avatarCharacter   Character? @relation("UserUniverseAvatar", fields: [avatarCharacterId], references: [id], onDelete: SetNull)
   profileLayout     Json?
+
+  /// Deck de cartes équipé : jusqu'à 3 `Character.id`, dans l'ordre des slots.
+  /// Par univers (comme le reste du loadout) alors que la POSSESSION des cartes
+  /// est globale : on n'équipe que des persos de l'univers courant.
+  /// Applique un multiplicateur d'XP et de coins (cf. lib/cards/deck.ts).
+  /// Validé à l'écriture (possession + univers + unicité), jamais lu tel quel.
+  deckCharacterIds String[]
 
   // ── Streak daily (déplacé de User — décision : streak par univers) ──
   jjkdleStreak       Int     @default(0)
@@ -565,6 +622,10 @@ model Character {
 
   /// Avatars par univers (UserUniverseProfile) pointant sur ce personnage.
   universeAvatarUsers UserUniverseProfile[] @relation("UserUniverseAvatar")
+
+  /// Cartes possédées correspondant à ce personnage (système de collection).
+  /// Supprimer un personnage retire la carte de toutes les collections.
+  userCards UserCard[]
 
   /// Valeurs d'attributs data-driven (étape 3). Remplacent à terme les colonnes
   /// enum ci-dessus. Absence de ligne pour un attribut = « non renseigné ».

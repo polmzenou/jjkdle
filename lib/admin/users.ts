@@ -38,6 +38,10 @@ export interface AdminUser {
   autoFrameKeys: string[];
   /** Cadres octroyés manuellement par un admin. */
   frameGrantKeys: string[];
+  /** `Character.id` des cartes possédées DANS L'UNIVERS ADMINISTRÉ. */
+  cardCharacterIds: string[];
+  /** `Character.id` des cartes équipées au deck de cet univers (≤ 3). */
+  deckCharacterIds: string[];
 }
 
 /**
@@ -65,9 +69,19 @@ export async function listUsers(): Promise<AdminUser[]> {
       badges: { select: { badgeKey: true } },
       titleGrants: { select: { titleKey: true } },
       frameGrants: { select: { frameKey: true } },
+      // Cartes de l'univers administré uniquement (la possession est globale,
+      // mais le dashboard n'affiche que le roster qu'il a sous les yeux).
+      cards: {
+        where: { character: { universeId } },
+        select: { characterId: true },
+      },
       universeProfiles: {
         where: { universeId },
-        select: { equippedTitleKey: true, equippedFrameKey: true },
+        select: {
+          equippedTitleKey: true,
+          equippedFrameKey: true,
+          deckCharacterIds: true,
+        },
       },
     },
   });
@@ -94,6 +108,8 @@ export async function listUsers(): Promise<AdminUser[]> {
         titleGrantKeys: u.titleGrants.map((t) => t.titleKey),
         autoFrameKeys: [...getUnlockedFrameKeys(ctx)],
         frameGrantKeys: u.frameGrants.map((f) => f.frameKey),
+        cardCharacterIds: u.cards.map((c) => c.characterId),
+        deckCharacterIds: prof?.deckCharacterIds ?? [],
       };
     }),
   );

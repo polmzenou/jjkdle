@@ -4,7 +4,9 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { RankingCard, LOCK_COLOR } from "./RankingCard";
 import { ExpReward } from "@/components/progress/ExpReward";
+import { BoosterDrop } from "@/components/cards/BoosterDrop";
 import { formatScore } from "@/lib/format";
+import type { DroppedBooster } from "@/lib/progress/recompute";
 
 interface VictoryModalProps {
   /** Classement correct (ordre = rangs 1→8). */
@@ -21,6 +23,8 @@ interface VictoryModalProps {
   gainedCoins: number | null;
   /** Badges débloqués par l'octroi d'XP. */
   expBadges: string[];
+  /** Booster tombé en fin de partie (1 sur 2), à ouvrir sur place. */
+  droppedBooster?: DroppedBooster | null;
   onReplay: () => void;
 }
 
@@ -35,6 +39,7 @@ export function VictoryModal({
   gainedExp,
   gainedCoins,
   expBadges,
+  droppedBooster,
   onReplay,
 }: VictoryModalProps) {
   return (
@@ -79,6 +84,8 @@ export function VictoryModal({
           gainedCoins={gainedCoins}
           newBadges={expBadges}
         />
+
+        <BoosterDrop booster={droppedBooster} />
 
         {/* Classement correct complet */}
         <div className="mt-6 grid grid-cols-4 gap-3">

@@ -39,6 +39,15 @@ import { refreshLevelAndBadges } from "@/lib/progress/recompute";
 import { isBadgeKey } from "@/lib/badges/definitions";
 import { isTitleKey } from "@/lib/titles/definitions";
 import { isFrameKey } from "@/lib/frames/definitions";
+import { isBoosterKind, type BoosterKind } from "@/lib/cards/boosters";
+import {
+  createBooster,
+  grantCard,
+  openBooster,
+  resolveCard,
+  revokeCard,
+} from "@/lib/cards/store";
+import type { CardView, OpenedBooster } from "@/lib/cards/types";
 import {
   grantTitle,
   revokeTitle,
@@ -1119,5 +1128,101 @@ export async function setForcedTargetAction(
   revalidateGlobalConfig();
   // Le mot du jour change → invalider aussi la page du jeu.
   await revalidateUniversePath("/games/jjkdle");
+  return { ok: true };
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Cartes & boosters (onglet « Booster Pack », et decks des joueurs).
+//
+// L'univers ciblé est celui de la session admin : sur /admin, le middleware
+// écrase `x-universe` depuis le cookie `admin_universe`, donc
+// `getCurrentUniverse()` suit automatiquement le sélecteur (cf.
+// lib/universes/admin-scope.ts). Aucune action n'a à recevoir de slug.
+//
+// Un octroi admin est un DON, pas un tirage : il ne crédite jamais de coins,
+// même si le joueur possédait déjà la carte.
+// ──────────────────────────────────────────────────────────────────────────
+
+/**
+ * Se donne (ou donne à un joueur) un booster, puis l'ouvre immédiatement.
+ *
+ * Sert à tester l'animation autant qu'à dépanner : le booster passe par la même
+ * table et le même `openBooster` que ceux des joueurs, donc ce qui est vérifié
+ * ici est exactement ce qu'ils verront.
+ */
+export async function adminGiveBoosterAction(
+  kind: string,
+  userId?: string,
+): Promise<ActionResult & { result?: OpenedBooster }> {
+  const admin = await getAdminUser();
+  if (!admin) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  if (!isBoosterKind(kind)) {
+    return { ok: false, error: "Booster inconnu." };
+  }
+
+  const universe = await getCurrentUniverse();
+  const target = userId ?? admin.id;
+
+  try {
+    const booster = await createBooster(
+      target,
+      universe.id,
+      kind as BoosterKind,
+      "admin",
+    );
+    const result = await openBooster(target, booster.id);
+    if (!result) return { ok: false, error: "Échec de l'ouverture du booster." };
+    revalidatePath("/admin");
+    return { ok: true, result };
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+}
+
+/**
+ * Octroie une carte précise (idempotent). Renvoie la carte pour que l'admin
+ * voie la même animation de révélation qu'à l'ouverture d'un booster.
+ */
+export async function adminGrantCardAction(
+  characterId: string,
+  userId?: string,
+): Promise<ActionResult & { card?: CardView; alreadyOwned?: boolean }> {
+  const admin = await getAdminUser();
+  if (!admin) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+
+  const universe = await getCurrentUniverse();
+  const card = await resolveCard(characterId, universe.id);
+  if (!card) {
+    return { ok: false, error: "Ce personnage n'existe pas dans cet univers." };
+  }
+
+  try {
+    const { created } = await grantCard(userId || admin.id, characterId);
+    revalidatePath("/admin");
+    return { ok: true, card, alreadyOwned: !created };
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+}
+
+/** Retire une carte d'une collection (et du deck où elle était équipée). */
+export async function adminRevokeCardAction(
+  characterId: string,
+  userId?: string,
+): Promise<ActionResult> {
+  const admin = await getAdminUser();
+  if (!admin) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  try {
+    await revokeCard(userId || admin.id, characterId);
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidatePath("/admin");
   return { ok: true };
 }

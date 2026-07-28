@@ -5,6 +5,7 @@ import { getUniverseLoadout } from "@/lib/universes/profile";
 import { normalizeProfileLayout } from "@/lib/profile/layout";
 import { ProfileLayoutEditor } from "./ProfileLayoutEditor";
 import { UniverseLink } from "@/components/universe/UniverseLink";
+import { AccountTabs } from "../AccountTabs";
 
 export const metadata: Metadata = {
   title: "Customiser mon profil",
@@ -27,13 +28,6 @@ export default async function CustomizeProfilePage() {
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-12 sm:py-16">
-      <UniverseLink
-        href="/account"
-        className="mb-6 inline-flex items-center gap-1.5 text-sm text-white/50 transition-colors hover:text-white"
-      >
-        ← Retour à mon compte
-      </UniverseLink>
-
       <header className="mb-8">
         <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.3em] text-domain-light/70">
           <span
@@ -50,6 +44,8 @@ export default async function CustomizeProfilePage() {
           pseudo, l'avatar et la bannière restent toujours tout en haut.
         </p>
       </header>
+
+      <AccountTabs />
 
       <ProfileLayoutEditor username={user.username} initialLayout={layout} />
 

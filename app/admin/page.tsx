@@ -25,6 +25,7 @@ import {
 import { listAttributes } from "@/lib/admin/attribute-store";
 import { listCategories } from "@/lib/admin/category-store";
 import { listRankingConditions } from "@/lib/admin/ranking-store";
+import { getCollection } from "@/lib/cards/store";
 import type { Character } from "@/data/roster/characters";
 import type { DraftCharacter } from "@/lib/games/draft/types";
 import { AdminDashboard } from "./AdminDashboard";
@@ -72,12 +73,16 @@ export default async function AdminPage({
       loadAttributeSchema(),
       listAvailableUniverses(),
     ]);
-  // Attributs, catégories et consignes Pyramid de l'univers administré.
-  const [attributes, adminCategories, rankingConditions] = await Promise.all([
-    listAttributes(),
-    listCategories(),
-    listRankingConditions(),
-  ]);
+  // Attributs, catégories et consignes Pyramid de l'univers administré, plus le
+  // roster en cartes marqué possédé/non pour l'ADMIN connecté (onglet Booster
+  // Pack : c'est sa propre collection qu'il manipule).
+  const [attributes, adminCategories, rankingConditions, cardCollection] =
+    await Promise.all([
+      listAttributes(),
+      listCategories(),
+      listRankingConditions(),
+      getCollection(user.id),
+    ]);
   // Univers administré : le middleware l'a déjà appliqué à toutes les lectures
   // ci-dessus (cf. lib/universes/admin-scope.ts) ; on ne lit ici que son slug
   // pour l'afficher dans le sélecteur.
@@ -127,6 +132,7 @@ export default async function AdminPage({
       attributes={attributes}
       adminCategories={adminCategories}
       rankingConditions={rankingConditions}
+      cardCollection={cardCollection}
       draftRoster={draftRoster}
       categories={categories}
       scores={[

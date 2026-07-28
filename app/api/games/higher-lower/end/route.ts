@@ -48,17 +48,24 @@ export async function POST() {
     });
   }
 
-  const xpEarned = xpForScore(score);
-  const { gainedCoins } = await awardExp(user.id, xpEarned);
-  await saveHigherLowerScore(user.id, score, xpEarned);
+  // `gained` inclut le bonus du deck équipé ; c'est lui qu'on enregistre et
+  // qu'on renvoie, pour que le classement et l'écran de fin montrent l'XP
+  // RÉELLEMENT empochée (comme les coins, déjà multipliés).
+  const { gained, gainedCoins, droppedBooster } = await awardExp(
+    user.id,
+    xpForScore(score),
+    "higher-lower",
+  );
+  await saveHigherLowerScore(user.id, score, gained);
   const { newBadges } = await refreshLevelAndBadges(user.id);
 
   await revalidateUniversePath("/games/higher-lower");
   return NextResponse.json({
     ok: true,
     score,
-    xpEarned,
+    xpEarned: gained,
     coinsEarned: gainedCoins,
     newBadges,
+    droppedBooster,
   });
 }

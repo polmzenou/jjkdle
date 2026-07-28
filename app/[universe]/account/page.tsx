@@ -27,6 +27,7 @@ import { badgesForUniverse } from "@/lib/badges/definitions";
 import { universeGameTitle } from "@/lib/games/universe";
 import { prisma } from "@/lib/prisma";
 import { AccountForms } from "./AccountForms";
+import { AccountTabs } from "./AccountTabs";
 import { ProfileEditor, type AvatarChoice } from "./ProfileEditor";
 import { UniverseLink } from "@/components/universe/UniverseLink";
 
@@ -185,7 +186,7 @@ export default async function AccountPage() {
           </div>
         </div>
 
-        {/* Actions profil (boutons pilule) */}
+        {/* Action profil (la customisation et le deck sont des onglets) */}
         <div className="mt-4 flex flex-wrap gap-3">
           <UniverseLink
             href={`/u/${encodeURIComponent(user.username)}`}
@@ -193,14 +194,10 @@ export default async function AccountPage() {
           >
             Voir mon profil public <span aria-hidden>↗</span>
           </UniverseLink>
-          <UniverseLink
-            href="/account/customize"
-            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-void-800/60 px-4 py-2 text-sm font-medium text-white/80 backdrop-blur transition-colors hover:border-domain/50 hover:text-white"
-          >
-            🎛️ Customiser mon profil
-          </UniverseLink>
         </div>
       </header>
+
+      <AccountTabs />
 
       {/* ── Cartes statistiques ── */}
       <section className="mb-12 grid gap-4 sm:grid-cols-3">

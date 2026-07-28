@@ -22,7 +22,11 @@ import {
   adminRevokeTitleAction,
   adminGrantFrameAction,
   adminRevokeFrameAction,
+  adminGrantCardAction,
+  adminRevokeCardAction,
 } from "./actions";
+import { cardRarityStyle } from "@/lib/cards/rarity";
+import type { CollectionCard } from "@/lib/cards/types";
 
 interface UserAdminProps {
   users: AdminUser[];
@@ -30,6 +34,8 @@ interface UserAdminProps {
   currentUserId: string;
   /** Le viewer est-il le super-admin (droits étendus) ? */
   isSuperAdmin: boolean;
+  /** Roster de l'univers administré, en cartes (catalogue des octrois). */
+  cardRoster: CollectionCard[];
 }
 
 type Feedback = { ok: boolean; msg: string } | null;
@@ -43,6 +49,7 @@ export function UserAdmin({
   users,
   currentUserId,
   isSuperAdmin,
+  cardRoster,
 }: UserAdminProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -276,6 +283,7 @@ export function UserAdmin({
                 {expanded && (
                   <ProgressionPanel
                     user={u}
+                    cardRoster={cardRoster}
                     pending={pending}
                     onResult={(ok, msg) => {
                       setFeedback({ ok, msg });
@@ -343,14 +351,19 @@ function RenameField({
   );
 }
 
-/** Panneau dépliable d'édition de la progression d'un joueur (XP, niveau, coins, badges). */
+/**
+ * Panneau dépliable d'édition de la progression d'un joueur (XP, niveau, coins,
+ * badges, cosmétiques, cartes).
+ */
 function ProgressionPanel({
   user,
+  cardRoster,
   pending,
   onResult,
   run,
 }: {
   user: AdminUser;
+  cardRoster: CollectionCard[];
   pending: boolean;
   onResult: (ok: boolean, msg: string) => void;
   run: (cb: () => void) => void;
@@ -549,6 +562,93 @@ function ProgressionPanel({
         onGrant={grantFrame}
         onRevoke={revokeFrame}
       />
+
+      {/* Cartes */}
+      <CardManager
+        user={user}
+        roster={cardRoster}
+        pending={pending}
+        onResult={onResult}
+        run={run}
+      />
+    </div>
+  );
+}
+
+/**
+ * Deck et collection d'un joueur, dans l'univers administré.
+ *
+ * Rangée de pastilles sur le modèle exact des badges : une par personnage du
+ * roster, colorée à sa rareté quand la carte est possédée. Les cartes équipées
+ * au deck portent un ⭐ — utile pour comprendre d'où vient le bonus d'XP d'un
+ * joueur avant de toucher à sa progression.
+ */
+function CardManager({
+  user,
+  roster,
+  pending,
+  onResult,
+  run,
+}: {
+  user: AdminUser;
+  roster: CollectionCard[];
+  pending: boolean;
+  onResult: (ok: boolean, msg: string) => void;
+  run: (cb: () => void) => void;
+}) {
+  const owned = new Set(user.cardCharacterIds);
+  const equipped = new Set(user.deckCharacterIds);
+
+  const toggle = (characterId: string, name: string, has: boolean) =>
+    run(async () => {
+      const res = has
+        ? await adminRevokeCardAction(characterId, user.id)
+        : await adminGrantCardAction(characterId, user.id);
+      onResult(
+        res.ok,
+        res.ok
+          ? `Carte « ${name} » ${has ? "retirée à" : "donnée à"} « ${user.username} ».`
+          : (res.error ?? "Échec."),
+      );
+    });
+
+  return (
+    <div>
+      <p className="mb-2 text-[11px] uppercase tracking-wider text-white/45">
+        Cartes · {owned.size} / {roster.length}
+        {equipped.size > 0 && ` · ${equipped.size} au deck (⭐)`}
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {roster.map((card) => {
+          const has = owned.has(card.characterId);
+          const style = cardRarityStyle(card.rarity);
+          return (
+            <button
+              key={card.characterId}
+              type="button"
+              disabled={pending}
+              onClick={() => toggle(card.characterId, card.name, has)}
+              title={`${style.label} · ${card.sellValue} coins`}
+              className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold transition-colors disabled:opacity-40 ${
+                has ? "" : "border-white/10 text-white/45 hover:text-white"
+              }`}
+              style={
+                has
+                  ? {
+                      borderColor: `${style.color}66`,
+                      backgroundColor: `${style.color}1a`,
+                      color: style.color,
+                    }
+                  : undefined
+              }
+            >
+              {equipped.has(card.characterId) && <span aria-hidden>⭐</span>}
+              {card.name}
+              <span className="text-[10px]">{has ? "✓" : "+"}</span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

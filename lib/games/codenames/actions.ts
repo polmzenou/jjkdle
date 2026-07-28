@@ -662,9 +662,12 @@ async function finishGame(
   // XP : gagnants > perdants, puis recompute niveau/badges pour tous.
   await Promise.all(
     userIds.map((userId) =>
+      // Booster non remonté : l'écran de fin est diffusé par Pusher à toute la
+      // table, il attend chaque joueur dans son onglet Deck.
       awardExp(
         userId,
         teams[userId] === winnerTeam ? codenamesWinExp() : codenamesLossExp(),
+        "codenames",
       ),
     ),
   );

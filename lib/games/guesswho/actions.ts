@@ -290,9 +290,12 @@ export async function guessAction(
       { userId: loserId, won: false, universeId },
     ],
   });
+  // Les deux joueurs peuvent looter (le drop ne dépend pas du résultat). Le
+  // booster n'est pas remonté à l'écran de fin — celui-ci passe par Pusher et
+  // ne sert qu'un des deux joueurs ; il les attend dans leur onglet Deck.
   await Promise.all([
-    awardExp(winnerId, guessWhoWinExp()),
-    awardExp(loserId, guessWhoLossExp()),
+    awardExp(winnerId, guessWhoWinExp(), "guesswho"),
+    awardExp(loserId, guessWhoLossExp(), "guesswho"),
   ]);
   await Promise.all([
     refreshLevelAndBadges(winnerId),

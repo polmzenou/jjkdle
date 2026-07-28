@@ -6,6 +6,8 @@ import { Logo } from "@/components/Logo";
 import { useUniverseHref } from "@/components/universe/UniverseProvider";
 import { CharacterImage } from "@/components/CharacterImage";
 import { ExpReward } from "@/components/progress/ExpReward";
+import { BoosterDrop } from "@/components/cards/BoosterDrop";
+import type { DroppedBooster } from "@/lib/progress/recompute";
 import type {
   HLChoice,
   HLReveal,
@@ -26,6 +28,8 @@ interface GameOverState {
   coinsEarned: number;
   needsAuth?: boolean;
   newBadges: string[];
+  /** Booster tombé en fin de run (1 sur 2), à ouvrir sur place. */
+  droppedBooster?: DroppedBooster | null;
 }
 
 interface HigherLowerGameProps {
@@ -122,6 +126,7 @@ export function HigherLowerGame({
         coinsEarned: data.coinsEarned ?? 0,
         needsAuth: data.needsAuth,
         newBadges: data.newBadges ?? [],
+        droppedBooster: data.droppedBooster ?? null,
       });
     } catch {
       setGameOver({
@@ -497,6 +502,7 @@ function ResultModal({
               gainedCoins={state.coinsEarned}
               newBadges={state.newBadges}
             />
+            <BoosterDrop booster={state.droppedBooster} />
             {isAuthed && (
               <p className="mt-4 text-sm">
                 <span className="font-semibold text-emerald-300">

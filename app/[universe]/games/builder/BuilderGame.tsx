@@ -17,6 +17,7 @@ import { CategoryTile } from "@/components/CategoryTile";
 import { RankFooter } from "@/components/RankFooter";
 import { Logo } from "@/components/Logo";
 import { ScoreReveal } from "@/components/ScoreReveal";
+import type { DroppedBooster } from "@/lib/progress/recompute";
 import { UniverseLink } from "@/components/universe/UniverseLink";
 
 interface BuilderGameProps {
@@ -56,6 +57,8 @@ export function BuilderGame({
   const [gainedExp, setGainedExp] = useState<number | null>(null);
   const [gainedCoins, setGainedCoins] = useState<number | null>(null);
   const [expBadges, setExpBadges] = useState<string[]>([]);
+  const [droppedBooster, setDroppedBooster] =
+    useState<DroppedBooster | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [, startTransition] = useTransition();
@@ -88,6 +91,7 @@ export function BuilderGame({
       setGainedExp(res.gainedExp);
       setGainedCoins(res.gainedCoins);
       setExpBadges(res.newBadges);
+      setDroppedBooster(res.droppedBooster ?? null);
       return;
     }
     applyStep(res);
@@ -195,6 +199,7 @@ export function BuilderGame({
           gainedExp={gainedExp}
           gainedCoins={gainedCoins}
           expBadges={expBadges}
+          droppedBooster={droppedBooster}
           onRestart={startNewGame}
         />
       ) : (
