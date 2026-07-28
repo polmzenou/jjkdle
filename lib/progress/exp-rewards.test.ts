@@ -5,6 +5,7 @@ import {
   draftExp,
   battleWinExp,
   jjkdleExp,
+  coinsForExp,
 } from "./exp-rewards";
 
 describe("builderExp", () => {
@@ -80,5 +81,29 @@ describe("jjkdleExp", () => {
   it("streak dégénéré (≤0) retombe sur ×1", () => {
     expect(jjkdleExp(1, 0)).toBe(500);
     expect(jjkdleExp(1, -5)).toBe(500);
+  });
+});
+
+describe("coinsForExp", () => {
+  it("convertit 10 XP en 1 coin, arrondi à l'inférieur", () => {
+    expect(coinsForExp(0)).toBe(0);
+    expect(coinsForExp(9)).toBe(0);
+    expect(coinsForExp(10)).toBe(1);
+    expect(coinsForExp(19)).toBe(1);
+    expect(coinsForExp(50)).toBe(5);
+    expect(coinsForExp(500)).toBe(50);
+  });
+
+  it("ne rend jamais de coins négatifs", () => {
+    expect(coinsForExp(-100)).toBe(0);
+    expect(coinsForExp(Number.NaN)).toBe(0);
+  });
+
+  it("suit les barèmes réels des jeux", () => {
+    expect(coinsForExp(builderExp("s", false))).toBe(5); // grade S
+    expect(coinsForExp(builderExp("s", true))).toBe(10); // grade S + record
+    expect(coinsForExp(rankingExp(10000))).toBe(10);
+    expect(coinsForExp(draftExp(5))).toBe(100);
+    expect(coinsForExp(battleWinExp())).toBe(2); // 25 XP → 2 coins
   });
 });

@@ -10,6 +10,8 @@ export type ExpResult = {
   needsAuth?: boolean;
   /** XP gagnée par cette partie (0 possible). */
   gainedExp?: number;
+  /** Coins gagnés par cette partie (dérivés de l'XP ; 0 possible). */
+  gainedCoins?: number;
   /** Badges nouvellement débloqués par l'octroi (toast). */
   newBadges?: string[];
 };

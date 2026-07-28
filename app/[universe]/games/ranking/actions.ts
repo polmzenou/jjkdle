@@ -77,6 +77,7 @@ export type RankingCheckResult =
       bestScore: number;
       isNewRecord: boolean;
       gainedExp: number | null;
+      gainedCoins: number | null;
       newBadges: string[];
       needsAuth: boolean;
     }
@@ -211,13 +212,14 @@ export async function checkRankingRun(
         bestScore: best,
         isNewRecord,
         gainedExp: null,
+        gainedCoins: null,
         newBadges: [],
         needsAuth: true,
       };
     }
 
     // XP + enregistrement au classement (DB) : autoritatif, score serveur.
-    const { gained, newBadges: xpBadges } = await awardExp(
+    const { gained, gainedCoins, newBadges: xpBadges } = await awardExp(
       user.id,
       rankingExp(score),
     );
@@ -234,6 +236,7 @@ export async function checkRankingRun(
       bestScore: best,
       isNewRecord,
       gainedExp: gained,
+      gainedCoins,
       newBadges: [...new Set([...xpBadges, ...recordBadges])],
       needsAuth: false,
     };

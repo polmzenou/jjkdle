@@ -43,6 +43,11 @@ model User {
   xpBonus Int @default(0) // ajustement manuel admin (additif, persistant)
   level   Int @default(1)
 
+  // Monnaie du jeu, créditée en fin de partie au prorata de l'EXP gagnée
+  // (`coinsForExp` dans lib/progress/exp-rewards). GLOBALE comme l'XP et le
+  // niveau. Aucune dépense pour l'instant : on accumule, l'usage viendra.
+  coins Int @default(0)
+
   sessions     Session[]
   scores       Score[]
   lobbyPlayers LobbyPlayer[]

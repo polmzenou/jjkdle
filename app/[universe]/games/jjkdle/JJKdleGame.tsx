@@ -74,6 +74,7 @@ export function JJKdleGame({
   const [vipUsed, setVipUsed] = useState(vipReplaysUsed);
   // XP empochée automatiquement à la victoire du jour (sans enregistrer au classement).
   const [gainedExp, setGainedExp] = useState<number | null>(null);
+  const [gainedCoins, setGainedCoins] = useState<number | null>(null);
   const [expBadges, setExpBadges] = useState<string[]>([]);
   const awardedRef = useRef(false);
 
@@ -91,6 +92,7 @@ export function JJKdleGame({
       .then((res) => {
         if (res.ok) {
           setGainedExp(res.gainedExp ?? 0);
+          setGainedCoins(res.gainedCoins ?? 0);
           setExpBadges(res.newBadges ?? []);
         }
       })
@@ -174,6 +176,7 @@ export function JJKdleGame({
               mode={mode}
               isAuthed={isAuthed}
               gainedExp={gainedExp}
+              gainedCoins={gainedCoins}
               expBadges={expBadges}
               showReplay={isPrivileged}
               replayLabel={replayLabel}
@@ -262,6 +265,7 @@ function VictoryPanel({
   mode,
   isAuthed,
   gainedExp,
+  gainedCoins,
   expBadges,
   showReplay,
   replayLabel,
@@ -275,6 +279,7 @@ function VictoryPanel({
   mode: GameMode;
   isAuthed: boolean;
   gainedExp: number | null;
+  gainedCoins: number | null;
   expBadges: string[];
   showReplay: boolean;
   replayLabel: string;
@@ -321,7 +326,11 @@ function VictoryPanel({
       )}
 
       {mode === "daily" && (
-        <ExpReward gainedExp={gainedExp} newBadges={expBadges} />
+        <ExpReward
+          gainedExp={gainedExp}
+          gainedCoins={gainedCoins}
+          newBadges={expBadges}
+        />
       )}
 
       <div className="mt-5 flex flex-wrap items-center justify-center gap-3">

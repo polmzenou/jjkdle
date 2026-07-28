@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { xpToLevel } from "./xp";
+import { coinsForExp } from "./exp-rewards";
 import { evaluateBadges } from "@/lib/badges/evaluate";
 
 /**
@@ -16,20 +17,27 @@ export interface ProgressResult {
 }
 
 /**
- * Ajoute `gainedExp` au total du joueur, recalcule le niveau et débloque les
- * badges nouvellement mérités. À appeler en fin de partie avec le montant du
- * barème (`lib/progress/exp-rewards`). Un gain ≤ 0 n'ajoute rien mais réévalue
- * quand même les badges.
+ * Ajoute `gainedExp` au total du joueur, crédite les coins correspondants,
+ * recalcule le niveau et débloque les badges nouvellement mérités. À appeler en
+ * fin de partie avec le montant du barème (`lib/progress/exp-rewards`). Un gain
+ * ≤ 0 n'ajoute rien mais réévalue quand même les badges.
+ *
+ * C'est le point d'entrée UNIQUE de tous les jeux : les coins étant dérivés de
+ * l'EXP (`coinsForExp`), aucun jeu n'a à s'en occuper.
  */
 export async function awardExp(
   userId: string,
   gainedExp: number,
-): Promise<ProgressResult & { gained: number }> {
+): Promise<ProgressResult & { gained: number; gainedCoins: number }> {
   const gained = Math.max(0, Math.round(gainedExp));
+  const gainedCoins = coinsForExp(gained);
 
   const user = await prisma.user.update({
     where: { id: userId },
-    data: gained > 0 ? { totalXp: { increment: gained } } : {},
+    data:
+      gained > 0
+        ? { totalXp: { increment: gained }, coins: { increment: gainedCoins } }
+        : {},
     select: { totalXp: true },
   });
 
@@ -42,7 +50,7 @@ export async function awardExp(
   });
 
   const newBadges = await evaluateBadges(userId);
-  return { newBadges, level, totalXp, gained };
+  return { newBadges, level, totalXp, gained, gainedCoins };
 }
 
 /**

@@ -180,11 +180,11 @@ export async function awardJjkdleExpAction(): Promise<ExpResult & { streak?: num
   // Streak AVANT l'octroi : il sert au multiplicateur ×(streak+1) et au badge
   // JJKDLE_STREAK_7. `firstToday: false` (déjà compté aujourd'hui) ⇒ 0 XP.
   const { streak, firstToday } = await updateJjkdleStreak(user.id);
-  const { gained, newBadges } = await awardExp(
+  const { gained, gainedCoins, newBadges } = await awardExp(
     user.id,
     firstToday ? jjkdleExp(state.guesses.length, streak) : 0,
   );
-  return { ok: true, gainedExp: gained, newBadges, streak };
+  return { ok: true, gainedExp: gained, gainedCoins, newBadges, streak };
 }
 
 /**

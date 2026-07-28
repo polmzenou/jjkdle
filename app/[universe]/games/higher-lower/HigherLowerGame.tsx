@@ -22,6 +22,8 @@ interface RevealState extends HLReveal {
 interface GameOverState {
   score: number;
   xpEarned: number;
+  /** Coins gagnés (dérivés de l'XP côté serveur). */
+  coinsEarned: number;
   needsAuth?: boolean;
   newBadges: string[];
 }
@@ -117,11 +119,17 @@ export function HigherLowerGame({
       setGameOver({
         score: data.score ?? fallbackScore,
         xpEarned: data.xpEarned ?? 0,
+        coinsEarned: data.coinsEarned ?? 0,
         needsAuth: data.needsAuth,
         newBadges: data.newBadges ?? [],
       });
     } catch {
-      setGameOver({ score: fallbackScore, xpEarned: 0, newBadges: [] });
+      setGameOver({
+        score: fallbackScore,
+        xpEarned: 0,
+        coinsEarned: 0,
+        newBadges: [],
+      });
     } finally {
       setPhase("gameover");
       setBusy(false);
@@ -484,7 +492,11 @@ function ResultModal({
           </div>
         ) : (
           <>
-            <ExpReward gainedExp={state.xpEarned} newBadges={state.newBadges} />
+            <ExpReward
+              gainedExp={state.xpEarned}
+              gainedCoins={state.coinsEarned}
+              newBadges={state.newBadges}
+            />
             {isAuthed && (
               <p className="mt-4 text-sm">
                 <span className="font-semibold text-emerald-300">

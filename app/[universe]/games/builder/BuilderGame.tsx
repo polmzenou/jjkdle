@@ -54,6 +54,7 @@ export function BuilderGame({
   const [isNewRecord, setIsNewRecord] = useState(false);
   const [needsAuth, setNeedsAuth] = useState(false);
   const [gainedExp, setGainedExp] = useState<number | null>(null);
+  const [gainedCoins, setGainedCoins] = useState<number | null>(null);
   const [expBadges, setExpBadges] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -85,6 +86,7 @@ export function BuilderGame({
       setIsNewRecord(res.isNewRecord);
       setNeedsAuth(res.needsAuth);
       setGainedExp(res.gainedExp);
+      setGainedCoins(res.gainedCoins);
       setExpBadges(res.newBadges);
       return;
     }
@@ -191,6 +193,7 @@ export function BuilderGame({
           isNewRecord={isNewRecord}
           needsAuth={needsAuth}
           gainedExp={gainedExp}
+          gainedCoins={gainedCoins}
           expBadges={expBadges}
           onRestart={startNewGame}
         />

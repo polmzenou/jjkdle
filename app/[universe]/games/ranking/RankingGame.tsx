@@ -60,6 +60,7 @@ export function RankingGame({ initialBestScore }: RankingGameProps) {
   const [bestScore, setBestScore] = useState(initialBestScore);
   const [isNewRecord, setIsNewRecord] = useState(false);
   const [gainedExp, setGainedExp] = useState<number | null>(null);
+  const [gainedCoins, setGainedCoins] = useState<number | null>(null);
   const [expBadges, setExpBadges] = useState<string[]>([]);
   const [order, setOrder] = useState<string[]>([]);
   const [needsAuth, setNeedsAuth] = useState(false);
@@ -200,6 +201,7 @@ export function RankingGame({ initialBestScore }: RankingGameProps) {
         setBestScore(res.bestScore);
         setIsNewRecord(res.isNewRecord);
         setGainedExp(res.gainedExp);
+        setGainedCoins(res.gainedCoins);
         setExpBadges(res.newBadges);
         setNeedsAuth(res.needsAuth);
         return;
@@ -326,6 +328,7 @@ export function RankingGame({ initialBestScore }: RankingGameProps) {
           isNewRecord={isNewRecord}
           needsAuth={needsAuth}
           gainedExp={gainedExp}
+          gainedCoins={gainedCoins}
           expBadges={expBadges}
           onReplay={startNewGame}
         />

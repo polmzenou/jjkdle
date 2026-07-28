@@ -62,6 +62,7 @@ export type BuilderFinish = {
   bestScore: number;
   isNewRecord: boolean;
   gainedExp: number | null;
+  gainedCoins: number | null;
   newBadges: string[];
   needsAuth: boolean;
 };
@@ -165,6 +166,7 @@ export async function lockBuilderCategory(
         bestScore: best,
         isNewRecord,
         gainedExp: null,
+        gainedCoins: null,
         newBadges: [],
         needsAuth: true,
       };
@@ -172,7 +174,7 @@ export async function lockBuilderCategory(
 
     // Bonus ×2 si nouveau record en base (comparé AVANT l'enregistrement).
     const dbBest = await getBestScore(user.id, "builder");
-    const { gained, newBadges: xpBadges } = await awardExp(
+    const { gained, gainedCoins, newBadges: xpBadges } = await awardExp(
       user.id,
       builderExp(grade.id, score > dbBest),
     );
@@ -188,6 +190,7 @@ export async function lockBuilderCategory(
       bestScore: best,
       isNewRecord,
       gainedExp: gained,
+      gainedCoins,
       newBadges: [...new Set([...xpBadges, ...recordBadges])],
       needsAuth: false,
     };

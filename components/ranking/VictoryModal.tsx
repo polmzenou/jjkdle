@@ -17,6 +17,8 @@ interface VictoryModalProps {
   needsAuth: boolean;
   /** XP empochée automatiquement (null = non connecté). */
   gainedExp: number | null;
+  /** Coins empochés en même temps (dérivés de l'XP ; null = non connecté). */
+  gainedCoins: number | null;
   /** Badges débloqués par l'octroi d'XP. */
   expBadges: string[];
   onReplay: () => void;
@@ -31,6 +33,7 @@ export function VictoryModal({
   isNewRecord,
   needsAuth,
   gainedExp,
+  gainedCoins,
   expBadges,
   onReplay,
 }: VictoryModalProps) {
@@ -71,7 +74,11 @@ export function VictoryModal({
           </p>
         )}
 
-        <ExpReward gainedExp={gainedExp} newBadges={expBadges} />
+        <ExpReward
+          gainedExp={gainedExp}
+          gainedCoins={gainedCoins}
+          newBadges={expBadges}
+        />
 
         {/* Classement correct complet */}
         <div className="mt-6 grid grid-cols-4 gap-3">

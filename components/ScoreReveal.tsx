@@ -19,6 +19,8 @@ interface ScoreRevealProps {
   needsAuth: boolean;
   /** XP empochée automatiquement (null = non connecté). */
   gainedExp: number | null;
+  /** Coins empochés en même temps (dérivés de l'XP ; null = non connecté). */
+  gainedCoins: number | null;
   /** Badges débloqués par l'octroi d'XP. */
   expBadges: string[];
   onRestart: () => void;
@@ -32,6 +34,7 @@ export function ScoreReveal({
   isNewRecord,
   needsAuth,
   gainedExp,
+  gainedCoins,
   expBadges,
   onRestart,
 }: ScoreRevealProps) {
@@ -73,7 +76,11 @@ export function ScoreReveal({
         </p>
       )}
 
-      <ExpReward gainedExp={gainedExp} newBadges={expBadges} />
+      <ExpReward
+        gainedExp={gainedExp}
+        gainedCoins={gainedCoins}
+        newBadges={expBadges}
+      />
 
       {/* Récap des choix : mêmes cartes que le jeu, sans les points */}
       <p className="mt-7 text-sm uppercase tracking-[0.2em] text-white/40">

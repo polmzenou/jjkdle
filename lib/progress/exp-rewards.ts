@@ -101,3 +101,16 @@ export function jjkdleExp(attempts: number, streak: number): number {
   const multiplier = Math.max(1, Math.floor(streak) + 1);
   return base * multiplier;
 }
+
+/** Combien d'EXP vaut 1 coin. Unique curseur d'équilibrage de l'économie. */
+export const XP_PER_COIN = 10;
+
+/**
+ * Coins gagnés par une partie, dérivés de l'EXP qu'elle rapporte (arrondi à
+ * l'inférieur). Une petite partie (< 10 XP) peut donc ne rien rapporter.
+ * Appelée depuis `awardExp` : aucun jeu n'a son propre barème de coins.
+ */
+export function coinsForExp(gainedExp: number): number {
+  const exp = Number.isFinite(gainedExp) ? gainedExp : 0;
+  return Math.floor(Math.max(0, exp) / XP_PER_COIN);
+}

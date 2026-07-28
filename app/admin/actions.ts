@@ -30,6 +30,7 @@ import {
   deleteUser,
   applyUserXpBonus,
   setUserTotalXp,
+  setUserCoins,
   grantBadge,
   revokeBadge,
 } from "@/lib/admin/users";
@@ -722,6 +723,32 @@ export async function adminSetLevelAction(
   try {
     await setUserTotalXp(userId, levelToMinXp(level));
     await refreshLevelAndBadges(userId);
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+const COINS_LIMIT = 1_000_000;
+
+/**
+ * Fixe le solde de coins d'un joueur (valeur ABSOLUE). Aucun recalcul derrière :
+ * les coins ne dérivent de rien une fois crédités (cf. `setUserCoins`).
+ */
+export async function adminSetCoinsAction(
+  userId: string,
+  coinsRaw: number,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  const coins = Math.round(Number(coinsRaw));
+  if (!Number.isFinite(coins) || coins < 0 || coins > COINS_LIMIT) {
+    return { ok: false, error: `Coins invalides (0 à ${COINS_LIMIT}).` };
+  }
+  try {
+    await setUserCoins(userId, coins);
   } catch (e) {
     return { ok: false, error: `Échec : ${(e as Error).message}` };
   }

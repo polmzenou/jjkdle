@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { Logo } from "@/components/Logo";
 import { VipBadge } from "@/components/VipBadge";
-import { TitleBadge } from "@/components/TitleBadge";
 import { UserAvatar } from "@/components/UserAvatar";
+import { CoinWallet } from "@/components/progress/CoinWallet";
 import { logoutAction } from "@/lib/auth/actions";
 import { UniverseLink } from "@/components/universe/UniverseLink";
 import { HubLink } from "@/components/universe/HubLink";
@@ -30,10 +30,10 @@ export type NavUser = {
   avatarImage: string | null;
   /** Niveau du compte (pastille sur l'avatar). */
   level: number;
-  /** Clé du titre équipé (ou null) — affiché à côté du pseudo. */
-  titleKey: string | null;
   /** Clé du cadre équipé (ou null) — bordure autour de l'avatar. */
   frameKey: string | null;
+  /** Solde de coins (global au compte) — pastille du portemonnaie. */
+  coins: number;
 };
 
 /**
@@ -198,6 +198,9 @@ function UserMenu({
           Admin
         </UniverseLink>
       )}
+      <CoinWallet coins={user.coins} />
+      {/* Volontairement SANS le titre équipé : il reste visible sur la page
+          compte et le profil public, la nav garde photo + cadre + pseudo. */}
       <UniverseLink
         href="/account"
         aria-label="Mon compte"
@@ -214,15 +217,30 @@ function UserMenu({
           {user.username}
         </span>
         {user.isVip && <VipBadge />}
-        {user.titleKey && <TitleBadge titleKey={user.titleKey} className="hidden sm:inline-flex" />}
       </UniverseLink>
       <button
         type="button"
         onClick={logout}
         disabled={pending}
-        className="rounded-full border border-white/15 bg-white/[0.03] px-3 py-1.5 text-sm font-medium text-white/70 transition-colors hover:text-white disabled:opacity-40"
+        aria-label="Déconnexion"
+        title="Déconnexion"
+        className="rounded-full border border-white/15 bg-white/[0.03] p-2 text-white/70 transition-colors hover:border-cursed/40 hover:text-cursed-light disabled:opacity-40"
       >
-        {pending ? "…" : "Déconnexion"}
+        {/* Porte + flèche sortante (SVG maison : pas de librairie d'icônes). */}
+        <svg
+          aria-hidden
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.9}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-[18px] w-[18px]"
+        >
+          <path d="M15 17l5-5-5-5" />
+          <path d="M20 12H9" />
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+        </svg>
       </button>
     </div>
   );

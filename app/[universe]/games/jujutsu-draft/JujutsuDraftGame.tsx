@@ -48,6 +48,7 @@ export function JujutsuDraftGame({
   const [combat, setCombat] = useState<CombatResult | null>(null);
   // XP empochée automatiquement en fin de combat (sans enregistrer au classement).
   const [gainedExp, setGainedExp] = useState<number | null>(null);
+  const [gainedCoins, setGainedCoins] = useState<number | null>(null);
   const [expBadges, setExpBadges] = useState<string[]>([]);
 
   const startNewGame = useCallback(() => {
@@ -56,6 +57,7 @@ export function JujutsuDraftGame({
     setCombat(null);
     setPhase("draft");
     setGainedExp(null);
+    setGainedCoins(null);
     setExpBadges([]);
   }, [roster]);
 
@@ -83,6 +85,7 @@ export function JujutsuDraftGame({
       void awardDraftExpAction(selection).then((res) => {
         if (res.ok) {
           setGainedExp(res.gainedExp ?? 0);
+          setGainedCoins(res.gainedCoins ?? 0);
           setExpBadges(res.newBadges ?? []);
         }
       });
@@ -157,6 +160,7 @@ export function JujutsuDraftGame({
           rosterById={rosterById}
           isAuthed={isAuthed}
           gainedExp={gainedExp}
+          gainedCoins={gainedCoins}
           expBadges={expBadges}
           onReplay={startNewGame}
         />

@@ -21,6 +21,8 @@ interface DraftResultModalProps {
   isAuthed: boolean;
   /** XP empochée automatiquement (null = pas encore résolue / non connecté). */
   gainedExp: number | null;
+  /** Coins empochés en même temps (dérivés de l'XP ; null = non résolu). */
+  gainedCoins: number | null;
   /** Badges débloqués par l'octroi d'XP. */
   expBadges: string[];
   onReplay: () => void;
@@ -37,6 +39,7 @@ export function DraftResultModal({
   rosterById,
   isAuthed,
   gainedExp,
+  gainedCoins,
   expBadges,
   onReplay,
 }: DraftResultModalProps) {
@@ -69,7 +72,11 @@ export function DraftResultModal({
           <span className="text-white/40">/ {result.duels.length}</span>
         </p>
 
-        <ExpReward gainedExp={gainedExp} newBadges={expBadges} />
+        <ExpReward
+          gainedExp={gainedExp}
+          gainedCoins={gainedCoins}
+          newBadges={expBadges}
+        />
 
         {/* Récap du draft */}
         <div className="mt-6 grid grid-cols-4 gap-2 sm:grid-cols-8 sm:gap-3">

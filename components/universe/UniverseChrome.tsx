@@ -41,17 +41,18 @@ export async function UniverseChrome({
   const isAdmin = user?.role === "ADMIN";
   const maintenanceActive = maintenance.enabled && !isAdmin;
 
-  // Profil (avatar + niveau) pour la barre de nav. Niveau = global (User) ;
-  // loadout équipé (avatar/titre/cadre) = univers courant (UserUniverseProfile).
+  // Profil (avatar + niveau + coins) pour la barre de nav. Niveau et coins =
+  // globaux (User) ; loadout équipé (avatar/cadre) = univers courant
+  // (UserUniverseProfile). Le titre équipé n'est plus affiché dans la nav.
   const profile = user
     ? await prisma.user.findUnique({
         where: { id: user.id },
         select: {
           level: true,
+          coins: true,
           universeProfiles: {
             where: { universeId: universe.id },
             select: {
-              equippedTitleKey: true,
               equippedFrameKey: true,
               avatarCharacter: { select: { image: true } },
             },
@@ -69,8 +70,8 @@ export async function UniverseChrome({
         canSyncImages: user.role === "ADMIN" || user.role === "VIP",
         avatarImage: navProfile?.avatarCharacter?.image ?? null,
         level: profile?.level ?? 1,
-        titleKey: navProfile?.equippedTitleKey ?? null,
         frameKey: navProfile?.equippedFrameKey ?? null,
+        coins: profile?.coins ?? 0,
       }
     : null;
   // Compteur du cache d'images (pour afficher « Vider le cache »).

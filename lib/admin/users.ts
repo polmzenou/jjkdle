@@ -22,6 +22,8 @@ export interface AdminUser {
   totalXp: number;
   /** Ajustement manuel admin (additif, persistant). */
   xpBonus: number;
+  /** Solde de coins (monnaie du jeu, globale au compte). */
+  coins: number;
   /** Clés des badges débloqués (dérivés OU octroyés). */
   badgeKeys: string[];
   /** Clé du titre actuellement équipé (ou null). */
@@ -59,6 +61,7 @@ export async function listUsers(): Promise<AdminUser[]> {
       level: true,
       totalXp: true,
       xpBonus: true,
+      coins: true,
       badges: { select: { badgeKey: true } },
       titleGrants: { select: { titleKey: true } },
       frameGrants: { select: { frameKey: true } },
@@ -82,6 +85,7 @@ export async function listUsers(): Promise<AdminUser[]> {
         level: u.level,
         totalXp: u.totalXp,
         xpBonus: u.xpBonus,
+        coins: u.coins,
         badgeKeys: u.badges.map((b) => b.badgeKey),
         equippedTitleKey: prof?.equippedTitleKey ?? null,
         equippedFrameKey: prof?.equippedFrameKey ?? null,
@@ -127,6 +131,18 @@ export async function setUserTotalXp(id: string, totalXp: number): Promise<void>
   await prisma.user.update({
     where: { id },
     data: { totalXp: Math.max(0, Math.round(totalXp)) },
+  });
+}
+
+/**
+ * Fixe le solde de coins (valeur ABSOLUE, pas un delta). Contrairement à
+ * `xpBonus`, aucune valeur dérivée n'est à réconcilier : les coins s'accumulent
+ * indépendamment une fois crédités.
+ */
+export async function setUserCoins(id: string, coins: number): Promise<void> {
+  await prisma.user.update({
+    where: { id },
+    data: { coins: Math.max(0, Math.round(coins)) },
   });
 }
 

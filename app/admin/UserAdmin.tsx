@@ -15,6 +15,7 @@ import {
   deleteUserAction,
   adminSetLevelAction,
   adminSetXpBonusAction,
+  adminSetCoinsAction,
   adminGrantBadgeAction,
   adminRevokeBadgeAction,
   adminGrantTitleAction,
@@ -342,7 +343,7 @@ function RenameField({
   );
 }
 
-/** Panneau dépliable d'édition de la progression d'un joueur (XP, niveau, badges). */
+/** Panneau dépliable d'édition de la progression d'un joueur (XP, niveau, coins, badges). */
 function ProgressionPanel({
   user,
   pending,
@@ -356,6 +357,7 @@ function ProgressionPanel({
 }) {
   const [level, setLevel] = useState(String(user.level));
   const [xpBonus, setXpBonus] = useState(String(user.xpBonus));
+  const [coins, setCoins] = useState(String(user.coins));
   const owned = new Set(user.badgeKeys);
   // Catalogues de l'univers ADMINISTRÉ : un cosmétique ne se gagne et ne
   // s'équipe que dans son univers, on n'octroie donc que ceux d'ici. (La
@@ -375,6 +377,13 @@ function ProgressionPanel({
     run(async () => {
       const res = await adminSetXpBonusAction(user.id, Number(xpBonus));
       onResult(res.ok, res.ok ? `Bonus d'XP de « ${user.username} » mis à jour.` : res.error ?? "Échec.");
+    });
+
+  // Solde de coins : valeur ABSOLUE (pas un delta comme le bonus d'XP).
+  const applyCoins = () =>
+    run(async () => {
+      const res = await adminSetCoinsAction(user.id, Number(coins));
+      onResult(res.ok, res.ok ? `Coins de « ${user.username} » fixés à ${coins}.` : res.error ?? "Échec.");
     });
 
   const toggleBadge = (key: string, has: boolean) =>
@@ -424,10 +433,11 @@ function ProgressionPanel({
 
   return (
     <div className="space-y-4 border-t border-white/5 px-3 py-3">
-      {/* XP totale + niveau actuel */}
+      {/* XP totale + niveau actuel + solde de coins */}
       <p className="text-[11px] text-white/40">
         XP totale : <b className="text-white/70">{user.totalXp.toLocaleString("fr-FR")}</b>{" "}
-        · niveau actuel : <b className="text-white/70">{user.level}</b>
+        · niveau actuel : <b className="text-white/70">{user.level}</b>{" "}
+        · coins : <b className="text-amber-300">{user.coins.toLocaleString("fr-FR")}</b>
       </p>
 
       <div className="flex flex-wrap items-end gap-4">
@@ -462,6 +472,24 @@ function ProgressionPanel({
               className={fieldCls}
             />
             <button type="button" onClick={applyXp} disabled={pending} className={btnCls}>
+              Appliquer
+            </button>
+          </div>
+        </label>
+
+        <label className="block">
+          <span className="mb-1 block text-[11px] uppercase tracking-wider text-white/45">
+            Coins (solde)
+          </span>
+          <div className="flex gap-2">
+            <input
+              type="number"
+              min={0}
+              value={coins}
+              onChange={(e) => setCoins(e.target.value)}
+              className={fieldCls}
+            />
+            <button type="button" onClick={applyCoins} disabled={pending} className={btnCls}>
               Appliquer
             </button>
           </div>
