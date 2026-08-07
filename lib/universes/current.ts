@@ -71,6 +71,13 @@ async function middlewareFlag(name: string): Promise<boolean> {
 export const isHubRequest = cache(() => middlewareFlag("x-hub"));
 
 /**
+ * Vrai si la requête courante rend une page du CASINO (`/casino/…`). Même usage
+ * que `isHubRequest` : le casino est hors univers et porte sa propre palette,
+ * donc ni la marque ni le thème d'un anime ne doivent s'y appliquer.
+ */
+export const isCasinoRequest = cache(() => middlewareFlag("x-casino"));
+
+/**
  * Préfixe un chemin interne par l'univers courant, côté SERVEUR :
  * `/games` → `/jjk/games`.
  *

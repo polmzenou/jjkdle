@@ -40,10 +40,12 @@ import { AttributesAdmin } from "./AttributesAdmin";
 import { CategoriesAdmin } from "./CategoriesAdmin";
 import { PyramidAdmin } from "./PyramidAdmin";
 import { CardsAdmin } from "./CardsAdmin";
+import { CasinoAdmin } from "./CasinoAdmin";
 import type { CollectionCard } from "@/lib/cards/types";
 import type { AdminAttribute } from "@/lib/admin/attribute-store";
 import type { AdminCategory } from "@/lib/admin/category-store";
 import type { AdminRankingCondition } from "@/lib/admin/ranking-store";
+import type { CasinoAdminData } from "@/lib/admin/casino";
 import type { OverviewStats } from "@/lib/admin/analytics";
 import type { JjkdleAnalytics } from "@/lib/admin/jjkdle-analytics";
 import type { MaintenanceConfig } from "@/lib/config/app-config";
@@ -119,6 +121,8 @@ interface AdminDashboardProps {
   rankingConditions: AdminRankingCondition[];
   /** Roster de l'univers en cartes, marqué possédé/non par l'ADMIN connecté. */
   cardCollection: CollectionCard[];
+  /** Réglages et tables du casino. HORS UNIVERS : le casino est unique. */
+  casino: CasinoAdminData;
 }
 
 type Tab =
@@ -133,6 +137,7 @@ type Tab =
   | "leaderboard"
   | "users"
   | "cards"
+  | "casino"
   | "config";
 
 /**
@@ -152,6 +157,7 @@ const TAB_LABELS: Record<Tab, string> = {
   leaderboard: "Leaderboard",
   users: "Utilisateurs",
   cards: "Booster Pack",
+  casino: "Casino",
   config: "Config",
 };
 
@@ -190,6 +196,7 @@ const TAB_GROUPS: { label: string; tabs: Tab[] }[] = [
       "leaderboard",
       "users",
       "cards",
+      "casino",
       "config",
     ],
   },
@@ -226,6 +233,7 @@ export function AdminDashboard({
   adminCategories,
   rankingConditions,
   cardCollection,
+  casino,
 }: AdminDashboardProps) {
   const router = useRouter();
   // Les appels d'API doivent porter l'univers ADMINISTRÉ (cf. admin/layout.tsx),
@@ -598,6 +606,7 @@ export function AdminDashboard({
     config: "Feature flags & maintenance",
     users: `${users.length} utilisateurs`,
     cards: `${cardCollection.filter((c) => c.owned).length} / ${cardCollection.length} cartes · ${universeName}`,
+    casino: `Blackjack · ${casino.tables.length} table(s) · réglages globaux`,
   };
   const subtitle = SUBTITLES[tab];
 
@@ -752,6 +761,8 @@ export function AdminDashboard({
       {tab === "cards" && (
         <CardsAdmin collection={cardCollection} universeName={universeName} />
       )}
+
+      {tab === "casino" && <CasinoAdmin casino={casino} />}
 
       {tab === "roster" && (
         <>

@@ -1,5 +1,6 @@
 import "server-only";
 import Pusher from "pusher";
+import { casinoChannel } from "@/lib/casino/events";
 import { lobbyChannel } from "@/lib/multiplayer/events";
 
 /**
@@ -48,4 +49,13 @@ export async function triggerLobby(
   data: unknown,
 ): Promise<void> {
   await getPusherServer().trigger(lobbyChannel(code), event, data);
+}
+
+/** Diffuse un événement à tous les joueurs assis à une table de casino. */
+export async function triggerCasino(
+  code: string,
+  event: string,
+  data: unknown,
+): Promise<void> {
+  await getPusherServer().trigger(casinoChannel(code), event, data);
 }

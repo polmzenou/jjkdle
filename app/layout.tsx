@@ -4,10 +4,11 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import {
   getCurrentUniverseConfig,
+  isCasinoRequest,
   isHubRequest,
   universeHref,
 } from "@/lib/universes/current";
-import { themeCss, hubThemeCss } from "@/lib/universes/theme";
+import { themeCss, hubThemeCss, casinoThemeCss } from "@/lib/universes/theme";
 import { siteSeo, DEFAULT_OG_IMAGE } from "@/lib/seo/config";
 import "./globals.css";
 
@@ -30,7 +31,23 @@ const spaceGrotesk = Space_Grotesk({
  * son titre, sa description et ses mots-clés.
  */
 export async function generateMetadata(): Promise<Metadata> {
-  const [seo, hub] = await Promise.all([siteSeo(), isHubRequest()]);
+  const [seo, hub, casino] = await Promise.all([
+    siteSeo(),
+    isHubRequest(),
+    isCasinoRequest(),
+  ]);
+  // Le casino est hors univers : pas plus que le hub il ne doit porter le nom
+  // d'un anime en suffixe.
+  if (casino) {
+    return {
+      metadataBase: new URL(seo.url),
+      title: { default: "Casino", template: "%s · Casino" },
+      description:
+        "Le casino de la plateforme : mise tes coins au blackjack, en solo ou à une table jusqu'à 5 joueurs.",
+      alternates: { canonical: "/casino" },
+      robots: { index: true, follow: true },
+    };
+  }
   // Sur le HUB, aucun suffixe de marque : « Les univers · JJK Arcade » n'aurait
   // aucun sens sur une page qui sert justement à choisir entre les animes.
   if (hub) {
@@ -104,8 +121,9 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const [hub, config] = await Promise.all([
+  const [hub, casino, config] = await Promise.all([
     isHubRequest(),
+    isCasinoRequest(),
     getCurrentUniverseConfig(),
   ]);
 
@@ -113,8 +131,11 @@ export default async function RootLayout({
     <html lang="fr" className={`${inter.variable} ${spaceGrotesk.variable}`}>
       <head>
         {/* Les classes Tailwind (bg-domain, bg-void-800/60…) consomment ces
-            variables. Sur le hub : palette NEUTRE, aucune marque. */}
-        <style>{hub ? hubThemeCss() : themeCss(config)}</style>
+            variables. Sur le hub : palette NEUTRE, aucune marque. Au casino :
+            feutre + or, sa propre identité. */}
+        <style>
+          {casino ? casinoThemeCss() : hub ? hubThemeCss() : themeCss(config)}
+        </style>
       </head>
       <body className="min-h-screen">
         {children}

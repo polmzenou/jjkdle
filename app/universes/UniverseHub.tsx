@@ -46,7 +46,14 @@ const CROSS_UNIVERSE_PERKS = [
   { icon: "🏅", label: "Cosmétiques débloqués partout" },
 ] as const;
 
-export function UniverseHub({ universes }: { universes: HubUniverse[] }) {
+export function UniverseHub({
+  universes,
+  casino,
+}: {
+  universes: HubUniverse[];
+  /** Palette + disponibilité du casino. `null` = casino coupé, carte masquée. */
+  casino: { vars: Record<string, string> } | null;
+}) {
   return (
     <main className="relative mx-auto w-full max-w-6xl px-6 pb-24 pt-16 sm:pt-24">
       <HubBackdrop />
@@ -111,7 +118,87 @@ export function UniverseHub({ universes }: { universes: HubUniverse[] }) {
           <ComingSoonCard index={universes.length} />
         </ul>
       )}
+
+      {casino && <CasinoCard vars={casino.vars} index={universes.length + 1} />}
     </main>
+  );
+}
+
+/**
+ * Entrée du CASINO, sous la grille des univers.
+ *
+ * Hors de la grille et pleine largeur, délibérément : le casino n'est pas un
+ * anime de plus, c'est un lieu transverse. L'aligner avec les autres cartes
+ * laisserait croire qu'il faut y choisir un univers, alors qu'il n'en a aucun —
+ * il mise les coins du compte, qui sont globaux.
+ *
+ * Il porte tout de même sa palette en variables CSS inline, exactement comme
+ * chaque carte d'univers porte la sienne : c'est ce qui lui donne son feutre
+ * vert et son or au milieu d'une page rendue en gris neutre.
+ */
+function CasinoCard({
+  vars,
+  index,
+}: {
+  vars: Record<string, string>;
+  index: number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.1 + index * 0.08, ease: "easeOut" }}
+      className="mt-5"
+    >
+      <Link
+        href="/casino"
+        style={vars as CSSProperties}
+        className="group relative flex items-center gap-5 overflow-hidden rounded-3xl border border-cursed/25 bg-void-800/70 p-6 transition duration-300 hover:-translate-y-1 hover:border-cursed/60 hover:shadow-[0_30px_70px_-35px_rgb(var(--color-cursed))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cursed-light focus-visible:ring-offset-2 focus-visible:ring-offset-void-900 sm:gap-6 sm:p-7"
+      >
+        <span
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(90% 160% at 12% 50%, rgb(var(--color-domain) / 0.35) 0%, transparent 62%)",
+          }}
+        />
+        <span
+          aria-hidden
+          className="absolute inset-y-0 -left-1/4 w-1/4 -skew-x-12 bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[520%]"
+        />
+
+        <span
+          aria-hidden
+          className="relative grid h-14 w-14 shrink-0 place-items-center rounded-2xl border border-cursed/40 bg-cursed/10 text-2xl text-cursed-light transition-transform duration-500 group-hover:scale-110 sm:h-16 sm:w-16 sm:text-3xl"
+        >
+          ♠
+        </span>
+
+        <div className="relative min-w-0 flex-1">
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-cursed-light">
+            Tous univers
+          </p>
+          <p className="mt-1.5 font-display text-2xl font-black tracking-tight text-white">
+            Casino
+          </p>
+          <p className="mt-1.5 text-sm leading-relaxed text-white/50">
+            Mise tes coins au blackjack, en solo ou à une table jusqu&apos;à
+            5&nbsp;joueurs.
+          </p>
+        </div>
+
+        <span className="relative hidden items-center gap-2 font-display text-sm font-bold uppercase tracking-wider text-white/60 transition-colors group-hover:text-white sm:flex">
+          Entrer
+          <span
+            aria-hidden
+            className="transition-transform duration-300 group-hover:translate-x-1.5"
+          >
+            →
+          </span>
+        </span>
+      </Link>
+    </motion.div>
   );
 }
 

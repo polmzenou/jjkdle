@@ -17,6 +17,15 @@ import {
   getAdminOrVipUser,
   getSuperAdminUser,
 } from "@/lib/auth/session";
+import {
+  MIN_BET_CEIL,
+  MIN_BET_FLOOR,
+  setCasinoCardBack,
+  setCasinoEnabled,
+  setCasinoMinBet,
+} from "@/lib/casino/config";
+import { closeTable } from "@/lib/casino/store";
+import { resetCasinoStats } from "@/lib/admin/casino";
 import { upsertCharacter, deleteCharacter, readRoster } from "@/lib/admin/roster-store";
 import {
   refreshAllRosterImages,
@@ -1220,6 +1229,107 @@ export async function adminRevokeCardAction(
   }
   try {
     await revokeCard(userId || admin.id, characterId);
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+// ── Casino (hors univers) ─────────────────────────────────────────────────
+// ⚠️ Ces réglages ne sont PAS scopés à un univers, contrairement à tous ceux
+// au-dessus : il n'y a qu'un casino sur la plateforme, puisqu'il mise des coins
+// globaux. Couper le casino le coupe partout — c'est voulu.
+
+/** Ouvre ou ferme le casino (les ADMIN continuent d'y accéder). */
+export async function setCasinoEnabledAction(
+  enabled: boolean,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  try {
+    await setCasinoEnabled(Boolean(enabled));
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidateGlobalConfig();
+  return { ok: true };
+}
+
+/** Règle la mise minimale des tables. Il n'y a volontairement pas de maximum. */
+export async function setCasinoMinBetAction(
+  value: number,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  const amount = Math.round(Number(value));
+  if (!Number.isFinite(amount) || amount < MIN_BET_FLOOR || amount > MIN_BET_CEIL) {
+    return {
+      ok: false,
+      error: `Mise minimale entre ${MIN_BET_FLOOR} et ${MIN_BET_CEIL} coins.`,
+    };
+  }
+  try {
+    await setCasinoMinBet(amount);
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidateGlobalConfig();
+  return { ok: true };
+}
+
+/**
+ * Choisit le dos de carte servi à toutes les tables.
+ *
+ * Les tables DÉJÀ ouvertes le prennent aussi : le dos est résolu à la
+ * sérialisation (cf. lib/casino/engine.ts `viewFor`), pas figé à la création.
+ */
+export async function setCasinoCardBackAction(
+  id: string,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  try {
+    await setCasinoCardBack(String(id));
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidateGlobalConfig();
+  return { ok: true };
+}
+
+/**
+ * Ferme une table de force.
+ *
+ * ⚠️ Destructif : les mises engagées sur la manche en cours sont perdues, sans
+ * remboursement (il n'y a pas de registre pour les retrouver). À réserver aux
+ * tables réellement bloquées.
+ */
+export async function closeCasinoTableAction(
+  code: string,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  try {
+    await closeTable(String(code));
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+/** Remet les compteurs de la maison à zéro (nouveau cycle de mesure). */
+export async function resetCasinoStatsAction(): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  try {
+    await resetCasinoStats();
   } catch (e) {
     return { ok: false, error: `Échec : ${(e as Error).message}` };
   }

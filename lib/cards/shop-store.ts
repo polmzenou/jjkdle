@@ -1,4 +1,7 @@
 import { prisma } from "@/lib/prisma";
+// Le débit atomique vivait ici en privé ; il est parti dans lib/coins.ts quand
+// le casino a eu besoin de la même règle (une seule implémentation du débit).
+import { creditCoins as refundCoins, debitCoins } from "@/lib/coins";
 import { getRoster } from "@/lib/content/queries";
 import { msUntilMidnight, todayKey } from "@/lib/games/jjkdle/daily";
 import type { Character } from "@/data/roster/characters";
@@ -30,35 +33,6 @@ import type { CardView, ShopExoticOffer, ShopWindow } from "./types";
 
 /** Ce que renvoie un achat : le message d'erreur est destiné au joueur. */
 export type PurchaseResult = { ok: boolean; error?: string };
-
-// ──────────────────────────────────────────────────────────────────────────
-// Portemonnaie
-// ──────────────────────────────────────────────────────────────────────────
-
-/**
- * Débite le compte, ATOMIQUEMENT : la condition `coins >= amount` fait partie du
- * `WHERE` de l'écriture, donc deux achats concurrents ne peuvent pas passer tous
- * les deux sur le même solde (le second ne matche plus aucune ligne).
- *
- * Même garde que l'ouverture d'un booster (`updateMany` conditionné) : on ne lit
- * jamais le solde pour décider, c'est la base qui arbitre.
- */
-async function debitCoins(userId: string, amount: number): Promise<boolean> {
-  if (!Number.isFinite(amount) || amount <= 0) return false;
-  const res = await prisma.user.updateMany({
-    where: { id: userId, coins: { gte: amount } },
-    data: { coins: { decrement: amount } },
-  });
-  return res.count === 1;
-}
-
-/** Rembourse un débit dont la contrepartie n'a pas pu être livrée. */
-async function refundCoins(userId: string, amount: number): Promise<void> {
-  await prisma.user.update({
-    where: { id: userId },
-    data: { coins: { increment: amount } },
-  });
-}
 
 // ──────────────────────────────────────────────────────────────────────────
 // Lecture

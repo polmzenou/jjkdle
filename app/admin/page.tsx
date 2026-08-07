@@ -28,6 +28,7 @@ import { listRankingConditions } from "@/lib/admin/ranking-store";
 import { getCollection } from "@/lib/cards/store";
 import type { Character } from "@/data/roster/characters";
 import type { DraftCharacter } from "@/lib/games/draft/types";
+import { getCasinoAdminData } from "@/lib/admin/casino";
 import { AdminDashboard } from "./AdminDashboard";
 import { accessDeniedFor } from "./AccessDenied";
 
@@ -110,14 +111,23 @@ export default async function AdminPage({
   const analyticsDate = /^\d{4}-\d{2}-\d{2}$/.test(jjkdleDate ?? "")
     ? (jjkdleDate as string)
     : todayKey();
-  const [overview, jjkdleAnalytics, gameFlags, maintenance, forcedTarget] =
-    await Promise.all([
-      getOverviewStats(roster),
-      getJjkdleAnalytics(roster, analyticsDate),
-      getGameFlags(),
-      getMaintenance(),
-      getForcedTarget(),
-    ]);
+  // `casino` est le seul de ce lot à NE PAS dépendre de l'univers administré :
+  // il n'y a qu'un casino sur la plateforme (cf. lib/casino/config.ts).
+  const [
+    overview,
+    jjkdleAnalytics,
+    gameFlags,
+    maintenance,
+    forcedTarget,
+    casino,
+  ] = await Promise.all([
+    getOverviewStats(roster),
+    getJjkdleAnalytics(roster, analyticsDate),
+    getGameFlags(),
+    getMaintenance(),
+    getForcedTarget(),
+    getCasinoAdminData(),
+  ]);
 
   return (
     <AdminDashboard
@@ -133,6 +143,7 @@ export default async function AdminPage({
       adminCategories={adminCategories}
       rankingConditions={rankingConditions}
       cardCollection={cardCollection}
+      casino={casino}
       draftRoster={draftRoster}
       categories={categories}
       scores={[

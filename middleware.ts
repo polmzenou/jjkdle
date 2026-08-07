@@ -50,6 +50,7 @@ export function middleware(request: NextRequest) {
   // on écrase toujours les valeurs entrantes (headers réservés au serveur).
   headers.delete("x-universe");
   headers.delete("x-hub");
+  headers.delete("x-casino");
 
   // ── 1. Administration : hors univers, sa cible vient d'un cookie ──────────
   // `?universe=<slug>` a la priorité et devient la nouvelle cible mémorisée :
@@ -113,9 +114,15 @@ export function middleware(request: NextRequest) {
     return response;
   }
 
-  // ── 4. Chemins hors univers (auth, og, robots…) : rien à préfixer ─────────
+  // ── 4. Chemins hors univers (auth, casino, og, robots…) : rien à préfixer ──
   if (isUniverseFreePath(pathname)) {
     headers.set("x-universe", fallbackSlug(request));
+    // Le casino a sa PROPRE palette (feutre + or), comme le hub a la sienne :
+    // le layout racine a besoin de le savoir dès le premier paint, sans quoi le
+    // fond serait peint aux couleurs du dernier anime visité.
+    if (pathname === "/casino" || pathname.startsWith("/casino/")) {
+      headers.set("x-casino", "1");
+    }
     return NextResponse.next({ request: { headers } });
   }
 

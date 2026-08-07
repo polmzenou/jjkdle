@@ -24,6 +24,11 @@
 const UNIVERSE_FREE_PREFIXES = [
   "/admin", // administration : son univers vient d'un cookie (admin-scope)
   "/universes", // hub
+  // Le casino ne se joue pas dans un anime : il mise des coins, qui sont GLOBAUX
+  // (`User.coins`). Le préfixer par un univers découperait les tables publiques
+  // par anime — moins de joueurs par table pour une distinction que le jeu ne
+  // fait pas. Il a sa propre palette, cf. `casinoThemeCss` dans ./theme.
+  "/casino",
   "/login",
   "/register",
   "/og", // image d'aperçu social

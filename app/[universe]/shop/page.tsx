@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getCurrentUniverse } from "@/lib/universes/current";
+import { getCasinoConfig } from "@/lib/casino/config";
 import { getShopWindow } from "@/lib/cards/shop-store";
 import { ShopView } from "@/components/shop/ShopView";
 
@@ -24,7 +25,10 @@ export default async function ShopPage() {
   if (!user) redirect("/login");
 
   const universe = await getCurrentUniverse();
-  const shop = await getShopWindow(user.id, universe.id);
+  const [shop, casino] = await Promise.all([
+    getShopWindow(user.id, universe.id),
+    getCasinoConfig(),
+  ]);
 
   return (
     <main className="mx-auto w-full max-w-5xl px-5 py-10 sm:px-6 sm:py-16">
@@ -45,7 +49,7 @@ export default async function ShopPage() {
         </p>
       </header>
 
-      <ShopView shop={shop} />
+      <ShopView shop={shop} casinoEnabled={casino.enabled} />
     </main>
   );
 }

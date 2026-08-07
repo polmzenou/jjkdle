@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BoosterOpening } from "@/components/cards/BoosterOpening";
 import { BoosterPack } from "@/components/cards/BoosterPack";
@@ -33,7 +34,14 @@ import type {
  * existe déjà en base à cet instant — fermer la page avant l'ouverture ne le
  * perd pas, il attend dans « Mon deck ».
  */
-export function ShopView({ shop }: { shop: ShopWindow }) {
+export function ShopView({
+  shop,
+  casinoEnabled,
+}: {
+  shop: ShopWindow;
+  /** Le casino est ouvert : on propose d'y aller dépenser autrement. */
+  casinoEnabled: boolean;
+}) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [feedback, setFeedback] = useState<{ ok: boolean; msg: string } | null>(
@@ -113,6 +121,38 @@ export function ShopView({ shop }: { shop: ShopWindow }) {
           {shop.coins.toLocaleString("fr-FR")}
         </span>
       </div>
+
+      {/* ── Casino ── */}
+      {casinoEnabled && (
+        // `next/link` brut et NON `UniverseLink` : le casino est hors univers
+        // (cf. UNIVERSE_FREE_PREFIXES). `universePath` laisserait de toute façon
+        // `/casino` intact, mais un lien nu rend l'intention explicite.
+        <Link
+          href="/casino"
+          className="group flex items-center gap-4 rounded-2xl border border-emerald-400/25 bg-emerald-400/[0.06] px-5 py-4 transition hover:border-emerald-400/50 hover:bg-emerald-400/10"
+        >
+          <span
+            aria-hidden
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-emerald-400/30 bg-emerald-400/10 text-xl text-emerald-300 transition-transform duration-300 group-hover:scale-110"
+          >
+            ♠
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-display text-base font-black text-white">
+              Passer au casino
+            </span>
+            <span className="block text-sm text-white/50">
+              Fais fructifier tes coins au blackjack — ou perds-les.
+            </span>
+          </span>
+          <span
+            aria-hidden
+            className="text-white/40 transition-transform duration-300 group-hover:translate-x-1.5 group-hover:text-white"
+          >
+            →
+          </span>
+        </Link>
+      )}
 
       {feedback && (
         <p

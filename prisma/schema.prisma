@@ -45,25 +45,29 @@ model User {
 
   // Monnaie du jeu, créditée en fin de partie au prorata de l'EXP gagnée
   // (`coinsForExp` dans lib/progress/exp-rewards). GLOBALE comme l'XP et le
-  // niveau. Sources : fin de partie, doublons de cartes et revente de cartes
-  // (lib/cards/store). Aucune dépense pour l'instant.
+  // niveau. Sources : fin de partie, doublons de cartes, revente de cartes
+  // (lib/cards/store) et gains au casino. Dépenses : boutique (lib/cards/
+  // shop-store) et mises au casino (lib/casino). Tout mouvement passe par
+  // lib/coins.ts — le débit y est ATOMIQUE (`updateMany` + `coins >= montant`),
+  // jamais un read-then-write.
   coins Int @default(0)
 
-  sessions     Session[]
-  scores       Score[]
-  lobbyPlayers LobbyPlayer[]
-  draftScores  JujutsuDraftScore[]
-  jjkdleScores JjkdleScore[]
+  sessions          Session[]
+  scores            Score[]
+  lobbyPlayers      LobbyPlayer[]
+  draftScores       JujutsuDraftScore[]
+  jjkdleScores      JjkdleScore[]
   higherLowerScores HigherLowerScore[]
-  guessWhoScores GuessWhoScore[]
-  codenamesScores CodenamesScore[]
-  badges       UserBadge[]
-  titleGrants  UserTitleGrant[]
-  frameGrants  UserFrameGrant[]
-  jjkdleResults JjkdleResult[]
-  universeProfiles UserUniverseProfile[]
-  cards        UserCard[]
-  boosters     UserBooster[]
+  guessWhoScores    GuessWhoScore[]
+  codenamesScores   CodenamesScore[]
+  badges            UserBadge[]
+  titleGrants       UserTitleGrant[]
+  frameGrants       UserFrameGrant[]
+  jjkdleResults     JjkdleResult[]
+  universeProfiles  UserUniverseProfile[]
+  cards             UserCard[]
+  boosters          UserBooster[]
+  casinoSeats       CasinoSeat[]
 }
 
 /// Une carte POSSÉDÉE (système de collection, cf. lib/cards/).
@@ -77,12 +81,12 @@ model User {
 /// personnage. Pas de compteur d'exemplaires : un doublon est converti en coins
 /// à l'ouverture du booster, jamais stocké.
 model UserCard {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   characterId String
   character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
-  obtainedAt  DateTime @default(now())
+  obtainedAt  DateTime  @default(now())
 
   @@unique([userId, characterId])
   @@index([userId])
@@ -321,24 +325,24 @@ model HigherLowerScore {
 /// au client tant qu'il n'a pas répondu. `usedIds` = persos déjà apparus (évite la
 /// répétition immédiate à droite).
 model HigherLowerSession {
-  id                String   @id @default(cuid())
-  userId            String?
-  score             Int      @default(0)
-  leftId            String
+  id            String   @id @default(cuid())
+  userId        String?
+  score         Int      @default(0)
+  leftId        String
   /// Valeur comparée du perso de gauche : le nombre saisi (attribut NUMERIC,
   /// JJK) ou le RANG de l'option (attribut ORDINAL, CSM « Puissance »). Le nom
   /// de COLONNE reste `leftCursedEnergy` (@map) : le champ s'est généralisé au
   /// multi-univers, la donnée en base est la même — aucune migration.
-  leftValue         Int      @map("leftCursedEnergy")
+  leftValue     Int      @map("leftCursedEnergy")
   /// Départage des ex æquo (`Character.battleValue`), pour les attributs ORDINAL
   /// dont les rangs sont peu nombreux. 0 = pas de départage (cas NUMERIC).
-  leftTiebreak      Int      @default(0)
-  rightId           String
-  rightValue        Int      @map("rightCursedEnergy")
-  rightTiebreak     Int      @default(0)
-  usedIds           String[]
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  leftTiebreak  Int      @default(0)
+  rightId       String
+  rightValue    Int      @map("rightCursedEnergy")
+  rightTiebreak Int      @default(0)
+  usedIds       String[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   // Multi-univers (étape 2e). Colonne scalaire (pas de FK) : table éphémère à
   // fort churn, même convention que les tables de score. Une session démarrée
@@ -597,21 +601,20 @@ model Category {
 /// Personnage du roster. `ratings` est un objet JSON
 /// { [categoryId]: note 0-100 } — la présence d'une clé = éligible à la catégorie.
 model Character {
-  id        String  @id
-  name      String
-  title     String
-  tier      String
+  id          String  @id
+  name        String
+  title       String
+  tier        String
   /// URL d'affichage : chemin statique (/assets/...) OU route API d'une image uploadée.
-  image     String?
+  image       String?
   /// Image uploadée via /admin (binaire en base, servie par /api/characters/[id]/image).
-  imageData Bytes?
-  imageMime String?
-  ratings   Json
+  imageData   Bytes?
+  imageMime   String?
+  ratings     Json
   /// Score de combat pour le jeu "JJK Random Battle" (cumul de fin de partie).
   /// Optionnel : le builder l'ignore ; fallback 30 côté battle si null.
   battleValue Int?
-  position  Int     @default(0)
-
+  position    Int     @default(0)
 
   // ── Multi-univers (étape 1, phase B : NON-NULL après backfill).
   // `id` reste la PK globale (zéro cassure des références string existantes) ;
@@ -758,4 +761,128 @@ model LobbyPlayer {
 
   @@unique([lobbyId, userId])
   @@index([lobbyId])
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// CASINO (cf. lib/casino/)
+//
+// ⚠️ AUCUN `universeId` ici, contrairement à TOUS les autres modèles de jeu.
+// Ce n'est pas un oubli : le casino ne se joue pas dans un anime. Il mise des
+// `User.coins`, qui sont GLOBAUX, et vit hors univers à `/casino`. Lui coller un
+// univers fragmenterait les tables (moins de joueurs par table) pour une
+// distinction que le jeu ne fait pas.
+// ══════════════════════════════════════════════════════════════════════════
+
+/// Phase de la manche en cours à une table.
+enum CasinoPhase {
+  BETTING /// mises ouvertes
+  DEALING /// distribution (fenêtre d'animation, très courte)
+  PLAYER_TURNS /// un siège actif à la fois
+  DEALER /// le croupier joue (carte cachée révélée)
+  SETTLED /// récapitulatif, paiements déjà effectués
+}
+
+/// Une table de casino.
+///
+/// Le sabot (`shoe`) et la carte cachée du croupier vivent ICI et ne sont JAMAIS
+/// sérialisés vers le client tant qu'ils sont secrets — même discipline que
+/// `CodenamesGame.colorKey`. Le seul point de sortie est `serializeTable`
+/// (lib/casino/state.ts), qui remplace la carte cachée par `null` et ne publie
+/// du sabot qu'un COMPTE de cartes restantes.
+model CasinoTable {
+  id   String @id @default(cuid())
+  code String @unique
+  game String @default("blackjack")
+  mode String @default("PUBLIC") // PUBLIC | SOLO
+
+  /// Clé de MATCHMAKING : vaut "blackjack" sur LA table publique ouverte, null
+  /// partout ailleurs (table pleine, table solo). `@unique` + NULL multiples
+  /// autorisés en Postgres ⇒ deux joueurs qui cliquent « Jouer » en même temps
+  /// ne peuvent pas créer deux tables à moitié vides : le second prend un P2002
+  /// et rejoint la table du premier.
+  matchKey String? @unique
+
+  seatCount Int @default(0)
+  maxSeats  Int @default(5)
+
+  phase CasinoPhase @default(BETTING)
+
+  /// Numéro de main, incrémenté à chaque SETTLED → BETTING. Sert de clé
+  /// d'idempotence AUX MISES comme AUX PAIEMENTS (cf. CasinoSeat).
+  handNumber Int @default(0)
+
+  /// Garde optimiste, incrémentée par TOUTE mutation (mise, coup, arrivée,
+  /// départ, tick). Un tick parti d'un état périmé ne matche plus rien.
+  version Int @default(0)
+
+  /// Échéance ABSOLUE de la phase courante. null = phase sans horloge (table
+  /// solo, qui attend le joueur) OU verrou de tick pris (cf. lib/casino/engine).
+  phaseDeadline DateTime?
+
+  activeSeat Int?
+
+  shoe        Json @default("[]") // SECRET — jamais sérialisé
+  dealerCards Json @default("[]") // carte cachée masquée à la sérialisation
+
+  minBet Int @default(10)
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  /// Dernier signe de vie, pour le ramassage paresseux des tables zombies
+  /// (il n'y a pas de cron sur Vercel : c'est le matchmaking qui balaie).
+  lastActivityAt DateTime @default(now())
+
+  seats CasinoSeat[]
+
+  @@index([game, matchKey])
+  @@index([lastActivityAt])
+}
+
+/// Un joueur assis à une table.
+model CasinoSeat {
+  id      String      @id @default(cuid())
+  tableId String
+  table   CasinoTable @relation(fields: [tableId], references: [id], onDelete: Cascade)
+  seat    Int
+  userId  String
+  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Mains du joueur : `BjHand[]` = { cards, bet, doubled, status }.
+  /// TABLEAU dès maintenant alors que le split n'est pas implémenté : le jour où
+  /// il l'est, c'est un `push` dans lib/casino/machine.ts et AUCUNE migration.
+  hands      Json @default("[]")
+  activeHand Int  @default(0)
+
+  bet               Int @default(0)
+  /// Main pour laquelle `bet` a été misé. Garde d'idempotence de la MISE :
+  /// un double-clic sur « Miser » ne peut pas débiter deux fois.
+  betHandNumber     Int @default(-1)
+  /// Main déjà payée. Garde d'idempotence du PAIEMENT : une transition rejouée
+  /// après un crash ne crédite rien une seconde fois.
+  settledHandNumber Int @default(-1)
+
+  lastResult   Json?
+  /// Manches consécutives sans miser → éviction (AFK silencieux).
+  missedRounds Int     @default(0)
+  /// Le joueur a quitté : son siège part à la fin de la manche en cours.
+  leaving      Boolean @default(false)
+
+  joinedAt   DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+
+  @@unique([tableId, seat]) // deux joueurs ne peuvent pas prendre le même siège
+  @@unique([tableId, userId]) // un joueur = un seul siège par table
+  @@index([userId])
+}
+
+/// Agrégats du casino (ligne unique, id = "global").
+///
+/// Ce n'est PAS un registre de transactions : aucune ligne par mouvement, juste
+/// des compteurs incrémentés, de quoi afficher la marge de la maison en admin.
+model CasinoStats {
+  id          String   @id @default("global")
+  handsPlayed Int      @default(0)
+  wagered     Int      @default(0)
+  paidOut     Int      @default(0)
+  updatedAt   DateTime @updatedAt
 }

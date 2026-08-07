@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { getGameFlags, getMaintenance } from "@/lib/config/app-config";
 import { gamesForUniverse } from "@/lib/games/registry";
+import { getCasinoConfig } from "@/lib/casino/config";
 import { listAvailableUniverses } from "@/lib/universes/current";
-import { themeCssVars } from "@/lib/universes/theme";
+import { casinoThemeVars, themeCssVars } from "@/lib/universes/theme";
 import { UniverseHub, type HubUniverse } from "./UniverseHub";
 
 /**
@@ -28,7 +29,10 @@ export const dynamic = "force-dynamic";
 const HIGHLIGHT_COUNT = 3;
 
 export default async function UniversesHubPage() {
-  const universes = await listAvailableUniverses();
+  const [universes, casino] = await Promise.all([
+    listAvailableUniverses(),
+    getCasinoConfig(),
+  ]);
 
   // Taille de chaque roster en UNE requête : un `count` par univers ferait
   // grossir le coût de la page à chaque anime ajouté.
@@ -70,5 +74,12 @@ export default async function UniversesHubPage() {
     }),
   );
 
-  return <UniverseHub universes={cards} />;
+  return (
+    <UniverseHub
+      universes={cards}
+      // Casino coupé en admin → la carte disparaît du hub, comme un jeu
+      // désactivé disparaît de la carte d'un univers.
+      casino={casino.enabled ? { vars: casinoThemeVars() } : null}
+    />
+  );
 }

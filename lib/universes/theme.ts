@@ -95,3 +95,43 @@ const HUB_THEME: Record<string, string> = {
 export function hubThemeCss(): string {
   return rootBlock(HUB_THEME);
 }
+
+/**
+ * Palette du CASINO : feutre vert + or. Comme le hub, le casino ne porte la
+ * marque d'aucun anime (il est hors univers, cf. UNIVERSE_FREE_PREFIXES) — mais
+ * là où le hub s'efface en gris neutre, le casino assume une identité propre :
+ * c'est un lieu, pas un carrefour.
+ *
+ * `domain` = le tapis, `cursed` = les jetons et les liserés dorés. Les surfaces
+ * restent très sombres, teintées vert, pour que les cartes blanches ressortent.
+ */
+const CASINO_THEME: Record<string, string> = {
+  "--color-domain": "16 122 87", // feutre
+  "--color-domain-light": "52 211 153",
+  "--color-domain-dark": "6 78 59",
+  "--color-cursed": "202 138 4", // or
+  "--color-cursed-light": "250 204 21",
+  "--color-cursed-dark": "133 77 14",
+  "--color-void": "4 14 10",
+  "--color-void-900": "6 20 15",
+  "--color-void-800": "9 28 21",
+  "--color-void-700": "14 38 29",
+  "--color-void-600": "22 55 42",
+  "--glow": "0 0 20px rgb(52 211 153 / 0.35)",
+  "--glow-accent": "0 0 20px rgb(250 204 21 / 0.35)",
+};
+
+/** Bloc CSS du thème du casino. */
+export function casinoThemeCss(): string {
+  return rootBlock(CASINO_THEME);
+}
+
+/**
+ * Variables CSS du casino, à poser en style inline sur un élément isolé — c'est
+ * ce qui permet à la carte « Casino » du hub d'afficher son feutre et son or au
+ * milieu d'une page rendue en gris neutre, sans écrire une seule couleur en dur.
+ * Même mécanique que `themeCssVars` pour les cartes d'univers.
+ */
+export function casinoThemeVars(): Record<string, string> {
+  return { ...CASINO_THEME };
+}
