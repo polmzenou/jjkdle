@@ -7,6 +7,7 @@ import {
   leaveTableAction,
   placeBetAction,
   playAction,
+  relaunchAction,
   tickTableAction,
   type CasinoResult,
 } from "@/lib/casino/actions";
@@ -201,6 +202,19 @@ export function BlackjackTable({
     });
   };
 
+  /**
+   * Relance une manche en solo. Passe par `relaunchAction` et NON par `tick` :
+   * une table solo en SETTLED n'a pas d'échéance, donc un tick n'y ferait rien
+   * (il n'avance que les phases arrivées à terme).
+   */
+  const relaunch = () => {
+    if (pending) return;
+    setError(null);
+    startTransition(async () => {
+      apply(await relaunchAction(table.code));
+    });
+  };
+
   const leave = () => {
     startTransition(async () => {
       await leaveTableAction(table.code);
@@ -351,10 +365,10 @@ export function BlackjackTable({
           <button
             type="button"
             disabled={pending}
-            onClick={tick}
+            onClick={relaunch}
             className="rounded-xl bg-cursed px-8 py-3 font-display text-sm font-black uppercase tracking-wider text-white transition hover:bg-cursed-light disabled:opacity-40"
           >
-            Rejouer
+            {pending ? "…" : "Rejouer"}
           </button>
         )}
       </div>

@@ -304,6 +304,41 @@ export async function tickTableAction(code: string): Promise<CasinoResult> {
 }
 
 /**
+ * « Rejouer » : relance une manche sur une table SOLO.
+ *
+ * ⚠️ Ne passe PAS par `tickTableAction`, et c'est tout l'objet de cette action.
+ * Un tick n'avance la table que si son ÉCHÉANCE est passée — or une table solo
+ * en SETTLED n'en a aucune (elle attend justement le joueur). Le tick la
+ * trouvait donc toujours « pas mûre » et ne faisait rien : le bouton Rejouer
+ * restait sans effet, la table figée sur son récapitulatif.
+ *
+ * On force donc l'avancement. `advanceNow` ignorant l'échéance, il lui faut un
+ * garde-fou strict : sans lui, un joueur pourrait sauter le tour d'un autre à
+ * une table publique. D'où les trois conditions ci-dessous — être assis, table
+ * solo, phase SETTLED — qui décrivent exactement le cas « la table n'attend que
+ * moi ».
+ */
+export async function relaunchAction(code: string): Promise<CasinoResult> {
+  const auth = await guard();
+  if (!auth.ok) return auth.result;
+
+  const table = await findTableByCode(code);
+  if (!table) return { ok: false, error: "Cette table n'existe plus." };
+  if (!seatOf(table, auth.userId)) {
+    return { ok: false, error: "Tu n'es pas assis à cette table." };
+  }
+  if (table.mode !== "SOLO" || table.phase !== "SETTLED") {
+    // À une table publique, la manche suivante part au chrono : rien à forcer.
+    return { ok: false, error: "La manche suivante démarre toute seule." };
+  }
+
+  const view = await advanceNow(code, auth.userId);
+  return view
+    ? { ok: true, code, table: view }
+    : { ok: false, error: "Cette table n'existe plus." };
+}
+
+/**
  * Quitte la table.
  *
  * Si le joueur a déjà misé, sa mise est ENGAGÉE : sa main se joue sans lui
