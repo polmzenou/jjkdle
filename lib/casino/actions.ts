@@ -4,7 +4,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { debitCoins } from "@/lib/coins";
 import { prisma } from "@/lib/prisma";
 import { isPusherConfigured } from "@/lib/pusher/server";
-import { getCasinoConfig } from "./config";
+import { casinoAccess, NOT_AUTHED_ERROR } from "./guard";
 import {
   advanceNow,
   applyTransition,
@@ -46,24 +46,21 @@ export type CasinoResult =
 
 const NOT_AUTHED: CasinoResult = {
   ok: false,
-  error: "Connecte-toi pour jouer au casino.",
+  error: NOT_AUTHED_ERROR,
   needsAuth: true,
 };
 
-/** Vérifie session + casino ouvert. Les ADMIN passent même casino fermé. */
+/**
+ * Vérifie session + casino ouvert. La règle elle-même vit dans ./guard, partagée
+ * avec les autres jeux ; il ne reste ici que la mise à la forme `CasinoResult`.
+ */
 async function guard(): Promise<
   { ok: true; userId: string } | { ok: false; result: CasinoResult }
 > {
-  const user = await getCurrentUser();
-  if (!user) return { ok: false, result: NOT_AUTHED };
-  const { enabled } = await getCasinoConfig();
-  if (!enabled && user.role !== "ADMIN") {
-    return {
-      ok: false,
-      result: { ok: false, error: "Le casino est fermé pour le moment." },
-    };
-  }
-  return { ok: true, userId: user.id };
+  const access = await casinoAccess();
+  return access.ok
+    ? { ok: true, userId: access.userId }
+    : { ok: false, result: access };
 }
 
 // ──────────────────────────────────────────────────────────────────────────

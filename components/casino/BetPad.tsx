@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { CoinIcon } from "@/components/progress/CoinWallet";
 
 /**
@@ -23,20 +23,46 @@ export function BetPad({
   disabled,
   pending,
   onBet,
+  cta = "Miser",
+  amount: controlledAmount,
+  onAmountChange,
 }: {
   coins: number;
   minBet: number;
   disabled: boolean;
   pending: boolean;
   onBet: (amount: number) => void;
+  /** Libellé du bouton de validation ("Miser" à une table, "Lancer" à la pièce). */
+  cta?: string;
+  /**
+   * Montant PILOTÉ par le parent. Optionnel : sans lui, le pavé garde sa mise
+   * lui-même, ce qui suffit à une table. Le pile ou face en a besoin pour
+   * proposer « relancer avec les gains », qui repose la mise de l'extérieur.
+   */
+  amount?: number;
+  onAmountChange?: (amount: number) => void;
 }) {
-  const [amount, setAmount] = useState<number>(Math.min(Math.max(minBet, 100), coins));
+  const [innerAmount, setInnerAmount] = useState<number>(
+    Math.min(Math.max(minBet, 100), coins),
+  );
+  const controlled = controlledAmount !== undefined;
+  const amount = controlled ? controlledAmount : innerAmount;
+
+  const setAmount = useCallback(
+    (next: number) => {
+      if (!controlled) setInnerAmount(next);
+      onAmountChange?.(next);
+    },
+    [controlled, onAmountChange],
+  );
 
   // Le solde change entre deux manches : on garde la mise dans les bornes plutôt
-  // que de laisser un montant devenu impayable dans le champ.
+  // que de laisser un montant devenu impayable dans le champ. La correction est
+  // idempotente, donc elle ne peut pas s'auto-déclencher en boucle.
   useEffect(() => {
-    setAmount((current) => Math.min(Math.max(current, minBet), Math.max(coins, minBet)));
-  }, [coins, minBet]);
+    const clamped = Math.min(Math.max(amount, minBet), Math.max(coins, minBet));
+    if (clamped !== amount) setAmount(clamped);
+  }, [amount, coins, minBet, setAmount]);
 
   const tooPoor = coins < minBet;
   const valid = amount >= minBet && amount <= coins;
@@ -100,7 +126,7 @@ export function BetPad({
               onClick={() => onBet(amount)}
               className="rounded-xl bg-cursed px-6 py-2.5 font-display text-sm font-black uppercase tracking-wider text-white transition hover:bg-cursed-light disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {pending ? "…" : "Miser"}
+              {pending ? "…" : cta}
             </button>
           </div>
 

@@ -1,6 +1,7 @@
 import { getCurrentUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { casinoThemeCss } from "@/lib/universes/theme";
+import { CasinoBackdrop } from "@/components/casino/CasinoBackdrop";
 import { CasinoNav } from "@/components/casino/CasinoNav";
 
 /**
@@ -28,7 +29,12 @@ export default async function CasinoLayout({
   return (
     <>
       <style>{casinoThemeCss()}</style>
-      <div className="relative min-h-screen bg-void-900">
+      {/* ⚠️ AUCUN fond opaque sur ce conteneur (`bg-void-900` a été retiré) : il
+          est `relative`, donc peint APRÈS les calques à z-index négatif, et il
+          recouvrait purement et simplement le décor du casino. Le fond opaque
+          vit sur <html> (cf. app/globals.css) exactement pour cette raison —
+          même écueil que CursedBackground et MangaDecor. */}
+      <div className="relative min-h-screen">
         <CasinoBackdrop />
         <CasinoNav
           coins={profile?.coins ?? null}
@@ -37,28 +43,5 @@ export default async function CasinoLayout({
         {children}
       </div>
     </>
-  );
-}
-
-/** Décor : halo de tapis + trame de feutre. `fixed` et `-z-10`, donc inerte. */
-function CasinoBackdrop() {
-  return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(70% 55% at 50% 0%, rgb(var(--color-domain) / 0.22) 0%, transparent 70%)",
-        }}
-      />
-      <div
-        className="absolute inset-0 opacity-[0.06]"
-        style={{
-          backgroundImage:
-            "radial-gradient(rgb(255 255 255 / 0.9) 1px, transparent 1px)",
-          backgroundSize: "14px 14px",
-        }}
-      />
-    </div>
   );
 }

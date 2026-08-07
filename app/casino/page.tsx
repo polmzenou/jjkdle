@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth/session";
+import { COINFLIP_MULTIPLIER } from "@/lib/casino/coinflip";
 import { getCasinoConfig } from "@/lib/casino/config";
 import { prisma } from "@/lib/prisma";
 import { CasinoHome, type CasinoGameTile } from "@/components/casino/CasinoHome";
@@ -47,10 +48,12 @@ const GAMES: CasinoGameTile[] = [
   {
     id: "coinflip",
     title: "Pile ou face",
-    description: "Une pièce, un choix, le double ou rien.",
+    description:
+      "Un camp, une pièce, une seconde. Tu doubles presque, ou tu perds tout.",
     icon: "🪙",
-    href: null,
-    status: "coming-soon",
+    href: "/casino/coinflip",
+    status: "live",
+    hint: "Instantané",
   },
 ];
 
@@ -70,11 +73,20 @@ export default async function CasinoPage() {
       })
     : null;
 
-  const games = GAMES.map((game) =>
-    game.id === "blackjack"
-      ? { ...game, hint: `Mise min. ${config.minBet} · jusqu'à 5 joueurs` }
-      : game,
-  );
+  // La mise minimale est réglable en admin : les tuiles l'annoncent à jour
+  // plutôt que de la répéter en dur dans le catalogue.
+  const games = GAMES.map((game) => {
+    if (game.id === "blackjack") {
+      return { ...game, hint: `Mise min. ${config.minBet} · jusqu'à 5 joueurs` };
+    }
+    if (game.id === "coinflip") {
+      return {
+        ...game,
+        hint: `Mise min. ${config.minBet} · paie ${COINFLIP_MULTIPLIER.toLocaleString("fr-FR")}×`,
+      };
+    }
+    return game;
+  });
 
   return (
     <>

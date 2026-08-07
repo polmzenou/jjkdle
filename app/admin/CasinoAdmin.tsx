@@ -173,8 +173,10 @@ export function CasinoAdmin({ casino }: { casino: CasinoAdminData }) {
       {/* ── Marge de la maison ── */}
       <Section title="Marge de la maison">
         <p className="mb-3 text-xs text-white/45">
-          Compteurs agrégés, pas un registre : ils mesurent l&apos;équilibre du
-          jeu, ils ne permettent pas d&apos;auditer un mouvement précis.
+          Compteurs agrégés <strong>tous jeux confondus</strong> (une main de
+          blackjack comme un lancer de pièce), pas un registre : ils mesurent
+          l&apos;équilibre du casino, ils ne permettent pas d&apos;auditer un
+          mouvement précis.
         </p>
         <div className="grid gap-3 sm:grid-cols-4">
           <Stat label="Mains jouées" value={stats.handsPlayed} />
