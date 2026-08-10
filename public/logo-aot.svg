@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 76" width="260" height="76" role="img" aria-label="AOT Arcade">
+  <desc>Logo PLACEHOLDER de l'univers Attack on Titan — à remplacer par le visuel définitif (lib/universes/aot.ts, champ logo.src).</desc>
+  <defs>
+    <linearGradient id="aot-wings" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#a3e635" />
+      <stop offset="100%" stop-color="#2f4c07" />
+    </linearGradient>
+  </defs>
+  <!-- Ailes de la Liberté stylisées -->
+  <g>
+    <g fill="#b45309" opacity="0.9">
+      <polygon points="4,14 44,6 40,12 8,20" />
+      <polygon points="10,22 46,14 42,20 14,28" />
+      <polygon points="18,30 48,23 44,29 22,36" />
+    </g>
+    <g fill="#a3e635" opacity="0.9">
+      <polygon points="256,14 216,6 220,12 252,20" />
+      <polygon points="250,22 214,14 218,20 246,28" />
+      <polygon points="242,30 212,23 216,29 238,36" />
+    </g>
+  </g>
+  <text x="52" y="46" font-family="Impact, Haettenschweiler, 'Arial Narrow', 'Arial Black', sans-serif" font-size="34" font-weight="900" letter-spacing="2" fill="url(#aot-wings)">AOT</text>
+  <text x="124" y="46" font-family="Impact, Haettenschweiler, 'Arial Narrow', 'Arial Black', sans-serif" font-size="34" font-weight="900" letter-spacing="2" fill="#f5f5f5">ARCADE</text>
+  <rect x="6" y="62" width="248" height="3" rx="1.5" fill="#4d7c0f" opacity="0.7" />
+</svg>

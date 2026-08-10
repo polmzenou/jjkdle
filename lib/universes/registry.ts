@@ -1,6 +1,7 @@
 import type { UniverseConfig } from "./types";
 import { jjk } from "./jjk";
 import { csm } from "./csm";
+import { aot } from "./aot";
 
 /**
  * Registre des univers disponibles. Module PUR (client + serveur).
@@ -13,6 +14,7 @@ import { csm } from "./csm";
 export const UNIVERSES: Record<string, UniverseConfig> = {
   [jjk.slug]: jjk,
   [csm.slug]: csm,
+  [aot.slug]: aot,
 };
 
 /**
