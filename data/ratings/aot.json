@@ -1,0 +1,483 @@
+{
+  "levi-ackerman": {
+    "man-uvre-tridimensionnel": 100,
+    "agilite": 100,
+    "bataillon-d-exploration": 100,
+    "battle-iq": 92,
+    "menace": 88,
+    "determination": 92,
+    "commandement": 78
+  },
+  "mikasa-ackerman": {
+    "man-uvre-tridimensionnel": 96,
+    "agilite": 98,
+    "bataillon-d-exploration": 92,
+    "battle-iq": 78,
+    "menace": 75,
+    "determination": 90,
+    "commandement": 55
+  },
+  "eren-yeager": {
+    "man-uvre-tridimensionnel": 70,
+    "agilite": 75,
+    "bataillon-d-exploration": 90,
+    "battle-iq": 90,
+    "menace": 100,
+    "determination": 100
+  },
+  "armin-arlert": {
+    "man-uvre-tridimensionnel": 60,
+    "agilite": 55,
+    "bataillon-d-exploration": 85,
+    "battle-iq": 98,
+    "menace": 70,
+    "determination": 80,
+    "commandement": 88
+  },
+  "erwin-smith": {
+    "man-uvre-tridimensionnel": 78,
+    "agilite": 70,
+    "bataillon-d-exploration": 98,
+    "battle-iq": 100,
+    "menace": 60,
+    "determination": 95,
+    "commandement": 100
+  },
+  "hange-zoe": {
+    "man-uvre-tridimensionnel": 82,
+    "agilite": 75,
+    "bataillon-d-exploration": 90,
+    "battle-iq": 92,
+    "determination": 85,
+    "commandement": 85
+  },
+  "mike-zacharias": {
+    "man-uvre-tridimensionnel": 90,
+    "agilite": 85,
+    "bataillon-d-exploration": 88,
+    "battle-iq": 75,
+    "determination": 82,
+    "commandement": 72
+  },
+  "jean-kirstein": {
+    "man-uvre-tridimensionnel": 82,
+    "agilite": 72,
+    "bataillon-d-exploration": 78,
+    "battle-iq": 82,
+    "determination": 78,
+    "commandement": 80
+  },
+  "connie-springer": {
+    "man-uvre-tridimensionnel": 78,
+    "agilite": 80,
+    "bataillon-d-exploration": 72,
+    "battle-iq": 55,
+    "determination": 72,
+    "commandement": 45
+  },
+  "sasha-blouse": {
+    "man-uvre-tridimensionnel": 76,
+    "agilite": 82,
+    "bataillon-d-exploration": 70,
+    "battle-iq": 60,
+    "determination": 75,
+    "commandement": 40
+  },
+  "historia-reiss": {
+    "man-uvre-tridimensionnel": 65,
+    "agilite": 68,
+    "bataillon-d-exploration": 62,
+    "battle-iq": 60,
+    "determination": 82,
+    "commandement": 75
+  },
+  "ymir-freckles": {
+    "man-uvre-tridimensionnel": 78,
+    "agilite": 80,
+    "bataillon-d-exploration": 65,
+    "battle-iq": 70,
+    "menace": 55,
+    "determination": 78
+  },
+  "petra-rall": {
+    "man-uvre-tridimensionnel": 82,
+    "agilite": 78,
+    "bataillon-d-exploration": 70,
+    "battle-iq": 65,
+    "determination": 75
+  },
+  "oluo-bozado": {
+    "man-uvre-tridimensionnel": 80,
+    "agilite": 74,
+    "bataillon-d-exploration": 68,
+    "battle-iq": 60,
+    "determination": 70
+  },
+  "eld-jinn": {
+    "man-uvre-tridimensionnel": 82,
+    "agilite": 74,
+    "bataillon-d-exploration": 70,
+    "battle-iq": 68,
+    "determination": 72,
+    "commandement": 55
+  },
+  "gunther-schultz": {
+    "man-uvre-tridimensionnel": 80,
+    "agilite": 72,
+    "bataillon-d-exploration": 68,
+    "battle-iq": 62,
+    "determination": 70
+  },
+  "nanaba": {
+    "man-uvre-tridimensionnel": 80,
+    "agilite": 76,
+    "bataillon-d-exploration": 70,
+    "battle-iq": 68,
+    "determination": 75,
+    "commandement": 58
+  },
+  "gelgar": {
+    "man-uvre-tridimensionnel": 74,
+    "agilite": 68,
+    "bataillon-d-exploration": 62,
+    "battle-iq": 58,
+    "determination": 65
+  },
+  "moblit-berner": {
+    "man-uvre-tridimensionnel": 70,
+    "agilite": 62,
+    "bataillon-d-exploration": 62,
+    "battle-iq": 65,
+    "determination": 85,
+    "commandement": 50
+  },
+  "flock-forster": {
+    "man-uvre-tridimensionnel": 70,
+    "agilite": 62,
+    "bataillon-d-exploration": 60,
+    "battle-iq": 60,
+    "menace": 65,
+    "determination": 88
+  },
+  "ness": {
+    "man-uvre-tridimensionnel": 68,
+    "bataillon-d-exploration": 52,
+    "determination": 60
+  },
+  "lynne": {
+    "man-uvre-tridimensionnel": 68,
+    "bataillon-d-exploration": 55,
+    "determination": 60
+  },
+  "henning": {
+    "man-uvre-tridimensionnel": 66,
+    "bataillon-d-exploration": 52,
+    "determination": 58
+  },
+  "dirk": {
+    "man-uvre-tridimensionnel": 58,
+    "bataillon-d-exploration": 42
+  },
+  "carsten": {
+    "man-uvre-tridimensionnel": 58,
+    "bataillon-d-exploration": 42
+  },
+  "marlo-freudenberg": {
+    "man-uvre-tridimensionnel": 62,
+    "bataillon-d-exploration": 45,
+    "battle-iq": 50,
+    "determination": 72
+  },
+  "keith-shadis": {
+    "man-uvre-tridimensionnel": 78,
+    "bataillon-d-exploration": 70,
+    "battle-iq": 65,
+    "determination": 75,
+    "commandement": 78
+  },
+
+  "dot-pixis": {
+    "man-uvre-tridimensionnel": 45,
+    "battle-iq": 90,
+    "determination": 80,
+    "commandement": 92
+  },
+  "ian-dietrich": {
+    "man-uvre-tridimensionnel": 70,
+    "battle-iq": 62,
+    "determination": 78,
+    "commandement": 68
+  },
+  "rico-brzenska": {
+    "man-uvre-tridimensionnel": 72,
+    "agilite": 68,
+    "battle-iq": 65,
+    "determination": 70,
+    "commandement": 60
+  },
+  "mitabi-jarnach": {
+    "man-uvre-tridimensionnel": 68,
+    "determination": 75,
+    "commandement": 58
+  },
+  "kitz-woermann": {
+    "man-uvre-tridimensionnel": 50,
+    "battle-iq": 35,
+    "commandement": 40
+  },
+  "nile-dawk": {
+    "man-uvre-tridimensionnel": 55,
+    "battle-iq": 55,
+    "commandement": 65
+  },
+  "hitch-dreyse": {
+    "man-uvre-tridimensionnel": 55,
+    "agilite": 55,
+    "battle-iq": 55
+  },
+  "kenny-ackerman": {
+    "man-uvre-tridimensionnel": 88,
+    "agilite": 92,
+    "battle-iq": 85,
+    "menace": 88,
+    "determination": 85,
+    "commandement": 80
+  },
+  "louise": {
+    "man-uvre-tridimensionnel": 52,
+    "determination": 70
+  },
+
+  "marco-bodt": {
+    "man-uvre-tridimensionnel": 70,
+    "agilite": 62,
+    "battle-iq": 78,
+    "determination": 68,
+    "commandement": 60
+  },
+  "thomas-wagner": {
+    "man-uvre-tridimensionnel": 55,
+    "determination": 50
+  },
+  "mina-carolina": {
+    "man-uvre-tridimensionnel": 55,
+    "agilite": 58
+  },
+  "franz-kefka": {
+    "man-uvre-tridimensionnel": 50
+  },
+  "samuel-linke-jackson": {
+    "man-uvre-tridimensionnel": 52
+  },
+  "daz": {
+    "man-uvre-tridimensionnel": 40,
+    "determination": 30
+  },
+
+  "zeke-yeager": {
+    "mahr": 100,
+    "battle-iq": 95,
+    "menace": 92,
+    "determination": 85,
+    "commandement": 82
+  },
+  "reiner-braun": {
+    "mahr": 92,
+    "man-uvre-tridimensionnel": 85,
+    "agilite": 72,
+    "bataillon-d-exploration": 60,
+    "battle-iq": 80,
+    "menace": 82,
+    "determination": 95
+  },
+  "bertholdt-hoover": {
+    "mahr": 85,
+    "man-uvre-tridimensionnel": 88,
+    "agilite": 78,
+    "bataillon-d-exploration": 55,
+    "battle-iq": 72,
+    "menace": 88,
+    "determination": 78
+  },
+  "annie-leonhart": {
+    "mahr": 85,
+    "man-uvre-tridimensionnel": 90,
+    "agilite": 95,
+    "battle-iq": 85,
+    "menace": 80,
+    "determination": 80
+  },
+  "pieck-finger": {
+    "mahr": 85,
+    "agilite": 60,
+    "battle-iq": 92,
+    "menace": 62,
+    "determination": 80
+  },
+  "porco-galliard": {
+    "mahr": 82,
+    "agilite": 80,
+    "battle-iq": 70,
+    "menace": 68,
+    "determination": 82
+  },
+  "marcel-galliard": {
+    "mahr": 78,
+    "man-uvre-tridimensionnel": 65,
+    "agilite": 72,
+    "battle-iq": 75,
+    "menace": 55,
+    "determination": 80
+  },
+  "magath": {
+    "mahr": 90,
+    "battle-iq": 82,
+    "menace": 55,
+    "determination": 85,
+    "commandement": 88
+  },
+  "lara-tybur": {
+    "mahr": 70,
+    "agilite": 60,
+    "battle-iq": 65,
+    "menace": 70,
+    "determination": 75
+  },
+  "willy-tybur": {
+    "mahr": 60,
+    "battle-iq": 85,
+    "menace": 55,
+    "determination": 88,
+    "commandement": 82
+  },
+  "tom-ksaver": {
+    "mahr": 65,
+    "battle-iq": 88,
+    "determination": 60
+  },
+  "gabi-braun": {
+    "mahr": 75,
+    "agilite": 78,
+    "battle-iq": 65,
+    "menace": 55,
+    "determination": 88
+  },
+  "falco-grice": {
+    "mahr": 65,
+    "agilite": 68,
+    "battle-iq": 60,
+    "determination": 82
+  },
+  "colt-grice": {
+    "mahr": 70,
+    "battle-iq": 62,
+    "determination": 78,
+    "commandement": 55
+  },
+  "kruger": {
+    "mahr": 70,
+    "battle-iq": 88,
+    "menace": 75,
+    "determination": 92
+  },
+  "niccolo": {
+    "mahr": 35,
+    "determination": 60
+  },
+
+  "grisha-yeager": {
+    "battle-iq": 78,
+    "menace": 60,
+    "determination": 88
+  },
+  "yelena": {
+    "battle-iq": 78,
+    "menace": 70,
+    "determination": 80,
+    "commandement": 65
+  },
+  "onyankopon": {
+    "battle-iq": 62,
+    "determination": 68
+  },
+  "rod-reiss": {
+    "battle-iq": 50,
+    "menace": 45,
+    "determination": 60,
+    "commandement": 55
+  },
+  "uri-reiss": {
+    "determination": 70,
+    "commandement": 60
+  },
+  "frieda-reiss": {
+    "determination": 65,
+    "commandement": 55
+  },
+  "ymir": {
+    "menace": 75,
+    "determination": 40
+  },
+
+  "titan-originel-eren": {
+    "titan-shifter": 100,
+    "menace": 100
+  },
+  "titan-originel": {
+    "titan-shifter": 97,
+    "menace": 92
+  },
+  "titan-colossal": {
+    "titan-shifter": 92,
+    "agilite": 10,
+    "menace": 95
+  },
+  "titan-bestial": {
+    "titan-shifter": 90,
+    "menace": 88
+  },
+  "titan-marteau-armes": {
+    "titan-shifter": 88,
+    "agilite": 45,
+    "menace": 85
+  },
+  "titan-feminin": {
+    "titan-shifter": 86,
+    "agilite": 88,
+    "menace": 82
+  },
+  "titan-cuirasse": {
+    "titan-shifter": 85,
+    "agilite": 35,
+    "menace": 82
+  },
+  "titan-assailant": {
+    "titan-shifter": 84,
+    "agilite": 80,
+    "menace": 80
+  },
+  "titan-falco": {
+    "titan-shifter": 82,
+    "agilite": 95,
+    "menace": 76
+  },
+  "titan-machoire": {
+    "titan-shifter": 78,
+    "agilite": 92,
+    "menace": 72
+  },
+  "titan-charrette": {
+    "titan-shifter": 70,
+    "agilite": 70,
+    "menace": 60
+  },
+  "titan-royal-rod-reiss": {
+    "titan-shifter": 65,
+    "agilite": 5,
+    "menace": 78
+  },
+  "titan-souriant": {
+    "titan-shifter": 30,
+    "menace": 50
+  }
+}

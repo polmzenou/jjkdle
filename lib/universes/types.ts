@@ -45,6 +45,38 @@ export interface UniverseLabels {
    * propre à chaque anime — d'où sa place ici plutôt qu'en dur dans la page.
    */
   tagline: string;
+  /**
+   * Ouverture de la phrase de la landing, juste AVANT le nom de l'œuvre, qui est
+   * rendu à part en surbrillance : « La salle d'arcade maudite dédiée à » +
+   * *Jujutsu Kaisen*. Se termine donc par « à » / « au » et sans ponctuation.
+   *
+   * Était en dur dans `app/[universe]/page.tsx` : « maudite » est du vocabulaire
+   * JJK, qui s'affichait tel quel sur les autres animes.
+   */
+  arcadeLead: string;
+  /** Titre du bloc d'appel à l'action en bas de la landing (question courte). */
+  ctaTitle: string;
+  /**
+   * Titre de l'écran de MAINTENANCE. Était « Extension de Territoire en cours »
+   * en dur — du lore JJK, et c'est la seule page que voit un visiteur pendant la
+   * maintenance : sur un autre anime, elle ne parlait donc que de JJK.
+   */
+  maintenanceTitle: string;
+  /** Titre H1 de la liste des jeux (`/games`). */
+  gamesHeading: string;
+  /** Paragraphe sous le H1 de la liste des jeux — 1 phrase, avant « Chaque jeu… ». */
+  gamesLead: string;
+  /**
+   * Kanji unique affiché dans la pastille du hero (呪 pour JJK). Un seul
+   * caractère : au-delà, la pastille déborde.
+   */
+  heroKanji: string;
+  /**
+   * Les 4 colonnes de kanji du décor de fond (`MangaDecor`), dans l'ordre :
+   * haut-gauche, bas-gauche, haut-droit, bas-droit. Du lore de l'œuvre — 呪術廻
+   * sur une landing Demon Slayer n'aurait aucun sens.
+   */
+  kanjiColumns: [string, string, string, string];
 }
 
 /**
@@ -135,6 +167,16 @@ export interface UniverseConfig {
    * nouvel univers doit donc fournir un bloc COMPLET pour chaque jeu proposé.
    */
   gameCopy?: UniverseGameCopy;
+  /**
+   * Objets décoratifs flottants de la landing (SVG dessinés en code, cf.
+   * `components/landing/MangaDecor`). Une VALEUR NOMMÉE et non un booléen : chaque
+   * jeu d'objets est écrit pour un anime précis (l'ofuda et le sceau
+   * d'asservissement de JJK ne veulent rien dire ailleurs).
+   *
+   * Absent = aucun objet flottant. Le décor se limite alors à la trame manga, aux
+   * lignes de concentration et aux colonnes de kanji de l'univers, qui suffisent.
+   */
+  decorArtwork?: "jjk-cursed-objects";
   /** Attribut comparé par Higher/Lower. Absent = `cursedEnergy` (JJK). */
   higherLower?: UniverseHigherLower;
   /** Synchro d'images automatique (bouton « OUAIS »). Absent = désactivée. */

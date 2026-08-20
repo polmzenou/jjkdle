@@ -35,8 +35,11 @@ export default async function HomePage() {
 
   return (
     <main className="flex flex-col">
-      {/* Couche décorative manga / JJK (kanji, ofuda, lignes de concentration) */}
-      <MangaDecor />
+      {/* Couche décorative manga : kanji et objets de l'univers courant */}
+      <MangaDecor
+        kanjiColumns={universe.labels.kanjiColumns}
+        artwork={universe.decorArtwork}
+      />
 
       {/* ── Hero ── */}
       <section className="relative mx-auto flex w-full max-w-5xl flex-col items-center px-6 pb-24 pt-16 text-center sm:pt-24">
@@ -47,7 +50,7 @@ export default async function HomePage() {
             aria-hidden
             className="font-display text-sm leading-none text-domain-light/70"
           >
-            呪
+            {universe.labels.heroKanji}
           </span>
         </span>
 
@@ -60,7 +63,7 @@ export default async function HomePage() {
         </h1>
 
         <p className="mx-auto mt-6 max-w-xl text-balance text-lg leading-relaxed text-white/60">
-          La salle d&apos;arcade maudite dédiée à{" "}
+          {universe.labels.arcadeLead}{" "}
           <span className="text-white/80">{universe.sourceWork}</span>.{" "}
           {universe.labels.tagline}
         </p>
@@ -131,8 +134,10 @@ export default async function HomePage() {
             aria-hidden
             className="pointer-events-none absolute inset-0 opacity-50"
             style={{
+              // Accent du thème, pas le violet JJK en dur : ce halo est le seul
+              // élément de la landing qui restait teinté d'un autre anime.
               background:
-                "radial-gradient(120% 100% at 50% 0%, rgba(124,58,237,0.45) 0%, transparent 60%)",
+                "radial-gradient(120% 100% at 50% 0%, rgb(var(--color-domain) / 0.45) 0%, transparent 60%)",
             }}
           />
           {/* Kanji filigrane "戦" (combat) */}
@@ -144,7 +149,7 @@ export default async function HomePage() {
             戦
           </span>
           <h2 className="relative font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            Prêt à libérer ton énergie maudite ?
+            {universe.labels.ctaTitle}
           </h2>
           <p className="relative mx-auto mt-3 max-w-md text-white/60">
             Choisis ton jeu et lance-toi. Aucun compte, juste ton score à

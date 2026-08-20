@@ -12,6 +12,10 @@ import { frameRingForStyle, type FrameStyleKey } from "./styles";
 
 /** Nom d'un jeu côté CSM (suit `lib/universes/csm.ts`, jamais figé en dur ici). */
 const csmGame = (id: string) => gameTitleIn("csm", id);
+/** Idem côté AOT (`lib/universes/aot.ts`). */
+const aotGame = (id: string) => gameTitleIn("aot", id);
+/** Idem côté KNY (`lib/universes/kny.ts`). */
+const knyGame = (id: string) => gameTitleIn("kny", id);
 
 /**
  * Catalogue des CADRES (nameplates) — source de vérité = code (aucune table
@@ -163,6 +167,123 @@ export const FRAMES: FrameDefinition[] = [
     rarity: "epic",
     styleKey: "cursedEnergy",
     universe: "csm",
+    isUnlocked: (u) => u.stats.jjkdleBestAttempts === 1,
+  },
+
+  // ── Cadres AOT ────────────────────────────────────────────────────────────
+  // Mêmes paliers, noms Attack on Titan, clés PRÉFIXÉES. Le cadre d'entrée prend
+  // `scoutGreen` (ajouté avec cet univers) : le vert de cape n'existait dans
+  // aucun des six styles hérités de JJK.
+  {
+    key: "AOT_ODM_GEAR",
+    name: "Équipement Tridimensionnel",
+    description: "Atteindre le niveau 5.",
+    rarity: "common",
+    styleKey: "scoutGreen",
+    universe: "aot",
+    isUnlocked: (u) => u.level >= 5,
+  },
+  {
+    key: "AOT_SURVEY_CORPS",
+    name: "Bataillon d'Exploration",
+    description: "Atteindre le niveau 20.",
+    rarity: "epic",
+    styleKey: "domainGlow",
+    universe: "aot",
+    isUnlocked: (u) => u.level >= 20,
+  },
+  {
+    key: "AOT_FOUNDING_TITAN",
+    name: "Titan Originel",
+    description: `Atteindre le niveau maximum (${MAX_LEVEL}).`,
+    rarity: "legendary",
+    styleKey: "infinity",
+    universe: "aot",
+    isUnlocked: (u) => u.level >= MAX_LEVEL,
+  },
+  {
+    key: "AOT_SIGNAL_FLARE",
+    name: "Fusée Éclairante",
+    description: `Atteindre un streak ${aotGame("jjkdle")} de 7 jours.`,
+    rarity: "rare",
+    styleKey: "flameStreak",
+    universe: "aot",
+    isUnlocked: (u) => u.stats.jjkdleBestStreak >= 7,
+  },
+  {
+    key: "AOT_VIP_HUNTER",
+    name: "Chasseur de VIP",
+    description: `Battre un membre VIP en ${aotGame("battle")} — décerné par le staff.`,
+    rarity: "rare",
+    styleKey: "vipHunter",
+    universe: "aot",
+    isUnlocked: () => false,
+  },
+  {
+    key: "AOT_DAILY_LEGEND",
+    name: "Légende du Quotidien",
+    description: `Trouver le ${aotGame("jjkdle")} du jour en un seul essai.`,
+    rarity: "epic",
+    styleKey: "idleLegend",
+    universe: "aot",
+    isUnlocked: (u) => u.stats.jjkdleBestAttempts === 1,
+  },
+
+  // ── Cadres KNY ────────────────────────────────────────────────────────────
+  // Mêmes paliers, noms Demon Slayer, clés PRÉFIXÉES. `ensoRed` et `paperInk`
+  // (ajoutés avec cet univers) portent les deux couleurs du logo officiel.
+  {
+    key: "KNY_NICHIRIN",
+    name: "Lame Nichirin",
+    description: "Atteindre le niveau 5.",
+    rarity: "common",
+    styleKey: "ensoRed",
+    universe: "kny",
+    isUnlocked: (u) => u.level >= 5,
+  },
+  {
+    key: "KNY_DEMON_MARK",
+    name: "Marque du Pourfendeur",
+    description: "Atteindre le niveau 20.",
+    rarity: "epic",
+    styleKey: "domainGlow",
+    universe: "kny",
+    isUnlocked: (u) => u.level >= 20,
+  },
+  {
+    key: "KNY_HASHIRA_HAORI",
+    name: "Haori de Pilier",
+    description: `Atteindre le niveau maximum (${MAX_LEVEL}).`,
+    rarity: "legendary",
+    styleKey: "infinity",
+    universe: "kny",
+    isUnlocked: (u) => u.level >= MAX_LEVEL,
+  },
+  {
+    key: "KNY_BURNING_STREAK",
+    name: "Flamme Continue",
+    description: `Atteindre un streak ${knyGame("jjkdle")} de 7 jours.`,
+    rarity: "rare",
+    styleKey: "flameStreak",
+    universe: "kny",
+    isUnlocked: (u) => u.stats.jjkdleBestStreak >= 7,
+  },
+  {
+    key: "KNY_VIP_HUNTER",
+    name: "Chasseur de VIP",
+    description: `Battre un membre VIP en ${knyGame("battle")} — décerné par le staff.`,
+    rarity: "rare",
+    styleKey: "vipHunter",
+    universe: "kny",
+    isUnlocked: () => false,
+  },
+  {
+    key: "KNY_DAILY_LEGEND",
+    name: "Légende du Quotidien",
+    description: `Trouver le ${knyGame("jjkdle")} du jour en un seul essai.`,
+    rarity: "epic",
+    styleKey: "paperInk",
+    universe: "kny",
     isUnlocked: (u) => u.stats.jjkdleBestAttempts === 1,
   },
 ];

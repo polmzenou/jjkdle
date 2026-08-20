@@ -97,7 +97,11 @@ export async function UniverseChrome({
         {jsonLd && <SiteJsonLd />}
         <CursedBackground />
         {maintenanceActive ? (
-          <MaintenanceScreen message={maintenance.message} />
+          <MaintenanceScreen
+            title={universe.config.labels.maintenanceTitle}
+            siteName={universe.config.name}
+            message={maintenance.message}
+          />
         ) : (
           <>
             {/* Bandeau admin : la maintenance est active mais l'admin passe. */}

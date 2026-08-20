@@ -131,6 +131,16 @@ export const aot: UniverseConfig = {
   labels: {
     tagline:
       "Une collection de mini-jeux nerveux pour tester ta connaissance de l'univers et mériter tes ailes de la liberté.",
+    arcadeLead: "La salle d'arcade derrière les Murs, dédiée à",
+    ctaTitle: "Prêt à franchir les Murs ?",
+    maintenanceTitle: "Réparation des Murs en cours",
+    gamesHeading: "Les jeux du Bataillon",
+    gamesLead: "Choisis ton défi et offre ton cœur.",
+    // 進 = avancer (le 進 de Shingeki no Kyojin).
+    heroKanji: "進",
+    // 進撃之巨人 (le titre), 自由之翼 (les ailes de la liberté), 調査兵団 (le
+    // Bataillon d'exploration), 心臓を捧げよ → 献身 (offrir son cœur).
+    kanjiColumns: ["進撃巨人", "自由之翼", "調査兵団", "献身"],
   },
   booru: {
     seriesTag: "shingeki_no_kyojin",

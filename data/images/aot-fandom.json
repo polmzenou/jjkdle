@@ -1,0 +1,141 @@
+{
+  "_comment": [
+    "Correspondance personnage → source d'image sur attackontitan.fandom.com.",
+    "Utilisé par scripts/seed-images-fandom.ts.",
+    "",
+    "OBJECTIF : uniquement des portraits ANIME. Le wiki tient deux fiches par",
+    "personnage — la page manga (« Levi Ackerman ») et la page anime",
+    "(« Levi Ackerman (Anime) ») — et sert la version MANGA par défaut. Toutes",
+    "les entrées ci-dessous visent donc explicitement l'anime.",
+    "",
+    "Piège : l'espace anime emploie les orthographes de la VF/Funimation, qui ne",
+    "sont PAS celles des pages manga (Jaeger/Yeager, Braus/Blouse, Ackermann/",
+    "Ackerman, Sadies/Shadis, Kirschtein/Kirstein…). Quand le titre « <Nom>",
+    "(Anime) » n'existe pas sous notre orthographe, on épingle le fichier exact.",
+    "",
+    "Sans page du tout sur le wiki : kord — signalé à chaque exécution."
+  ],
+
+  "anka-rheinberger": "Anka Rheinberger (Anime)",
+  "annie-leonhart": "Annie Leonhart (Anime)",
+  "armin-arlert": { "file": "Armin Arlelt (Anime) character image.png" },
+  "artur-blouse": { "file": "Artur Braus (Anime) character image.png" },
+  "bertholdt-hoover": "Bertholdt Hoover (Anime)",
+  "calvi": "Calvi (Anime)",
+  "carla-yeager": { "file": "Carla Jaeger (Anime) character image.png" },
+  "carsten": "Carsten (Anime)",
+  "colt-grice": "Colt Grice (Anime)",
+  "connie-springer": "Connie Springer (Anime)",
+  "daz": "Daz (Anime)",
+  "dina-fritz": "Dina Fritz (Anime)",
+  "dirk": "Dirk (Anime)",
+  "dot-pixis": { "file": "Dot Pyxis (Anime) character image.png" },
+  "eld-jinn": { "file": "Eld Gin (Anime) character image.png" },
+  "kruger": "Eren Kruger (Anime)",
+  "eren-yeager": { "file": "Eren Jaeger (Anime) character image.png" },
+  "erwin-smith": "Erwin Smith (Anime)",
+  "falco-grice": "Falco Grice (Anime)",
+  "flock-forster": "Floch Forster (Anime)",
+  "franz-kefka": "Franz Kefka (Anime)",
+  "frieda-reiss": "Frieda Reiss (Anime)",
+  "gabi-braun": "Gabi Braun (Anime)",
+  "gelgar": "Gelgar (Anime)",
+  "gordon": "Gordon (Anime)",
+  "griez": { "file": "Greiz (Anime) character image.png" },
+  "grisha-yeager": { "file": "Grisha Jaeger (Anime) character image.png" },
+  "gunther-schultz": "Gunther Schultz (Anime)",
+  "halil": "Halil (Anime)",
+  "hange-zoe": "Hange Zoë (Anime)",
+  "henning": "Henning (Anime)",
+  "historia-reiss": "Historia Reiss (Anime)",
+  "hitch-dreyse": "Hitch Dreyse (Anime)",
+  "ian-dietrich": "Ian Dietrich (Anime)",
+  "jean-kirstein": { "file": "Jean Kirschtein (Anime) character image.png" },
+  "karina-braun": "Karina Braun (Anime)",
+  "kaya": "Kaya (Anime)",
+  "keith-shadis": { "file": "Keith Sadies (Anime) character image.png" },
+  "kenny-ackerman": { "file": "Kenny Ackermann (Anime) character image.png" },
+  "kitz-woermann": "Kitz Woermann (Anime)",
+  "kord": "Kord",
+  "lara-tybur": "Lara Tybur (Anime)",
+  "levi-ackerman": { "file": "Levi Ackermann (Anime) character image.png" },
+  "louise": "Louise (Anime)",
+  "lynne": "Lynne (Anime)",
+  "marcel-galliard": "Marcel Galliard (Anime)",
+  "marco-bodt": "Marco Bodt (Anime)",
+  "marlo-freudenberg": { "file": "Marlo Freudenberg (Anime) character image.png" },
+  "mikasa-ackerman": { "file": "Mikasa Ackermann (Anime) character image.png" },
+  "mike-zacharias": { "file": "Miche Zacharius (Anime) character image.png" },
+  "mina-carolina": "Mina Carolina (Anime)",
+  "mitabi-jarnach": "Mitabi Jarnach (Anime)",
+  "moblit-berner": "Moblit Berner (Anime)",
+  "mr-springer": "Mr. Springer (Anime)",
+  "nanaba": "Nanaba (Anime)",
+  "ness": { "file": "Dieter Ness (Anime) character image.png" },
+  "niccolo": "Niccolo (Anime)",
+  "nile-dawk": { "file": "Nile Dawk (Anime) character image.png" },
+  "oluo-bozado": { "file": "Oruo Bozad (Anime) character image.png" },
+  "oniontaku": "Onyankopon (Anime)",
+  "petra-rall": "Petra Rall (Anime)",
+  "pieck-finger": "Pieck Finger (Anime)",
+  "porco-galliard": "Porco Galliard (Anime)",
+  "ramzi": "Ramzi (Anime)",
+  "reiner-braun": "Reiner Braun (Anime)",
+  "rico-brzenska": "Rico Brzenska (Anime)",
+  "rod-reiss": "Rod Reiss (Anime)",
+  "samuel-linke-jackson": {
+    "file": "Samuel Linke-Jackson (Anime) character image.png"
+  },
+  "sandra": "Sandra (Anime)",
+  "sasha-blouse": { "file": "Sasha Braus (Anime) character image.png" },
+  "surma": "Surma (Anime)",
+  "magath": "Theo Magath (Anime)",
+  "thomas-wagner": "Thomas Wagner (Anime)",
+  "tom-ksaver": "Tom Ksaver (Anime)",
+  "uri-reiss": "Uri Reiss (Anime)",
+  "willy-tybur": "Willy Tybur (Anime)",
+  "yelena": "Yelena (Anime)",
+  "ymir": "Ymir Fritz (Anime)",
+  "ymir-freckles": "Ymir (Anime)",
+  "zeke-yeager": { "file": "Zeke Jaeger (Anime) character image.png" },
+
+  "titan-assailant": {
+    "file": "Attack Titan (Anime) character image (Eren Jaeger).png"
+  },
+  "titan-bestial": {
+    "file": "Beast Titan (Anime) character image (Zeke Jaeger).png"
+  },
+  "titan-charrette": {
+    "file": "Cart Titan (Anime) character image (Pieck Finger).png"
+  },
+  "titan-colossal": {
+    "file": "Colossal Titan (Anime) character image (Bertholdt Hoover).png"
+  },
+  "titan-cuirasse": {
+    "file": "Armored Titan (Anime) character image (Reiner Braun).png"
+  },
+  "titan-feminin": {
+    "file": "Female Titan (Anime) character image (Annie Leonhart).png"
+  },
+  "titan-machoire": {
+    "file": "Jaw Titan (Anime) character image (Porco Galliard).png"
+  },
+  "titan-falco": {
+    "file": "Jaw Titan (Anime) character image (Falco Grice).png"
+  },
+  "titan-marteau-armes": {
+    "file": "War Hammer Titan (Anime) character image (Lara Tybur).png"
+  },
+  "titan-originel": {
+    "file": "Founding Titan (Anime) character image (Ymir Fritz).png"
+  },
+  "titan-originel-eren": {
+    "file": "Eren Jaeger (Anime) character image (Founding Titan).png"
+  },
+  "titan-souriant": {
+    "file": "Dina Fritz (Anime) character image (Titan).png"
+  },
+  "titan-royal-rod-reiss": {
+    "file": "Rod Reiss (Anime) character image (Titan).png"
+  }
+}

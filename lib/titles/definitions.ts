@@ -11,6 +11,10 @@ import { MAX_LEVEL } from "@/lib/progress/xp";
 
 /** Nom d'un jeu côté CSM (suit `lib/universes/csm.ts`, jamais figé en dur ici). */
 const csmGame = (id: string) => gameTitleIn("csm", id);
+/** Idem côté AOT (`lib/universes/aot.ts`). */
+const aotGame = (id: string) => gameTitleIn("aot", id);
+/** Idem côté KNY (`lib/universes/kny.ts`). */
+const knyGame = (id: string) => gameTitleIn("kny", id);
 
 /**
  * Catalogue des TITRES (source de vérité = code, comme les badges/bannières —
@@ -217,6 +221,184 @@ const CSM_TITLES: Omit<TitleDefinition, "universe">[] = [
   },
 ];
 
+// Catalogue AOT : mêmes paliers, vocabulaire Attack on Titan, clés PRÉFIXÉES.
+// L'échelle de progression suit la hiérarchie du Bataillon d'exploration, ce qui
+// donne à la montée en niveau le même sens que le grade dans l'œuvre.
+const AOT_TITLES: Omit<TitleDefinition, "universe">[] = [
+  // ── Progression par niveau (titre de départ → légendaire au niveau max) ──
+  {
+    key: "AOT_NEW_CADET",
+    name: "Cadet",
+    description: "Titre de départ — disponible dès le niveau 1.",
+    rarity: "common",
+    isUnlocked: (u) => u.level >= 1,
+  },
+  {
+    key: "AOT_SOLDIER",
+    name: "Soldat",
+    description: "Atteindre le niveau 5.",
+    rarity: "common",
+    isUnlocked: (u) => u.level >= 5,
+  },
+  {
+    key: "AOT_SQUAD_LEADER",
+    name: "Chef d'Escouade",
+    description: "Atteindre le niveau 15.",
+    rarity: "rare",
+    isUnlocked: (u) => u.level >= 15,
+  },
+  {
+    key: "AOT_SECTION_COMMANDER",
+    name: "Commandant de Section",
+    description: "Atteindre le niveau 30.",
+    rarity: "epic",
+    isUnlocked: (u) => u.level >= 30,
+  },
+  {
+    key: "AOT_WINGS_OF_FREEDOM",
+    name: "Ailes de la Liberté",
+    description: `Atteindre le niveau maximum (${MAX_LEVEL}).`,
+    rarity: "legendary",
+    isUnlocked: (u) => u.level >= MAX_LEVEL,
+  },
+  // ── Exploits méta-site ──
+  {
+    key: "AOT_DAILY_MASTER",
+    name: "Maître de l'Énigme",
+    description: `Trouver le ${aotGame("jjkdle")} du jour en un seul essai.`,
+    rarity: "epic",
+    isUnlocked: (u) => u.stats.jjkdleBestAttempts === 1,
+  },
+  {
+    key: "AOT_PERFECT_WEEK",
+    name: "Semaine Sans Faille",
+    description: `Atteindre un streak ${aotGame("jjkdle")} de 7 jours.`,
+    rarity: "rare",
+    isUnlocked: (u) => u.stats.jjkdleBestStreak >= 7,
+  },
+  {
+    key: "AOT_TITAN_SLAYER",
+    name: "Tueur de Titans",
+    description:
+      "Atteindre le score maximal d'un jeu (rang S au Builder ou Pyramide parfaite).",
+    rarity: "epic",
+    isUnlocked: (u) =>
+      u.stats.builderBest >= 980 || u.stats.rankingBest >= 10000,
+  },
+  {
+    key: "AOT_COLLECTOR",
+    name: "Collectionneur",
+    description: "Débloquer au moins 10 badges.",
+    rarity: "epic",
+    isUnlocked: (u) => u.badgeCount >= 10,
+  },
+  // ── Titres MANUELS (octroi admin uniquement) ──
+  {
+    key: "AOT_UNDEFEATED",
+    name: "Invaincu",
+    description: `Battre un membre VIP en ${aotGame("battle")} — distinction décernée par le staff.`,
+    rarity: "rare",
+    isUnlocked: () => false,
+  },
+  {
+    key: "AOT_DRAFT_KING",
+    name: "Roi du Draft",
+    description:
+      "Terminer 1er d'un classement hebdomadaire — distinction décernée par le staff.",
+    rarity: "legendary",
+    isUnlocked: () => false,
+  },
+];
+
+// Catalogue KNY : mêmes paliers, vocabulaire Demon Slayer, clés PRÉFIXÉES.
+// L'échelle reprend les grades de l'armée des pourfendeurs (Mizunoto → Kinoe →
+// Pilier), les mêmes que l'attribut `knyrank` de KNYdle.
+const KNY_TITLES: Omit<TitleDefinition, "universe">[] = [
+  // ── Progression par niveau (titre de départ → légendaire au niveau max) ──
+  {
+    key: "KNY_NEW_SLAYER",
+    name: "Pourfendeur Novice",
+    description: "Titre de départ — disponible dès le niveau 1.",
+    rarity: "common",
+    isUnlocked: (u) => u.level >= 1,
+  },
+  {
+    key: "KNY_MIZUNOTO",
+    name: "Mizunoto",
+    description: "Atteindre le niveau 5.",
+    rarity: "common",
+    isUnlocked: (u) => u.level >= 5,
+  },
+  {
+    key: "KNY_KANOE",
+    name: "Kanoe",
+    description: "Atteindre le niveau 15.",
+    rarity: "rare",
+    isUnlocked: (u) => u.level >= 15,
+  },
+  {
+    key: "KNY_KINOE",
+    name: "Kinoe",
+    description: "Atteindre le niveau 30.",
+    rarity: "epic",
+    isUnlocked: (u) => u.level >= 30,
+  },
+  {
+    key: "KNY_HASHIRA",
+    name: "Pilier",
+    description: `Atteindre le niveau maximum (${MAX_LEVEL}).`,
+    rarity: "legendary",
+    isUnlocked: (u) => u.level >= MAX_LEVEL,
+  },
+  // ── Exploits méta-site ──
+  {
+    key: "KNY_DAILY_MASTER",
+    name: "Maître de l'Énigme",
+    description: `Trouver le ${knyGame("jjkdle")} du jour en un seul essai.`,
+    rarity: "epic",
+    isUnlocked: (u) => u.stats.jjkdleBestAttempts === 1,
+  },
+  {
+    key: "KNY_PERFECT_WEEK",
+    name: "Semaine Sans Faille",
+    description: `Atteindre un streak ${knyGame("jjkdle")} de 7 jours.`,
+    rarity: "rare",
+    isUnlocked: (u) => u.stats.jjkdleBestStreak >= 7,
+  },
+  {
+    key: "KNY_TOTAL_CONCENTRATION",
+    name: "Concentration Totale",
+    description:
+      "Atteindre le score maximal d'un jeu (rang S au Builder ou Pyramide parfaite).",
+    rarity: "epic",
+    isUnlocked: (u) =>
+      u.stats.builderBest >= 980 || u.stats.rankingBest >= 10000,
+  },
+  {
+    key: "KNY_COLLECTOR",
+    name: "Collectionneur",
+    description: "Débloquer au moins 10 badges.",
+    rarity: "epic",
+    isUnlocked: (u) => u.badgeCount >= 10,
+  },
+  // ── Titres MANUELS (octroi admin uniquement) ──
+  {
+    key: "KNY_UNDEFEATED",
+    name: "Invaincu",
+    description: `Battre un membre VIP en ${knyGame("battle")} — distinction décernée par le staff.`,
+    rarity: "rare",
+    isUnlocked: () => false,
+  },
+  {
+    key: "KNY_DRAFT_KING",
+    name: "Roi du Draft",
+    description:
+      "Terminer 1er d'un classement hebdomadaire — distinction décernée par le staff.",
+    rarity: "legendary",
+    isUnlocked: () => false,
+  },
+];
+
 /**
  * Catalogue COMPLET (tous univers). Sert à la possession/au déblocage, qui sont
  * globaux ; pour l'affichage et l'équipement, filtrer par univers courant via
@@ -225,6 +407,8 @@ const CSM_TITLES: Omit<TitleDefinition, "universe">[] = [
 export const TITLES: TitleDefinition[] = [
   ...tagUniverse(JJK_TITLES, "jjk"),
   ...tagUniverse(CSM_TITLES, "csm"),
+  ...tagUniverse(AOT_TITLES, "aot"),
+  ...tagUniverse(KNY_TITLES, "kny"),
 ];
 
 /** Titres d'un univers (slug) — catalogue affiché par le sélecteur de profil. */

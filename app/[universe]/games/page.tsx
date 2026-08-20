@@ -4,20 +4,53 @@ import { MultiplayerPicker } from "@/components/multiplayer/MultiplayerPicker";
 import { GamesListJsonLd } from "@/components/seo/JsonLd";
 import { universeGames } from "@/lib/games/universe";
 import { getGameFlags } from "@/lib/config/app-config";
+import { siteSeo } from "@/lib/seo/config";
+import {
+  getCurrentUniverseConfig,
+  universeHref,
+} from "@/lib/universes/current";
 
-export const metadata: Metadata = {
-  title: "Tous les jeux Jujutsu Kaisen",
-  description:
-    "Tous les mini-jeux Jujutsu Kaisen de JJK Arcade : JJKdle, Qui est-ce ?, JJK Pyramid, Jujutsu Draft, Random Battle, Higher/Lower… Gratuits, sans compte, dans le navigateur.",
-  alternates: { canonical: "/games" },
-  openGraph: {
-    type: "website",
-    url: "/games",
-    title: "Tous les jeux Jujutsu Kaisen · JJK Arcade",
-    description:
-      "JJKdle, Qui est-ce ?, JJK Pyramid, Jujutsu Draft, Random Battle, Higher/Lower… tous les mini-jeux Jujutsu Kaisen, gratuits et sans compte.",
-  },
-};
+/**
+ * Métadonnées de la liste des jeux, DÉRIVÉES de l'univers courant.
+ *
+ * C'était un `export const metadata` statique entièrement rédigé pour Jujutsu
+ * Kaisen (titre, description, og) : chaque anime servait donc à Google le
+ * catalogue « Jujutsu Kaisen », et le canonical `/games` oubliait le préfixe
+ * d'univers, ce qui faisait se confondre les quatre catalogues en une seule URL.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const [seo, universe, games, route] = await Promise.all([
+    siteSeo(),
+    getCurrentUniverseConfig(),
+    universeGames(),
+    universeHref("/games"),
+  ]);
+
+  // Les jeux tels que les nomme CET univers : la description liste donc
+  // « KNYdle, Hashira Draft… » et non les titres JJK du registre.
+  const titles = games
+    .filter((g) => g.status !== "coming-soon")
+    .map((g) => g.title)
+    .join(", ");
+  const title = `Tous les jeux ${universe.sourceWork}`;
+  const description =
+    `Tous les mini-jeux ${universe.sourceWork} de ${seo.name} : ${titles}… ` +
+    `Gratuits, sans compte, dans le navigateur.`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: route },
+    openGraph: {
+      type: "website",
+      siteName: seo.name,
+      locale: seo.locale,
+      url: route,
+      title: `${title} · ${seo.name}`,
+      description,
+    },
+  };
+}
 
 const FEATURES = ["Sans compte", "Best score local"];
 
@@ -25,7 +58,11 @@ const FEATURES = ["Sans compte", "Best score local"];
 export default async function GamesPage() {
   // Flags d'activation admin (défaut true) : un jeu désactivé est grisé/non cliquable.
   // `universeGames()` = le registre avec les titres de l'univers courant.
-  const [flags, games] = await Promise.all([getGameFlags(), universeGames()]);
+  const [flags, games, universe] = await Promise.all([
+    getGameFlags(),
+    universeGames(),
+    getCurrentUniverseConfig(),
+  ]);
   const liveCount = games.filter(
     (g) => g.status !== "coming-soon" && flags[g.id] !== false,
   ).length;
@@ -46,12 +83,12 @@ export default async function GamesPage() {
         </span>
 
         <h1 className="mt-5 font-display text-4xl font-bold tracking-tight text-white sm:text-5xl">
-          Les jeux maudits
+          {universe.labels.gamesHeading}
         </h1>
 
         <p className="mx-auto mt-4 max-w-md text-balance text-white/55">
-          Choisis ton défi et libère ton énergie maudite. Chaque jeu garde ton
-          meilleur score en local — aucun compte requis.
+          {universe.labels.gamesLead} Chaque jeu garde ton meilleur score en
+          local — aucun compte requis.
         </p>
 
         <div className="mt-6 flex flex-wrap items-center justify-center gap-2">

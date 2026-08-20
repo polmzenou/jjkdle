@@ -31,6 +31,23 @@ export const FRAME_STYLES = {
   idleLegend: {
     ring: "border-2 border-rose-400/80 shadow-[0_0_16px_4px_rgba(244,63,94,0.6)]",
   },
+  // Les six styles ci-dessus sont violets, cyan, orange, ambre et rose : nés du
+  // thème JJK, ils sont réutilisables partout mais ne « sonnent » ni AOT ni KNY.
+  // Les trois suivants complètent la gamme pour ces deux univers. Un style reste
+  // du CSS neutre — sa clé n'est jamais montrée au joueur, tout univers peut donc
+  // piocher dedans.
+  /** Vert des capes du Bataillon d'exploration (AOT). */
+  scoutGreen: {
+    ring: "border-2 border-lime-400/80 shadow-[0_0_14px_3px_rgba(163,230,53,0.6)]",
+  },
+  /** Rouge du cercle au pinceau (KNY). */
+  ensoRed: {
+    ring: "border-2 border-red-500/80 shadow-[0_0_16px_4px_rgba(224,35,27,0.65)]",
+  },
+  /** Encre claire sur papier (KNY) — le seul style volontairement froid/pâle. */
+  paperInk: {
+    ring: "border-2 border-stone-200/70 shadow-[0_0_14px_3px_rgba(231,229,228,0.35)]",
+  },
 } as const satisfies Record<string, FrameStyle>;
 
 export type FrameStyleKey = keyof typeof FRAME_STYLES;

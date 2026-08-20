@@ -170,6 +170,142 @@ export const BANNER_PALETTE = {
     requiredLevel: MAX_LEVEL,
     universe: "csm",
   },
+
+  // ── Bannières AOT (mêmes paliers, vert de cape & ocre des harnais) ──
+  aotScout: {
+    label: "Bataillon d'Exploration",
+    gradient: "linear-gradient(120deg, #0a0b08 0%, #2f4c07 55%, #a3e635 100%)",
+    requiredLevel: 1,
+    universe: "aot",
+  },
+  aotWalls: {
+    label: "Les Murs",
+    gradient: "linear-gradient(120deg, #0a0b08 0%, #44403c 55%, #a8a29e 100%)",
+    requiredLevel: 3,
+    universe: "aot",
+  },
+  aotGarrison: {
+    label: "Brigades Stationnaires",
+    gradient: "linear-gradient(120deg, #1e2118 0%, #7c3d0a 55%, #f0b429 100%)",
+    requiredLevel: 5,
+    universe: "aot",
+  },
+  aotMilitaryPolice: {
+    label: "Police Militaire",
+    gradient: "linear-gradient(120deg, #0a0b08 0%, #1e3a8a 55%, #60a5fa 100%)",
+    requiredLevel: 8,
+    universe: "aot",
+  },
+  aotFemaleTitan: {
+    label: "Titan Féminin",
+    gradient: "linear-gradient(120deg, #141610 0%, #57534e 50%, #d6d3d1 100%)",
+    requiredLevel: 11,
+    universe: "aot",
+  },
+  aotArmored: {
+    label: "Titan Cuirassé",
+    gradient: "linear-gradient(120deg, #0a0b08 0%, #78350f 55%, #b45309 100%)",
+    requiredLevel: 15,
+    universe: "aot",
+  },
+  aotColossal: {
+    label: "Titan Colossal",
+    gradient: "linear-gradient(120deg, #141610 0%, #7f1d1d 50%, #fca5a5 100%)",
+    requiredLevel: 20,
+    universe: "aot",
+  },
+  aotMarley: {
+    label: "Marley",
+    gradient: "linear-gradient(120deg, #0a0b08 0%, #422006 55%, #a16207 100%)",
+    requiredLevel: 26,
+    universe: "aot",
+  },
+  aotJaegerist: {
+    label: "Jägers",
+    gradient: "linear-gradient(120deg, #000000 0%, #14532d 55%, #4d7c0f 100%)",
+    requiredLevel: 33,
+    universe: "aot",
+  },
+  aotFounding: {
+    label: "Titan Originel",
+    gradient: "linear-gradient(120deg, #0a0b08 0%, #3f3f46 45%, #fafaf9 100%)",
+    requiredLevel: 41,
+    universe: "aot",
+  },
+  aotRumbling: {
+    label: "Grand Terrassement",
+    gradient: "linear-gradient(120deg, #0a0b08 0%, #7c2d12 45%, #f0b429 100%)",
+    requiredLevel: MAX_LEVEL,
+    universe: "aot",
+  },
+
+  // ── Bannières KNY (mêmes paliers, rouge ensō & encre) ──
+  knyEnso: {
+    label: "Cercle d'Encre",
+    gradient: "linear-gradient(120deg, #0a0708 0%, #8c0f0a 55%, #e0231b 100%)",
+    requiredLevel: 1,
+    universe: "kny",
+  },
+  knyCheckered: {
+    label: "Damier",
+    gradient: "linear-gradient(120deg, #0a0708 0%, #1e1819 50%, #e7e5e4 100%)",
+    requiredLevel: 3,
+    universe: "kny",
+  },
+  knyNichirin: {
+    label: "Lame Nichirin",
+    gradient: "linear-gradient(120deg, #141011 0%, #3f3f46 50%, #ff5a4d 100%)",
+    requiredLevel: 5,
+    universe: "kny",
+  },
+  knyWisteria: {
+    label: "Glycine",
+    gradient: "linear-gradient(120deg, #1e1b4b 0%, #6d28d9 55%, #c4b5fd 100%)",
+    requiredLevel: 8,
+    universe: "kny",
+  },
+  knyWaterBreathing: {
+    label: "Souffle de l'Eau",
+    gradient: "linear-gradient(120deg, #0a0708 0%, #0e7490 55%, #67e8f9 100%)",
+    requiredLevel: 11,
+    universe: "kny",
+  },
+  knyFlameBreathing: {
+    label: "Souffle de la Flamme",
+    gradient: "linear-gradient(120deg, #0a0708 0%, #9a3412 50%, #fb923c 100%)",
+    requiredLevel: 15,
+    universe: "kny",
+  },
+  knyThunderBreathing: {
+    label: "Souffle de la Foudre",
+    gradient: "linear-gradient(120deg, #141011 0%, #a16207 50%, #fde047 100%)",
+    requiredLevel: 20,
+    universe: "kny",
+  },
+  knyInsectBreathing: {
+    label: "Souffle de l'Insecte",
+    gradient: "linear-gradient(120deg, #1e1819 0%, #7e22ce 50%, #f0abfc 100%)",
+    requiredLevel: 26,
+    universe: "kny",
+  },
+  knyUpperMoon: {
+    label: "Lune Supérieure",
+    gradient: "linear-gradient(120deg, #000000 0%, #4c0519 55%, #be123c 100%)",
+    requiredLevel: 33,
+    universe: "kny",
+  },
+  knyInfinityCastle: {
+    label: "Château de l'Infini",
+    gradient: "linear-gradient(120deg, #0a0708 0%, #292524 50%, #78716c 100%)",
+    requiredLevel: 41,
+    universe: "kny",
+  },
+  knySunBreathing: {
+    label: "Souffle du Soleil",
+    gradient: "linear-gradient(120deg, #0a0708 0%, #e0231b 45%, #fbbf24 100%)",
+    requiredLevel: MAX_LEVEL,
+    universe: "kny",
+  },
 } as const satisfies Record<string, BannerStyle>;
 
 export type BannerKey = keyof typeof BANNER_PALETTE;

@@ -92,18 +92,29 @@ describe("catalogues JJK (non-régression)", () => {
   });
 });
 
-describe("catalogue CSM", () => {
-  const csmBadges = badgesForUniverse("csm");
-  const csmTitles = titlesForUniverse("csm");
-  const csmFrames = framesForUniverse("csm").filter(
+/**
+ * Univers non-JJK, chacun avec le nom que porte le jeu quotidien chez lui. Un
+ * univers ajouté à la plateforme s'ajoute ICI : les quatre garanties ci-dessous
+ * lui sont alors appliquées telles quelles.
+ */
+const UNIVERSES = [
+  { slug: "csm", daily: "CSMdle" },
+  { slug: "aot", daily: "AOTdle" },
+  { slug: "kny", daily: "KNYdle" },
+] as const;
+
+describe.each(UNIVERSES)("catalogue $slug", ({ slug, daily }) => {
+  const badges = badgesForUniverse(slug);
+  const titles = titlesForUniverse(slug);
+  const frames = framesForUniverse(slug).filter(
     (f) => f.key !== DEFAULT_FRAME_KEY,
   );
 
   it("est peuplé (un univers sans cosmétiques n'a rien à afficher)", () => {
-    expect(csmBadges.length).toBeGreaterThan(0);
-    expect(csmTitles.length).toBeGreaterThan(0);
-    expect(csmFrames.length).toBeGreaterThan(0);
-    expect(bannerKeysForUniverse("csm").length).toBeGreaterThan(1);
+    expect(badges.length).toBeGreaterThan(0);
+    expect(titles.length).toBeGreaterThan(0);
+    expect(frames.length).toBeGreaterThan(0);
+    expect(bannerKeysForUniverse(slug).length).toBeGreaterThan(1);
   });
 
   it("n'a AUCUNE clé en commun avec JJK (la possession est globale)", () => {
@@ -112,27 +123,49 @@ describe("catalogue CSM", () => {
       ...taggedJjk(TITLES).map((t) => t.key),
       ...taggedJjk(FRAMES).map((f) => f.key),
     ]);
-    for (const k of [...csmBadges, ...csmTitles, ...csmFrames].map((c) => c.key)) {
+    for (const k of [...badges, ...titles, ...frames].map((c) => c.key)) {
       expect(jjkKeys.has(k)).toBe(false);
     }
   });
 
-  it("nomme les jeux avec les titres CSM (et non l'id en repli)", () => {
-    // `gameTitleIn("csm", …)` doit vraiment résoudre : un slug mal orthographié
+  it(`nomme les jeux avec les titres ${slug} (et non l'id en repli)`, () => {
+    // `gameTitleIn(slug, …)` doit vraiment résoudre : un slug mal orthographié
     // retomberait sur l'id du jeu (« jjkdle »), sans autre signe visible.
-    const daily = [...csmBadges, ...csmTitles].map((c) => c.description);
-    expect(daily.some((d) => d.includes("CSMdle"))).toBe(true);
-    expect(daily.some((d) => d.includes("jjkdle"))).toBe(false);
+    const descriptions = [...badges, ...titles].map((c) => c.description);
+    expect(descriptions.some((d) => d.includes(daily))).toBe(true);
+    expect(descriptions.some((d) => d.includes("jjkdle"))).toBe(false);
   });
 
   it("ne contient aucun vocabulaire JJK dans ses libellés", () => {
-    const texts = [...csmBadges, ...csmTitles, ...csmFrames].flatMap((c) => [
+    const texts = [...badges, ...titles, ...frames].flatMap((c) => [
       c.name,
       c.description,
     ]);
     for (const t of texts) {
       expect(t).not.toMatch(/JJK|Jujutsu|sorcier|exorcis|occulte/i);
     }
+  });
+});
+
+/**
+ * Unicité GLOBALE des clés, tous univers confondus. La règle « pas de clé
+ * partagée » ne vaut pas que face à JJK : deux animes qui partageraient une clé
+ * partageraient le déblocage, puisque la possession est indexée par clé seule.
+ * Ce test-ci attrape le cas qu'un `describe.each` par univers ne voit pas.
+ */
+describe("unicité des clés de cosmétiques", () => {
+  it.each([
+    ["badges", BADGES],
+    ["titres", TITLES],
+    ["cadres", FRAMES],
+  ] as const)("aucun doublon de clé parmi les %s", (_label, catalog) => {
+    const keys = catalog.map((c) => c.key);
+    expect(keys).toHaveLength(new Set(keys).size);
+  });
+
+  it("aucune bannière ne se répète entre univers", () => {
+    const keys = Object.keys(BANNER_PALETTE);
+    expect(keys).toHaveLength(new Set(keys).size);
   });
 });
 

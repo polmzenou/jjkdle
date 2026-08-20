@@ -1,0 +1,825 @@
+{
+  "anka-rheinberger": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "FEMALE",
+    "aotaffiliation": "GARRISON",
+    "aotrank": "SOLDIER",
+    "aottitan": "false",
+    "aotstatus": "ALIVE",
+    "aotAppearanceArc": "TROST_BATTLE",
+    "aotpower": 20810
+  },
+  "annie-leonhart": {
+    "aotorigin": "SHIFTER",
+    "aotgender": "FEMALE",
+    "aotaffiliation": "MARLEY_WARRIORS",
+    "aotrank": "SOLDIER",
+    "aottitan": "true",
+    "aotstatus": "ALIVE",
+    "aotAppearanceArc": "TRAINING_CORPS_104",
+    "aotpower": 533043
+  },
+  "armin-arlert": {
+    "aotorigin": "SHIFTER",
+    "aotgender": "MALE",
+    "aotaffiliation": "SURVEY_CORPS",
+    "aotrank": "COMMANDER",
+    "aottitan": "true",
+    "aotstatus": "ALIVE",
+    "aotAppearanceArc": "SHIGANSHINA_FALL",
+    "aotpower": 679921
+  },
+  "artur-blouse": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "CIVILIAN",
+    "aotrank": "NO_RANK",
+    "aottitan": "false",
+    "aotpower": 2933
+  },
+  "bertholdt-hoover": {
+    "aotorigin": "SHIFTER",
+    "aotgender": "MALE",
+    "aotaffiliation": "MARLEY_WARRIORS",
+    "aotrank": "SOLDIER",
+    "aottitan": "true",
+    "aotstatus": "DEVOURED",
+    "aotAppearanceArc": "TRAINING_CORPS_104",
+    "aotpower": 663948
+  },
+  "calvi": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "GARRISON",
+    "aottitan": "false"
+  },
+  "carla-yeager": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "FEMALE",
+    "aotaffiliation": "CIVILIAN",
+    "aotrank": "NO_RANK",
+    "aottitan": "false",
+    "aotstatus": "DEVOURED",
+    "aotAppearanceArc": "SHIGANSHINA_FALL",
+    "aotpower": 347
+  },
+  "carsten": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "GARRISON",
+    "aotrank": "CAPTAIN",
+    "aottitan": "false",
+    "aotpower": 12082
+  },
+  "colt-grice": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "MARLEY_WARRIORS",
+    "aotrank": "CADET",
+    "aottitan": "false",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "MARLEY",
+    "aotpower": 33275
+  },
+  "connie-springer": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "SURVEY_CORPS",
+    "aotrank": "SOLDIER",
+    "aottitan": "false",
+    "aotstatus": "ALIVE",
+    "aotAppearanceArc": "TRAINING_CORPS_104",
+    "aotpower": 164040
+  },
+  "daz": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "SURVEY_CORPS",
+    "aotrank": "SOLDIER",
+    "aottitan": "false",
+    "aotAppearanceArc": "TRAINING_CORPS_104",
+    "aotpower": 33275
+  },
+  "dina-fritz": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "FEMALE",
+    "aotrank": "NO_RANK",
+    "aottitan": "true",
+    "aotstatus": "DEVOURED",
+    "aotpower": 1138
+  },
+  "dirk": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "SURVEY_CORPS",
+    "aotrank": "SOLDIER",
+    "aottitan": "false",
+    "aotAppearanceArc": "CLASH_OF_TITANS"
+  },
+  "dot-pixis": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "GARRISON",
+    "aotrank": "COMMANDER",
+    "aottitan": "false",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "TROST_BATTLE",
+    "aotpower": 6358
+  },
+  "eld-jinn": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "SURVEY_CORPS",
+    "aotrank": "SOLDIER",
+    "aottitan": "false",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "FEMALE_TITAN",
+    "aotpower": 149023
+  },
+  "kruger": {
+    "aotorigin": "SHIFTER",
+    "aotgender": "MALE",
+    "aottitan": "true",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "RETURN_TO_SHIGANSHINA",
+    "aotpower": 424031
+  },
+  "eren-yeager": {
+    "aotorigin": "SHIFTER",
+    "aotgender": "MALE",
+    "aotaffiliation": "SURVEY_CORPS",
+    "aotrank": "SOLDIER",
+    "aottitan": "true",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "SHIGANSHINA_FALL",
+    "aotpower": 1206006
+  },
+  "erwin-smith": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "SURVEY_CORPS",
+    "aotrank": "COMMANDER",
+    "aottitan": "false",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "TROST_BATTLE",
+    "aotpower": 362733
+  },
+  "falco-grice": {
+    "aotorigin": "SHIFTER",
+    "aotgender": "MALE",
+    "aotaffiliation": "MARLEY_WARRIORS",
+    "aotrank": "CADET",
+    "aottitan": "true",
+    "aotstatus": "ALIVE",
+    "aotAppearanceArc": "MARLEY",
+    "aotpower": 408001
+  },
+  "flock-forster": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "JAEGERISTS",
+    "aotrank": "SOLDIER",
+    "aottitan": "false",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "RETURN_TO_SHIGANSHINA",
+    "aotpower": 148030
+  },
+  "franz-kefka": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotrank": "CADET",
+    "aottitan": "false",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "TRAINING_CORPS_104",
+    "aotpower": 1138
+  },
+  "frieda-reiss": {
+    "aotorigin": "SHIFTER",
+    "aotgender": "FEMALE",
+    "aotaffiliation": "ROYALTY",
+    "aotrank": "NO_RANK",
+    "aottitan": "true",
+    "aotstatus": "DEVOURED",
+    "aotAppearanceArc": "UPRISING",
+    "aotpower": 383072
+  },
+  "gabi-braun": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "FEMALE",
+    "aotaffiliation": "MARLEY_WARRIORS",
+    "aotrank": "CADET",
+    "aottitan": "false",
+    "aotstatus": "ALIVE",
+    "aotAppearanceArc": "MARLEY",
+    "aotpower": 33275
+  },
+  "gelgar": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "SURVEY_CORPS",
+    "aotrank": "SOLDIER",
+    "aottitan": "false",
+    "aotstatus": "DEAD",
+    "aotpower": 76992
+  },
+  "grisha-yeager": {
+    "aotorigin": "SHIFTER",
+    "aotgender": "MALE",
+    "aotrank": "NO_RANK",
+    "aottitan": "true",
+    "aotstatus": "DEVOURED",
+    "aotAppearanceArc": "SHIGANSHINA_FALL",
+    "aotpower": 307025
+  },
+  "gunther-schultz": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "SURVEY_CORPS",
+    "aotrank": "SOLDIER",
+    "aottitan": "false",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "FEMALE_TITAN",
+    "aotpower": 124002
+  },
+  "halil": {
+    "aotorigin": "OTHER",
+    "aotgender": "MALE",
+    "aotaffiliation": "CIVILIAN",
+    "aotrank": "NO_RANK",
+    "aottitan": "false",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "MARLEY"
+  },
+  "hange-zoe": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "OTHER",
+    "aotaffiliation": "SURVEY_CORPS",
+    "aotrank": "COMMANDER",
+    "aottitan": "false",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "TROST_BATTLE",
+    "aotpower": 216947
+  },
+  "henning": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "SURVEY_CORPS",
+    "aotrank": "SOLDIER",
+    "aottitan": "false",
+    "aotstatus": "DEAD",
+    "aotpower": 61000
+  },
+  "historia-reiss": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "FEMALE",
+    "aotaffiliation": "ROYALTY",
+    "aotrank": "MARSHAL",
+    "aottitan": "false",
+    "aotstatus": "ALIVE",
+    "aotAppearanceArc": "TRAINING_CORPS_104",
+    "aotpower": 40005
+  },
+  "hitch-dreyse": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "FEMALE",
+    "aotaffiliation": "MILITARY_POLICE",
+    "aotrank": "SOLDIER",
+    "aottitan": "false",
+    "aotstatus": "ALIVE",
+    "aotAppearanceArc": "UPRISING",
+    "aotpower": 33275
+  },
+  "ian-dietrich": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "GARRISON",
+    "aotrank": "SQUAD_LEADER",
+    "aottitan": "false",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "TROST_BATTLE",
+    "aotpower": 55019
+  },
+  "jean-kirstein": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "SURVEY_CORPS",
+    "aotrank": "SOLDIER",
+    "aottitan": "false",
+    "aotstatus": "ALIVE",
+    "aotAppearanceArc": "TRAINING_CORPS_104",
+    "aotpower": 181971
+  },
+  "karina-braun": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "FEMALE",
+    "aotaffiliation": "CIVILIAN",
+    "aotrank": "NO_RANK",
+    "aottitan": "false",
+    "aotAppearanceArc": "MARLEY"
+  },
+  "kaya": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "FEMALE",
+    "aotaffiliation": "CIVILIAN",
+    "aotrank": "NO_RANK",
+    "aottitan": "false",
+    "aotstatus": "ALIVE",
+    "aotAppearanceArc": "CLASH_OF_TITANS",
+    "aotpower": 347
+  },
+  "keith-shadis": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotrank": "COMMANDER",
+    "aottitan": "false",
+    "aotstatus": "ALIVE",
+    "aotAppearanceArc": "TRAINING_CORPS_104",
+    "aotpower": 100787
+  },
+  "kenny-ackerman": {
+    "aotorigin": "ACKERMAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "MILITARY_POLICE",
+    "aotrank": "CAPTAIN",
+    "aottitan": "false",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "UPRISING",
+    "aotpower": 318666
+  },
+  "kitz-woermann": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "GARRISON",
+    "aotrank": "CAPTAIN",
+    "aottitan": "false",
+    "aotAppearanceArc": "TROST_BATTLE",
+    "aotpower": 12082
+  },
+  "lara-tybur": {
+    "aotorigin": "SHIFTER",
+    "aotgender": "FEMALE",
+    "aotaffiliation": "MARLEY_WARRIORS",
+    "aotrank": "NO_RANK",
+    "aottitan": "true",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "MARLEY",
+    "aotpower": 417060
+  },
+  "levi-ackerman": {
+    "aotorigin": "ACKERMAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "SURVEY_CORPS",
+    "aotrank": "CAPTAIN",
+    "aottitan": "false",
+    "aotstatus": "ALIVE",
+    "aotAppearanceArc": "TROST_BATTLE",
+    "aotpower": 849243
+  },
+  "louise": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "FEMALE",
+    "aottitan": "false",
+    "aotstatus": "DEAD"
+  },
+  "lynne": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "FEMALE",
+    "aotaffiliation": "SURVEY_CORPS",
+    "aotrank": "SOLDIER",
+    "aottitan": "false",
+    "aotstatus": "DEAD",
+    "aotpower": 63993
+  },
+  "marcel-galliard": {
+    "aotorigin": "SHIFTER",
+    "aotgender": "MALE",
+    "aotaffiliation": "MARLEY_WARRIORS",
+    "aotrank": "SOLDIER",
+    "aottitan": "true",
+    "aotstatus": "DEVOURED",
+    "aotpower": 322048
+  },
+  "marco-bodt": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotrank": "CADET",
+    "aottitan": "false",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "TRAINING_CORPS_104",
+    "aotpower": 20810
+  },
+  "marlo-freudenberg": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "SURVEY_CORPS",
+    "aotrank": "SOLDIER",
+    "aottitan": "false",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "UPRISING",
+    "aotpower": 20810
+  },
+  "mikasa-ackerman": {
+    "aotorigin": "ACKERMAN",
+    "aotgender": "FEMALE",
+    "aotaffiliation": "SURVEY_CORPS",
+    "aotrank": "SOLDIER",
+    "aottitan": "false",
+    "aotstatus": "ALIVE",
+    "aotAppearanceArc": "SHIGANSHINA_FALL",
+    "aotpower": 601987
+  },
+  "mike-zacharias": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "SURVEY_CORPS",
+    "aotrank": "SECTION_COMMANDER",
+    "aottitan": "false",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "TROST_BATTLE",
+    "aotpower": 291040
+  },
+  "mina-carolina": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "FEMALE",
+    "aotrank": "CADET",
+    "aottitan": "false",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "TRAINING_CORPS_104",
+    "aotpower": 1138
+  },
+  "mitabi-jarnach": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "GARRISON",
+    "aotrank": "SQUAD_LEADER",
+    "aottitan": "false",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "TROST_BATTLE",
+    "aotpower": 38015
+  },
+  "moblit-berner": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "SURVEY_CORPS",
+    "aotrank": "SOLDIER",
+    "aottitan": "false",
+    "aotstatus": "DEAD",
+    "aotpower": 50235
+  },
+  "mr-springer": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "CIVILIAN",
+    "aotrank": "NO_RANK",
+    "aotAppearanceArc": "CLASH_OF_TITANS"
+  },
+  "nanaba": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "FEMALE",
+    "aotaffiliation": "SURVEY_CORPS",
+    "aotrank": "SQUAD_LEADER",
+    "aottitan": "false",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "CLASH_OF_TITANS",
+    "aotpower": 89027
+  },
+  "ness": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "SURVEY_CORPS",
+    "aotrank": "SQUAD_LEADER",
+    "aottitan": "false",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "FEMALE_TITAN",
+    "aotpower": 42862
+  },
+  "niccolo": {
+    "aotorigin": "MARLEYAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "CIVILIAN",
+    "aotrank": "NO_RANK",
+    "aottitan": "false",
+    "aotstatus": "ALIVE",
+    "aotAppearanceArc": "WAR_FOR_PARADIS",
+    "aotpower": 12082
+  },
+  "nile-dawk": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "MILITARY_POLICE",
+    "aotrank": "COMMANDER",
+    "aottitan": "false",
+    "aotAppearanceArc": "TROST_BATTLE",
+    "aotpower": 50235
+  },
+  "oluo-bozado": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "SURVEY_CORPS",
+    "aotrank": "SOLDIER",
+    "aottitan": "false",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "FEMALE_TITAN",
+    "aotpower": 170967
+  },
+  "onyankopon": {
+    "aotorigin": "OTHER",
+    "aotgender": "MALE",
+    "aotaffiliation": "ANTI_MARLEYAN",
+    "aotrank": "NO_RANK",
+    "aottitan": "false",
+    "aotstatus": "ALIVE",
+    "aotAppearanceArc": "WAR_FOR_PARADIS",
+    "aotpower": 20810
+  },
+  "petra-rall": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "FEMALE",
+    "aotaffiliation": "SURVEY_CORPS",
+    "aotrank": "SOLDIER",
+    "aottitan": "false",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "FEMALE_TITAN",
+    "aotpower": 156021
+  },
+  "pieck-finger": {
+    "aotorigin": "SHIFTER",
+    "aotgender": "FEMALE",
+    "aotaffiliation": "MARLEY_WARRIORS",
+    "aotrank": "SOLDIER",
+    "aottitan": "true",
+    "aotstatus": "ALIVE",
+    "aotAppearanceArc": "MARLEY",
+    "aotpower": 329028
+  },
+  "porco-galliard": {
+    "aotorigin": "SHIFTER",
+    "aotgender": "MALE",
+    "aotaffiliation": "MARLEY_WARRIORS",
+    "aotrank": "SOLDIER",
+    "aottitan": "true",
+    "aotstatus": "DEVOURED",
+    "aotAppearanceArc": "MARLEY",
+    "aotpower": 348948
+  },
+  "ramzi": {
+    "aotorigin": "OTHER",
+    "aotgender": "MALE",
+    "aotaffiliation": "CIVILIAN",
+    "aotrank": "NO_RANK",
+    "aottitan": "false",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "MARLEY"
+  },
+  "reiner-braun": {
+    "aotorigin": "SHIFTER",
+    "aotgender": "MALE",
+    "aotaffiliation": "MARLEY_WARRIORS",
+    "aotrank": "SOLDIER",
+    "aottitan": "true",
+    "aotstatus": "ALIVE",
+    "aotAppearanceArc": "TRAINING_CORPS_104",
+    "aotpower": 557033
+  },
+  "rico-brzenska": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "FEMALE",
+    "aotaffiliation": "GARRISON",
+    "aotrank": "SQUAD_LEADER",
+    "aottitan": "false",
+    "aotstatus": "ALIVE",
+    "aotAppearanceArc": "TROST_BATTLE",
+    "aotpower": 52009
+  },
+  "rod-reiss": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "ROYALTY",
+    "aotrank": "NO_RANK",
+    "aottitan": "true",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "UPRISING",
+    "aotpower": 1138
+  },
+  "samuel-linke-jackson": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "SURVEY_CORPS",
+    "aotrank": "SOLDIER",
+    "aottitan": "false",
+    "aotAppearanceArc": "TRAINING_CORPS_104",
+    "aotpower": 33275
+  },
+  "sasha-blouse": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "FEMALE",
+    "aotaffiliation": "SURVEY_CORPS",
+    "aotrank": "SOLDIER",
+    "aottitan": "false",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "TRAINING_CORPS_104",
+    "aotpower": 137013
+  },
+  "magath": {
+    "aotorigin": "MARLEYAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "MARLEY_WARRIORS",
+    "aotrank": "COMMANDER",
+    "aottitan": "false",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "MARLEY",
+    "aotpower": 33275
+  },
+  "thomas-wagner": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotrank": "CADET",
+    "aottitan": "false",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "TRAINING_CORPS_104",
+    "aotpower": 1138
+  },
+  "tom-ksaver": {
+    "aotorigin": "SHIFTER",
+    "aotgender": "MALE",
+    "aotaffiliation": "MARLEY_WARRIORS",
+    "aotrank": "NO_RANK",
+    "aottitan": "true",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "WAR_FOR_PARADIS"
+  },
+  "uri-reiss": {
+    "aotorigin": "SHIFTER",
+    "aotgender": "MALE",
+    "aotaffiliation": "ROYALTY",
+    "aotrank": "NO_RANK",
+    "aottitan": "true",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "UPRISING",
+    "aotpower": 404018
+  },
+  "willy-tybur": {
+    "aotorigin": "ELDIAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "ROYALTY",
+    "aotrank": "NO_RANK",
+    "aottitan": "false",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "MARLEY",
+    "aotpower": 2933
+  },
+  "yelena": {
+    "aotorigin": "MARLEYAN",
+    "aotgender": "FEMALE",
+    "aotaffiliation": "ANTI_MARLEYAN",
+    "aotrank": "NO_RANK",
+    "aottitan": "false",
+    "aotAppearanceArc": "WAR_FOR_PARADIS",
+    "aotpower": 20810
+  },
+  "ymir": {
+    "aotorigin": "SHIFTER",
+    "aotgender": "FEMALE",
+    "aotrank": "NO_RANK",
+    "aottitan": "true",
+    "aotstatus": "DEAD",
+    "aotpower": 1824047
+  },
+  "ymir-freckles": {
+    "aotorigin": "SHIFTER",
+    "aotgender": "FEMALE",
+    "aotaffiliation": "SURVEY_CORPS",
+    "aotrank": "SOLDIER",
+    "aottitan": "true",
+    "aotstatus": "DEVOURED",
+    "aotAppearanceArc": "TRAINING_CORPS_104",
+    "aotpower": 205021
+  },
+  "zeke-yeager": {
+    "aotorigin": "SHIFTER",
+    "aotgender": "MALE",
+    "aotaffiliation": "MARLEY_WARRIORS",
+    "aotrank": "SOLDIER",
+    "aottitan": "true",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "CLASH_OF_TITANS",
+    "aotpower": 718053
+  },
+
+  "titan-assailant": {
+    "aotorigin": "SHIFTER",
+    "aotgender": "MALE",
+    "aotaffiliation": "SURVEY_CORPS",
+    "aotrank": "NO_RANK",
+    "aottitan": "true",
+    "aotAppearanceArc": "TROST_BATTLE",
+    "aotpower": 742934
+  },
+  "titan-bestial": {
+    "aotorigin": "SHIFTER",
+    "aotgender": "MALE",
+    "aotaffiliation": "MARLEY_WARRIORS",
+    "aotrank": "NO_RANK",
+    "aottitan": "true",
+    "aotAppearanceArc": "CLASH_OF_TITANS",
+    "aotpower": 624035
+  },
+  "titan-charrette": {
+    "aotorigin": "SHIFTER",
+    "aotgender": "FEMALE",
+    "aotaffiliation": "MARLEY_WARRIORS",
+    "aotrank": "NO_RANK",
+    "aottitan": "true",
+    "aotAppearanceArc": "MARLEY",
+    "aotpower": 291040
+  },
+  "titan-colossal": {
+    "aotorigin": "SHIFTER",
+    "aotgender": "MALE",
+    "aotaffiliation": "MARLEY_WARRIORS",
+    "aotrank": "NO_RANK",
+    "aottitan": "true",
+    "aotAppearanceArc": "SHIGANSHINA_FALL",
+    "aotpower": 635039
+  },
+  "titan-cuirasse": {
+    "aotorigin": "SHIFTER",
+    "aotgender": "MALE",
+    "aotaffiliation": "MARLEY_WARRIORS",
+    "aotrank": "NO_RANK",
+    "aottitan": "true",
+    "aotAppearanceArc": "SHIGANSHINA_FALL",
+    "aotpower": 481036
+  },
+  "titan-feminin": {
+    "aotorigin": "SHIFTER",
+    "aotgender": "FEMALE",
+    "aotaffiliation": "MARLEY_WARRIORS",
+    "aotrank": "NO_RANK",
+    "aottitan": "true",
+    "aotAppearanceArc": "FEMALE_TITAN",
+    "aotpower": 445070
+  },
+  "titan-machoire": {
+    "aotorigin": "SHIFTER",
+    "aotgender": "MALE",
+    "aotaffiliation": "MARLEY_WARRIORS",
+    "aotrank": "NO_RANK",
+    "aottitan": "true",
+    "aotAppearanceArc": "MARLEY",
+    "aotpower": 317965
+  },
+  "titan-falco": {
+    "aotorigin": "SHIFTER",
+    "aotgender": "MALE",
+    "aotaffiliation": "MARLEY_WARRIORS",
+    "aotrank": "NO_RANK",
+    "aottitan": "true",
+    "aotAppearanceArc": "WAR_FOR_PARADIS",
+    "aotpower": 401049
+  },
+  "titan-marteau-armes": {
+    "aotorigin": "SHIFTER",
+    "aotgender": "FEMALE",
+    "aotaffiliation": "MARLEY_WARRIORS",
+    "aotrank": "NO_RANK",
+    "aottitan": "true",
+    "aotAppearanceArc": "MARLEY",
+    "aotpower": 410002
+  },
+  "titan-originel": {
+    "aotorigin": "SHIFTER",
+    "aotgender": "FEMALE",
+    "aotrank": "NO_RANK",
+    "aottitan": "true",
+    "aotpower": 1723203
+  },
+  "titan-originel-eren": {
+    "aotorigin": "SHIFTER",
+    "aotgender": "MALE",
+    "aotaffiliation": "SURVEY_CORPS",
+    "aotrank": "NO_RANK",
+    "aottitan": "true",
+    "aotAppearanceArc": "RUMBLING",
+    "aotpower": 897932
+  },
+  "titan-souriant": {
+    "aotorigin": "PURE_TITAN",
+    "aotgender": "FEMALE",
+    "aotrank": "NO_RANK",
+    "aottitan": "true",
+    "aotstatus": "DEVOURED",
+    "aotAppearanceArc": "SHIGANSHINA_FALL",
+    "aotpower": 20810
+  },
+  "titan-royal-rod-reiss": {
+    "aotorigin": "PURE_TITAN",
+    "aotgender": "MALE",
+    "aotaffiliation": "ROYALTY",
+    "aotrank": "NO_RANK",
+    "aottitan": "true",
+    "aotstatus": "DEAD",
+    "aotAppearanceArc": "UPRISING",
+    "aotpower": 250091
+  }
+}

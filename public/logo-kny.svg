@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 76" width="260" height="76" role="img" aria-label="KNY Arcade">
+  <desc>Logo PLACEHOLDER de l'univers Kimetsu no Yaiba — à remplacer par le visuel définitif (lib/universes/kny.ts, champ logo.src).</desc>
+  <defs>
+    <linearGradient id="kny-ink" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff5a4d" />
+      <stop offset="100%" stop-color="#e0231b" />
+    </linearGradient>
+  </defs>
+  <!-- Damier du haori de Tanjiro, en rouge ensō et papier -->
+  <g>
+    <g fill="#e0231b">
+      <rect x="14" y="10" width="9" height="9" />
+      <rect x="32" y="10" width="9" height="9" />
+      <rect x="23" y="19" width="9" height="9" />
+      <rect x="14" y="28" width="9" height="9" />
+      <rect x="32" y="28" width="9" height="9" />
+    </g>
+    <g fill="#e7e5e4" opacity="0.65">
+      <rect x="23" y="10" width="9" height="9" />
+      <rect x="14" y="19" width="9" height="9" />
+      <rect x="32" y="19" width="9" height="9" />
+      <rect x="23" y="28" width="9" height="9" />
+    </g>
+    <g fill="#e0231b">
+      <rect x="229" y="10" width="9" height="9" />
+      <rect x="247" y="10" width="9" height="9" />
+      <rect x="238" y="19" width="9" height="9" />
+      <rect x="229" y="28" width="9" height="9" />
+      <rect x="247" y="28" width="9" height="9" />
+    </g>
+    <g fill="#e7e5e4" opacity="0.65">
+      <rect x="238" y="10" width="9" height="9" />
+      <rect x="229" y="19" width="9" height="9" />
+      <rect x="247" y="19" width="9" height="9" />
+      <rect x="238" y="28" width="9" height="9" />
+    </g>
+  </g>
+  <text x="52" y="46" font-family="Impact, Haettenschweiler, 'Arial Narrow', 'Arial Black', sans-serif" font-size="34" font-weight="900" letter-spacing="2" fill="url(#kny-ink)">KNY</text>
+  <text x="124" y="46" font-family="Impact, Haettenschweiler, 'Arial Narrow', 'Arial Black', sans-serif" font-size="34" font-weight="900" letter-spacing="2" fill="#f5f5f5">ARCADE</text>
+  <rect x="6" y="62" width="248" height="3" rx="1.5" fill="#e0231b" opacity="0.75" />
+</svg>

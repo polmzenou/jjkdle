@@ -61,7 +61,20 @@ export const jjk: UniverseConfig = {
   labels: {
     tagline:
       "Une collection de mini-jeux nerveux pour tester ta connaissance de l'univers et libérer ton énergie maudite.",
+    // Ces cinq libellés étaient EN DUR dans `app/[universe]/page.tsx` et
+    // `app/[universe]/games/page.tsx` : ils y sont repris à l'identique, pour que
+    // la landing JJK reste mot pour mot ce qu'elle était.
+    arcadeLead: "La salle d'arcade maudite dédiée à",
+    ctaTitle: "Prêt à libérer ton énergie maudite ?",
+    maintenanceTitle: "Extension de Territoire en cours",
+    gamesHeading: "Les jeux maudits",
+    gamesLead: "Choisis ton défi et libère ton énergie maudite.",
+    heroKanji: "呪",
+    kanjiColumns: ["呪術廻", "領域展開", "無量空処", "両面宿儺"],
   },
+  // L'ofuda et le sceau d'asservissement de la landing : dessinés pour JJK, ils
+  // ne s'affichent donc que sur cet univers.
+  decorArtwork: "jjk-cursed-objects",
   booru: {
     seriesTag: "jujutsu_kaisen",
     // Filtre historique du bouton « OUAIS » : uniquement les persos féminins.

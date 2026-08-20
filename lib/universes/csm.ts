@@ -130,6 +130,16 @@ export const csm: UniverseConfig = {
   labels: {
     tagline:
       "Une collection de mini-jeux nerveux pour tester ta connaissance de l'univers et faire hurler la tronçonneuse.",
+    arcadeLead: "La salle d'arcade la plus sanglante, dédiée à",
+    ctaTitle: "Prêt à tirer sur la corde ?",
+    maintenanceTitle: "Révision de la tronçonneuse en cours",
+    gamesHeading: "Les jeux des démons",
+    gamesLead: "Choisis ton défi et fais hurler la tronçonneuse.",
+    // 鬼 = démon, le motif central de Chainsaw Man.
+    heroKanji: "鬼",
+    // 電気鋸人 (l'homme-tronçonneuse), 悪魔 (démon), 公安 (Sécurité publique),
+    // 契約 (contrat).
+    kanjiColumns: ["電気鋸人", "悪魔", "公安", "契約"],
   },
   booru: {
     seriesTag: "chainsaw_man",

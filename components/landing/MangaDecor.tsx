@@ -1,5 +1,7 @@
+import type { UniverseConfig } from "@/lib/universes/types";
+
 /**
- * Couche décorative "manga / Jujutsu Kaisen" pour la landing.
+ * Couche décorative "manga" pour la landing d'un univers.
  *
  * Purement visuelle (aria-hidden, pointer-events-none) et 100 % CSS/SVG :
  * aucune image copyrightée, net sur tous les écrans, perf-friendly.
@@ -7,15 +9,26 @@
  * Contient :
  *  - une trame halftone façon impression manga,
  *  - des lignes de concentration (集中線) derrière le hero,
- *  - des colonnes de kanji en fond sur les côtés,
- *  - deux "objets maudits" stylisés (ofuda 呪符, sceau 縛り).
+ *  - des colonnes de kanji en fond sur les côtés — celles de L'UNIVERS COURANT,
+ *  - éventuellement des objets stylisés, propres à un anime (cf. `artwork`).
  *
  * Volontairement aéré pour ne pas surcharger : la trame et les lignes de
  * concentration sont visibles partout ; les colonnes de kanji apparaissent
- * dès `md` et les objets maudits dès `lg`, pour ne pas empiéter sur le
+ * dès `md` et les objets flottants dès `lg`, pour ne pas empiéter sur le
  * contenu en mobile.
+ *
+ * ⚠️ Les kanji étaient EN DUR (呪術廻 / 領域展開 / 無量空処 / 両面宿儺 — du lore
+ * strictement Jujutsu Kaisen) et s'affichaient donc sur la landing de tous les
+ * animes. Ils viennent maintenant de `labels.kanjiColumns`.
  */
-export function MangaDecor() {
+export function MangaDecor({
+  kanjiColumns,
+  artwork,
+}: {
+  kanjiColumns: UniverseConfig["labels"]["kanjiColumns"];
+  artwork?: UniverseConfig["decorArtwork"];
+}) {
+  const [topLeft, bottomLeft, topRight, bottomRight] = kanjiColumns;
   return (
     <div
       aria-hidden
@@ -39,8 +52,10 @@ export function MangaDecor() {
       <div
         className="absolute left-1/2 top-[-18%] h-[80vh] w-[80vh] -translate-x-1/2 opacity-[0.45]"
         style={{
+          // Teinte du thème et non un violet en dur : les lignes s'affichent sur
+          // TOUS les univers, un `rgba(167,139,250)` y plaquait l'accent de JJK.
           background:
-            "repeating-conic-gradient(from 0deg at 50% 50%, rgba(167,139,250,0.16) 0deg 0.55deg, transparent 0.55deg 4.2deg)",
+            "repeating-conic-gradient(from 0deg at 50% 50%, rgb(var(--color-domain-light) / 0.16) 0deg 0.55deg, transparent 0.55deg 4.2deg)",
           maskImage:
             "radial-gradient(circle, transparent 26%, black 58%, transparent 82%)",
           WebkitMaskImage:
@@ -51,34 +66,38 @@ export function MangaDecor() {
       {/* ── Colonnes de kanji en fond — côté gauche ── */}
       <KanjiColumn
         className="left-3 top-28 text-white/[0.09] xl:left-6"
-        text="呪術廻"
+        text={topLeft}
         size="clamp(3.5rem, 7vw, 6.5rem)"
       />
       <KanjiColumn
         className="left-6 top-[58%] text-domain-light/[0.13]"
-        text="領域展開"
+        text={bottomLeft}
         size="clamp(2.5rem, 4.5vw, 4rem)"
       />
 
       {/* ── Colonnes de kanji en fond — côté droit ── */}
       <KanjiColumn
         className="right-3 top-20 text-white/[0.09] xl:right-6"
-        text="無量空処"
+        text={topRight}
         size="clamp(3.5rem, 7vw, 6.5rem)"
       />
       <KanjiColumn
         className="right-7 top-[62%] text-cursed-light/[0.13]"
-        text="両面宿儺"
+        text={bottomRight}
         size="clamp(2.5rem, 4.5vw, 4rem)"
       />
 
-      {/* ── Objets maudits flottants (2 accents discrets, dès lg) ── */}
-      <FloatingObject className="left-[4%] top-[32%]" delay="0s" duration="8s" rotate={-8}>
-        <Ofuda />
-      </FloatingObject>
-      <FloatingObject className="right-[5%] top-[58%]" delay="1.4s" duration="9s" rotate={9}>
-        <CursedSeal />
-      </FloatingObject>
+      {/* ── Objets flottants propres à l'anime (2 accents discrets, dès lg) ── */}
+      {artwork === "jjk-cursed-objects" && (
+        <>
+          <FloatingObject className="left-[4%] top-[32%]" delay="0s" duration="8s" rotate={-8}>
+            <Ofuda />
+          </FloatingObject>
+          <FloatingObject className="right-[5%] top-[58%]" delay="1.4s" duration="9s" rotate={9}>
+            <CursedSeal />
+          </FloatingObject>
+        </>
+      )}
     </div>
   );
 }
