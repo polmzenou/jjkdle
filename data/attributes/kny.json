@@ -1,0 +1,789 @@
+{
+  "tanjiro-kamado": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "DEMON_SLAYER_CORPS",
+    "knyrank": "MIZUNOTO",
+    "knybreathing": "SUN",
+    "knystatus": "ALIVE",
+    "knyAppearanceArc": "FINAL_SELECTION",
+    "knypower": 463175
+  },
+  "nezuko-kamado": {
+    "knyspecies": "HYBRID",
+    "knygender": "FEMALE",
+    "knyaffiliation": "OTHER",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "ALIVE",
+    "knyAppearanceArc": "FINAL_SELECTION",
+    "knypower": 394343
+  },
+  "zenitsu-agatsuma": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "DEMON_SLAYER_CORPS",
+    "knyrank": "MIZUNOTO",
+    "knybreathing": "THUNDER",
+    "knystatus": "ALIVE",
+    "knyAppearanceArc": "TSUZUMI_MANSION",
+    "knypower": 347605
+  },
+  "inosuke-hashibira": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "DEMON_SLAYER_CORPS",
+    "knyrank": "MIZUNOTO",
+    "knybreathing": "BEAST",
+    "knystatus": "ALIVE",
+    "knyAppearanceArc": "TSUZUMI_MANSION",
+    "knypower": 362733
+  },
+  "kanao-tsuyuri": {
+    "knyspecies": "HUMAN",
+    "knygender": "FEMALE",
+    "knyaffiliation": "DEMON_SLAYER_CORPS",
+    "knyrank": "MIZUNOTO",
+    "knybreathing": "FLOWER",
+    "knystatus": "ALIVE",
+    "knyAppearanceArc": "BUTTERFLY_MANSION",
+    "knypower": 332918
+  },
+  "genya-shinazugawa": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "DEMON_SLAYER_CORPS",
+    "knyrank": "MIZUNOTO",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "SWORDSMITH_VILLAGE",
+    "knypower": 278444
+  },
+  "giyu-tomioka": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "DEMON_SLAYER_CORPS",
+    "knyrank": "HASHIRA",
+    "knybreathing": "WATER",
+    "knystatus": "ALIVE",
+    "knyAppearanceArc": "FINAL_SELECTION",
+    "knypower": 519941
+  },
+  "shinobu-kocho": {
+    "knyspecies": "HUMAN",
+    "knygender": "FEMALE",
+    "knyaffiliation": "DEMON_SLAYER_CORPS",
+    "knyrank": "HASHIRA",
+    "knybreathing": "INSECT",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "NATAGUMO",
+    "knypower": 410838
+  },
+  "kyojuro-rengoku": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "DEMON_SLAYER_CORPS",
+    "knyrank": "HASHIRA",
+    "knybreathing": "FLAME",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "MUGEN_TRAIN",
+    "knypower": 539881
+  },
+  "tengen-uzui": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "DEMON_SLAYER_CORPS",
+    "knyrank": "HASHIRA",
+    "knybreathing": "SOUND",
+    "knystatus": "ALIVE",
+    "knyAppearanceArc": "ENTERTAINMENT_DISTRICT",
+    "knypower": 427804
+  },
+  "mitsuri-kanroji": {
+    "knyspecies": "HUMAN",
+    "knygender": "FEMALE",
+    "knyaffiliation": "DEMON_SLAYER_CORPS",
+    "knyrank": "HASHIRA",
+    "knybreathing": "LOVE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "SWORDSMITH_VILLAGE",
+    "knypower": 481595
+  },
+  "muichiro-tokito": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "DEMON_SLAYER_CORPS",
+    "knyrank": "HASHIRA",
+    "knybreathing": "MIST",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "SWORDSMITH_VILLAGE",
+    "knypower": 500515
+  },
+  "gyomei-himejima": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "DEMON_SLAYER_CORPS",
+    "knyrank": "HASHIRA",
+    "knybreathing": "STONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "HASHIRA_TRAINING",
+    "knypower": 694473
+  },
+  "sanemi-shinazugawa": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "DEMON_SLAYER_CORPS",
+    "knyrank": "HASHIRA",
+    "knybreathing": "WIND",
+    "knystatus": "ALIVE",
+    "knyAppearanceArc": "BUTTERFLY_MANSION",
+    "knypower": 647549
+  },
+  "obanai-iguro": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "DEMON_SLAYER_CORPS",
+    "knyrank": "HASHIRA",
+    "knybreathing": "SERPENT",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "BUTTERFLY_MANSION",
+    "knypower": 445247
+  },
+  "sakonji-urokodaki": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "DEMON_SLAYER_CORPS",
+    "knyrank": "HASHIRA",
+    "knybreathing": "WATER",
+    "knystatus": "ALIVE",
+    "knyAppearanceArc": "FINAL_SELECTION",
+    "knypower": 318666
+  },
+  "jigoro-kuwajima": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "DEMON_SLAYER_CORPS",
+    "knyrank": "HASHIRA",
+    "knybreathing": "THUNDER",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "NATAGUMO",
+    "knypower": 253670
+  },
+  "kanae-kocho": {
+    "knyspecies": "HUMAN",
+    "knygender": "FEMALE",
+    "knyaffiliation": "DEMON_SLAYER_CORPS",
+    "knyrank": "HASHIRA",
+    "knybreathing": "FLOWER",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "BUTTERFLY_MANSION",
+    "knypower": 378310
+  },
+  "aoi-kanzaki": {
+    "knyspecies": "HUMAN",
+    "knygender": "FEMALE",
+    "knyaffiliation": "DEMON_SLAYER_CORPS",
+    "knyrank": "MIZUNOTO",
+    "knybreathing": "WATER",
+    "knystatus": "ALIVE",
+    "knyAppearanceArc": "BUTTERFLY_MANSION",
+    "knypower": 72472
+  },
+  "murata": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "DEMON_SLAYER_CORPS",
+    "knyrank": "MIZUNOTO",
+    "knybreathing": "WATER",
+    "knystatus": "ALIVE",
+    "knyAppearanceArc": "NATAGUMO",
+    "knypower": 67565
+  },
+  "goto": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "DEMON_SLAYER_CORPS",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "ALIVE",
+    "knyAppearanceArc": "BUTTERFLY_MANSION",
+    "knypower": 12082
+  },
+  "ozaki": {
+    "knyspecies": "HUMAN",
+    "knygender": "FEMALE",
+    "knyaffiliation": "DEMON_SLAYER_CORPS",
+    "knyrank": "MIZUNOTO",
+    "knybreathing": "OTHER",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "NATAGUMO",
+    "knypower": 33275
+  },
+  "sumi-nakahara": {
+    "knyspecies": "HUMAN",
+    "knygender": "FEMALE",
+    "knyaffiliation": "DEMON_SLAYER_CORPS",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "ALIVE",
+    "knyAppearanceArc": "BUTTERFLY_MANSION",
+    "knypower": 580
+  },
+  "kiyo-terauchi": {
+    "knyspecies": "HUMAN",
+    "knygender": "FEMALE",
+    "knyaffiliation": "DEMON_SLAYER_CORPS",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "ALIVE",
+    "knyAppearanceArc": "BUTTERFLY_MANSION",
+    "knypower": 734
+  },
+  "naho-takada": {
+    "knyspecies": "HUMAN",
+    "knygender": "FEMALE",
+    "knyaffiliation": "DEMON_SLAYER_CORPS",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "ALIVE",
+    "knyAppearanceArc": "BUTTERFLY_MANSION",
+    "knypower": 453
+  },
+  "hotaru-haganezuka": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "SWORDSMITH_VILLAGE",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "ALIVE",
+    "knyAppearanceArc": "FINAL_SELECTION",
+    "knypower": 6358
+  },
+  "kozo-kanamori": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "SWORDSMITH_VILLAGE",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "ALIVE",
+    "knyAppearanceArc": "SWORDSMITH_VILLAGE",
+    "knypower": 347
+  },
+  "tecchin-tecchikawahara": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "SWORDSMITH_VILLAGE",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "ALIVE",
+    "knyAppearanceArc": "SWORDSMITH_VILLAGE",
+    "knypower": 1702
+  },
+  "senjuro-rengoku": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "CIVILIAN",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "ALIVE",
+    "knyAppearanceArc": "MUGEN_TRAIN",
+    "knypower": 734
+  },
+  "shinjuro-rengoku": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "DEMON_SLAYER_CORPS",
+    "knyrank": "HASHIRA",
+    "knybreathing": "FLAME",
+    "knystatus": "ALIVE",
+    "knyAppearanceArc": "MUGEN_TRAIN",
+    "knypower": 304841
+  },
+  "makomo": {
+    "knyspecies": "HUMAN",
+    "knygender": "FEMALE",
+    "knyaffiliation": "DEMON_SLAYER_CORPS",
+    "knyrank": "NO_RANK",
+    "knybreathing": "WATER",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "FINAL_SELECTION",
+    "knypower": 88680
+  },
+  "sabito": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "DEMON_SLAYER_CORPS",
+    "knyrank": "NO_RANK",
+    "knybreathing": "WATER",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "FINAL_SELECTION",
+    "knypower": 241875
+  },
+  "yoriichi-tsugikuni": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "DEMON_SLAYER_CORPS",
+    "knyrank": "HASHIRA",
+    "knybreathing": "SUN",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "SWORDSMITH_VILLAGE",
+    "knypower": 905700
+  },
+  "muzan-kibutsuji": {
+    "knyspecies": "DEMON",
+    "knygender": "MALE",
+    "knyaffiliation": "OTHER",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "ASAKUSA",
+    "knypower": 877159
+  },
+  "kokushibo": {
+    "knyspecies": "DEMON",
+    "knygender": "MALE",
+    "knyaffiliation": "TWELVE_KIZUKI",
+    "knyrank": "NO_RANK",
+    "knybreathing": "MOON",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "SWORDSMITH_VILLAGE",
+    "knypower": 849243
+  },
+  "doma": {
+    "knyspecies": "DEMON",
+    "knygender": "MALE",
+    "knyaffiliation": "TWELVE_KIZUKI",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "INFINITY_CASTLE",
+    "knypower": 795260
+  },
+  "akaza": {
+    "knyspecies": "DEMON",
+    "knygender": "MALE",
+    "knyaffiliation": "TWELVE_KIZUKI",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "MUGEN_TRAIN",
+    "knypower": 743690
+  },
+  "nakime": {
+    "knyspecies": "DEMON",
+    "knygender": "FEMALE",
+    "knyaffiliation": "TWELVE_KIZUKI",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "SWORDSMITH_VILLAGE",
+    "knypower": 581333
+  },
+  "hantengu": {
+    "knyspecies": "DEMON",
+    "knygender": "MALE",
+    "knyaffiliation": "TWELVE_KIZUKI",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "SWORDSMITH_VILLAGE",
+    "knypower": 718791
+  },
+  "gyokko": {
+    "knyspecies": "DEMON",
+    "knygender": "MALE",
+    "knyaffiliation": "TWELVE_KIZUKI",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "SWORDSMITH_VILLAGE",
+    "knypower": 670728
+  },
+  "gyutaro": {
+    "knyspecies": "DEMON",
+    "knygender": "MALE",
+    "knyaffiliation": "TWELVE_KIZUKI",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "ENTERTAINMENT_DISTRICT",
+    "knypower": 624929
+  },
+  "daki": {
+    "knyspecies": "DEMON",
+    "knygender": "FEMALE",
+    "knyaffiliation": "TWELVE_KIZUKI",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "ENTERTAINMENT_DISTRICT",
+    "knypower": 602859
+  },
+  "kaigaku": {
+    "knyspecies": "DEMON",
+    "knygender": "MALE",
+    "knyaffiliation": "TWELVE_KIZUKI",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "HASHIRA_TRAINING",
+    "knypower": 560343
+  },
+  "enmu": {
+    "knyspecies": "DEMON",
+    "knygender": "MALE",
+    "knyaffiliation": "TWELVE_KIZUKI",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "MUGEN_TRAIN",
+    "knypower": 362733
+  },
+  "rui": {
+    "knyspecies": "DEMON",
+    "knygender": "MALE",
+    "knyaffiliation": "TWELVE_KIZUKI",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "NATAGUMO",
+    "knypower": 318666
+  },
+  "rokuro": {
+    "knyspecies": "DEMON",
+    "knygender": "MALE",
+    "knyaffiliation": "TWELVE_KIZUKI",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "MUGEN_TRAIN",
+    "knypower": 265858
+  },
+  "wakuraba": {
+    "knyspecies": "DEMON",
+    "knygender": "MALE",
+    "knyaffiliation": "TWELVE_KIZUKI",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "MUGEN_TRAIN",
+    "knypower": 241875
+  },
+  "mukago": {
+    "knyspecies": "DEMON",
+    "knygender": "FEMALE",
+    "knyaffiliation": "TWELVE_KIZUKI",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "MUGEN_TRAIN",
+    "knypower": 219432
+  },
+  "kamanue": {
+    "knyspecies": "DEMON",
+    "knygender": "MALE",
+    "knyaffiliation": "TWELVE_KIZUKI",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "MUGEN_TRAIN",
+    "knypower": 198472
+  },
+  "kyogai": {
+    "knyspecies": "DEMON",
+    "knygender": "MALE",
+    "knyaffiliation": "DEMON_UNRANKED",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "TSUZUMI_MANSION",
+    "knypower": 160781
+  },
+  "tamayo": {
+    "knyspecies": "DEMON",
+    "knygender": "FEMALE",
+    "knyaffiliation": "OTHER",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "ASAKUSA",
+    "knypower": 178940
+  },
+  "yushiro": {
+    "knyspecies": "DEMON",
+    "knygender": "MALE",
+    "knyaffiliation": "OTHER",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "ALIVE",
+    "knyAppearanceArc": "ASAKUSA",
+    "knypower": 20810
+  },
+  "susamaru": {
+    "knyspecies": "DEMON",
+    "knygender": "FEMALE",
+    "knyaffiliation": "DEMON_UNRANKED",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "ASAKUSA",
+    "knypower": 113997
+  },
+  "yahaba": {
+    "knyspecies": "DEMON",
+    "knygender": "MALE",
+    "knyaffiliation": "DEMON_UNRANKED",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "ASAKUSA",
+    "knypower": 100787
+  },
+  "hand-demon": {
+    "knyspecies": "DEMON",
+    "knygender": "MALE",
+    "knyaffiliation": "DEMON_UNRANKED",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "FINAL_SELECTION",
+    "knypower": 36282
+  },
+  "temple-demon": {
+    "knyspecies": "DEMON",
+    "knygender": "MALE",
+    "knyaffiliation": "DEMON_UNRANKED",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "FINAL_SELECTION",
+    "knypower": 8333
+  },
+  "swamp-demon": {
+    "knyspecies": "DEMON",
+    "knygender": "MALE",
+    "knyaffiliation": "DEMON_UNRANKED",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knypower": 13565
+  },
+  "spider-demon-father": {
+    "knyspecies": "DEMON",
+    "knygender": "MALE",
+    "knyaffiliation": "DEMON_UNRANKED",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "NATAGUMO",
+    "knypower": 62893
+  },
+  "spider-demon-mother": {
+    "knyspecies": "DEMON",
+    "knygender": "FEMALE",
+    "knyaffiliation": "DEMON_UNRANKED",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "NATAGUMO",
+    "knypower": 72472
+  },
+  "spider-demon-brother": {
+    "knyspecies": "DEMON",
+    "knygender": "MALE",
+    "knyaffiliation": "DEMON_UNRANKED",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "NATAGUMO",
+    "knypower": 50235
+  },
+  "spider-demon-sister": {
+    "knyspecies": "DEMON",
+    "knygender": "FEMALE",
+    "knyaffiliation": "DEMON_UNRANKED",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "NATAGUMO",
+    "knypower": 39476
+  },
+  "tongue-demon": {
+    "knyspecies": "DEMON",
+    "knygender": "MALE",
+    "knyaffiliation": "DEMON_UNRANKED",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "TSUZUMI_MANSION",
+    "knypower": 18789
+  },
+  "horned-demon": {
+    "knyspecies": "DEMON",
+    "knygender": "MALE",
+    "knyaffiliation": "DEMON_UNRANKED",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "TSUZUMI_MANSION",
+    "knypower": 15172
+  },
+  "serpent-demon": {
+    "knyspecies": "DEMON",
+    "knygender": "FEMALE",
+    "knyaffiliation": "DEMON_UNRANKED",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "HASHIRA_TRAINING",
+    "knypower": 27792
+  },
+  "sumiyoshi": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "CIVILIAN",
+    "knyrank": "NO_RANK",
+    "knybreathing": "SUN",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "SWORDSMITH_VILLAGE",
+    "knypower": 1138
+  },
+  "suyako": {
+    "knyspecies": "HUMAN",
+    "knygender": "FEMALE",
+    "knyaffiliation": "CIVILIAN",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "SWORDSMITH_VILLAGE",
+    "knypower": 57
+  },
+  "saburo": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "CIVILIAN",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "ALIVE",
+    "knyAppearanceArc": "FINAL_SELECTION",
+    "knypower": 57
+  },
+  "teruko": {
+    "knyspecies": "HUMAN",
+    "knygender": "FEMALE",
+    "knyaffiliation": "CIVILIAN",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "ALIVE",
+    "knyAppearanceArc": "TSUZUMI_MANSION",
+    "knypower": 57
+  },
+  "shoichi": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "CIVILIAN",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "ALIVE",
+    "knyAppearanceArc": "TSUZUMI_MANSION",
+    "knypower": 57
+  },
+  "kiyoshi": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "CIVILIAN",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "ALIVE",
+    "knyAppearanceArc": "TSUZUMI_MANSION",
+    "knypower": 57
+  },
+  "kotetsu": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "SWORDSMITH_VILLAGE",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "ALIVE",
+    "knyAppearanceArc": "SWORDSMITH_VILLAGE",
+    "knypower": 183
+  },
+  "kanata-ubuyashiki": {
+    "knyspecies": "HUMAN",
+    "knygender": "FEMALE",
+    "knyaffiliation": "UBUYASHIKI",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "ALIVE",
+    "knyAppearanceArc": "FINAL_SELECTION",
+    "knypower": 1138
+  },
+  "kiriya-ubuyashiki": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "UBUYASHIKI",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "ALIVE",
+    "knyAppearanceArc": "FINAL_SELECTION",
+    "knypower": 2056
+  },
+  "amane-ubuyashiki": {
+    "knyspecies": "HUMAN",
+    "knygender": "FEMALE",
+    "knyaffiliation": "UBUYASHIKI",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "BUTTERFLY_MANSION",
+    "knypower": 2465
+  },
+  "kagaya-ubuyashiki": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "UBUYASHIKI",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "BUTTERFLY_MANSION",
+    "knypower": 2933
+  },
+  "hinaki-ubuyashiki": {
+    "knyspecies": "HUMAN",
+    "knygender": "FEMALE",
+    "knyaffiliation": "UBUYASHIKI",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "HASHIRA_TRAINING",
+    "knypower": 918
+  },
+  "nichika-ubuyashiki": {
+    "knyspecies": "HUMAN",
+    "knygender": "FEMALE",
+    "knyaffiliation": "UBUYASHIKI",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "DEAD",
+    "knyAppearanceArc": "HASHIRA_TRAINING",
+    "knypower": 734
+  },
+  "kuina-ubuyashiki": {
+    "knyspecies": "HUMAN",
+    "knygender": "FEMALE",
+    "knyaffiliation": "UBUYASHIKI",
+    "knyrank": "NO_RANK",
+    "knybreathing": "NONE",
+    "knystatus": "ALIVE",
+    "knyAppearanceArc": "HASHIRA_TRAINING",
+    "knypower": 1397
+  },
+  "michikatsu-tsugikuni": {
+    "knyspecies": "HUMAN",
+    "knygender": "MALE",
+    "knyaffiliation": "DEMON_SLAYER_CORPS",
+    "knyrank": "HASHIRA",
+    "knybreathing": "MOON",
+    "knystatus": "DEAD"
+  }
+}

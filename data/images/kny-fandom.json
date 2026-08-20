@@ -1,0 +1,141 @@
+{
+  "_comment": [
+    "Correspondance roster KNY → wiki kimetsu-no-yaiba.fandom.com.",
+    "Lu par : npx tsx scripts/seed-images-fandom.ts --universe kny",
+    "Clé = Character.id. Valeur = titre de PAGE, ou { file } pour épingler un fichier.",
+    "",
+    "── Pourquoi tant de fichiers épinglés ──",
+    "L'infobox de ce wiki sert souvent une CAPTURE 16:9 de l'anime plutôt qu'un",
+    "portrait. Dans une grille Qui est-ce ? ou sur une carte, un 16:9 se recadre en",
+    "bouillie. Les 20 entrées { file } ci-dessous pointent donc vers le visuel de",
+    "personnage (les « design.png » du wiki, verticaux) au lieu de la page.",
+    "",
+    "── Cas particuliers ──",
+    "· sumiyoshi / suyako : les pages sont « Sumiyoshi Kamado » / « Suyako Kamado ».",
+    "· michikatsu-tsugikuni : la page « Michikatsu Tsugikuni » REDIRIGE vers",
+    "  « Kokushibo » — sans épinglage, ces deux personnages du roster partageraient",
+    "  le même visage. Le fichier retenu est le seul plan serré de sa forme humaine.",
+    "· spider-demon-sister : « Spider Daughter design » et non « Original Spider",
+    "  Daughter design », qui montre sa forme d'avant transformation.",
+    "· hand-demon : « Hand Demon Design » et non « Child Hand Demon design ».",
+    "· yoriichi-tsugikuni : aucun rendu anime vertical n'existe sur le wiki ; le",
+    "  visuel manga colorisé est le seul portrait propre disponible.",
+    "",
+    "── Volontairement ABSENTS (aucun portrait sur le wiki) ──",
+    "kotetsu, tongue-demon : leur page n'a qu'une capture 16:9 et leur galerie que",
+    "des planches manga. Laissés sans image — visibles dans /admin → « Sans image »."
+  ],
+  "tanjiro-kamado": "Tanjiro Kamado",
+  "nezuko-kamado": "Nezuko Kamado",
+  "zenitsu-agatsuma": "Zenitsu Agatsuma",
+  "inosuke-hashibira": "Inosuke Hashibira",
+  "kanao-tsuyuri": "Kanao Tsuyuri",
+  "genya-shinazugawa": "Genya Shinazugawa",
+  "giyu-tomioka": "Giyu Tomioka",
+  "shinobu-kocho": "Shinobu Kocho",
+  "kyojuro-rengoku": "Kyojuro Rengoku",
+  "tengen-uzui": "Tengen Uzui",
+  "mitsuri-kanroji": "Mitsuri Kanroji",
+  "muichiro-tokito": "Muichiro Tokito",
+  "gyomei-himejima": "Gyomei Himejima",
+  "sanemi-shinazugawa": "Sanemi Shinazugawa",
+  "obanai-iguro": "Obanai Iguro",
+  "sakonji-urokodaki": "Sakonji Urokodaki",
+  "jigoro-kuwajima": "Jigoro Kuwajima",
+  "kanae-kocho": "Kanae Kocho",
+  "shinjuro-rengoku": {
+    "file": "Shinjuro design.png"
+  },
+  "senjuro-rengoku": "Senjuro Rengoku",
+  "makomo": "Makomo",
+  "sabito": "Sabito",
+  "aoi-kanzaki": "Aoi Kanzaki",
+  "murata": "Murata",
+  "goto": "Goto",
+  "ozaki": {
+    "file": "Ozaki design.png"
+  },
+  "sumi-nakahara": "Sumi Nakahara",
+  "kiyo-terauchi": "Kiyo Terauchi",
+  "naho-takada": "Naho Takada",
+  "hotaru-haganezuka": "Hotaru Haganezuka",
+  "kozo-kanamori": {
+    "file": "Kozo design.png"
+  },
+  "tecchin-tecchikawahara": {
+    "file": "Tecchin profile pic.png"
+  },
+  "yoriichi-tsugikuni": {
+    "file": "Yoriichi colored body 2.png"
+  },
+  "michikatsu-tsugikuni": {
+    "file": "Michikatsu laments being unable to master Sun Breathing.png"
+  },
+  "muzan-kibutsuji": "Muzan Kibutsuji",
+  "kokushibo": "Kokushibo",
+  "doma": "Doma",
+  "akaza": "Akaza",
+  "nakime": "Nakime",
+  "hantengu": "Hantengu",
+  "gyokko": "Gyokko",
+  "gyutaro": "Gyutaro",
+  "daki": "Daki",
+  "kaigaku": "Kaigaku",
+  "enmu": "Enmu",
+  "rokuro": "Rokuro",
+  "wakuraba": {
+    "file": "Wakuraba design.png"
+  },
+  "mukago": "Mukago",
+  "rui": "Rui",
+  "kamanue": "Kamanue",
+  "kyogai": "Kyogai",
+  "tamayo": "Tamayo",
+  "yushiro": "Yushiro",
+  "susamaru": "Susamaru",
+  "yahaba": {
+    "file": "Yahaba design.png"
+  },
+  "hand-demon": {
+    "file": "Hand Demon Design.png"
+  },
+  "temple-demon": {
+    "file": "Temple Demon design.png"
+  },
+  "swamp-demon": {
+    "file": "Three-Horned Swamp Demon design.png"
+  },
+  "spider-demon-father": {
+    "file": "Spider Father design.png"
+  },
+  "spider-demon-mother": {
+    "file": "Spider Mother design.png"
+  },
+  "spider-demon-brother": {
+    "file": "Spider Son design.png"
+  },
+  "spider-demon-sister": {
+    "file": "Spider Daughter design.png"
+  },
+  "horned-demon": {
+    "file": "Horned Demon design.png"
+  },
+  "serpent-demon": "Serpent Demon",
+  "sumiyoshi": "Sumiyoshi Kamado",
+  "suyako": "Suyako Kamado",
+  "saburo": "Saburo",
+  "teruko": "Teruko",
+  "shoichi": "Shoichi",
+  "kiyoshi": {
+    "file": "Kiyoshi design.png"
+  },
+  "kagaya-ubuyashiki": "Kagaya Ubuyashiki",
+  "amane-ubuyashiki": {
+    "file": "Amane colored body.png"
+  },
+  "kiriya-ubuyashiki": "Kiriya Ubuyashiki",
+  "kanata-ubuyashiki": "Kanata Ubuyashiki",
+  "hinaki-ubuyashiki": "Hinaki Ubuyashiki",
+  "nichika-ubuyashiki": "Nichika Ubuyashiki",
+  "kuina-ubuyashiki": "Kuina Ubuyashiki"
+}

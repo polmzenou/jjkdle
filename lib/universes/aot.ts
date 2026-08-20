@@ -68,22 +68,25 @@ export const aot: UniverseConfig = {
   // COMPLET (les 8 jeux, description et tags inclus) — sans quoi le registre
   // retomberait sur ses valeurs par défaut, qui sont celles de JJK.
   //
-  // `previewImage` est volontairement ABSENT partout : une capture montre le
-  // roster de l'anime, et aucune capture AOT n'existe encore. Les jeux gardent
-  // donc temporairement celle de JJK — ajouter `/assets/<jeu>-screen-aot.png`
-  // puis le champ ici dès que les visuels existent.
+  // `previewImage` suit la même règle : une capture montre le roster de l'anime,
+  // celle du registre montre donc des persos JJK. Les 4 jeux sans capture AOT
+  // (Scout Draft, AOT Random Battle, Qui est-ce ?, AOT Codenames) gardent
+  // temporairement celle de JJK — ajouter le PNG dans `public/assets/` puis le
+  // champ ici dès que les visuels existent.
   gameCopy: {
     builder: {
       title: "Build the Perfect Soldier",
       description:
         "Compose ton soldat idéal catégorie par catégorie. Chaque choix verrouille une stat et re-mélange le reste. Score sur 1000, de la simple recrue au rang S.",
       tags: ["tap game", "roster AOT", "score"],
+      previewImage: "/assets/builder-aot.png",
     },
     ranking: {
       title: "AOT Pyramid",
       description:
         "Classe 8 personnages du plus fort au plus faible selon la consigne. Les bonnes positions se verrouillent, les fausses reviennent. 4 tentatives, jusqu'à 10 000 points.",
       tags: ["ranking", "drag & drop", "roster AOT"],
+      previewImage: "/assets/pyramid-aot.png",
     },
     "jujutsu-draft": {
       title: "Scout Draft",
@@ -114,12 +117,14 @@ export const aot: UniverseConfig = {
       description:
         "Devine le personnage Attack on Titan mystère du jour. Chaque proposition révèle des indices par attribut (espèce, bataillon, pouvoir de titan, arc…) avec des flèches ↑/↓. Un perso par jour, essais illimités.",
       tags: ["quotidien", "déduction", "roster AOT"],
+      previewImage: "/assets/idle-screen-aot.png",
     },
     "higher-lower": {
       title: "AOT Higher/Lower",
       description:
         "Plus ou moins puissant ? Compare deux personnages du roster, devine si celui de droite dépasse celui de gauche en puissance et enchaîne les bonnes réponses le plus loin possible.",
       tags: ["quickfire", "déduction", "roster AOT"],
+      previewImage: "/assets/higher-lower-aot.png",
     },
   },
   // Higher/Lower compare la « Puissance » (attribut ORDINAL) plutôt qu'une jauge

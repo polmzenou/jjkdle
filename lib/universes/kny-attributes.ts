@@ -43,14 +43,15 @@ function ordinal(
 /**
  * Écart sous lequel la puissance passe en « proche » (orange).
  *
- * ⚠️ Contrairement à JJK (énergie occulte) et AOT (échelle aotdle), Kimetsu no
- * Yaiba n'a AUCUNE échelle de puissance canonique : celle du roster est donc à
- * choisir en la saisissant. La valeur ci-dessous suppose une échelle 0–10 000
- * (un Mizunoto de base à quelques centaines, une Lune supérieure au-delà de
- * 9 000), soit ~2 % d'étendue comme chez les autres univers. Saisir le roster
- * sur une autre échelle impose de réajuster cette constante.
+ * L'échelle du roster est celle du « CE » de kimetsudle.net, exactement comme
+ * AOT reprend celle d'aotdle : elle va de 57 (un villageois) à 905 700 (le
+ * sommet). La tolérance vaut ~1,3 % de l'étendue, le même ratio qu'AOT
+ * (25 000 sur 1 824 047).
+ *
+ * ⚠️ Cette échelle n'a rien à voir avec `Character.battleValue`, qui reste borné
+ * 0–100 et sert au jeu Battle. Les deux coexistent volontairement.
  */
-export const KNY_POWER_TOLERANCE = 200;
+export const KNY_POWER_TOLERANCE = 12_000;
 
 export const KNY_ATTRIBUTES: AttributeSpec[] = [
   {

@@ -1,0 +1,371 @@
+{
+  "akaza": {
+    "pouvoir-sanguinaire": 72,
+    "force-physique": 92,
+    "lunes": 88,
+    "battle-iq": 76,
+    "speed": 88
+  },
+  "aoi-kanzaki": {
+    "souffle": 48,
+    "corps-des-pourfendeurs": 50,
+    "nouvelle-generation": 44
+  },
+  "daki": {
+    "pouvoir-sanguinaire": 76,
+    "force-physique": 62,
+    "lunes": 64,
+    "battle-iq": 42,
+    "speed": 72
+  },
+  "doma": {
+    "pouvoir-sanguinaire": 94,
+    "force-physique": 76,
+    "lunes": 92,
+    "battle-iq": 74,
+    "speed": 78
+  },
+  "enmu": {
+    "pouvoir-sanguinaire": 78,
+    "force-physique": 40,
+    "lunes": 58,
+    "battle-iq": 72,
+    "speed": 50
+  },
+  "genya-shinazugawa": {
+    "force-physique": 78,
+    "corps-des-pourfendeurs": 58,
+    "nouvelle-generation": 66,
+    "battle-iq": 56
+  },
+  "giyu-tomioka": {
+    "souffle": 85,
+    "force-physique": 74,
+    "corps-des-pourfendeurs": 84,
+    "piliers": 86,
+    "sensei": 50,
+    "battle-iq": 78,
+    "speed": 76
+  },
+  "goto": {
+    "corps-des-pourfendeurs": 30
+  },
+  "gyokko": {
+    "pouvoir-sanguinaire": 80,
+    "lunes": 76,
+    "battle-iq": 48,
+    "speed": 62
+  },
+  "gyomei-himejima": {
+    "souffle": 92,
+    "force-physique": 100,
+    "corps-des-pourfendeurs": 94,
+    "piliers": 100,
+    "sensei": 84,
+    "battle-iq": 82,
+    "speed": 70
+  },
+  "gyutaro": {
+    "pouvoir-sanguinaire": 84,
+    "force-physique": 74,
+    "lunes": 78,
+    "battle-iq": 70,
+    "speed": 80
+  },
+  "hand-demon": {
+    "pouvoir-sanguinaire": 46,
+    "force-physique": 68
+  },
+  "hantengu": {
+    "pouvoir-sanguinaire": 90,
+    "force-physique": 72,
+    "lunes": 82,
+    "battle-iq": 50,
+    "speed": 68
+  },
+  "horned-demon": {
+    "pouvoir-sanguinaire": 30,
+    "force-physique": 44
+  },
+  "inosuke-hashibira": {
+    "souffle": 66,
+    "force-physique": 76,
+    "corps-des-pourfendeurs": 62,
+    "nouvelle-generation": 82,
+    "battle-iq": 60,
+    "speed": 74
+  },
+  "jigoro-kuwajima": {
+    "souffle": 72,
+    "corps-des-pourfendeurs": 70,
+    "piliers": 58,
+    "sensei": 88,
+    "battle-iq": 70
+  },
+  "kagaya-ubuyashiki": {
+    "corps-des-pourfendeurs": 100,
+    "sensei": 80,
+    "battle-iq": 96
+  },
+  "kaigaku": {
+    "pouvoir-sanguinaire": 62,
+    "souffle": 68,
+    "force-physique": 60,
+    "lunes": 70,
+    "nouvelle-generation": 70,
+    "battle-iq": 52,
+    "speed": 84
+  },
+  "kamanue": {
+    "pouvoir-sanguinaire": 34,
+    "lunes": 38,
+    "speed": 44
+  },
+  "kanae-kocho": {
+    "souffle": 76,
+    "corps-des-pourfendeurs": 74,
+    "piliers": 66,
+    "sensei": 78,
+    "battle-iq": 68
+  },
+  "kanao-tsuyuri": {
+    "souffle": 74,
+    "force-physique": 58,
+    "corps-des-pourfendeurs": 66,
+    "nouvelle-generation": 84,
+    "battle-iq": 74,
+    "speed": 86
+  },
+  "kokushibo": {
+    "pouvoir-sanguinaire": 82,
+    "souffle": 94,
+    "force-physique": 90,
+    "lunes": 100,
+    "battle-iq": 86,
+    "speed": 90
+  },
+  "kyogai": {
+    "pouvoir-sanguinaire": 66,
+    "force-physique": 52,
+    "battle-iq": 46,
+    "speed": 54
+  },
+  "kyojuro-rengoku": {
+    "souffle": 86,
+    "force-physique": 80,
+    "corps-des-pourfendeurs": 86,
+    "piliers": 84,
+    "battle-iq": 74
+  },
+  "makomo": {
+    "souffle": 56,
+    "corps-des-pourfendeurs": 38,
+    "speed": 58
+  },
+  "michikatsu-tsugikuni": {
+    "souffle": 92,
+    "force-physique": 78,
+    "corps-des-pourfendeurs": 72,
+    "piliers": 90,
+    "battle-iq": 74
+  },
+  "mitsuri-kanroji": {
+    "souffle": 79,
+    "force-physique": 86,
+    "corps-des-pourfendeurs": 76,
+    "piliers": 78,
+    "sensei": 66,
+    "battle-iq": 54,
+    "speed": 84
+  },
+  "muichiro-tokito": {
+    "souffle": 83,
+    "force-physique": 62,
+    "corps-des-pourfendeurs": 80,
+    "piliers": 82,
+    "sensei": 58,
+    "battle-iq": 80,
+    "speed": 88
+  },
+  "mukago": {
+    "pouvoir-sanguinaire": 36,
+    "lunes": 40,
+    "speed": 42
+  },
+  "murata": {
+    "souffle": 40,
+    "force-physique": 42,
+    "corps-des-pourfendeurs": 40,
+    "nouvelle-generation": 38,
+    "speed": 40
+  },
+  "muzan-kibutsuji": {
+    "pouvoir-sanguinaire": 100,
+    "force-physique": 88,
+    "battle-iq": 84,
+    "speed": 92
+  },
+  "nakime": {
+    "pouvoir-sanguinaire": 92,
+    "lunes": 80,
+    "battle-iq": 66
+  },
+  "nezuko-kamado": {
+    "pouvoir-sanguinaire": 68,
+    "force-physique": 72,
+    "nouvelle-generation": 88,
+    "speed": 74
+  },
+  "obanai-iguro": {
+    "souffle": 82,
+    "force-physique": 70,
+    "corps-des-pourfendeurs": 78,
+    "piliers": 80,
+    "sensei": 62,
+    "battle-iq": 76,
+    "speed": 78
+  },
+  "ozaki": {
+    "souffle": 38,
+    "force-physique": 38,
+    "corps-des-pourfendeurs": 36,
+    "nouvelle-generation": 34
+  },
+  "rokuro": {
+    "pouvoir-sanguinaire": 38,
+    "lunes": 44,
+    "speed": 46
+  },
+  "rui": {
+    "pouvoir-sanguinaire": 74,
+    "force-physique": 60,
+    "lunes": 56,
+    "battle-iq": 62,
+    "speed": 66
+  },
+  "sabito": {
+    "souffle": 62,
+    "force-physique": 56,
+    "corps-des-pourfendeurs": 44,
+    "speed": 64
+  },
+  "sakonji-urokodaki": {
+    "souffle": 74,
+    "force-physique": 66,
+    "corps-des-pourfendeurs": 76,
+    "piliers": 64,
+    "sensei": 100,
+    "battle-iq": 78
+  },
+  "sanemi-shinazugawa": {
+    "souffle": 84,
+    "force-physique": 84,
+    "corps-des-pourfendeurs": 82,
+    "piliers": 88,
+    "sensei": 54,
+    "battle-iq": 68,
+    "speed": 74
+  },
+  "serpent-demon": {
+    "pouvoir-sanguinaire": 38,
+    "speed": 48
+  },
+  "shinjuro-rengoku": {
+    "souffle": 70,
+    "corps-des-pourfendeurs": 60,
+    "piliers": 50,
+    "sensei": 36
+  },
+  "shinobu-kocho": {
+    "souffle": 70,
+    "force-physique": 30,
+    "corps-des-pourfendeurs": 82,
+    "piliers": 68,
+    "sensei": 76,
+    "battle-iq": 90,
+    "speed": 88
+  },
+  "spider-demon-brother": {
+    "pouvoir-sanguinaire": 40,
+    "speed": 56
+  },
+  "spider-demon-father": {
+    "pouvoir-sanguinaire": 44,
+    "force-physique": 82,
+    "battle-iq": 38
+  },
+  "spider-demon-mother": {
+    "pouvoir-sanguinaire": 34
+  },
+  "spider-demon-sister": {
+    "pouvoir-sanguinaire": 36
+  },
+  "susamaru": {
+    "pouvoir-sanguinaire": 52,
+    "battle-iq": 30,
+    "speed": 52
+  },
+  "swamp-demon": {
+    "pouvoir-sanguinaire": 44,
+    "force-physique": 50,
+    "battle-iq": 40
+  },
+  "tamayo": {
+    "pouvoir-sanguinaire": 70,
+    "battle-iq": 88
+  },
+  "tanjiro-kamado": {
+    "souffle": 80,
+    "force-physique": 70,
+    "corps-des-pourfendeurs": 74,
+    "nouvelle-generation": 100,
+    "battle-iq": 88,
+    "speed": 76
+  },
+  "temple-demon": {
+    "pouvoir-sanguinaire": 30,
+    "force-physique": 40
+  },
+  "tengen-uzui": {
+    "souffle": 78,
+    "force-physique": 82,
+    "corps-des-pourfendeurs": 78,
+    "piliers": 76,
+    "sensei": 72,
+    "battle-iq": 80,
+    "speed": 82
+  },
+  "tongue-demon": {
+    "pouvoir-sanguinaire": 32
+  },
+  "wakuraba": {
+    "pouvoir-sanguinaire": 42,
+    "lunes": 46,
+    "speed": 50
+  },
+  "yahaba": {
+    "pouvoir-sanguinaire": 50,
+    "battle-iq": 34,
+    "speed": 60
+  },
+  "yoriichi-tsugikuni": {
+    "souffle": 100,
+    "force-physique": 84,
+    "corps-des-pourfendeurs": 90,
+    "piliers": 96,
+    "sensei": 82,
+    "battle-iq": 100,
+    "speed": 100
+  },
+  "yushiro": {
+    "pouvoir-sanguinaire": 58,
+    "battle-iq": 64
+  },
+  "zenitsu-agatsuma": {
+    "souffle": 78,
+    "corps-des-pourfendeurs": 62,
+    "nouvelle-generation": 86,
+    "battle-iq": 58,
+    "speed": 96
+  }
+}

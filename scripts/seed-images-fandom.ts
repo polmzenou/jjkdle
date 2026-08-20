@@ -5,6 +5,10 @@
  *   npx tsx scripts/seed-images-fandom.ts --universe aot
  *   npx tsx scripts/seed-images-fandom.ts --universe aot --force
  *
+ * Le wiki interrogé dépend de l'univers (cf. `WIKIS` plus bas) : chaque anime a
+ * le sien, et un univers qui n'y figure pas est refusé plutôt qu'envoyé sur le
+ * wiki d'un autre.
+ *
  * Télécharge le portrait de chaque personnage et l'écrit EN BASE
  * (`Character.imageData`/`imageMime`), exactement comme le fait un upload manuel
  * via /admin : même contrat, mêmes limites (formats autorisés, 3 Mo), même URL
@@ -66,11 +70,52 @@ const ALLOWED_MIME = new Set([
 ]);
 const MAX_BYTES = 3 * 1024 * 1024;
 
-const API = "https://attackontitan.fandom.com/api.php";
 const UA = "jjk-arcade/1.0 (+roster image seed)";
 const REQUEST_DELAY_MS = 250; // ~4 req/s, courtoisie envers le wiki
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Wiki visé par univers.
+ *
+ * Volontairement LOCAL au script plutôt qu'un champ de `UniverseConfig` : c'est
+ * de l'outillage de seed, joué à la main une fois par univers, jamais lu au
+ * runtime. L'y mettre obligerait les quatre univers et `labels.test.ts` à porter
+ * une donnée qui ne sert qu'ici.
+ *
+ * `offCanon` n'écarte que le REPLI par recherche de préfixe (cf.
+ * `urlOfPrefixSearch`) : ce sont les déclinaisons qui portent le bon nom mais pas
+ * le bon dessin, propres à chaque franchise.
+ */
+type Wiki = { api: string; offCanon: string[] };
+
+const WIKIS: Record<string, Wiki> = {
+  aot: {
+    api: "https://attackontitan.fandom.com/api.php",
+    offCanon: [
+      "junior_high",
+      "live-action",
+      "spoof",
+      "chibi",
+      "before_the_fall",
+      "attack_on_avengers",
+      "lost_girls",
+      "(aot_",
+    ],
+  },
+  kny: {
+    api: "https://kimetsu-no-yaiba.fandom.com/api.php",
+    // `kimetsu_gakuen` est le pendant KNY de `junior_high` : un spin-off scolaire
+    // dont les profils portent exactement le nom des personnages.
+    offCanon: [
+      "kimetsu_gakuen",
+      "junior_high",
+      "live-action",
+      "stage_play",
+      "chibi",
+    ],
+  },
+};
 
 type Target = string | { file: string };
 type MappingFile = Record<string, Target>;
@@ -89,9 +134,9 @@ function parseArgs(argv: string[]) {
   };
 }
 
-async function api<T>(params: Record<string, string>): Promise<T> {
+async function api<T>(wiki: Wiki, params: Record<string, string>): Promise<T> {
   const qs = new URLSearchParams({ format: "json", ...params });
-  const res = await fetch(`${API}?${qs}`, {
+  const res = await fetch(`${wiki.api}?${qs}`, {
     headers: { "User-Agent": UA },
     cache: "no-store",
   });
@@ -100,7 +145,7 @@ async function api<T>(params: Record<string, string>): Promise<T> {
 }
 
 /** URL d'un fichier épinglé (`File:<nom>`). */
-async function urlOfFile(name: string): Promise<string | null> {
+async function urlOfFile(wiki: Wiki, name: string): Promise<string | null> {
   const json = await api<{
     query?: {
       pages?: Record<
@@ -108,7 +153,12 @@ async function urlOfFile(name: string): Promise<string | null> {
         { missing?: string; imageinfo?: { url: string }[] }
       >;
     };
-  }>({ action: "query", titles: `File:${name}`, prop: "imageinfo", iiprop: "url" });
+  }>(wiki, {
+    action: "query",
+    titles: `File:${name}`,
+    prop: "imageinfo",
+    iiprop: "url",
+  });
 
   for (const page of Object.values(json.query?.pages ?? {})) {
     if (page.imageinfo?.[0]?.url) return page.imageinfo[0].url;
@@ -117,7 +167,7 @@ async function urlOfFile(name: string): Promise<string | null> {
 }
 
 /** Image d'infobox d'une page (suit les redirections). */
-async function urlOfPageImage(title: string): Promise<string | null> {
+async function urlOfPageImage(wiki: Wiki, title: string): Promise<string | null> {
   const json = await api<{
     query?: {
       pages?: Record<
@@ -125,7 +175,7 @@ async function urlOfPageImage(title: string): Promise<string | null> {
         { missing?: string; original?: { source: string } }
       >;
     };
-  }>({
+  }>(wiki, {
     action: "query",
     titles: title,
     prop: "pageimages",
@@ -139,26 +189,14 @@ async function urlOfPageImage(title: string): Promise<string | null> {
   return null;
 }
 
-/**
- * Déclinaisons hors continuité principale : elles portent le bon nom mais pas le
- * bon dessin (chibi, live-action, spin-offs). Écartées d'office du repli.
- */
-const OFF_CANON = [
-  "junior_high",
-  "live-action",
-  "spoof",
-  "chibi",
-  "before_the_fall",
-  "attack_on_avengers",
-  "lost_girls",
-  "(aot_",
-];
-
 /** Repli : meilleur fichier `<Titre>_character_image*` du wiki. */
-async function urlOfPrefixSearch(title: string): Promise<string | null> {
+async function urlOfPrefixSearch(
+  wiki: Wiki,
+  title: string,
+): Promise<string | null> {
   const json = await api<{
     query?: { allimages?: { name: string; url: string }[] };
-  }>({
+  }>(wiki, {
     action: "query",
     list: "allimages",
     ailimit: "50",
@@ -167,7 +205,7 @@ async function urlOfPrefixSearch(title: string): Promise<string | null> {
 
   const hits = (json.query?.allimages ?? []).filter((h) => {
     const lower = h.name.toLowerCase();
-    return !OFF_CANON.some((bad) => lower.includes(bad));
+    return !wiki.offCanon.some((bad) => lower.includes(bad));
   });
   if (hits.length === 0) return null;
 
@@ -179,17 +217,20 @@ async function urlOfPrefixSearch(title: string): Promise<string | null> {
 
 type Resolved = { url: string; via: string };
 
-async function resolveImageUrl(target: Target): Promise<Resolved | null> {
+async function resolveImageUrl(
+  wiki: Wiki,
+  target: Target,
+): Promise<Resolved | null> {
   if (typeof target !== "string") {
-    const url = await urlOfFile(target.file);
+    const url = await urlOfFile(wiki, target.file);
     return url ? { url, via: "fichier épinglé" } : null;
   }
 
-  const page = await urlOfPageImage(target);
+  const page = await urlOfPageImage(wiki, target);
   if (page) return { url: page, via: "page" };
 
   await sleep(REQUEST_DELAY_MS);
-  const prefix = await urlOfPrefixSearch(target);
+  const prefix = await urlOfPrefixSearch(wiki, target);
   return prefix ? { url: prefix, via: "recherche préfixe" } : null;
 }
 
@@ -221,6 +262,16 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (!args.universe) {
     throw new Error("Univers manquant : --universe <slug> (ex. --universe aot).");
+  }
+
+  // Résolu AVANT toute requête : sans cette garde, un slug inconnu partirait
+  // interroger le wiki d'un autre anime et ramènerait des visages faux.
+  const wiki = WIKIS[args.universe];
+  if (!wiki) {
+    throw new Error(
+      `Aucun wiki déclaré pour l'univers "${args.universe}" — ` +
+        `l'ajouter à WIKIS dans ce script (connus : ${Object.keys(WIKIS).join(", ")}).`,
+    );
   }
 
   const universe = await prisma.universe.findUnique({
@@ -257,7 +308,8 @@ async function main() {
   }
 
   console.log(
-    `Fichier : ${path} — ${Object.keys(mapping).length} correspondance(s), ` +
+    `Wiki : ${wiki.api}\n` +
+      `Fichier : ${path} — ${Object.keys(mapping).length} correspondance(s), ` +
       `${characters.length} personnage(s) dans l'univers ${universe.slug}.\n`,
   );
 
@@ -277,7 +329,7 @@ async function main() {
     await sleep(REQUEST_DELAY_MS);
     let resolved: Resolved | null;
     try {
-      resolved = await resolveImageUrl(target);
+      resolved = await resolveImageUrl(wiki, target);
     } catch (e) {
       failures.push(`${character.name} : ${(e as Error).message}`);
       console.log(`✗ ${character.name} — ${(e as Error).message}`);

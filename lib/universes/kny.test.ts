@@ -1,9 +1,10 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { GAMES, gamesForUniverse } from "@/lib/games/registry";
 import { kny } from "./kny";
 import { jjk } from "./jjk";
+import { KNY_CATEGORIES } from "./kny-categories";
 
 /**
  * Textes des jeux côté KNY. Le registre (`lib/games/registry.ts`) porte les
@@ -105,5 +106,89 @@ describe("attribut comparé par Higher/Lower", () => {
     expect(KNY_ATTRIBUTES.map((a) => a.key)).toContain(
       kny.booru?.filter?.attributeKey,
     );
+  });
+});
+
+/**
+ * Catégories du builder KNY.
+ *
+ * Le piège que ces tests ferment : une catégorie SANS personnage noté rend la
+ * partie INFINISSABLE. `drawOne` renvoie `null`, la case ne peut pas se
+ * verrouiller, et `lockedIds.length` n'atteint donc jamais `categories.length`
+ * — la condition de fin de partie. Rien ne plante, le joueur reste juste coincé.
+ *
+ * On vérifie ici les données d'amorçage (`kny-categories.ts` + `data/ratings/kny.json`),
+ * pas la base : la source de vérité au runtime reste la table `Category`, mais
+ * c'est de ce couple que part tout nouvel univers.
+ *
+ * Volontairement AUCUN test sur la distribution des scores : elle est aléatoire.
+ * Le calibrage (moyenne ~870, Grade 1 ≈ 20 %, Grade S ≈ 0 %, aligné sur JJK/AOT)
+ * se vérifie par simulation, pas par assertion.
+ */
+describe("catégories du builder KNY", () => {
+  const ratings = JSON.parse(
+    readFileSync(resolve(__dirname, "../../data/ratings/kny.json"), "utf8"),
+  ) as Record<string, Record<string, number>>;
+
+  it("préfixe chaque id par l'univers", () => {
+    // `Category.id` est une clé primaire GLOBALE et la clé du JSON
+    // `Character.ratings` : un id non préfixé entrerait en collision avec un
+    // autre univers, et serait impossible à renommer après coup.
+    for (const c of KNY_CATEGORIES) {
+      expect(c.id, `catégorie « ${c.label} »`).toMatch(/^kny-/);
+    }
+    expect(new Set(KNY_CATEGORIES.map((c) => c.id)).size).toBe(
+      KNY_CATEGORIES.length,
+    );
+  });
+
+  it("ne laisse fuiter aucun vocabulaire JJK", () => {
+    for (const c of KNY_CATEGORIES) {
+      for (const t of [c.label, c.description]) {
+        expect(t, `« ${c.id} » : ${t}`).not.toMatch(
+          /JJK|Jujutsu|sorcier|exorcis|occulte|maudit/i,
+        );
+      }
+    }
+  });
+
+  it("donne à chaque catégorie de quoi remplir un tirage", () => {
+    for (const c of KNY_CATEGORIES) {
+      // Le fichier de notes utilise le slug court ; l'id est aussi accepté.
+      const slug = c.id.replace(/^kny-/, "");
+      const rated = Object.values(ratings).filter(
+        (r) => r[slug] !== undefined || r[c.id] !== undefined,
+      );
+      expect(
+        rated.length,
+        `« ${c.id} » : ${rated.length} personnage(s) noté(s) — en dessous de ` +
+          `drawCount (${c.drawCount}), la case se vide et la partie ne peut plus finir`,
+      ).toBeGreaterThanOrEqual(c.drawCount);
+    }
+  });
+
+  it("ne note aucun personnage dans une catégorie inconnue", () => {
+    const known = new Set(
+      KNY_CATEGORIES.flatMap((c) => [c.id, c.id.replace(/^kny-/, "")]),
+    );
+    for (const [character, row] of Object.entries(ratings)) {
+      for (const key of Object.keys(row)) {
+        expect(known, `${character} : catégorie « ${key} » inconnue`).toContain(
+          key,
+        );
+      }
+    }
+  });
+
+  it("garde les notes dans 0–100", () => {
+    for (const [character, row] of Object.entries(ratings)) {
+      for (const [key, value] of Object.entries(row)) {
+        expect(Number.isInteger(value), `${character}/${key} = ${value}`).toBe(
+          true,
+        );
+        expect(value).toBeGreaterThanOrEqual(0);
+        expect(value).toBeLessThanOrEqual(100);
+      }
+    }
   });
 });
