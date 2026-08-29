@@ -115,6 +115,21 @@ const WIKIS: Record<string, Wiki> = {
       "chibi",
     ],
   },
+  tg: {
+    api: "https://tokyoghoul.fandom.com/api.php",
+    // `jack` et `joker` sont les spin-offs (Tokyo Ghoul [Jack], Tokyo Ghoul
+    // [Joker]) : mêmes noms de personnages, autre design. `re` n'est PAS écarté —
+    // c'est la suite canonique, et c'est souvent d'elle que vient le meilleur
+    // portrait d'un personnage.
+    offCanon: [
+      "jack",
+      "joker",
+      "live-action",
+      "stage_play",
+      "chibi",
+      "(tg_",
+    ],
+  },
 };
 
 type Target = string | { file: string };

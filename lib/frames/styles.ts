@@ -48,6 +48,13 @@ export const FRAME_STYLES = {
   paperInk: {
     ring: "border-2 border-stone-200/70 shadow-[0_0_14px_3px_rgba(231,229,228,0.35)]",
   },
+  /**
+   * Cramoisi du kakugan (TG). Distinct d'`ensoRed`, plus vermillon : ici le rouge
+   * tire sur le rose, comme le `primary` de l'univers (#c8102e).
+   */
+  kakuganRed: {
+    ring: "border-2 border-rose-600/85 shadow-[0_0_16px_4px_rgba(200,16,46,0.65)]",
+  },
 } as const satisfies Record<string, FrameStyle>;
 
 export type FrameStyleKey = keyof typeof FRAME_STYLES;

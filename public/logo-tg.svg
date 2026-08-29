@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 76" width="260" height="76" role="img" aria-label="TG Arcade">
+  <desc>Logo PLACEHOLDER de l'univers Tokyo Ghoul — à remplacer par le visuel définitif (lib/universes/tg.ts, champ logo.src).</desc>
+  <defs>
+    <linearGradient id="tg-blood" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff3355" />
+      <stop offset="100%" stop-color="#c8102e" />
+    </linearGradient>
+  </defs>
+  <!-- Kakugan : sclère noire, iris cramoisi, veines rouges -->
+  <g>
+    <ellipse cx="27" cy="24" rx="19" ry="12" fill="#0f131a" stroke="#c8102e" stroke-width="1.5" />
+    <circle cx="27" cy="24" r="8.5" fill="#7a0316" />
+    <circle cx="27" cy="24" r="4.5" fill="#c8102e" />
+    <circle cx="27" cy="24" r="2" fill="#07090d" />
+    <g stroke="#c8102e" stroke-width="1" stroke-linecap="round" opacity="0.8">
+      <path d="M12 20 L6 15" />
+      <path d="M12 28 L6 33" />
+      <path d="M42 20 L48 15" />
+      <path d="M42 28 L48 33" />
+    </g>
+  </g>
+  <!-- Wordmark dédoublé : fantôme cyan décalé, comme l'aberration chromatique
+       du logo officiel — le décalage EST la signature, ne pas l'aligner. -->
+  <text x="55" y="47" font-family="Impact, Haettenschweiler, 'Arial Narrow', 'Arial Black', sans-serif" font-size="34" font-weight="900" letter-spacing="2" fill="#22d3ee" opacity="0.55">TG</text>
+  <text x="58" y="45" font-family="Impact, Haettenschweiler, 'Arial Narrow', 'Arial Black', sans-serif" font-size="34" font-weight="900" letter-spacing="2" fill="url(#tg-blood)">TG</text>
+  <text x="106" y="45" font-family="Impact, Haettenschweiler, 'Arial Narrow', 'Arial Black', sans-serif" font-size="34" font-weight="900" letter-spacing="2" fill="#f5f5f5">ARCADE</text>
+  <!-- Filet de base : rouge coupé net par une amorce cyan (même dédoublement) -->
+  <rect x="6" y="62" width="204" height="3" rx="1.5" fill="#c8102e" opacity="0.8" />
+  <rect x="214" y="62" width="40" height="3" rx="1.5" fill="#22d3ee" opacity="0.7" />
+</svg>

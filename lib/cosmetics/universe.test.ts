@@ -101,6 +101,7 @@ const UNIVERSES = [
   { slug: "csm", daily: "CSMdle" },
   { slug: "aot", daily: "AOTdle" },
   { slug: "kny", daily: "KNYdle" },
+  { slug: "tg", daily: "TGdle" },
 ] as const;
 
 describe.each(UNIVERSES)("catalogue $slug", ({ slug, daily }) => {

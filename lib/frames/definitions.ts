@@ -16,6 +16,8 @@ const csmGame = (id: string) => gameTitleIn("csm", id);
 const aotGame = (id: string) => gameTitleIn("aot", id);
 /** Idem côté KNY (`lib/universes/kny.ts`). */
 const knyGame = (id: string) => gameTitleIn("kny", id);
+/** Idem côté TG (`lib/universes/tg.ts`). */
+const tgGame = (id: string) => gameTitleIn("tg", id);
 
 /**
  * Catalogue des CADRES (nameplates) — source de vérité = code (aucune table
@@ -284,6 +286,65 @@ export const FRAMES: FrameDefinition[] = [
     rarity: "epic",
     styleKey: "paperInk",
     universe: "kny",
+    isUnlocked: (u) => u.stats.jjkdleBestAttempts === 1,
+  },
+
+  // ── Cadres TG ─────────────────────────────────────────────────────────────
+  // Mêmes paliers, noms Tokyo Ghoul, clés PRÉFIXÉES. `kakuganRed` (ajouté avec
+  // cet univers) porte le cramoisi du logo ; `infinity`, cyan et pulsé, reprend
+  // la moitié froide de son dédoublement chromatique.
+  {
+    key: "TG_KAKUGAN",
+    name: "Kakugan",
+    description: "Atteindre le niveau 5.",
+    rarity: "common",
+    styleKey: "kakuganRed",
+    universe: "tg",
+    isUnlocked: (u) => u.level >= 5,
+  },
+  {
+    key: "TG_CENTIPEDE",
+    name: "Mille-pattes",
+    description: "Atteindre le niveau 20.",
+    rarity: "epic",
+    styleKey: "idleLegend",
+    universe: "tg",
+    isUnlocked: (u) => u.level >= 20,
+  },
+  {
+    key: "TG_KING_MASK",
+    name: "Masque du Roi",
+    description: `Atteindre le niveau maximum (${MAX_LEVEL}).`,
+    rarity: "legendary",
+    styleKey: "infinity",
+    universe: "tg",
+    isUnlocked: (u) => u.level >= MAX_LEVEL,
+  },
+  {
+    key: "TG_BURNING_STREAK",
+    name: "Faim Insatiable",
+    description: `Atteindre un streak ${tgGame("jjkdle")} de 7 jours.`,
+    rarity: "rare",
+    styleKey: "flameStreak",
+    universe: "tg",
+    isUnlocked: (u) => u.stats.jjkdleBestStreak >= 7,
+  },
+  {
+    key: "TG_VIP_HUNTER",
+    name: "Chasseur de VIP",
+    description: `Battre un membre VIP en ${tgGame("battle")} — décerné par le staff.`,
+    rarity: "rare",
+    styleKey: "vipHunter",
+    universe: "tg",
+    isUnlocked: () => false,
+  },
+  {
+    key: "TG_DAILY_LEGEND",
+    name: "Légende du Quotidien",
+    description: `Trouver le ${tgGame("jjkdle")} du jour en un seul essai.`,
+    rarity: "epic",
+    styleKey: "paperInk",
+    universe: "tg",
     isUnlocked: (u) => u.stats.jjkdleBestAttempts === 1,
   },
 ];

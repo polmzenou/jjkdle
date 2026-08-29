@@ -306,6 +306,75 @@ export const BANNER_PALETTE = {
     requiredLevel: MAX_LEVEL,
     universe: "kny",
   },
+
+  // ── Bannières TG (mêmes paliers, cramoisi & cyan sur noir bleuté) ──
+  tgKakugan: {
+    label: "Kakugan",
+    gradient: "linear-gradient(120deg, #07090d 0%, #7a0316 55%, #c8102e 100%)",
+    requiredLevel: 1,
+    universe: "tg",
+  },
+  tgAnteiku: {
+    label: "Anteiku",
+    gradient: "linear-gradient(120deg, #07090d 0%, #4a2c17 50%, #b98a5a 100%)",
+    requiredLevel: 3,
+    universe: "tg",
+  },
+  tgRinkaku: {
+    label: "Rinkaku",
+    gradient: "linear-gradient(120deg, #0f131a 0%, #9f1239 50%, #fb7185 100%)",
+    requiredLevel: 5,
+    universe: "tg",
+  },
+  tgUkaku: {
+    label: "Ukaku",
+    gradient: "linear-gradient(120deg, #07090d 0%, #b91c1c 45%, #fca5a5 100%)",
+    requiredLevel: 8,
+    universe: "tg",
+  },
+  tgKoukaku: {
+    label: "Kōkaku",
+    gradient: "linear-gradient(120deg, #0f131a 0%, #334155 50%, #94a3b8 100%)",
+    requiredLevel: 11,
+    universe: "tg",
+  },
+  tgBikaku: {
+    label: "Bikaku",
+    gradient: "linear-gradient(120deg, #07090d 0%, #713f12 50%, #eab308 100%)",
+    requiredLevel: 15,
+    universe: "tg",
+  },
+  tgAogiri: {
+    label: "Arbre Aogiri",
+    gradient: "linear-gradient(120deg, #020617 0%, #1e293b 50%, #64748b 100%)",
+    requiredLevel: 20,
+    universe: "tg",
+  },
+  tgQuinx: {
+    label: "Escouade Quinx",
+    gradient: "linear-gradient(120deg, #07090d 0%, #0e7490 55%, #22d3ee 100%)",
+    requiredLevel: 26,
+    universe: "tg",
+  },
+  tgGourmet: {
+    label: "Gourmet",
+    gradient: "linear-gradient(120deg, #171c26 0%, #6b21a8 50%, #d8b4fe 100%)",
+    requiredLevel: 33,
+    universe: "tg",
+  },
+  tgKakuja: {
+    label: "Kakuja",
+    gradient: "linear-gradient(120deg, #000000 0%, #450a0a 55%, #dc2626 100%)",
+    requiredLevel: 41,
+    universe: "tg",
+  },
+  // Le dédoublement du logo, en dégradé : cramoisi d'un côté, cyan de l'autre.
+  tgOneEyedKing: {
+    label: "Roi Borgne",
+    gradient: "linear-gradient(120deg, #c8102e 0%, #07090d 50%, #22d3ee 100%)",
+    requiredLevel: MAX_LEVEL,
+    universe: "tg",
+  },
 } as const satisfies Record<string, BannerStyle>;
 
 export type BannerKey = keyof typeof BANNER_PALETTE;

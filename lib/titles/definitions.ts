@@ -15,6 +15,8 @@ const csmGame = (id: string) => gameTitleIn("csm", id);
 const aotGame = (id: string) => gameTitleIn("aot", id);
 /** Idem côté KNY (`lib/universes/kny.ts`). */
 const knyGame = (id: string) => gameTitleIn("kny", id);
+/** Idem côté TG (`lib/universes/tg.ts`). */
+const tgGame = (id: string) => gameTitleIn("tg", id);
 
 /**
  * Catalogue des TITRES (source de vérité = code, comme les badges/bannières —
@@ -399,6 +401,96 @@ const KNY_TITLES: Omit<TitleDefinition, "universe">[] = [
   },
 ];
 
+// Catalogue TG : mêmes paliers, vocabulaire Tokyo Ghoul, clés PRÉFIXÉES.
+// L'échelle reprend le classement de menace du CCG (C → SSS), le même que
+// l'attribut `tgrate` de TGdle — et non les grades d'enquêteur, qui ne
+// concernent qu'un camp.
+const TG_TITLES: Omit<TitleDefinition, "universe">[] = [
+  // ── Progression par niveau (titre de départ → légendaire au niveau max) ──
+  {
+    key: "TG_NEW_GHOUL",
+    name: "Goule Novice",
+    description: "Titre de départ — disponible dès le niveau 1.",
+    rarity: "common",
+    isUnlocked: (u) => u.level >= 1,
+  },
+  {
+    key: "TG_RATE_C",
+    name: "Menace de Classe C",
+    description: "Atteindre le niveau 5.",
+    rarity: "common",
+    isUnlocked: (u) => u.level >= 5,
+  },
+  {
+    key: "TG_RATE_A",
+    name: "Menace de Classe A",
+    description: "Atteindre le niveau 15.",
+    rarity: "rare",
+    isUnlocked: (u) => u.level >= 15,
+  },
+  {
+    key: "TG_RATE_S",
+    name: "Menace de Classe S",
+    description: "Atteindre le niveau 30.",
+    rarity: "epic",
+    isUnlocked: (u) => u.level >= 30,
+  },
+  {
+    key: "TG_RATE_SSS",
+    name: "Menace de Classe SSS",
+    description: `Atteindre le niveau maximum (${MAX_LEVEL}).`,
+    rarity: "legendary",
+    isUnlocked: (u) => u.level >= MAX_LEVEL,
+  },
+  // ── Exploits méta-site ──
+  {
+    key: "TG_DAILY_MASTER",
+    name: "Maître de l'Énigme",
+    description: `Trouver le ${tgGame("jjkdle")} du jour en un seul essai.`,
+    rarity: "epic",
+    isUnlocked: (u) => u.stats.jjkdleBestAttempts === 1,
+  },
+  {
+    key: "TG_PERFECT_WEEK",
+    name: "Semaine Sans Faille",
+    description: `Atteindre un streak ${tgGame("jjkdle")} de 7 jours.`,
+    rarity: "rare",
+    isUnlocked: (u) => u.stats.jjkdleBestStreak >= 7,
+  },
+  {
+    key: "TG_ONE_EYED_KING",
+    name: "Roi Borgne",
+    description:
+      "Atteindre le score maximal d'un jeu (rang S au Builder ou Pyramide parfaite).",
+    rarity: "epic",
+    isUnlocked: (u) =>
+      u.stats.builderBest >= 980 || u.stats.rankingBest >= 10000,
+  },
+  {
+    key: "TG_COLLECTOR",
+    name: "Collectionneur",
+    description: "Débloquer au moins 10 badges.",
+    rarity: "epic",
+    isUnlocked: (u) => u.badgeCount >= 10,
+  },
+  // ── Titres MANUELS (octroi admin uniquement) ──
+  {
+    key: "TG_UNDEFEATED",
+    name: "Invaincu",
+    description: `Battre un membre VIP en ${tgGame("battle")} — distinction décernée par le staff.`,
+    rarity: "rare",
+    isUnlocked: () => false,
+  },
+  {
+    key: "TG_DRAFT_KING",
+    name: "Roi du Draft",
+    description:
+      "Terminer 1er d'un classement hebdomadaire — distinction décernée par le staff.",
+    rarity: "legendary",
+    isUnlocked: () => false,
+  },
+];
+
 /**
  * Catalogue COMPLET (tous univers). Sert à la possession/au déblocage, qui sont
  * globaux ; pour l'affichage et l'équipement, filtrer par univers courant via
@@ -409,6 +501,7 @@ export const TITLES: TitleDefinition[] = [
   ...tagUniverse(CSM_TITLES, "csm"),
   ...tagUniverse(AOT_TITLES, "aot"),
   ...tagUniverse(KNY_TITLES, "kny"),
+  ...tagUniverse(TG_TITLES, "tg"),
 ];
 
 /** Titres d'un univers (slug) — catalogue affiché par le sélecteur de profil. */

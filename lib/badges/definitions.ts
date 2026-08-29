@@ -12,6 +12,8 @@ const csmGame = (id: string) => gameTitleIn("csm", id);
 const aotGame = (id: string) => gameTitleIn("aot", id);
 /** Idem côté KNY (`lib/universes/kny.ts`). */
 const knyGame = (id: string) => gameTitleIn("kny", id);
+/** Idem côté TG (`lib/universes/tg.ts`). */
+const tgGame = (id: string) => gameTitleIn("tg", id);
 
 /**
  * Catalogue des badges (source de vérité = code, pas de table `Badge`).
@@ -392,6 +394,95 @@ const KNY_BADGES: Omit<BadgeRule, "universe">[] = [
   },
 ];
 
+// Catalogue TG. Mêmes règles, vocabulaire Tokyo Ghoul, clés préfixées. Palette
+// du logo officiel : cramoisi et cyan de l'aberration chromatique (cf.
+// `lib/universes/tg.ts`).
+const TG_BADGES: Omit<BadgeRule, "universe">[] = [
+  // ── Badges de découverte : jouer à chaque jeu pour la première fois ──
+  {
+    key: "TG_FIRST_PLAY_BUILDER",
+    name: "Éveil du kakugan",
+    description: `Jouer à ${tgGame("builder")} pour la première fois.`,
+    iconKey: "👁️",
+    color: "#c8102e",
+    check: (ctx) => ctx.playedBuilder,
+  },
+  {
+    key: "TG_FIRST_PLAY_RANKING",
+    name: "Premier classement",
+    description: `Jouer à ${tgGame("ranking")} pour la première fois.`,
+    iconKey: "🔺",
+    color: "#ff3355",
+    check: (ctx) => ctx.playedRanking,
+  },
+  {
+    key: "TG_FIRST_PLAY_DRAFT",
+    name: "Première traque",
+    description: `Jouer à ${tgGame("jujutsu-draft")} pour la première fois.`,
+    iconKey: "⚔️",
+    color: "#7a0316",
+    check: (ctx) => ctx.playedDraft,
+  },
+  {
+    key: "TG_FIRST_PLAY_DAILY",
+    name: "Première énigme",
+    description: `Jouer à ${tgGame("jjkdle")} pour la première fois.`,
+    iconKey: "🎭",
+    color: "#22d3ee",
+    check: (ctx) => ctx.playedJjkdle,
+  },
+  // ── Badges de performance ──
+  {
+    key: "TG_FIRST_S_GRADE",
+    name: "Rang S",
+    description: `Atteindre le rang S sur ${tgGame("builder")} (≥ 980).`,
+    iconKey: "🏅",
+    color: "#c8102e",
+    check: (ctx) => ctx.builderBest >= 980,
+  },
+  {
+    key: "TG_PYRAMID_PERFECT",
+    name: "Pyramide parfaite",
+    description: `Résoudre ${tgGame("ranking")} sans faute, du premier coup (10 000).`,
+    iconKey: "🔺",
+    color: "#ff3355",
+    check: (ctx) => ctx.rankingBest >= 10000,
+  },
+  {
+    key: "TG_DRAFT_CONQUEROR",
+    name: "Traqueur accompli",
+    description: `Vaincre les 6 boss de ${tgGame("jujutsu-draft")} (victoire totale).`,
+    iconKey: "⚔️",
+    color: "#7a0316",
+    check: (ctx) => ctx.draftVictory,
+  },
+  {
+    key: "TG_DAILY_STREAK_7",
+    name: "Assidu",
+    description: `Enchaîner 7 jours de ${tgGame("jjkdle")} d'affilée.`,
+    iconKey: "🔥",
+    color: "#fb923c",
+    check: (ctx) => ctx.jjkdleStreak >= 7 || ctx.jjkdleBestStreak >= 7,
+  },
+  {
+    key: "TG_POLYVALENT",
+    name: "Polyvalent",
+    description: "Avoir un score sur au moins 4 jeux différents.",
+    iconKey: "🎴",
+    color: "#38bdf8",
+    check: (ctx) => ctx.gamesPlayed >= 4,
+  },
+  // ── Badges manuels (admin uniquement) ──
+  {
+    key: "TG_STAFF_PICK",
+    name: "Choix du staff",
+    description: "Distinction décernée manuellement par l'équipe.",
+    iconKey: "⭐",
+    color: "#facc15",
+    check: () => false,
+  },
+];
+
 /**
  * Catalogue COMPLET (tous univers). La possession étant globale, c'est ce
  * catalogue qui sert de référence de clés ; pour ce qui se gagne et s'affiche
@@ -402,6 +493,7 @@ export const BADGES: BadgeRule[] = [
   ...tagUniverse(CSM_BADGES, "csm"),
   ...tagUniverse(AOT_BADGES, "aot"),
   ...tagUniverse(KNY_BADGES, "kny"),
+  ...tagUniverse(TG_BADGES, "tg"),
 ];
 
 /** Badges d'un univers (slug) — évaluation des déblocages et vitrine profil. */
