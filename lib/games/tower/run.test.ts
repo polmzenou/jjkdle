@@ -84,6 +84,7 @@ function won(state: TowerRunState, kills = 1): CombatResult {
     enemies: [],
     enemiesKilled: kills,
     events: [],
+    energyByTick: [],
   };
 }
 

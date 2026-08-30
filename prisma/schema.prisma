@@ -68,6 +68,7 @@ model User {
   cards             UserCard[]
   boosters          UserBooster[]
   casinoSeats       CasinoSeat[]
+  towerScores       TowerScore[]
 }
 
 /// Une carte POSSÉDÉE (système de collection, cf. lib/cards/).
@@ -885,4 +886,73 @@ model CasinoStats {
   wagered     Int      @default(0)
   paidOut     Int      @default(0)
   updatedAt   DateTime @updatedAt
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// « The Culling Tower » — roguelike d'ascension (lib/games/tower/).
+//
+// Deux tables, calquées sur des motifs déjà en place :
+//  - TowerRun   ≈ HigherLowerSession : état autoritatif ÉPHÉMÈRE d'une run en
+//    cours, référencé par un cookie httpOnly. `userId` nullable ⇒ jouable sans
+//    compte, comme Higher/Lower.
+//  - TowerScore ≈ HigherLowerScore : append d'une run terminée, `universeId`
+//    scalaire sans FK (table à fort volume d'écriture).
+// ──────────────────────────────────────────────────────────────────────────
+
+/// Run EN COURS. Supprimée en fin de run ; `id` est le runId porté par le
+/// cookie `tower_run`. La tour n'est PAS stockée : elle se régénère à volonté
+/// depuis `seed` (cf. lib/games/tower/floors.ts), si bien que le serveur peut
+/// n'envoyer au client que l'étage courant — jamais la suite.
+model TowerRun {
+  id         String  @id @default(cuid())
+  userId     String?
+  universeId String
+
+  seed    Int
+  /// "YYYY-MM-DD" pour la Tour du Jour, null pour une tour aléatoire (VIP/ADMIN).
+  dateKey String?
+  /// N° d'essai du jour. Les essais sont illimités jusqu'à la réussite.
+  attempt Int     @default(1)
+  floor   Int     @default(1)
+
+  /// Blob compact de `TowerRunState` (lib/games/tower/run.ts) : uniquement des
+  /// identifiants et des entiers, jamais un personnage résolu ni une image.
+  /// Cible : moins de 3 ko.
+  state Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([universeId, dateKey])
+  @@index([updatedAt])
+}
+
+/// Run TERMINÉE (append) : classement, récap profil, administration.
+///
+/// Le classement de la Tour du Jour trie sur `attempt` CROISSANT puis `score`
+/// décroissant : avec des essais illimités, tout le monde finit par boucler, et
+/// le score seul ne distinguerait plus personne (même métrique que JJKdle, qui
+/// classe déjà sur le nombre de tentatives).
+model TowerScore {
+  id         String @id @default(cuid())
+  userId     String
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  universeId String
+
+  score         Int
+  floor         Int
+  enemiesKilled Int     @default(0)
+  bossesKilled  Int     @default(0)
+  cleared       Boolean @default(false)
+  attempt       Int     @default(1)
+  /// Non-null ⇒ compte pour la Tour du Jour de ce jour-là.
+  dateKey       String?
+  xpEarned      Int     @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([universeId, score])
+  @@index([universeId, dateKey, cleared, attempt])
 }

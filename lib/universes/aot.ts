@@ -128,6 +128,12 @@ export const aot: UniverseConfig = {
       tags: ["quickfire", "déduction", "roster AOT"],
       previewImage: "/assets/higher-lower-aot.png",
     },
+    tower: {
+      title: "La Tour de Wall Maria",
+      description:
+        "Grimpe 20 étages avec une escouade de 3 que tu constitues en route. Les combats se résolvent seuls : à toi de déclencher les capacités au bon moment, quand un ennemi charge son attaque. Un mort reste mort.",
+      tags: ["roguelike", "combat", "quotidien", "roster AOT"],
+    },
   },
   // Higher/Lower compare la « Puissance » (attribut ORDINAL) plutôt qu'une jauge
   // chiffrée — AOT n'a pas d'équivalent de l'énergie occulte. Les ex æquo de rang

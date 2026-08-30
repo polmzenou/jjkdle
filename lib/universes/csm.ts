@@ -122,6 +122,12 @@ export const csm: UniverseConfig = {
       tags: ["quickfire", "déduction", "roster CSM"],
       previewImage: "/assets/higher-lower-screen-csm.png",
     },
+    tower: {
+      title: "La Tour de Réincarnation",
+      description:
+        "Grimpe 20 étages avec une escouade de 3 que tu constitues en route. Les combats se résolvent seuls : à toi de déclencher les pouvoirs au bon moment, quand un ennemi charge son attaque. Un mort reste mort.",
+      tags: ["roguelike", "combat", "quotidien", "roster CSM"],
+    },
   },
   // Higher/Lower compare la « Puissance » (attribut ORDINAL : Minimum → Surpuissant)
   // plutôt qu'une jauge chiffrée — CSM n'a pas d'équivalent de l'énergie occulte.

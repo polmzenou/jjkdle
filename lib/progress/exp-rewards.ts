@@ -102,6 +102,50 @@ export function jjkdleExp(attempts: number, streak: number): number {
   return base * multiplier;
 }
 
+/**
+ * « The Culling Tower » : paliers d'EXP par étage atteint.
+ * Ordonné du plus haut au plus bas, comme `RANKING_TIERS`.
+ */
+const TOWER_TIERS: ReadonlyArray<{ min: number; exp: number }> = [
+  { min: 20, exp: 1500 }, // tour bouclée
+  { min: 15, exp: 600 },
+  { min: 10, exp: 200 },
+  { min: 5, exp: 50 },
+  { min: 0, exp: 0 },
+];
+
+/** EXP CUMULÉE que vaut un étage atteint. */
+export function towerExp(floor: number): number {
+  const f = Number.isFinite(floor) ? Math.floor(floor) : 0;
+  return TOWER_TIERS.find((t) => f >= t.min)?.exp ?? 0;
+}
+
+/** Part de l'EXP servie par une tour aléatoire (VIP/ADMIN, hors classement). */
+export const TOWER_RANDOM_RATIO = 0.4;
+
+/**
+ * EXP réellement due pour une run, AU PLUS-HAUT-ATTEINT DU JOUR.
+ *
+ * Les essais sur la tour du jour étant illimités, payer chaque essai en ferait
+ * la machine à farmer du site : rejouer trente fois rapporterait trente fois
+ * l'EXP. On ne paie donc que la PROGRESSION — atteindre l'étage 17 après un 12
+ * rapporte la différence, retomber à l'étage 8 ne rapporte rien. C'est la même
+ * sémantique que la table `Score` (meilleur en upsert), appliquée à la journée.
+ *
+ * Une tour aléatoire n'a pas de mémoire d'un essai à l'autre (`bestFloorBefore`
+ * vaut 0) mais son barème est réduit : c'est le garde-fou anti-farm côté VIP.
+ */
+export function towerRunExp(params: {
+  floorReached: number;
+  bestFloorBefore: number;
+  daily: boolean;
+}): number {
+  const earned = towerExp(params.floorReached);
+  const already = params.daily ? towerExp(params.bestFloorBefore) : 0;
+  const delta = Math.max(0, earned - already);
+  return params.daily ? delta : Math.round(delta * TOWER_RANDOM_RATIO);
+}
+
 /** Combien d'EXP vaut 1 coin. Unique curseur d'équilibrage de l'économie. */
 export const XP_PER_COIN = 10;
 

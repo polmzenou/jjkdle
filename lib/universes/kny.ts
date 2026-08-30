@@ -139,6 +139,12 @@ export const kny: UniverseConfig = {
       tags: ["quickfire", "déduction", "roster KNY"],
       previewImage: "/assets/higher-lower-kny.png",
     },
+    tower: {
+      title: "La Forteresse Infinie",
+      description:
+        "Grimpe 20 étages avec une escouade de 3 que tu constitues en route. Les combats se résolvent seuls : à toi de déclencher les souffles au bon moment, quand un démon charge son attaque. Un mort reste mort.",
+      tags: ["roguelike", "combat", "quotidien", "roster KNY"],
+    },
   },
   // Higher/Lower compare la « Puissance » (attribut NUMERIC). KNY n'a pas
   // d'équivalent canonique de l'énergie occulte : l'échelle retenue est celle du

@@ -46,6 +46,18 @@ export interface UserStatsContext {
   playedJjkdle: boolean;
   /** A déjà joué une partie « Qui est-ce ? ». */
   playedGuessWho: boolean;
+  /** Étage le plus haut atteint dans « The Culling Tower » (0 si jamais joué). */
+  towerBestFloor: number;
+  /** La tour a déjà été franchie au moins une fois. */
+  towerCleared: boolean;
+  /**
+   * Plus petit n° d'essai auquel la tour a été bouclée. 0 = jamais bouclée.
+   * `=== 1` ⇒ franchie du premier coup (badge TOWER_FIRST_TRY) — l'exploit,
+   * puisque les essais sont illimités.
+   */
+  towerBestAttempt: number;
+  /** A déjà terminé une ascension. */
+  playedTower: boolean;
 }
 
 /**
@@ -61,7 +73,8 @@ export async function buildUserStatsContext(
   universeId?: string,
 ): Promise<UserStatsContext> {
   const uid = universeId ?? (await getCurrentUniverse()).id;
-  const [user, profile, scores, draft, jjkdleAgg, guessWhoAgg] = await Promise.all([
+  const [user, profile, scores, draft, jjkdleAgg, guessWhoAgg, tower] =
+    await Promise.all([
     prisma.user.findUnique({
       where: { id: userId },
       select: { role: true },
@@ -91,6 +104,11 @@ export async function buildUserStatsContext(
       where: { userId, universeId: uid },
       _count: { _all: true },
     }),
+    // Une ligne par ascension terminée (essais compris).
+    prisma.towerScore.findMany({
+      where: { userId, universeId: uid },
+      select: { floor: true, cleared: true, attempt: true },
+    }),
   ]);
 
   const bestByGame = new Map(scores.map((s) => [s.gameId, s.best]));
@@ -105,6 +123,9 @@ export async function buildUserStatsContext(
   if (draft) played.add("jujutsu-draft");
   if (jjkdleCount > 0) played.add("jjkdle");
   if (guessWhoWins + guessWhoLosses > 0) played.add("guesswho");
+  if (tower.length > 0) played.add("tower");
+
+  const towerClears = tower.filter((t) => t.cleared);
 
   return {
     role: user?.role ?? "PLAYER",
@@ -123,5 +144,12 @@ export async function buildUserStatsContext(
     playedDraft: played.has("jujutsu-draft"),
     playedJjkdle: played.has("jjkdle"),
     playedGuessWho: played.has("guesswho"),
+    towerBestFloor: tower.reduce((max, t) => Math.max(max, t.floor), 0),
+    towerCleared: towerClears.length > 0,
+    towerBestAttempt: towerClears.reduce(
+      (min, t) => (min === 0 ? t.attempt : Math.min(min, t.attempt)),
+      0,
+    ),
+    playedTower: played.has("tower"),
   };
 }

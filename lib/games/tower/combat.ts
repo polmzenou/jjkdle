@@ -56,6 +56,21 @@ export const ACTION_GAUGE = 100;
 export const MAX_ENERGY = 100;
 
 /**
+ * Énergie occulte au premier tick de CHAQUE combat.
+ *
+ * Sans elle, la jauge part de zéro : avec un starter seul (flux ≈ 1,9/s) et une
+ * technique à 40, la première fenêtre s'ouvre à 6 s avec 11 d'énergie, la
+ * deuxième à 12 s avec 23, et un combat d'étage 1 se termine avant que le joueur
+ * ait pu appuyer une seule fois. Il passait son premier combat — celui qui lui
+ * apprend le jeu — à regarder des fenêtres qu'il ne pouvait pas saisir.
+ *
+ * À 30, la première fenêtre de tout combat est jouable, quel que soit
+ * l'archétype. C'est la garantie qu'il y a toujours au moins une décision à
+ * prendre, ce qui est la promesse du système.
+ */
+export const START_ENERGY = 30;
+
+/**
  * Ticks entre deux charges d'un même ennemi (6 s).
  *
  * Réglé pour donner 4 fenêtres dans un combat ordinaire de 24 s et 7 à 8 dans
@@ -132,6 +147,8 @@ interface Runtime {
   expiresAt: number | null;
   domainGauge: number;
   domainThreshold: number;
+  /** Évite de ré-annoncer une jauge déjà signalée comme pleine. */
+  domainAnnounced: boolean;
   usedSurvive: boolean;
 
   // ── ennemis ──
@@ -163,6 +180,7 @@ interface State {
   telegraphSuppressedUntil: number;
   modifiers: RunModifiers;
   summonCount: number;
+  energyByTick: number[];
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -208,6 +226,7 @@ export function simulateCombat(setup: CombatSetup): CombatResult {
 
     advanceTelegraphs(state);
     expireSummons(state);
+    state.energyByTick.push(Math.round(state.energy));
 
     ended = isOver(state);
     state.tick += 1;
@@ -223,6 +242,7 @@ export function simulateCombat(setup: CombatSetup): CombatResult {
     enemies: state.enemies.map(toOutcome),
     enemiesKilled: state.enemiesKilled,
     events: state.events,
+    energyByTick: state.energyByTick,
   };
 }
 
@@ -276,6 +296,7 @@ function buildState(setup: CombatSetup): State {
         10,
         applyPct(passive.ultimateThreshold, modifiers.ULTIME_SEUIL_PCT),
       ),
+      domainAnnounced: false,
       usedSurvive: false,
       sinceTelegraph: 0,
       charging: false,
@@ -298,6 +319,7 @@ function buildState(setup: CombatSetup): State {
     expiresAt: null,
     domainGauge: 0,
     domainThreshold: Infinity,
+    domainAnnounced: false,
     usedSurvive: false,
     // Décalage d'un ennemi à l'autre : sans lui, trois ennemis chargent en
     // même temps au même tick et la fenêtre devient un mur infranchissable.
@@ -308,7 +330,10 @@ function buildState(setup: CombatSetup): State {
 
   return {
     tick: 0,
-    energy: Math.min(MAX_ENERGY, Math.max(0, modifiers.ENERGIE_DEPART)),
+    energy: Math.min(
+      MAX_ENERGY,
+      START_ENERGY + Math.max(0, modifiers.ENERGIE_DEPART),
+    ),
     events: [],
     squad,
     enemies,
@@ -322,6 +347,7 @@ function buildState(setup: CombatSetup): State {
     telegraphSuppressedUntil: -1,
     modifiers,
     summonCount: 0,
+    energyByTick: [],
   };
 }
 
@@ -547,6 +573,10 @@ function dealDamage(
       200,
       to.domainGauge + (damage / to.maxHp) * 100 * DOMAIN_GAUGE_RATE,
     );
+    if (!to.domainAnnounced && to.domainGauge >= to.domainThreshold) {
+      to.domainAnnounced = true;
+      state.events.push({ t: state.tick, kind: "domain-ready", who: to.uid });
+    }
   }
 
   state.events.push(
@@ -617,6 +647,7 @@ function resolveIntervention(state: State, intervention: Intervention): void {
 
   if (fighter.spec.hasDomain && fighter.domainGauge >= fighter.domainThreshold) {
     fighter.domainGauge = 0;
+    fighter.domainAnnounced = false;
     return castUltimate(state, fighter);
   }
 
@@ -854,6 +885,7 @@ function spawnSummon(
     expiresAt: state.tick + ticks,
     domainGauge: 0,
     domainThreshold: Infinity,
+    domainAnnounced: false,
     usedSurvive: false,
     sinceTelegraph: 0,
     charging: false,

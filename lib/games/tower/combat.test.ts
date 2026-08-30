@@ -30,7 +30,11 @@ function fighter(
   };
 }
 
-/** Modificateurs neutres, mais avec la jauge pleine : évite d'attendre 150 ticks. */
+/**
+ * Modificateurs neutres, avec de l'énergie d'avance : évite d'attendre que la
+ * jauge se remplisse. La valeur s'AJOUTE à `START_ENERGY` (30), que tout combat
+ * accorde d'office.
+ */
 function withEnergy(energy: number): RunModifiers {
   return { ...NO_MODIFIERS, ENERGIE_DEPART: energy };
 }
@@ -276,8 +280,9 @@ describe("interventions", () => {
     const setup: CombatSetup = {
       squad: [fighter({ id: "a", archetype: "technique" })],
       enemies: [enemy],
-      // Coût 50 − 10 (passif « Sort inné ») = 40 ; 60 n'en paie qu'une.
-      modifiers: withEnergy(60),
+      // Coût 50 − 10 (passif « Sort inné ») = 40. Total 30 + 30 = 60 :
+      // de quoi en payer une seule, la seconde tombe à court.
+      modifiers: withEnergy(30),
     };
 
     const result = run({

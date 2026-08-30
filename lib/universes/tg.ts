@@ -143,6 +143,12 @@ export const tg: UniverseConfig = {
       tags: ["quickfire", "déduction", "roster TG"],
       previewImage: "/assets/higher-lower-tg.png",
     },
+    tower: {
+      title: "La Tour de Cochlea",
+      description:
+        "Grimpe 20 étages avec une escouade de 3 que tu constitues en route. Les combats se résolvent seuls : à toi de déclencher les kagune au bon moment, quand un adversaire charge son attaque. Un mort reste mort.",
+      tags: ["roguelike", "combat", "quotidien", "roster TG"],
+    },
   },
   // Higher/Lower compare la « Puissance » (attribut NUMERIC), comme CSM et KNY.
   // ⚠️ L'attribut `tgpower` doit exister en base pour cet univers : sans lui, le

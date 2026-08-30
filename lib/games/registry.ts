@@ -114,6 +114,20 @@ export const GAMES: Game[] = [
     previewImage: "/assets/higher-lower-screen.png",
     status: "live",
   },
+  {
+    id: "tower",
+    title: "The Culling Tower",
+    description:
+      "Grimpe 20 étages avec une escouade de 3 que tu constitues en route. Les combats se résolvent seuls : à toi de déclencher les techniques au bon moment, quand un ennemi charge son attaque. Un mort reste mort.",
+    // L'id est un segment d'URL PARTAGÉ par tous les univers, contrairement au
+    // titre que chacun réécrit : le garder neutre évite un
+    // `csm.…/games/culling-tower` sur Chainsaw Man.
+    route: "/games/tower",
+    glyph: "🗼",
+    tags: ["roguelike", "combat", "quotidien", "roster JJK"],
+    accent: "#7c3aed",
+    status: "live",
+  },
   // Exemple de jeu futur (grisé sur le hub) :
   // {
   //   id: "domain-clash",

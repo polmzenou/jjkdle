@@ -166,6 +166,11 @@ export type CombatEvent =
       cost: number;
     }
   | { t: number; kind: "ultimate"; from: string }
+  /** La jauge d'ultime d'un membre d'escouade vient de se remplir. Émis par
+   * le MOTEUR pour que l'interface n'ait pas à recalculer le remplissage —
+   * seule façon de garantir que le bouton affiché correspond à l'action qui
+   * partira réellement. */
+  | { t: number; kind: "domain-ready"; who: string }
   | { t: number; kind: "summon"; from: string; summonId: string }
   | { t: number; kind: "parry"; by: string; absorbed: number }
   | { t: number; kind: "heal"; to: string; amount: number }
@@ -204,6 +209,16 @@ export interface CombatResult {
   enemiesKilled: number;
   /** Journal ordonné, pour l'animation. */
   events: CombatEvent[];
+  /**
+   * Énergie occulte à la fin de chaque tick.
+   *
+   * L'énergie n'est pas déductible du journal (elle monte en continu et se
+   * dépense par paliers) : la sortir ici évite à l'interface de ré-implémenter
+   * la régénération, donc de diverger du moteur. Le serveur ne renvoie pas ce
+   * tableau au client — celui-ci l'a déjà, il simule le combat en local pour
+   * l'animer.
+   */
+  energyByTick: number[];
 }
 
 // ──────────────────────────────────────────────────────────────────────────
