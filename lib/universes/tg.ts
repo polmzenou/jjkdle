@@ -83,22 +83,25 @@ export const tg: UniverseConfig = {
   // sur ses valeurs par défaut, qui sont celles de JJK.
   //
   // `previewImage` suit la même règle : une capture montre le roster de l'anime,
-  // celle du registre montre donc des persos JJK. AUCUN jeu n'a encore de capture
-  // TG : les 8 gardent temporairement celle de JJK — ajouter le PNG dans
-  // `public/assets/` (suffixe `-tg`) puis le champ ici dès que les visuels
-  // existent (garde-fou dans `tg.test.ts`).
+  // celle du registre montre donc des persos JJK. Les 4 jeux sans capture TG
+  // (Kagune Draft, TG Random Battle, Qui est-ce ?, TG Codenames) gardent
+  // temporairement celle de JJK — ajouter le PNG dans `public/assets/`
+  // (suffixe `-tg`) puis le champ ici dès que les visuels existent (garde-fou
+  // dans `tg.test.ts`).
   gameCopy: {
     builder: {
       title: "Build the Perfect Ghoul",
       description:
         "Compose ta goule idéale catégorie par catégorie. Chaque choix verrouille une stat et re-mélange le reste. Score sur 1000, de la simple menace de classe C au rang SSS.",
       tags: ["tap game", "roster TG", "score"],
+      previewImage: "/assets/builder-tg.png",
     },
     ranking: {
       title: "TG Pyramid",
       description:
         "Classe 8 personnages du plus fort au plus faible selon la consigne. Les bonnes positions se verrouillent, les fausses reviennent. 4 tentatives, jusqu'à 10 000 points.",
       tags: ["ranking", "drag & drop", "roster TG"],
+      previewImage: "/assets/pyramid-tg.png",
     },
     "jujutsu-draft": {
       title: "Kagune Draft",
@@ -129,12 +132,14 @@ export const tg: UniverseConfig = {
       description:
         "Devine le personnage Tokyo Ghoul mystère du jour. Chaque proposition révèle des indices par attribut (espèce, kagune, classement, arc…) avec des flèches ↑/↓. Un perso par jour, essais illimités.",
       tags: ["quotidien", "déduction", "roster TG"],
+      previewImage: "/assets/idle-screen-tg.png",
     },
     "higher-lower": {
       title: "TG Higher/Lower",
       description:
         "Plus ou moins puissant ? Compare deux personnages du roster, devine si celui de droite dépasse celui de gauche en puissance et enchaîne les bonnes réponses le plus loin possible.",
       tags: ["quickfire", "déduction", "roster TG"],
+      previewImage: "/assets/higher-lower-tg.png",
     },
   },
   // Higher/Lower compare la « Puissance » (attribut NUMERIC), comme CSM et KNY.
