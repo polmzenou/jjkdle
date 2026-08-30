@@ -99,12 +99,14 @@ export const aot: UniverseConfig = {
       description:
         "Affronte un ami en 1v1 : drafte une carte tirée au hasard à tour de rôle (garde-la ou refile-la), compose ton escouade de 5, puis laisse parler les lames. Le cumul le plus fort gagne.",
       tags: ["1v1", "multijoueur", "draft", "roster AOT"],
+      previewImage: "/assets/battle-screen-aot.png",
     },
     guesswho: {
       title: "Qui est-ce ?",
       description:
         "Affronte un ami en 1v1 : une grille de 25 personnages, un secret pour chacun. Pose des questions, élimine des cartes et devine le perso secret de l'adversaire avant lui. Un mauvais guess et c'est perdu.",
       tags: ["1v1", "multijoueur", "déduction", "roster AOT"],
+      previewImage: "/assets/guesswho-aot.png",
     },
     codenames: {
       title: "AOT Codenames",
