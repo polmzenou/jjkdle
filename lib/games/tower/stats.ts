@@ -77,6 +77,22 @@ export const ENEMY_HP_MULT: Readonly<Record<string, number>> = {
   boss: 5,
 };
 
+/**
+ * Frappe ennemie réduite tant que l'escouade est INCOMPLÈTE, indexée par son
+ * nombre de membres vivants.
+ *
+ * Sans cela, les premiers étages sont ingagnables par construction : le joueur
+ * y entre SEUL (l'escouade se remplit en montant), donc il inflige un tiers des
+ * dégâts d'une escouade complète tout en encaissant autant. Un combat dure
+ * alors trois fois plus longtemps face au même adversaire — il perdait au
+ * deuxième ou troisième étage sans avoir démérité.
+ *
+ * On ne touche QUE la frappe, pas les PV : baisser les PV raccourcirait les
+ * combats, alors que le problème est justement qu'ils sont trop longs pour un
+ * personnage seul.
+ */
+export const SQUAD_HANDICAP: readonly number[] = [0.5, 0.75, 1];
+
 /** Replis appliqués quand la donnée source est absente (cas NORMAL, cf. supra). */
 export const FALLBACK_SPEED_RATING = 50;
 export const FALLBACK_ENERGY = 40;
@@ -188,14 +204,20 @@ export function toEnemySpec(
   character: Character,
   kind: string,
   config: TowerConfig,
+  squadSize = SQUAD_HANDICAP.length,
 ): FighterSpec {
   const spec = toFighterSpec(character, "enemy", config);
-  const mult = ENEMY_HP_MULT[kind] ?? 1;
-  if (mult === 1) return spec;
+  const hpMult = ENEMY_HP_MULT[kind] ?? 1;
+  const strikeMult =
+    SQUAD_HANDICAP[Math.max(0, Math.min(SQUAD_HANDICAP.length - 1, squadSize - 1))];
 
   return {
     ...spec,
-    stats: { ...spec.stats, maxHp: Math.round(spec.stats.maxHp * mult) },
+    stats: {
+      ...spec.stats,
+      maxHp: Math.max(1, Math.round(spec.stats.maxHp * hpMult)),
+      strike: Math.max(1, Math.round(spec.stats.strike * strikeMult)),
+    },
   };
 }
 

@@ -6,6 +6,10 @@ import { RunRecap } from "@/components/tower/RunRecap";
 import { TowerCard } from "@/components/tower/TowerCard";
 import { TowerCombat } from "@/components/tower/TowerCombat";
 import { TowerMap } from "@/components/tower/TowerMap";
+import {
+  TowerRulesButton,
+  TowerRulesSummary,
+} from "@/components/tower/TowerRules";
 import type { Intervention } from "@/lib/games/tower/types";
 import type { TowerActionResult, TowerView } from "@/lib/games/tower/view";
 import type { ExpResult } from "@/lib/leaderboard/types";
@@ -103,11 +107,14 @@ export function TowerGame() {
               : "Tour libre · hors classement"}
           </p>
         </div>
-        {view.status !== "won" && view.status !== "lost" && (
-          <p className="font-display text-sm tabular-nums text-white/50">
-            {view.score} pts
-          </p>
-        )}
+        <div className="flex shrink-0 items-center gap-3">
+          {view.status !== "won" && view.status !== "lost" && (
+            <p className="font-display text-sm tabular-nums text-white/50">
+              {view.score} pts
+            </p>
+          )}
+          <TowerRulesButton />
+        </div>
       </header>
 
       {error && (
@@ -178,6 +185,8 @@ function StarterPicker({
           montant, et les plus grands noms ne se croisent que dans les hauteurs.
         </p>
       </header>
+
+      <TowerRulesSummary />
 
       <div className="grid grid-cols-3 gap-3">
         {view.choices.map((card) => (

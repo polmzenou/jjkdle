@@ -1,3 +1,4 @@
+import { GUARD_COOLDOWN } from "./combat";
 import type { CombatEvent, CombatResult, FighterSpec } from "./types";
 
 /**
@@ -45,6 +46,10 @@ export interface CombatSnapshot {
   events: CombatEvent[];
   /** Une fenêtre est-elle ouverte ? Pilote la mise en avant des boutons. */
   windowOpen: boolean;
+  /** La garde est levée en ce moment. */
+  guardActive: boolean;
+  /** Ticks restants avant de pouvoir la relever (0 = disponible). */
+  guardCooldown: number;
   /** Le combat est-il terminé à ce tick ? */
   finished: boolean;
 }
@@ -81,6 +86,8 @@ export function snapshotAt(
   /** Charges en cours : uid → [début, fin]. */
   const charges = new Map<string, [number, number]>();
   const current: CombatEvent[] = [];
+  let guardUntil = -1;
+  let guardReadyAt = 0;
 
   for (const event of result.events) {
     if (event.t > clamped) break;
@@ -124,6 +131,10 @@ export function snapshotAt(
         break;
       case "telegraph-cancel":
         charges.delete(event.from);
+        break;
+      case "guard":
+        guardUntil = event.until;
+        guardReadyAt = event.t + GUARD_COOLDOWN;
         break;
       case "domain-ready": {
         const who = byUid.get(event.who);
@@ -180,6 +191,8 @@ export function snapshotAt(
     summons: summons.filter((s) => s.alive),
     events: current,
     windowOpen: enemies.some((e) => e.alive && e.charging),
+    guardActive: clamped < guardUntil,
+    guardCooldown: Math.max(0, guardReadyAt - clamped),
     finished: clamped >= result.ticks,
   };
 }

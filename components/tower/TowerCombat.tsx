@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CharacterImage } from "@/components/CharacterImage";
 import {
+  GUARD_SLOT,
   MAX_ENERGY,
+  TICKS_PER_SECOND,
   TICK_MS,
   simulateCombat,
   type CombatSetup,
@@ -77,18 +79,21 @@ export function TowerCombat({
   }, [snap.finished, interventions, onResolved]);
 
   const intervene = useCallback(
-    (slot: number) => {
+    (slot: number, kind: "technique" | "guard" = "technique") => {
       setInterventions((prev) => {
         // Les ticks doivent croître STRICTEMENT (garde anti-rejeu du moteur) :
         // deux appuis dans le même dixième de seconde, et le second serait
         // rejeté côté serveur alors qu'il aurait été joué à l'écran.
         const last = prev[prev.length - 1];
         if (last && last.tick >= tick) return prev;
-        return [...prev, { tick, slot }];
+        return [...prev, { tick, slot, kind }];
       });
     },
     [tick],
   );
+
+  const canGuard =
+    !snap.finished && !busy && snap.guardCooldown === 0 && !snap.guardActive;
 
   return (
     <div className="flex flex-col gap-4">
@@ -160,6 +165,27 @@ export function TowerCombat({
         })}
       </section>
 
+      <button
+        type="button"
+        onClick={() => intervene(GUARD_SLOT, "guard")}
+        disabled={!canGuard}
+        className={[
+          "flex items-center justify-center gap-2 rounded-lg border px-3 py-3 font-display text-sm font-bold uppercase tracking-wide transition",
+          snap.guardActive
+            ? "border-sky-400 bg-sky-400/25 text-sky-200"
+            : canGuard
+              ? "border-white/25 bg-white/[0.06] text-white/85 hover:border-sky-400/60"
+              : "border-white/10 bg-void-800/50 text-white/25",
+        ].join(" ")}
+      >
+        <span aria-hidden>🛡</span>
+        {snap.guardActive
+          ? "Garde levée"
+          : snap.guardCooldown > 0
+            ? `Garde · ${(snap.guardCooldown / TICKS_PER_SECOND).toFixed(1)}s`
+            : "Garde"}
+      </button>
+
       <p className="text-center text-xs text-white/40">
         {snap.finished
           ? busy
@@ -168,8 +194,8 @@ export function TowerCombat({
               ? "Étage franchi."
               : "Escouade à terre."
           : snap.windowOpen
-            ? "Fenêtre ouverte — frappe maintenant pour contrer."
-            : "Le combat se joue seul. Attends qu'un ennemi charge."}
+            ? "Fenêtre ouverte — frappe maintenant pour contrer, ou garde pour amortir."
+            : "Le combat se joue seul. Garde pour encaisser, et attends qu'un ennemi charge."}
       </p>
     </div>
   );

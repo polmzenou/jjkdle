@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  GUARD_COOLDOWN,
+  GUARD_DURATION,
+  GUARD_SLOT,
   MAX_TICKS,
   TELEGRAPH_DURATION,
   TELEGRAPH_PERIOD,
@@ -517,5 +520,123 @@ describe("techniques", () => {
 
     expect(guarded.events.some((e) => e.kind === "parry")).toBe(true);
     expect(guarded.squad[0].hp).toBeGreaterThan(plain.squad[0].hp);
+  });
+});
+
+describe("garde", () => {
+  const punchingBag: CombatSetup = {
+    squad: [
+      fighter({
+        id: "a",
+        archetype: "brute",
+        stats: { maxHp: 5_000, strike: 1, speed: 1, flux: 1.6 },
+      }),
+    ],
+    enemies: [
+      fighter({
+        id: "x",
+        archetype: "brute",
+        side: "enemy",
+        stats: { maxHp: 100_000, strike: 40, speed: 90, flux: 0 },
+      }),
+    ],
+  };
+
+  const guard = (tick: number) => ({ tick, slot: GUARD_SLOT, kind: "guard" as const });
+
+  it("réduit les dégâts des coups ordinaires pendant sa durée", () => {
+    const plain = run(punchingBag);
+    const guarded = run({ ...punchingBag, interventions: [guard(1)] });
+
+    const damageIn = (r: typeof plain, from: number, to: number) =>
+      r.events
+        .filter((e) => e.kind === "strike" && e.to === "s0" && e.t >= from && e.t < to)
+        .reduce((sum, e) => sum + (e.kind === "strike" ? e.damage : 0), 0);
+
+    const window: [number, number] = [1, 1 + GUARD_DURATION];
+    expect(damageIn(guarded, ...window)).toBeLessThan(damageIn(plain, ...window));
+  });
+
+  it("ne coûte AUCUNE énergie : c'est la défense du joueur qui n'en a pas", () => {
+    const withGuard = run({ ...punchingBag, interventions: [guard(1)] });
+    const without = run(punchingBag);
+
+    // L'énergie ne dépend que de la régénération, identique dans les deux cas.
+    expect(withGuard.energyByTick[20]).toBe(without.energyByTick[20]);
+  });
+
+  it("expire au bout de GUARD_DURATION", () => {
+    const guarded = run({ ...punchingBag, interventions: [guard(1)] });
+    const plain = run(punchingBag);
+
+    const after = (r: typeof plain) =>
+      r.events
+        .filter(
+          (e) =>
+            e.kind === "strike" &&
+            e.to === "s0" &&
+            e.t > 1 + GUARD_DURATION + 2 &&
+            e.t < 1 + GUARD_DURATION + 40,
+        )
+        .reduce((sum, e) => sum + (e.kind === "strike" ? e.damage : 0), 0);
+
+    expect(after(guarded)).toBe(after(plain));
+  });
+
+  it("refuse une garde encore en recharge, sans la consommer en silence", () => {
+    const result = run({
+      ...punchingBag,
+      interventions: [guard(1), guard(5)],
+    });
+
+    expect(result.events.filter((e) => e.kind === "guard")).toHaveLength(1);
+    const rejected = result.events.find((e) => e.kind === "reject");
+    expect(rejected?.kind === "reject" && rejected.reason).toBe("cooldown");
+  });
+
+  it("se relève une fois la recharge écoulée", () => {
+    const result = run({
+      ...punchingBag,
+      interventions: [guard(1), guard(1 + GUARD_COOLDOWN)],
+    });
+
+    expect(result.events.filter((e) => e.kind === "guard")).toHaveLength(2);
+  });
+
+  it("amortit aussi le coup chargé : c'est la parade du joueur sans énergie", () => {
+    const landsAt = TELEGRAPH_PERIOD - 1 + TELEGRAPH_DURATION;
+    const base: CombatSetup = {
+      squad: [
+        fighter({
+          id: "a",
+          archetype: "brute",
+          stats: { maxHp: 5_000, strike: 1, speed: 1, flux: 1.6 },
+        }),
+      ],
+      enemies: [
+        fighter({
+          id: "x",
+          archetype: "brute",
+          side: "enemy",
+          stats: { maxHp: 100_000, strike: 30, speed: 1, flux: 0 },
+        }),
+      ],
+    };
+
+    const ignored = run(base);
+    const guarded = run({ ...base, interventions: [guard(landsAt - 3)] });
+
+    const hit = (r: typeof ignored) => {
+      const e = r.events.find((x) => x.kind === "telegraph-hit" && x.t === landsAt);
+      return e?.kind === "telegraph-hit" ? e.damage : 0;
+    };
+
+    expect(hit(ignored)).toBe(90); // 30 × 3
+    expect(hit(guarded)).toBeLessThan(hit(ignored));
+  });
+
+  it("reste déterministe avec des gardes dans le log", () => {
+    const setup = { ...punchingBag, interventions: [guard(1), guard(60), guard(120)] };
+    expect(run(setup)).toEqual(run(setup));
   });
 });

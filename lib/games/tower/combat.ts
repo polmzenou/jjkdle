@@ -90,6 +90,28 @@ export const MIN_TECHNIQUE_COST = 5;
 export const COUNTER_MULT = 2;
 
 /**
+ * LA GARDE — défense d'escouade, gratuite, en temps de recharge.
+ *
+ * Ajoutée après un retour de partie sans appel : entre deux fenêtres, espacées
+ * de six secondes, le joueur n'avait STRICTEMENT rien à faire pendant que son
+ * personnage s'usait coup après coup. Le combat se regardait plus qu'il ne se
+ * jouait, et une escouade incomplète mourait sans que personne ait décidé quoi
+ * que ce soit.
+ *
+ * Elle est volontairement GRATUITE : au début d'une run, l'énergie manque
+ * justement quand on en aurait le plus besoin, et faire payer la seule défense
+ * disponible aurait reproduit le problème. Son coût, c'est le temps de
+ * recharge — et c'est ce qui en fait une décision : la garde dépensée sur des
+ * coups ordinaires ne sera pas disponible pour l'attaque chargée qui arrive.
+ */
+export const GUARD_DURATION = 15; // 1,5 s
+export const GUARD_COOLDOWN = 40; // 4 s
+/** Part des dégâts absorbés pendant la garde. */
+export const GUARD_REDUCTION = 0.7;
+/** `slot` conventionnel d'une garde : elle n'appartient à personne. */
+export const GUARD_SLOT = -1;
+
+/**
  * Vitesse de remplissage de la jauge d'ultime, par point de PV perdu.
  *
  * Sans ce coefficient, la jauge se remplirait de `dégâts / PV max`, c'est-à-dire
@@ -178,6 +200,10 @@ interface State {
   firstTelegraphUsed: boolean;
   /** Aucun ennemi ne peut télégraphier avant ce tick (ultime). */
   telegraphSuppressedUntil: number;
+  /** L'escouade est en garde jusqu'à ce tick (exclu). */
+  guardUntil: number;
+  /** La garde n'est re-levable qu'à partir de ce tick. */
+  guardReadyAt: number;
   modifiers: RunModifiers;
   summonCount: number;
   energyByTick: number[];
@@ -345,6 +371,8 @@ function buildState(setup: CombatSetup): State {
     absorption: Math.max(0, modifiers.ABSORPTION),
     firstTelegraphUsed: false,
     telegraphSuppressedUntil: -1,
+    guardUntil: -1,
+    guardReadyAt: 0,
     modifiers,
     summonCount: 0,
     energyByTick: [],
@@ -381,9 +409,10 @@ function planInterventions(
     }
 
     previousTick = tick;
+    const entry: Intervention = { tick, slot, kind: item.kind ?? "technique" };
     const bucket = plan.get(tick);
-    if (bucket) bucket.push({ tick, slot });
-    else plan.set(tick, [{ tick, slot }]);
+    if (bucket) bucket.push(entry);
+    else plan.set(tick, [entry]);
   }
 
   return plan;
@@ -555,6 +584,13 @@ function dealDamage(
     return;
   }
 
+  // Garde levée : l'escouade encaisse une fraction seulement. S'applique AUSSI
+  // au coup chargé — c'est la réponse défensive de secours quand l'énergie
+  // manque pour contrer.
+  if (to.spec.side === "squad" && state.tick < state.guardUntil) {
+    damage = Math.max(1, Math.round(damage * (1 - GUARD_REDUCTION)));
+  }
+
   // Objet « Inversion » : les premiers dégâts subis deviennent de l'énergie.
   if (to.spec.side === "squad" && state.absorption > 0) {
     const converted = Math.min(state.absorption, damage);
@@ -640,6 +676,9 @@ function reject(state: State, slot: number, reason: InterventionReject): void {
  */
 function resolveIntervention(state: State, intervention: Intervention): void {
   const { slot } = intervention;
+
+  if (intervention.kind === "guard") return raiseGuard(state);
+
   const fighter = state.squad[slot];
 
   if (!fighter) return reject(state, slot, "empty");
@@ -659,6 +698,22 @@ function resolveIntervention(state: State, intervention: Intervention): void {
 
   state.energy -= cost;
   castTechnique(state, fighter, technique, cost);
+}
+
+/**
+ * Lève la garde, si elle est disponible.
+ *
+ * Refusée pendant sa recharge plutôt qu'ignorée en silence : le journal doit
+ * dire au serveur pourquoi une intervention n'a rien produit, sinon un log
+ * légitime et un log trafiqué se ressemblent.
+ */
+function raiseGuard(state: State): void {
+  if (state.tick < state.guardReadyAt) {
+    return reject(state, GUARD_SLOT, "cooldown");
+  }
+  state.guardUntil = state.tick + GUARD_DURATION;
+  state.guardReadyAt = state.tick + GUARD_COOLDOWN;
+  state.events.push({ t: state.tick, kind: "guard", until: state.guardUntil });
 }
 
 /** Coût effectif : base, remise du passif, puis modificateur d'objet. */

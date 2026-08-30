@@ -135,7 +135,7 @@ export function buildCombatSetup(
   const enemies = plan.enemyIds
     .map((id) => roster[id])
     .filter((c): c is Character => Boolean(c))
-    .map((c) => toEnemySpec(c, plan.kind, config));
+    .map((c) => toEnemySpec(c, plan.kind, config, state.squad.length));
 
   return {
     squad,

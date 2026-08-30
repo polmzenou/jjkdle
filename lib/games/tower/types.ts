@@ -31,8 +31,15 @@ export const STRATE_COUNT = TOWER_FLOORS / FLOORS_PER_STRATE;
 /** Starters proposés à l'entrée. Le joueur en prend UN. */
 export const STARTER_CHOICES = 3;
 
-/** Bornes de `battleValue` du vivier de starters (« jamais ultra puissants »). */
-export const STARTER_MIN_VALUE = 8;
+/**
+ * Bornes de `battleValue` du vivier de starters (« jamais ultra puissants »).
+ *
+ * Le PLANCHER compte autant que le plafond : à 8, l'écart entre le starter le
+ * plus faible et le plus fort était de 1 à 5, et tirer le plus faible rendait
+ * les premiers étages ingagnables quoi qu'on fasse. Un choix entre trois
+ * personnages n'a de sens que s'ils sont tous jouables.
+ */
+export const STARTER_MIN_VALUE = 18;
 export const STARTER_MAX_VALUE = 40;
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -129,7 +136,14 @@ export interface FighterSpec {
  */
 export interface Intervention {
   tick: number;
+  /** Slot de l'escouade. Ignoré pour une garde, qui est d'escouade. */
   slot: number;
+  /**
+   * `"technique"` par défaut (et absent des anciens logs, d'où l'optionalité).
+   * `"guard"` lève la GARDE : une défense d'escouade, gratuite mais en temps de
+   * recharge, qui donne au joueur quelque chose à faire ENTRE deux fenêtres.
+   */
+  kind?: "technique" | "guard";
 }
 
 /** Pourquoi une intervention a été ignorée (utile au debug et aux tests). */
@@ -138,6 +152,7 @@ export type InterventionReject =
   | "empty" // aucun personnage dans ce slot
   | "no-ability" // ni technique ni ultime disponible
   | "energy" // énergie insuffisante
+  | "cooldown" // garde encore en temps de recharge
   | "out-of-range"; // tick hors bornes ou non croissant
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -166,6 +181,8 @@ export type CombatEvent =
       cost: number;
     }
   | { t: number; kind: "ultimate"; from: string }
+  /** Garde levée : l'escouade encaisse moins jusqu'à `until`. */
+  | { t: number; kind: "guard"; until: number }
   /** La jauge d'ultime d'un membre d'escouade vient de se remplir. Émis par
    * le MOTEUR pour que l'interface n'ait pas à recalculer le remplissage —
    * seule façon de garantir que le bouton affiché correspond à l'action qui

@@ -156,7 +156,11 @@ export function buildView(params: {
           .map((id) => roster[id])
           .filter((c): c is Character => Boolean(c))
           .map((c) =>
-            toCardView(c, config, toEnemySpec(c, plan.kind, config).stats),
+            toCardView(
+              c,
+              config,
+              toEnemySpec(c, plan.kind, config, state.squad.length).stats,
+            ),
           )
       : [];
 

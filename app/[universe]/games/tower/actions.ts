@@ -339,7 +339,13 @@ function sanitize(interventions: unknown): Intervention[] {
         Number.isFinite((i as Intervention).tick) &&
         Number.isFinite((i as Intervention).slot),
     )
-    .map((i) => ({ tick: Math.trunc(i.tick), slot: Math.trunc(i.slot) }));
+    .map((i) => ({
+      tick: Math.trunc(i.tick),
+      slot: Math.trunc(i.slot),
+      // Toute valeur inconnue retombe sur "technique" : le moteur validera
+      // ensuite la légalité de l'action elle-même.
+      kind: i.kind === "guard" ? ("guard" as const) : ("technique" as const),
+    }));
 }
 
 // ──────────────────────────────────────────────────────────────────────────
