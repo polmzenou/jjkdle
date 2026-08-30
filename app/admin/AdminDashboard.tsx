@@ -21,6 +21,7 @@ import {
   saveCharacterAction,
   deleteCharacterAction,
   deleteCharactersAction,
+  removeCharacterRatingAction,
   refreshRosterImagesFromApiAction,
   clearImageCacheAction,
 } from "./actions";
@@ -66,6 +67,22 @@ const TIERS: CharacterTier[] = ["s", "1", "2", "3", "4", "4minus"];
  * valeur d'option (qui est un slug type "GRADE_1").
  */
 const ATTR_MISSING = "__missing__";
+
+/**
+ * Tris disponibles sur la liste du roster. Les tris « note » portent sur la
+ * catégorie sélectionnée dans le filtre ; sur « Toutes catégories » il n'y a pas
+ * de note unique à comparer, on classe alors sur le NOMBRE de catégories notées
+ * (ce que le tag « n perso » de l'onglet Catégories mesure dans l'autre sens).
+ */
+const ROSTER_SORTS = {
+  default: "Tri : ordre du roster",
+  "cat-desc": "Note ↓ (décroissant)",
+  "cat-asc": "Note ↑ (croissant)",
+  "name-asc": "Nom A → Z",
+  "name-desc": "Nom Z → A",
+} as const;
+
+type RosterSort = keyof typeof ROSTER_SORTS;
 
 type CatField = { enabled: boolean; value: string };
 interface FormState {
@@ -257,6 +274,8 @@ export function AdminDashboard({
   );
   const [query, setQuery] = useState("");
   const [rosterCat, setRosterCat] = useState<CategoryId | "all">("all");
+  // Tri de la liste du roster (cf. ROSTER_SORTS) — indépendant du filtre.
+  const [rosterSort, setRosterSort] = useState<RosterSort>("default");
   // Filtres par attribut : `clé d'attribut → valeur retenue`. "" = pas de filtre,
   // ATTR_MISSING = ne garder que les persos dont l'attribut n'est pas renseigné.
   const [attrFilters, setAttrFilters] = useState<Record<string, string>>({});
@@ -452,6 +471,32 @@ export function AdminDashboard({
     });
   };
 
+  /**
+   * Croix au survol d'un tag de catégorie : retire le personnage de CETTE
+   * catégorie sans passer par le formulaire. Pas de `confirm()` — le geste est
+   * précis, et la note se remet en deux clics dans l'éditeur.
+   */
+  const removeFromCategory = (c: Character, catId: CategoryId) => {
+    startTransition(async () => {
+      const res = await removeCharacterRatingAction(c.id, catId);
+      if (!res.ok) {
+        setFeedback({ ok: false, msg: res.error ?? "Échec." });
+        return;
+      }
+      const label = categories.find((cat) => cat.id === catId)?.label ?? catId;
+      setFeedback({ ok: true, msg: `« ${c.name} » retiré de « ${label} ».` });
+      // La fiche ouverte dans le formulaire doit refléter le retrait, sinon un
+      // « Mettre à jour » réécrirait la note qu'on vient d'enlever.
+      if (editingId === c.id) {
+        setForm((f) => ({
+          ...f,
+          cats: { ...f.cats, [catId]: { enabled: false, value: "" } },
+        }));
+      }
+      router.refresh();
+    });
+  };
+
   const toggleSelected = (id: string) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
@@ -578,13 +623,38 @@ export function AdminDashboard({
         : value != null && String(value) === wanted;
     });
 
-  const filtered = roster.filter(
-    (c) =>
-      (rosterCat === "all" || c.ratings[rosterCat] !== undefined) &&
-      matchesAttrFilters(c) &&
-      (c.name.toLowerCase().includes(query.toLowerCase()) ||
-        c.id.includes(query.toLowerCase())),
-  );
+  /**
+   * Grandeur comparée par les tris « note » : la note dans la catégorie
+   * filtrée, ou le nombre de catégories notées quand aucune n'est choisie.
+   */
+  const sortValue = (c: Character) =>
+    rosterCat === "all"
+      ? Object.keys(c.ratings).length
+      : (c.ratings[rosterCat] ?? -1);
+
+  const filtered = roster
+    .filter(
+      (c) =>
+        (rosterCat === "all" || c.ratings[rosterCat] !== undefined) &&
+        matchesAttrFilters(c) &&
+        (c.name.toLowerCase().includes(query.toLowerCase()) ||
+          c.id.includes(query.toLowerCase())),
+    )
+    // `filter` renvoie déjà une copie : trier ici ne touche pas `roster`.
+    .sort((a, b) => {
+      switch (rosterSort) {
+        case "cat-asc":
+          return sortValue(a) - sortValue(b);
+        case "cat-desc":
+          return sortValue(b) - sortValue(a);
+        case "name-asc":
+          return a.name.localeCompare(b.name, "fr");
+        case "name-desc":
+          return b.name.localeCompare(a.name, "fr");
+        default:
+          return 0;
+      }
+    });
 
   // Depuis l'onglet « Santé contenu » : ouvre un perso dans l'éditeur roster.
   const editCharacter = (c: Character) => {
@@ -1083,12 +1153,54 @@ export function AdminDashboard({
                 </option>
               ))}
             </select>
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Rechercher…"
-              className="w-40 rounded-lg border border-white/10 bg-void-900 px-3 py-1.5 text-sm text-white outline-none focus:border-domain"
-            />
+            {/* Tri : sur la note de la catégorie filtrée, sinon sur le nombre
+                de catégories notées (cf. ROSTER_SORTS). */}
+            <select
+              value={rosterSort}
+              onChange={(e) => setRosterSort(e.target.value as RosterSort)}
+              title={
+                rosterCat === "all"
+                  ? "Les tris « Note » classent sur le nombre de catégories notées tant qu'aucune catégorie n'est filtrée."
+                  : `Les tris « Note » classent sur la note dans « ${
+                      categories.find((cat) => cat.id === rosterCat)?.label ??
+                      rosterCat
+                    } ».`
+              }
+              className={`rounded-lg border bg-void-900 px-3 py-1.5 text-sm outline-none focus:border-domain ${
+                rosterSort === "default"
+                  ? "border-white/10 text-white/70"
+                  : "border-domain/60 text-domain-light"
+              }`}
+            >
+              {Object.entries(ROSTER_SORTS).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+            {/* Recherche : la croix vide le champ en un clic (elle n'occupe la
+                place du texte que lorsqu'il y en a). */}
+            <div className="relative w-40">
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Rechercher…"
+                className={`w-full rounded-lg border border-white/10 bg-void-900 py-1.5 pl-3 text-sm text-white outline-none focus:border-domain ${
+                  query ? "pr-8" : "pr-3"
+                }`}
+              />
+              {query && (
+                <button
+                  type="button"
+                  onClick={() => setQuery("")}
+                  aria-label="Effacer la recherche"
+                  title="Effacer la recherche"
+                  className="absolute right-1 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full text-white/40 transition-colors hover:bg-white/10 hover:text-white"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Filtres par attribut (un select par attribut de l'univers). */}
@@ -1204,12 +1316,32 @@ export function AdminDashboard({
                         </span>
                       ) : (
                         cats.map(([catId, val]) => (
+                          // `group` : la croix de retrait n'apparaît qu'au
+                          // survol du tag, pour ne pas alourdir la liste. Elle
+                          // est masquée en OPACITÉ et non en `display` — elle
+                          // reste ainsi focusable au clavier, et le tag ne
+                          // change pas de largeur au survol.
                           <span
                             key={catId}
-                            className="rounded bg-domain/15 px-1.5 py-0.5 text-[10px] text-domain-light"
+                            className="group inline-flex items-center gap-1 rounded bg-domain/15 py-0.5 pl-1.5 pr-1.5 text-[10px] text-domain-light transition-colors hover:bg-domain/25"
                             title={catId}
                           >
-                            {catId}: <b>{val}</b>
+                            <span>
+                              {catId}: <b>{val}</b>
+                            </span>
+                            <button
+                              type="button"
+                              disabled={pending}
+                              onClick={() => removeFromCategory(c, catId)}
+                              aria-label={`Retirer ${c.name} de la catégorie ${catId}`}
+                              title={`Retirer de « ${
+                                categories.find((cat) => cat.id === catId)
+                                  ?.label ?? catId
+                              } »`}
+                              className="-mr-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-cursed/30 text-[9px] leading-none text-cursed-light opacity-0 transition-opacity hover:bg-cursed/60 hover:text-white focus-visible:opacity-100 group-hover:opacity-100"
+                            >
+                              ✕
+                            </button>
                           </span>
                         ))
                       )}

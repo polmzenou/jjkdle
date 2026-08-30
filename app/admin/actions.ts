@@ -26,7 +26,12 @@ import {
 } from "@/lib/casino/config";
 import { closeTable } from "@/lib/casino/store";
 import { resetCasinoStats } from "@/lib/admin/casino";
-import { upsertCharacter, deleteCharacter, readRoster } from "@/lib/admin/roster-store";
+import {
+  upsertCharacter,
+  deleteCharacter,
+  removeCharacterRating,
+  readRoster,
+} from "@/lib/admin/roster-store";
 import {
   refreshAllRosterImages,
   type ImageRefreshResult,
@@ -232,6 +237,38 @@ export async function saveCharacterAction(
 
   revalidatePath("/", "layout"); // hub + jeux + admin relisent le roster
   return { ok: true, universe: universe.slug };
+}
+
+/**
+ * Retire un personnage d'UNE catégorie (croix au survol du tag, liste du roster).
+ *
+ * Raccourci du formulaire complet : décocher la catégorie puis « Mettre à jour »
+ * imposait de charger la fiche entière pour un retrait d'un clic. La catégorie
+ * est validée contre celles de l'univers courant — on ne fait jamais confiance
+ * à l'id envoyé par le client, comme dans `saveCharacterAction`.
+ */
+export async function removeCharacterRatingAction(
+  characterId: string,
+  categoryId: string,
+): Promise<ActionResult> {
+  if (!(await getAdminUser())) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+
+  const universe = await getCurrentUniverse();
+  const known = new Set((await getCategories(universe.id)).map((c) => c.id));
+  if (!known.has(categoryId)) {
+    return { ok: false, error: `Catégorie inconnue : « ${categoryId} ».` };
+  }
+
+  try {
+    await removeCharacterRating(characterId, categoryId);
+  } catch (e) {
+    return { ok: false, error: `Échec du retrait : ${(e as Error).message}` };
+  }
+
+  revalidatePath("/", "layout");
+  return { ok: true };
 }
 
 export async function deleteCharacterAction(id: string): Promise<ActionResult> {

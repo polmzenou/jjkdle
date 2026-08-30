@@ -135,6 +135,36 @@ export async function upsertCharacter(
   await prisma.$transaction([save, ...attributeWrites]);
 }
 
+/**
+ * Retire UNE note de catégorie d'un personnage (croix au survol du tag, admin).
+ *
+ * `ratings` est une colonne JSON : on relit puis on réécrit l'objet sans la clé.
+ * Absence de note = absence de clé, ce qui rend le personnage inéligible au
+ * tirage de cette catégorie — même sémantique que le formulaire complet.
+ *
+ * Idempotent : retirer une note déjà absente ne fait rien. Lève si le
+ * personnage n'existe pas (l'appelant en fait un message d'erreur).
+ */
+export async function removeCharacterRating(
+  characterId: string,
+  categoryId: string,
+): Promise<void> {
+  const existing = await prisma.character.findUnique({
+    where: { id: characterId },
+    select: { ratings: true },
+  });
+  if (!existing) throw new Error(`Personnage introuvable : ${characterId}`);
+
+  const ratings = { ...((existing.ratings ?? {}) as Record<string, number>) };
+  if (!(categoryId in ratings)) return;
+  delete ratings[categoryId];
+
+  await prisma.character.update({
+    where: { id: characterId },
+    data: { ratings },
+  });
+}
+
 /** Supprime un personnage par id (ignore s'il n'existe pas). */
 export async function deleteCharacter(id: string): Promise<void> {
   // Les CharacterAttribute partent en cascade (onDelete: Cascade).

@@ -1,0 +1,643 @@
+{
+  "_comment": [
+    "Notes du builder « Build the Perfect Ghoul » (univers TG).",
+    "Lu par : npx tsx scripts/seed-ratings.ts --universe tg",
+    "Clé de 1er niveau = Character.slug, clé de 2e = slug de catégorie.",
+    "",
+    "── Les six catégories de STAT ──",
+    "kagune, regeneration, force-physique, speed, battle-iq, mental : ouvertes à",
+    "tous les combattants. « kagune » y couvre l'arme du personnage — kagune pour",
+    "une goule, quinque pour un enquêteur (c'est la définition de la catégorie,",
+    "pas celle de l'attribut tgkagune, qui lui vaut NONE pour un humain).",
+    "Les non-combattants (Hide, Kimi, Yoriko, Chie, Kanou, Mirumo, Tsuneyoshi) n'ont",
+    "que battle-iq et/ou mental.",
+    "",
+    "── Les quatre catégories d'APPARTENANCE : un seul camp par personnage ──",
+    "Un personnage n'est noté que là où il a RÉELLEMENT sa place. Aucune goule du",
+    "camp adverse dans ccg, aucun enquêteur dans aogiri ou anteiku.",
+    "· ccg          → camp CCG : les enquêteurs et les Quinx (tgaffiliation CCG ou",
+    "                 QUINX_SQUAD). Amon et Furuta y restent malgré leur",
+    "                 transformation — ils n'ont jamais changé de camp. Kaneki et",
+    "                 Takizawa en sortent : ils ont déserté vers le camp goule.",
+    "· aogiri       → les membres, passés ou présents, cités par le wiki.",
+    "· anteiku      → les sept du 20e arrondissement + Kaneki, qui y a été serveur.",
+    "· semi-goules  → réservée aux espèces hybrides : HALF_GHOUL, ONE_EYED_GHOUL",
+    "                 et QUINX. Une goule ordinaire ou un humain n'y figure pas.",
+    "Un personnage peut légitimement relever de deux camps ghoul : Hinami est notée",
+    "dans anteiku ET aogiri, le wiki la rattachant aux deux.",
+    "",
+    "── Barème ──",
+    "Rien ici ne vient du wiki : une note sur 100 est un jugement. Le classement",
+    "suit l'ordre de puissance du roster (tier + battleValue) décliné axe par axe.",
+    "Chacune des dix catégories a au moins un 100, sinon le builder ne peut jamais",
+    "sortir un score parfait sur cette ligne :",
+    "  kagune → Kaneki · regeneration → Noro · force-physique → Arima et Matasaka",
+    "  speed → Arima · battle-iq → Arima · mental → Kaneki et Takizawa",
+    "  semi-goules → Kaneki · ccg → Arima · aogiri → Eto · anteiku → Yoshimura",
+    "",
+    "── Une catégorie absente n'est pas un zéro ──",
+    "Une note manquante rend le personnage inéligible AU TIRAGE de cette catégorie.",
+    "0 ≠ absent.",
+    "",
+    "⚠️ Chaque catégorie a drawCount = 4 : il lui faut au moins 4 personnages notés,",
+    "sinon le builder ne peut pas verrouiller sa ligne. La plus étroite ici est",
+    "anteiku (8 personnages) — à surveiller si le roster est élagué."
+  ],
+
+  "ken-kaneki": {
+    "kagune": 100,
+    "regeneration": 99,
+    "force-physique": 92,
+    "speed": 94,
+    "battle-iq": 90,
+    "mental": 100,
+    "semi-goules": 100,
+    "anteiku": 84
+  },
+  "kishou-arima": {
+    "kagune": 94,
+    "regeneration": 40,
+    "force-physique": 100,
+    "speed": 100,
+    "battle-iq": 100,
+    "mental": 90,
+    "ccg": 100
+  },
+  "eto-yoshimura": {
+    "kagune": 96,
+    "regeneration": 98,
+    "force-physique": 90,
+    "speed": 92,
+    "battle-iq": 94,
+    "mental": 92,
+    "semi-goules": 96,
+    "aogiri": 100
+  },
+  "kichimura-washuu": {
+    "kagune": 88,
+    "regeneration": 86,
+    "force-physique": 78,
+    "speed": 86,
+    "battle-iq": 96,
+    "mental": 84,
+    "semi-goules": 88,
+    "ccg": 94
+  },
+  "yoshimura": {
+    "kagune": 92,
+    "regeneration": 84,
+    "force-physique": 88,
+    "speed": 86,
+    "battle-iq": 90,
+    "mental": 88,
+    "anteiku": 100
+  },
+  "noro": {
+    "kagune": 84,
+    "regeneration": 100,
+    "force-physique": 88,
+    "speed": 74,
+    "battle-iq": 55,
+    "mental": 80,
+    "aogiri": 88
+  },
+  "tatara": {
+    "kagune": 86,
+    "regeneration": 82,
+    "force-physique": 84,
+    "speed": 82,
+    "battle-iq": 82,
+    "mental": 80,
+    "aogiri": 92
+  },
+  "matasaka-kamishiro": {
+    "kagune": 80,
+    "regeneration": 76,
+    "force-physique": 100,
+    "speed": 76,
+    "battle-iq": 74,
+    "mental": 78,
+    "aogiri": 74
+  },
+  "donato-porpora": {
+    "kagune": 82,
+    "regeneration": 74,
+    "force-physique": 76,
+    "speed": 78,
+    "battle-iq": 88,
+    "mental": 86
+  },
+  "seido-takizawa": {
+    "kagune": 86,
+    "regeneration": 88,
+    "force-physique": 82,
+    "speed": 84,
+    "battle-iq": 68,
+    "mental": 100,
+    "semi-goules": 84,
+    "aogiri": 82
+  },
+  "uta": {
+    "kagune": 84,
+    "regeneration": 78,
+    "force-physique": 78,
+    "speed": 86,
+    "battle-iq": 84,
+    "mental": 82
+  },
+  "juuzou-suzuya": {
+    "kagune": 84,
+    "regeneration": 30,
+    "force-physique": 76,
+    "speed": 92,
+    "battle-iq": 86,
+    "mental": 76,
+    "ccg": 88
+  },
+  "rize-kamishiro": {
+    "kagune": 86,
+    "regeneration": 80,
+    "force-physique": 78,
+    "speed": 80,
+    "battle-iq": 66,
+    "mental": 60
+  },
+  "renji-yomo": {
+    "kagune": 78,
+    "regeneration": 72,
+    "force-physique": 80,
+    "speed": 88,
+    "battle-iq": 82,
+    "mental": 84,
+    "anteiku": 88
+  },
+  "ayato-kirishima": {
+    "kagune": 80,
+    "regeneration": 70,
+    "force-physique": 74,
+    "speed": 88,
+    "battle-iq": 74,
+    "mental": 70,
+    "aogiri": 84
+  },
+  "kaiko": {
+    "kagune": 76,
+    "regeneration": 74,
+    "force-physique": 78,
+    "speed": 74,
+    "battle-iq": 80,
+    "mental": 78
+  },
+  "touka-kirishima": {
+    "kagune": 76,
+    "regeneration": 68,
+    "force-physique": 70,
+    "speed": 86,
+    "battle-iq": 76,
+    "mental": 82,
+    "anteiku": 92
+  },
+  "kuki-urie": {
+    "kagune": 76,
+    "regeneration": 72,
+    "force-physique": 70,
+    "speed": 78,
+    "battle-iq": 80,
+    "mental": 62,
+    "semi-goules": 78,
+    "ccg": 76
+  },
+  "kotaro-amon": {
+    "kagune": 74,
+    "regeneration": 76,
+    "force-physique": 84,
+    "speed": 72,
+    "battle-iq": 74,
+    "mental": 88,
+    "semi-goules": 74,
+    "ccg": 74
+  },
+  "tooru-mutsuki": {
+    "kagune": 72,
+    "regeneration": 70,
+    "force-physique": 66,
+    "speed": 80,
+    "battle-iq": 74,
+    "mental": 40,
+    "semi-goules": 72,
+    "ccg": 72
+  },
+  "yakumo-omori": {
+    "kagune": 76,
+    "regeneration": 74,
+    "force-physique": 82,
+    "speed": 68,
+    "battle-iq": 58,
+    "mental": 62,
+    "aogiri": 78
+  },
+  "matsuri-washuu": {
+    "kagune": 62,
+    "regeneration": 66,
+    "force-physique": 62,
+    "speed": 64,
+    "battle-iq": 76,
+    "mental": 52,
+    "ccg": 82
+  },
+  "shuu-tsukiyama": {
+    "kagune": 74,
+    "regeneration": 68,
+    "force-physique": 70,
+    "speed": 82,
+    "battle-iq": 76,
+    "mental": 66
+  },
+  "koori-ui": {
+    "kagune": 72,
+    "regeneration": 30,
+    "force-physique": 68,
+    "speed": 76,
+    "battle-iq": 82,
+    "mental": 72,
+    "ccg": 86
+  },
+  "yukinori-shinohara": {
+    "kagune": 74,
+    "regeneration": 28,
+    "force-physique": 82,
+    "speed": 62,
+    "battle-iq": 80,
+    "mental": 84,
+    "ccg": 84
+  },
+  "big-madam": {
+    "kagune": 70,
+    "regeneration": 66,
+    "force-physique": 84,
+    "speed": 48,
+    "battle-iq": 46,
+    "mental": 44
+  },
+  "iwao-kuroiwa": {
+    "kagune": 70,
+    "regeneration": 26,
+    "force-physique": 88,
+    "speed": 58,
+    "battle-iq": 72,
+    "mental": 78,
+    "ccg": 80
+  },
+  "yoshitoki-washuu": {
+    "kagune": 58,
+    "regeneration": 62,
+    "force-physique": 60,
+    "speed": 58,
+    "battle-iq": 78,
+    "mental": 76,
+    "ccg": 90
+  },
+  "naki": {
+    "kagune": 66,
+    "regeneration": 64,
+    "force-physique": 76,
+    "speed": 62,
+    "battle-iq": 30,
+    "mental": 68,
+    "aogiri": 70
+  },
+  "kousuke-hoji": {
+    "kagune": 66,
+    "regeneration": 24,
+    "force-physique": 62,
+    "speed": 66,
+    "battle-iq": 84,
+    "mental": 76,
+    "ccg": 78
+  },
+  "hairu-ihei": {
+    "kagune": 68,
+    "regeneration": 26,
+    "force-physique": 64,
+    "speed": 84,
+    "battle-iq": 66,
+    "mental": 58,
+    "ccg": 70
+  },
+  "roma-hoito": {
+    "kagune": 62,
+    "regeneration": 72,
+    "force-physique": 60,
+    "speed": 66,
+    "battle-iq": 78,
+    "mental": 74
+  },
+  "matsumae": {
+    "kagune": 64,
+    "regeneration": 58,
+    "force-physique": 66,
+    "speed": 62,
+    "battle-iq": 64,
+    "mental": 76
+  },
+  "mogan-tanakamaru": {
+    "kagune": 62,
+    "regeneration": 22,
+    "force-physique": 64,
+    "speed": 60,
+    "battle-iq": 70,
+    "mental": 74,
+    "ccg": 72
+  },
+  "kaya-irimi": {
+    "kagune": 62,
+    "regeneration": 58,
+    "force-physique": 60,
+    "speed": 68,
+    "battle-iq": 62,
+    "mental": 72,
+    "anteiku": 78
+  },
+  "miza-kusakari": {
+    "kagune": 60,
+    "regeneration": 56,
+    "force-physique": 58,
+    "speed": 70,
+    "battle-iq": 64,
+    "mental": 66,
+    "aogiri": 66
+  },
+  "ginshi-shirazu": {
+    "kagune": 60,
+    "regeneration": 62,
+    "force-physique": 62,
+    "speed": 60,
+    "battle-iq": 58,
+    "mental": 72,
+    "semi-goules": 62,
+    "ccg": 58
+  },
+  "kurona-yasuhisa": {
+    "kagune": 62,
+    "regeneration": 68,
+    "force-physique": 56,
+    "speed": 64,
+    "battle-iq": 60,
+    "mental": 54,
+    "semi-goules": 64
+  },
+  "takeomi-kuroiwa": {
+    "kagune": 56,
+    "regeneration": 20,
+    "force-physique": 72,
+    "speed": 56,
+    "battle-iq": 58,
+    "mental": 70,
+    "ccg": 62
+  },
+  "hinami-fueguchi": {
+    "kagune": 64,
+    "regeneration": 60,
+    "force-physique": 48,
+    "speed": 62,
+    "battle-iq": 74,
+    "mental": 70,
+    "anteiku": 70,
+    "aogiri": 52
+  },
+  "akira-mado": {
+    "kagune": 58,
+    "regeneration": 20,
+    "force-physique": 52,
+    "speed": 60,
+    "battle-iq": 78,
+    "mental": 66,
+    "ccg": 68
+  },
+  "kanae-von-rosewald": {
+    "kagune": 60,
+    "regeneration": 58,
+    "force-physique": 56,
+    "speed": 60,
+    "battle-iq": 52,
+    "mental": 48
+  },
+  "enji-koma": {
+    "kagune": 56,
+    "regeneration": 54,
+    "force-physique": 62,
+    "speed": 58,
+    "battle-iq": 60,
+    "mental": 68,
+    "anteiku": 74
+  },
+  "saiko-yonebayashi": {
+    "kagune": 58,
+    "regeneration": 66,
+    "force-physique": 46,
+    "speed": 50,
+    "battle-iq": 60,
+    "mental": 62,
+    "semi-goules": 58,
+    "ccg": 52
+  },
+  "take-hirako": {
+    "kagune": 58,
+    "regeneration": 18,
+    "force-physique": 58,
+    "speed": 66,
+    "battle-iq": 72,
+    "mental": 74,
+    "ccg": 66
+  },
+  "nishiki-nishio": {
+    "kagune": 56,
+    "regeneration": 54,
+    "force-physique": 54,
+    "speed": 72,
+    "battle-iq": 62,
+    "mental": 60,
+    "anteiku": 66
+  },
+  "shiki-kijima": {
+    "kagune": 56,
+    "regeneration": 18,
+    "force-physique": 60,
+    "speed": 54,
+    "battle-iq": 56,
+    "mental": 44,
+    "ccg": 60
+  },
+  "kureo-mado": {
+    "kagune": 54,
+    "regeneration": 16,
+    "force-physique": 48,
+    "speed": 52,
+    "battle-iq": 82,
+    "mental": 62,
+    "ccg": 64
+  },
+  "nico": {
+    "kagune": 52,
+    "regeneration": 56,
+    "force-physique": 50,
+    "speed": 54,
+    "battle-iq": 62,
+    "mental": 66,
+    "aogiri": 48
+  },
+  "nashiro-yasuhisa": {
+    "kagune": 52,
+    "regeneration": 60,
+    "force-physique": 48,
+    "speed": 56,
+    "battle-iq": 50,
+    "mental": 46,
+    "semi-goules": 54
+  },
+  "kazuichi-banjo": {
+    "kagune": 46,
+    "regeneration": 50,
+    "force-physique": 58,
+    "speed": 48,
+    "battle-iq": 44,
+    "mental": 74,
+    "aogiri": 44
+  },
+  "hanbee-abara": {
+    "kagune": 50,
+    "regeneration": 16,
+    "force-physique": 54,
+    "speed": 52,
+    "battle-iq": 48,
+    "mental": 56,
+    "ccg": 54
+  },
+  "chuu-hachikawa": {
+    "kagune": 50,
+    "regeneration": 16,
+    "force-physique": 52,
+    "speed": 54,
+    "battle-iq": 56,
+    "mental": 48,
+    "ccg": 58
+  },
+  "ching-li-hsiao": {
+    "kagune": 48,
+    "regeneration": 52,
+    "force-physique": 44,
+    "speed": 62,
+    "battle-iq": 50,
+    "mental": 54,
+    "semi-goules": 48,
+    "ccg": 50
+  },
+  "itori": {
+    "kagune": 44,
+    "regeneration": 46,
+    "force-physique": 40,
+    "speed": 50,
+    "battle-iq": 70,
+    "mental": 64
+  },
+  "kuramoto-itou": {
+    "kagune": 46,
+    "regeneration": 14,
+    "force-physique": 48,
+    "speed": 46,
+    "battle-iq": 52,
+    "mental": 56,
+    "ccg": 52
+  },
+  "toma-higemaru": {
+    "kagune": 42,
+    "regeneration": 48,
+    "force-physique": 42,
+    "speed": 46,
+    "battle-iq": 44,
+    "mental": 50,
+    "semi-goules": 44,
+    "ccg": 44
+  },
+  "taishi-fura": {
+    "kagune": 44,
+    "regeneration": 14,
+    "force-physique": 46,
+    "speed": 44,
+    "battle-iq": 54,
+    "mental": 66,
+    "ccg": 50
+  },
+  "ayumu-hogi": {
+    "kagune": 42,
+    "regeneration": 14,
+    "force-physique": 42,
+    "speed": 44,
+    "battle-iq": 46,
+    "mental": 48,
+    "ccg": 46
+  },
+  "misato-gori": {
+    "kagune": 42,
+    "regeneration": 14,
+    "force-physique": 40,
+    "speed": 44,
+    "battle-iq": 44,
+    "mental": 46,
+    "ccg": 44
+  },
+  "nobu-shimoguchi": {
+    "kagune": 40,
+    "regeneration": 12,
+    "force-physique": 40,
+    "speed": 40,
+    "battle-iq": 38,
+    "mental": 30,
+    "ccg": 42
+  },
+  "uruka-minami": {
+    "kagune": 38,
+    "regeneration": 40,
+    "force-physique": 38,
+    "speed": 44,
+    "battle-iq": 34,
+    "mental": 32
+  },
+  "itsuki-marude": {
+    "kagune": 34,
+    "regeneration": 12,
+    "force-physique": 38,
+    "speed": 36,
+    "battle-iq": 76,
+    "mental": 70,
+    "ccg": 68
+  },
+  "tsuneyoshi-washuu": {
+    "battle-iq": 60,
+    "mental": 62,
+    "ccg": 74
+  },
+  "hideyoshi-nagachika": {
+    "battle-iq": 52,
+    "mental": 86
+  },
+  "chie-hori": {
+    "battle-iq": 40,
+    "mental": 62
+  },
+  "akihiro-kanou": {
+    "battle-iq": 30,
+    "mental": 64,
+    "aogiri": 40
+  },
+  "mirumo-tsukiyama": {
+    "battle-iq": 58,
+    "mental": 60
+  },
+  "kimie-nishino": {
+    "mental": 58
+  },
+  "yoriko-kosaka": {
+    "mental": 54
+  }
+}

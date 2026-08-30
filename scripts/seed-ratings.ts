@@ -104,7 +104,14 @@ async function main() {
   }
 
   const path = resolve(args.file ?? `data/ratings/${universe.slug}.json`);
-  const file = JSON.parse(readFileSync(path, "utf8")) as RatingsFile;
+  // Les clés préfixées `_` documentent le fichier (barème retenu, catégories
+  // volontairement laissées vides) : elles ne désignent aucun personnage. Même
+  // convention que `seed-images-fandom.ts`.
+  const file = Object.fromEntries(
+    Object.entries(JSON.parse(readFileSync(path, "utf8")) as RatingsFile).filter(
+      ([key]) => !key.startsWith("_"),
+    ),
+  );
   console.log(
     `Fichier : ${path} — ${Object.keys(file).length} personnage(s) à noter.`,
   );

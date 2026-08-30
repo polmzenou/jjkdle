@@ -54,12 +54,12 @@ function ordinal(
 /**
  * Écart sous lequel la puissance passe en « proche » (orange).
  *
- * ⚠️ L'échelle de `tgpower` se fixe AVEC le roster (aucun personnage n'est encore
- * saisi). La valeur ci-dessous suppose une étendue du même ordre que KNY
- * (~10^6) : la tolérance vaut alors ~1,3 % de l'étendue, le ratio retenu sur
- * AOT et KNY. Si le roster est finalement noté sur une autre échelle (0–100,
- * 0–10 000…), RÉAJUSTER cette constante en conséquence, sinon toute comparaison
- * ressortira « proche » — ou aucune.
+ * L'échelle de `tgpower` est désormais fixée par `data/attributes/tg.json` :
+ * ~150 (Yoriko) → ~950 000 (Kaneki), même étendue de ~10^6 que KNY. La tolérance
+ * ci-dessous vaut donc ~1,3 % de l'étendue, le ratio retenu sur AOT et KNY. Si
+ * le roster est un jour renoté sur une autre échelle (0–100, 0–10 000…),
+ * RÉAJUSTER cette constante en conséquence, sinon toute comparaison ressortira
+ * « proche » — ou aucune.
  *
  * Cette échelle n'a rien à voir avec `Character.battleValue`, qui reste borné
  * 0–100 et sert au jeu Battle. Les deux coexistent volontairement.
@@ -173,12 +173,19 @@ export const TG_ATTRIBUTES: AttributeSpec[] = [
     tolerance: null,
     // Échelle officielle des enquêteurs, du plus bas (Rang 3) au plus haut
     // (Classe Spéciale). NO_RANK, non ordonné, couvre les goules et les civils.
+    //
+    // ⚠️ `FIRST_CLASS` (上等捜査官, aussi traduit « Senior Investigator ») est un
+    // échelon À PART ENTIÈRE entre Rang 1 et Classe Spéciale associée : c'est
+    // même celui auquel la majorité des enquêteurs finissent leur carrière
+    // (Hirako, Shimoguchi, Ihei, Itou, Amon après le ch. 80…). L'omettre
+    // écraserait un tiers du roster CCG sur le grade du dessus ou du dessous.
     options: ordinal(
       [
         ["NO_RANK", "Sans grade"],
         ["RANK_3", "Rang 3"],
         ["RANK_2", "Rang 2"],
         ["RANK_1", "Rang 1"],
+        ["FIRST_CLASS", "Première Classe"],
         ["ASSOCIATE_SPECIAL", "Classe Spéciale associée"],
         ["SPECIAL_CLASS", "Classe Spéciale"],
       ],
@@ -208,6 +215,23 @@ export const TG_ATTRIBUTES: AttributeSpec[] = [
     // Ordre du récit, Tokyo Ghoul puis :re d'une seule traite : c'est lui qui
     // donne le sens des flèches ↑/↓, il ne doit donc jamais être réordonné
     // autrement que chronologiquement.
+    //
+    // Découpage retenu, et chapitres couverts (les arcs fins du wiki sont
+    // regroupés — dix cases pour 322 chapitres) :
+    //   TRAGEDY                 TG 1–9      (Introduction + Nishiki)
+    //   DOVES                   TG 10–30    (Doves' Emergence)
+    //   GOURMET                 TG 31–46
+    //   AOGIRI                  TG 47–121   (11e arr. + après-Aogiri + labo Kanou + Décision)
+    //   OWL_SUPPRESSION         TG 122–143  (+ épilogue)
+    //   QUINX                   :re 1–16    (Torso + Casse-Noisette)
+    //   ROSE                    :re 17–45   (Enchères + enquête Rose)
+    //   TSUKIYAMA_EXTERMINATION :re 46–59
+    //   RUSHIMA                 :re 60–98   (3e Cochlea + débarquement)
+    //   DRAGON                  :re 99–179  (siège des Clowns + 24e arr. + Dragon)
+    //
+    // ⚠️ ROSE passe AVANT TSUKIYAMA_EXTERMINATION : l'enquête Rose (:re 32–45)
+    // précède l'opération d'extermination qu'elle déclenche (:re 46–59). L'ordre
+    // inverse rendait les flèches ↑/↓ fausses entre ces deux cases.
     options: ordinal([
       ["TRAGEDY", "Tragédie"],
       ["DOVES", "Colombes"],
@@ -215,8 +239,8 @@ export const TG_ATTRIBUTES: AttributeSpec[] = [
       ["AOGIRI", "Arbre Aogiri"],
       ["OWL_SUPPRESSION", "Chasse au Hibou"],
       ["QUINX", "Escouade Quinx"],
-      ["TSUKIYAMA_EXTERMINATION", "Extermination des Tsukiyama"],
       ["ROSE", "Opération Rose"],
+      ["TSUKIYAMA_EXTERMINATION", "Extermination des Tsukiyama"],
       ["RUSHIMA", "Rushima"],
       ["DRAGON", "Dragon"],
     ]),
