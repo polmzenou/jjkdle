@@ -160,6 +160,13 @@ export type TowerActionResult =
       exp?: ExpResult;
       /** Message à afficher après coup (issue d'une rencontre, par exemple). */
       notice?: string;
+      /**
+       * Explication de l'EXP gagnée — ou non gagnée.
+       *
+       * Champ à part de `notice` : celui-ci est éphémère, alors que la note
+       * d'XP doit rester lisible sur tout l'écran de récap.
+       */
+      xpNote?: string;
     }
   | { ok: false; error: string };
 

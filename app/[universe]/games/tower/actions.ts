@@ -6,7 +6,7 @@ import { randomSeed } from "@/lib/games/battle/rng";
 import { todayKey } from "@/lib/games/jjkdle/daily";
 import { hashString } from "@/lib/rotation";
 import { VIP_MAX_REPLAYS } from "@/lib/games/jjkdle/types";
-import { towerRunExp } from "@/lib/progress/exp-rewards";
+import { towerExpNote, towerRunExp } from "@/lib/progress/exp-rewards";
 import { awardExp } from "@/lib/progress/recompute";
 import type { ExpResult } from "@/lib/leaderboard/types";
 import { simulateCombat } from "@/lib/games/tower/combat";
@@ -346,10 +346,9 @@ export async function resolveCombatAction(
   const saved = await saveRun(run.id, run.state.floor, next);
   if (!saved) return fail("Cet étage a déjà été résolu.");
 
-  let exp: ExpResult | undefined;
-  if (isFinished(next)) {
-    exp = await finishRun({ run, context, state: next, userId: user?.id ?? null });
-  }
+  const finished = isFinished(next)
+    ? await finishRun({ run, context, state: next, userId: user?.id ?? null })
+    : undefined;
 
   const view = await viewOf({
     context,
@@ -359,7 +358,15 @@ export async function resolveCombatAction(
     attempt: run.attempt,
     isAuthed: Boolean(user),
   });
-  return view ? { ok: true, view, combat: result, exp } : fail("Étage introuvable.");
+  return view
+    ? {
+        ok: true,
+        view,
+        combat: result,
+        exp: finished?.exp,
+        xpNote: finished?.note,
+      }
+    : fail("Étage introuvable.");
 }
 
 /**
@@ -480,18 +487,19 @@ export async function resolveEventAction(
 
   await saveRun(run.id, run.state.floor, applied.state);
 
-  let exp: ExpResult | undefined;
-  if (isFinished(applied.state)) {
-    exp = await finishRun({
-      run,
-      context,
-      state: applied.state,
-      userId: user?.id ?? null,
-    });
-  }
+  const finished = isFinished(applied.state)
+    ? await finishRun({ run, context, state: applied.state, userId: user?.id ?? null })
+    : undefined;
 
   const result = await viewResult(context, applied.state, run, user);
-  return result.ok ? { ...result, notice: outcome.text, exp } : result;
+  return result.ok
+    ? {
+        ...result,
+        notice: outcome.text,
+        exp: finished?.exp,
+        xpNote: finished?.note,
+      }
+    : result;
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -697,7 +705,7 @@ async function finishRun(params: {
   context: TowerContext;
   state: TowerRunState;
   userId: string | null;
-}): Promise<ExpResult | undefined> {
+}): Promise<{ exp: ExpResult; note?: string } | undefined> {
   const { run, context, state, userId } = params;
 
   await deleteRun(run.id);
@@ -705,7 +713,7 @@ async function finishRun(params: {
 
   // Jouable déconnecté : la run se joue jusqu'au bout, mais rien n'est
   // enregistré. L'écran de récap invite alors à créer un compte.
-  if (!userId) return { ok: false, needsAuth: true };
+  if (!userId) return { exp: { ok: false, needsAuth: true } };
 
   const daily = Boolean(run.dateKey);
   const floor = reachedFloor(state);
@@ -736,7 +744,15 @@ async function finishRun(params: {
   const { gained: gainedExp, gainedCoins, newBadges, droppedBooster } =
     await awardExp(userId, gained, "tower");
 
-  return { ok: true, gainedExp, gainedCoins, newBadges, droppedBooster };
+  return {
+    exp: { ok: true, gainedExp, gainedCoins, newBadges, droppedBooster },
+    note: towerExpNote({
+      gained,
+      floorReached: floor,
+      bestFloorBefore: progress.bestFloor,
+      daily,
+    }),
+  };
 }
 
 // ──────────────────────────────────────────────────────────────────────────

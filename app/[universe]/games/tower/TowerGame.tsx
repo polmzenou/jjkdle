@@ -46,6 +46,7 @@ import {
 export function TowerGame() {
   const [view, setView] = useState<TowerView | null>(null);
   const [exp, setExp] = useState<ExpResult | undefined>();
+  const [xpNote, setXpNote] = useState<string | undefined>();
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -55,6 +56,7 @@ export function TowerGame() {
     if (result.ok) {
       setView(result.view);
       if (result.exp) setExp(result.exp);
+      if (result.xpNote) setXpNote(result.xpNote);
       // `notice` porte l'issue d'une rencontre : on l'efface dès qu'une autre
       // action passe, sinon elle survivrait plusieurs étages.
       setNotice(result.notice ?? null);
@@ -88,6 +90,7 @@ export function TowerGame() {
 
   const restart = useCallback(() => {
     setExp(undefined);
+    setXpNote(undefined);
     setNotice(null);
     startTransition(async () => {
       await abandonRunAction();
@@ -241,7 +244,13 @@ export function TowerGame() {
           )}
 
           {(view.status === "won" || view.status === "lost") && (
-            <RunRecap view={view} exp={exp} busy={pending} onRestart={restart} />
+            <RunRecap
+              view={view}
+              exp={exp}
+              xpNote={xpNote}
+              busy={pending}
+              onRestart={restart}
+            />
           )}
         </div>
       </div>

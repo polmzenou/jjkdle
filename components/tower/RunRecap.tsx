@@ -18,11 +18,14 @@ import { TowerCard } from "./TowerCard";
 export function RunRecap({
   view,
   exp,
+  xpNote,
   onRestart,
   busy,
 }: {
   view: TowerView;
   exp?: ExpResult;
+  /** Pourquoi cette run a rapporté ce qu'elle a rapporté (cf. `towerExpNote`). */
+  xpNote?: string;
   onRestart: () => void;
   busy: boolean;
 }) {
@@ -65,12 +68,28 @@ export function RunRecap({
         </div>
       )}
 
+      {/*
+        L'XP est payée au plus-haut-atteint du jour : une run peut donc ne rien
+        rapporter. Sans le dire, le joueur conclut à un bug — la note explique
+        toujours, gain ou pas.
+      */}
       {exp?.ok && (
-        <p className="text-sm text-domain-light">
-          +{exp.gainedExp} XP
-          {exp.gainedCoins ? ` · +${exp.gainedCoins} coins` : ""}
-          {exp.droppedBooster ? " · un booster est tombé" : ""}
-        </p>
+        <div className="max-w-md">
+          <p
+            className={
+              exp.gainedExp
+                ? "text-sm font-semibold text-domain-light"
+                : "text-sm font-semibold text-white/45"
+            }
+          >
+            {exp.gainedExp ? `+${exp.gainedExp} XP` : "Aucune XP cette fois"}
+            {exp.gainedCoins ? ` · +${exp.gainedCoins} coins` : ""}
+            {exp.droppedBooster ? " · un booster est tombé" : ""}
+          </p>
+          {xpNote && (
+            <p className="mt-1 text-xs leading-snug text-white/45">{xpNote}</p>
+          )}
+        </div>
       )}
 
       {/* Jouable déconnecté : la run va jusqu'au bout, mais rien n'est gardé. */}

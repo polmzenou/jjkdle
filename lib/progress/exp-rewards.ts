@@ -103,21 +103,23 @@ export function jjkdleExp(attempts: number, streak: number): number {
 }
 
 /**
- * « The Culling Tower » : paliers d'EXP par étage atteint.
- * Ordonné du plus haut au plus bas, comme `RANKING_TIERS`.
+ * « The Culling Tower » : EXP CUMULÉE que vaut un étage atteint.
+ *
+ * Courbe quadratique — CHAQUE étage vaut plus que le précédent, et l'écart se
+ * creuse en montant : l'étage 20 vaut 1600, le 15 en vaut 900, le 10 en vaut
+ * 400. Un palier de plus près du sommet se paie donc bien plus cher qu'un
+ * palier de plus au pied de la tour, ce qui est exactement l'effort demandé.
+ *
+ * ⚠️ Le détail par étage n'est pas cosmétique. Une première version à cinq
+ * paliers grossiers (0 / 5 / 10 / 15 / 20) donnait la même EXP à tous les
+ * étages d'un même palier : combinée à la règle du plus-haut-atteint, elle
+ * faisait qu'un joueur passé de l'étage 10 à l'étage 14 ne gagnait
+ * RIEN — une progression réelle, payée zéro, sans explication. Toute échelle
+ * remplaçant celle-ci doit rester STRICTEMENT croissante.
  */
-const TOWER_TIERS: ReadonlyArray<{ min: number; exp: number }> = [
-  { min: 20, exp: 1500 }, // tour bouclée
-  { min: 15, exp: 600 },
-  { min: 10, exp: 200 },
-  { min: 5, exp: 50 },
-  { min: 0, exp: 0 },
-];
-
-/** EXP CUMULÉE que vaut un étage atteint. */
 export function towerExp(floor: number): number {
-  const f = Number.isFinite(floor) ? Math.floor(floor) : 0;
-  return TOWER_TIERS.find((t) => f >= t.min)?.exp ?? 0;
+  const f = Number.isFinite(floor) ? Math.max(0, Math.floor(floor)) : 0;
+  return 4 * f * f;
 }
 
 /** Part de l'EXP servie par une tour aléatoire (VIP/ADMIN, hors classement). */
@@ -144,6 +146,34 @@ export function towerRunExp(params: {
   const already = params.daily ? towerExp(params.bestFloorBefore) : 0;
   const delta = Math.max(0, earned - already);
   return params.daily ? delta : Math.round(delta * TOWER_RANDOM_RATIO);
+}
+
+/**
+ * Ce qu'il faut dire au joueur sur son EXP, en une phrase.
+ *
+ * Indispensable et pas décoratif : la règle du plus-haut-atteint fait qu'une
+ * run de quinze minutes peut ne rien rapporter. Sans explication, le joueur
+ * conclut à un bug — c'est exactement ce qui s'est produit.
+ */
+export function towerExpNote(params: {
+  gained: number;
+  floorReached: number;
+  bestFloorBefore: number;
+  daily: boolean;
+}): string {
+  if (!params.daily) {
+    return params.gained > 0
+      ? "Tour libre : l'XP y est réduite, et elle ne compte pas au classement."
+      : "Tour libre : hors classement, et sans XP à la clé ici.";
+  }
+
+  if (params.gained > 0) {
+    return params.bestFloorBefore > 0
+      ? `Nouveau record du jour : étage ${params.floorReached}, contre ${params.bestFloorBefore} auparavant.`
+      : `Premier passage du jour : étage ${params.floorReached}.`;
+  }
+
+  return `Tu étais déjà monté à l'étage ${params.bestFloorBefore} aujourd'hui. L'XP ne se gagne qu'en allant plus haut — il faut dépasser l'étage ${params.bestFloorBefore} pour en regagner.`;
 }
 
 /** Combien d'EXP vaut 1 coin. Unique curseur d'équilibrage de l'économie. */
