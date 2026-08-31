@@ -266,6 +266,12 @@ export interface FloorPlan {
   kind: NodeKind;
   /** Ids des ennemis à affronter (vide pour un nœud non combattant). */
   enemyIds: string[];
-  /** Ids proposés au recrutement (nœud `recruit`, ou après un boss). */
+  /** Ids proposés au recrutement (nœud `recruit`). */
   recruitIds: string[];
+  /**
+   * Graine de sélection de l'évènement (nœud `event`). Un entier plutôt que le
+   * slug : le catalogue d'évènements est de la donnée d'univers, il peut
+   * grandir sans invalider les runs en cours.
+   */
+  eventIndex: number;
 }

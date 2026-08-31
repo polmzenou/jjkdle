@@ -130,25 +130,30 @@ export function isBossFloor(floor: number): boolean {
 }
 
 /**
- * Un étage propose-t-il un recrutement ?
+ * Poids de tirage des types de nœud, hors boss.
  *
- * Les DEUX PREMIERS étages en proposent un d'office, puis tous les 3 étages et
- * à chaque boss — soit 10 occasions sur la tour.
- *
- * Les deux premiers ne sont pas une faveur, c'est une nécessité mesurée en
- * jouant : l'élite de l'étage 3 puise dans la strate supérieure, et un starter
- * SEUL n'a aucune chance contre elle. L'escouade doit être complète avant d'y
- * arriver — sinon la run se termine au troisième étage quoi que fasse le joueur.
- *
- * Au-delà, la fréquence sert surtout à faire revenir la mécanique de SACRIFICE :
- * c'est elle, et pas l'accumulation, qui fait la décision. Le sommet est exclu,
- * y recruter n'aurait plus d'usage.
+ * Le combat domine — c'est le cœur du jeu et la seule source de fragments et
+ * d'XP — mais chaque étage propose DEUX nœuds de types différents, si bien
+ * qu'il y a toujours un arbitrage à faire : se renforcer, souffler, ou avancer.
  */
-export function isRecruitFloor(floor: number): boolean {
-  if (floor >= TOWER_FLOORS) return false;
-  if (floor <= 2) return true;
-  return floor % 3 === 0 || floor % FLOORS_PER_STRATE === 0;
-}
+const NODE_WEIGHTS: ReadonlyArray<readonly [NodeKind, number]> = [
+  ["combat", 40],
+  ["recruit", 18],
+  ["elite", 12],
+  ["merchant", 10],
+  ["rest", 10],
+  ["event", 10],
+];
+
+/**
+ * Les deux premiers étages proposent TOUJOURS un recrutement face à un combat.
+ *
+ * Ce n'est pas une faveur mais une nécessité mesurée en jouant : l'élite de la
+ * strate I puise dans la strate supérieure, et un starter SEUL n'a aucune
+ * chance contre elle. Le joueur garde le choix — il peut préférer se battre —
+ * mais l'occasion de compléter son escouade doit exister avant d'y arriver.
+ */
+export const GUARANTEED_RECRUIT_FLOORS = 2;
 
 // ──────────────────────────────────────────────────────────────────────────
 // Construction du vivier
@@ -210,52 +215,115 @@ export function isTowerPlayable(tower: TowerRoster): boolean {
 // Génération
 // ──────────────────────────────────────────────────────────────────────────
 
+/** Les nœuds proposés à un étage : deux au choix, un seul sur un boss. */
+export interface FloorOptions {
+  floor: number;
+  strate: number;
+  options: FloorPlan[];
+}
+
 /**
  * Génère la tour entière à partir de la seule graine.
  *
  * Générer d'un bloc plutôt qu'étage par étage garantit qu'un joueur qui reprend
- * sa run retombe exactement sur la même tour, sans qu'on ait à persister les
- * étages : l'état de run ne stocke que le numéro d'étage.
+ * sa run retombe exactement sur la même tour, sans qu'on ait à persister quoi
+ * que ce soit : l'état de run ne stocke que le numéro d'étage et le CHEMIN
+ * emprunté (un index par étage franchi).
+ *
+ * ⚠️ Les DEUX options d'un étage sont générées quel que soit le choix du
+ * joueur : c'est ce qui rend la tour reproductible. Tirer la branche non
+ * empruntée en même temps que l'autre coûte trois fois rien et évite d'avoir à
+ * mémoriser un curseur de générateur.
  */
-export function planTower(seed: number, tower: TowerRoster): FloorPlan[] {
+export function planTower(seed: number, tower: TowerRoster): FloorOptions[] {
   const rand = mulberry32(seed);
-  const plans: FloorPlan[] = [];
+  const floors: FloorOptions[] = [];
   const usedBosses = new Set<string>();
 
   for (let floor = 1; floor <= TOWER_FLOORS; floor += 1) {
     const strate = strateOfFloor(floor);
-    const kind = nodeKindOf(floor);
+    const kinds = pickKinds(rand, floor);
 
-    plans.push({
+    floors.push({
       floor,
       strate,
-      kind,
-      enemyIds: pickEnemies(rand, tower, strate, kind, usedBosses),
-      recruitIds: isRecruitFloor(floor)
-        ? pickRecruits(rand, tower, strate)
-        : [],
+      options: kinds.map((kind) => ({
+        floor,
+        strate,
+        kind,
+        enemyIds: pickEnemies(rand, tower, strate, kind, usedBosses),
+        recruitIds:
+          kind === "recruit" ? pickRecruits(rand, tower, strate) : [],
+        eventIndex: kind === "event" ? Math.floor(rand() * 1_000_003) : 0,
+      })),
     });
   }
 
-  return plans;
+  return floors;
+}
+
+/** Les nœuds d'un étage donné. `null` hors des bornes de la tour. */
+export function optionsAt(
+  seed: number,
+  tower: TowerRoster,
+  floor: number,
+): FloorOptions | null {
+  return planTower(seed, tower)[floor - 1] ?? null;
 }
 
 /**
- * Type d'un étage — fonction du SEUL numéro d'étage.
+ * Le nœud effectivement emprunté à un étage.
  *
- * Rythme d'une strate : combat, combat, élite, marchand, boss. Le marchand
- * tombe juste avant le boss, ce qui donne aux fragments un moment évident où
- * ils valent quelque chose — ils meurent avec la run, les garder ne sert à rien.
- *
- * Ne dépend pas de la graine, et c'est ce qui permet à `run.ts` de savoir quel
- * écran présenter à l'étage suivant sans avoir à regénérer la tour.
+ * Un index absent ou hors bornes retombe sur la première option : une run dont
+ * le chemin serait tronqué doit rester jouable, pas planter.
  */
-export function nodeKindOf(floor: number): NodeKind {
-  if (isBossFloor(floor)) return "boss";
-  const rank = floor % FLOORS_PER_STRATE;
-  if (rank === 3) return "elite";
-  if (rank === 4) return "merchant";
-  return "combat";
+export function planAt(
+  seed: number,
+  tower: TowerRoster,
+  floor: number,
+  path: readonly number[],
+): FloorPlan | null {
+  const at = optionsAt(seed, tower, floor);
+  if (!at) return null;
+  const index = path[floor - 1] ?? 0;
+  return at.options[index] ?? at.options[0] ?? null;
+}
+
+/**
+ * Types des nœuds proposés à un étage.
+ *
+ * Un boss n'offre pas de choix — c'est le palier de la strate, on le franchit
+ * ou la run s'arrête. Partout ailleurs, deux types DIFFÉRENTS : proposer deux
+ * combats reviendrait à ne rien proposer du tout.
+ */
+function pickKinds(rand: () => number, floor: number): NodeKind[] {
+  if (isBossFloor(floor)) return ["boss"];
+  if (floor <= GUARANTEED_RECRUIT_FLOORS) return ["recruit", "combat"];
+
+  const first = weightedKind(rand, NODE_WEIGHTS);
+  const second = weightedKind(
+    rand,
+    NODE_WEIGHTS.filter(([kind]) => kind !== first),
+  );
+  return [first, second];
+}
+
+function weightedKind(
+  rand: () => number,
+  weights: ReadonlyArray<readonly [NodeKind, number]>,
+): NodeKind {
+  const total = weights.reduce((sum, [, w]) => sum + w, 0);
+  let ticket = rand() * total;
+  for (const [kind, weight] of weights) {
+    ticket -= weight;
+    if (ticket <= 0) return kind;
+  }
+  return weights[weights.length - 1][0];
+}
+
+/** Un nœud fait-il combattre ? (combat, élite, boss) */
+export function isFightNode(kind: NodeKind): boolean {
+  return kind === "combat" || kind === "elite" || kind === "boss";
 }
 
 function pickEnemies(
@@ -265,8 +333,9 @@ function pickEnemies(
   kind: NodeKind,
   usedBosses: Set<string>,
 ): string[] {
-  // Un marchand n'a pas d'ennemi : c'est une respiration entre l'élite et le boss.
-  if (kind === "merchant") return [];
+  // Seuls les nœuds de combat ont des adversaires ; les autres sont des
+  // respirations ou des choix.
+  if (!isFightNode(kind)) return [];
 
   if (kind === "boss") {
     const boss = pickBoss(tower, strate, usedBosses);
