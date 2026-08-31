@@ -11,7 +11,12 @@ import {
   type CombatSetup,
 } from "@/lib/games/tower/combat";
 import { snapshotAt, type FighterSnapshot } from "@/lib/games/tower/playback";
-import { toSpecFromView, type TowerView } from "@/lib/games/tower/view";
+import {
+  toSpecFromView,
+  type TowerCardView,
+  type TowerView,
+} from "@/lib/games/tower/view";
+import { CharacterTip } from "./InfoTip";
 import type { Intervention } from "@/lib/games/tower/types";
 
 /**
@@ -104,7 +109,7 @@ export function TowerCombat({
           <FighterTile
             key={enemy.uid}
             fighter={enemy}
-            image={view.enemies[i]?.image}
+            card={view.enemies[i]}
             hostile
           />
         ))}
@@ -117,7 +122,7 @@ export function TowerCombat({
           <FighterTile
             key={member.uid}
             fighter={member}
-            image={view.squad[i]?.image}
+            card={view.squad[i]}
           />
         ))}
         {snap.summons.map((summon) => (
@@ -256,12 +261,13 @@ function EnergyGauge({
 
 function FighterTile({
   fighter,
-  image,
+  card,
   hostile = false,
   summon = false,
 }: {
   fighter: FighterSnapshot;
-  image?: string;
+  /** Fiche complète, pour la bulle de survol. Absente pour un shikigami. */
+  card?: TowerCardView;
   hostile?: boolean;
   summon?: boolean;
 }) {
@@ -270,6 +276,7 @@ function FighterTile({
   return (
     <div
       className={[
+        "group relative",
         "relative w-[104px] overflow-hidden rounded-lg border transition",
         fighter.alive ? "" : "opacity-30 grayscale",
         fighter.charging
@@ -286,7 +293,7 @@ function FighterTile({
             🐕
           </div>
         ) : (
-          <CharacterImage character={{ name: fighter.name, image }} />
+          <CharacterImage character={{ name: fighter.name, image: card?.image }} />
         )}
 
         {fighter.damageTaken > 0 && (

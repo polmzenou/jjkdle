@@ -1,7 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { CharacterImage } from "@/components/CharacterImage";
-import type { NodeOptionView, TowerView } from "@/lib/games/tower/view";
+import { CharacterTip } from "./InfoTip";
+import type {
+  NodeOptionView,
+  TowerCardView,
+  TowerView,
+} from "@/lib/games/tower/view";
 
 /**
  * La carte : deux branches, un choix.
@@ -12,9 +18,10 @@ import type { NodeOptionView, TowerView } from "@/lib/games/tower/view";
  *   - voie bonus : un renfort / marchand / repos / rencontre, puis le même
  *     combat, mais sans récompense après.
  *
- * Les adversaires sont MONTRÉS dans les deux cas. Choisir à l'aveugle ne serait
- * pas un choix mais un tirage — et c'est précisément la différence entre une
- * carte à embranchements et un couloir déguisé.
+ * Les adversaires sont MONTRÉS dans les deux cas, avec leur fiche complète au
+ * survol. Choisir à l'aveugle ne serait pas un choix mais un tirage — et c'est
+ * précisément la différence entre une carte à embranchements et un couloir
+ * déguisé.
  */
 
 const ICONS: Record<string, string> = {
@@ -85,49 +92,85 @@ function NodeCard({
   busy: boolean;
   onClick: () => void;
 }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={busy}
-      className={[
-        "flex flex-col gap-3 rounded-xl border p-4 text-left transition",
-        ACCENTS[option.prelude ?? option.kind] ?? ACCENTS.combat,
-        busy ? "opacity-40" : "",
-      ].join(" ")}
-    >
-      <div className="flex items-center gap-3">
-        <span aria-hidden className="text-2xl">
-          {ICONS[option.prelude ?? option.kind] ?? "⚔"}
-        </span>
-        <div className="min-w-0">
-          <p className="font-display text-sm font-bold uppercase tracking-wide text-white">
-            {option.label}
-            {option.prelude && (
-              <span aria-hidden className="ml-1 text-white/40">
-                {" → "}
-                {ICONS[option.kind]}
-              </span>
-            )}
-          </p>
-          <p className="text-[11px] leading-snug text-white/50">{option.hint}</p>
-        </div>
-      </div>
+  /**
+   * Adversaire survolé.
+   *
+   * Un état plutôt qu'un `group-hover` en CSS pur, pour une raison de
+   * structure : les portraits vivent DANS le bouton de la branche, et une bulle
+   * ne peut pas y être imbriquée — un `<div>` dans un `<button>` est du HTML
+   * invalide, et le rognage du bouton la masquerait de toute façon. Elle est
+   * donc rendue en dehors, ce qui impose de savoir laquelle afficher.
+   */
+  const [hovered, setHovered] = useState<number | null>(null);
+  const focused = hovered !== null ? option.enemies[hovered] : null;
 
-      {option.enemies.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {option.enemies.map((enemy, i) => (
-            <div key={`${enemy.id}-${i}`} className="w-16">
-              <div className="aspect-square overflow-hidden rounded border border-white/10">
-                <CharacterImage character={enemy} />
-              </div>
-              <p className="mt-1 truncate text-center text-[10px] text-white/50">
-                {enemy.name}
-              </p>
-            </div>
-          ))}
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={busy}
+        className={[
+          "flex w-full flex-col gap-3 rounded-xl border p-4 text-left transition",
+          ACCENTS[option.prelude ?? option.kind] ?? ACCENTS.combat,
+          busy ? "opacity-40" : "",
+        ].join(" ")}
+      >
+        <div className="flex items-center gap-3">
+          <span aria-hidden className="text-2xl">
+            {ICONS[option.prelude ?? option.kind] ?? "⚔"}
+          </span>
+          <div className="min-w-0">
+            <p className="font-display text-sm font-bold uppercase tracking-wide text-white">
+              {option.label}
+              {option.prelude && (
+                <span aria-hidden className="ml-1 text-white/40">
+                  {" → "}
+                  {ICONS[option.kind]}
+                </span>
+              )}
+            </p>
+            <p className="text-[11px] leading-snug text-white/50">{option.hint}</p>
+          </div>
         </div>
-      )}
-    </button>
+
+        {option.enemies.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {option.enemies.map((enemy, i) => (
+              <div
+                key={`${enemy.id}-${i}`}
+                className="w-16"
+                onMouseEnter={() => setHovered(i)}
+                onMouseLeave={() => setHovered((h) => (h === i ? null : h))}
+              >
+                <div className="aspect-square overflow-hidden rounded border border-white/10">
+                  <CharacterImage character={enemy} />
+                </div>
+                <p className="mt-1 truncate text-center text-[10px] text-white/50">
+                  {enemy.name}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+      </button>
+
+      {focused && <HoveredEnemyTip card={focused} />}
+    </div>
+  );
+}
+
+/**
+ * Bulle d'un adversaire, rendue HORS du bouton de la branche.
+ *
+ * `CharacterTip` s'affiche normalement via le survol de son parent ; ici ce
+ * parent n'existe pas (la bulle vit hors du bouton), donc la visibilité est
+ * pilotée par l'état et déclarée avec `open`.
+ */
+function HoveredEnemyTip({ card }: { card: TowerCardView }) {
+  return (
+    <div className="pointer-events-none absolute inset-x-0 bottom-0">
+      <CharacterTip card={card} open />
+    </div>
   );
 }

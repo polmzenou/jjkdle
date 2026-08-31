@@ -93,8 +93,14 @@ export interface NodeOptionView {
   hint: string;
   /** Cette branche donne-t-elle droit à la récompense d'après-combat ? */
   rewarded: boolean;
-  /** Aperçu des adversaires — toujours renseigné, tout étage se combat. */
-  enemies: { id: string; name: string; image?: string }[];
+  /**
+   * Adversaires de la branche — fiches COMPLÈTES, stats de l'étage comprises.
+   *
+   * Pas seulement un portrait : c'est sur ces chiffres qu'on décide d'affronter
+   * une élite ou de prendre le détour, et les cacher reviendrait à faire
+   * choisir à l'aveugle.
+   */
+  enemies: TowerCardView[];
 }
 
 /** Un évènement en cours, avec ses deux issues possibles. */
@@ -288,7 +294,7 @@ export function buildView(params: {
     options:
       state.status === "map"
         ? (params.options ?? []).map((option, index) =>
-            toNodeView(option, index, roster),
+            toNodeView(option, index, roster, config, state.squad.length),
           )
         : [],
     event:
@@ -381,6 +387,8 @@ function toNodeView(
   option: FloorPlan,
   index: number,
   roster: Record<string, Character>,
+  config: TowerConfig,
+  squadSize: number,
 ): NodeOptionView {
   const fight = NODE_COPY[option.kind];
   const prelude = option.prelude ? NODE_COPY[option.prelude] : null;
@@ -396,12 +404,15 @@ function toNodeView(
         ? fight.hint
         : `${fight.hint} Butin à la clé.`,
     rewarded: option.prelude === null,
-    // On montre les adversaires : choisir sa branche à l'aveugle ne serait pas
-    // un choix, juste un tirage.
+    // On montre les adversaires, et avec les stats de CET étage (multiplicateur
+    // d'élite ou de boss compris) : choisir sa branche à l'aveugle ne serait
+    // pas un choix, juste un tirage.
     enemies: option.enemyIds
       .map((id) => roster[id])
       .filter((c): c is Character => Boolean(c))
-      .map((c) => ({ id: c.id, name: c.name, image: c.image ?? undefined })),
+      .map((c) =>
+        toCardView(c, config, toEnemySpec(c, option.kind, config, squadSize).stats),
+      ),
   };
 }
 
