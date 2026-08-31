@@ -7,17 +7,24 @@ import {
   buildCombatSetup,
   buyHeal,
   buyItem,
+  chooseNode,
   chooseStarter,
+  eventChoiceOf,
   leaveMerchant,
   recruit,
   recruitChoices,
   resolveFloor,
   runScore,
   skipRecruit,
+  normalizeRunState,
+  resolveEvent,
   startRun,
+  takeRest,
   takeReward,
+  REST_HEAL_PCT,
   type TowerRunState,
 } from "./run";
+import type { TowerEvent } from "./events";
 import type { TowerItem } from "./items";
 import { SQUAD_SIZE, TOWER_FLOORS, type CombatResult, type FloorPlan } from "./types";
 
@@ -69,6 +76,7 @@ function plan(overrides: Partial<FloorPlan> = {}): FloorPlan {
     kind: "combat",
     enemyIds: ["a"],
     recruitIds: ["a", "b", "c", "d"],
+    eventIndex: 0,
     ...overrides,
   };
 }
@@ -142,10 +150,10 @@ describe("démarrage", () => {
     expect(state.floor).toBe(1);
   });
 
-  it("l'escouade démarre à UN personnage sur trois slots", () => {
+  it("l'escouade démarre à UN personnage sur trois slots, face à la carte", () => {
     const state = started();
     expect(state.squad).toHaveLength(1);
-    expect(state.status).toBe("combat");
+    expect(state.status).toBe("map");
     expect(state.squad[0].hp).toBe(state.squad[0].maxHp);
   });
 
@@ -165,7 +173,7 @@ describe("progression", () => {
     expect(next.floor).toBe(4);
   });
 
-  it("monte d'un étage une fois la récompense prise", () => {
+  it("remonte à la carte une fois la récompense prise", () => {
     const state = { ...started(), floor: 4, status: "reward" as const };
     const out = takeReward(state, plan({ recruitIds: [] }), {
       kind: "fragments",
@@ -174,17 +182,7 @@ describe("progression", () => {
 
     expect(out.ok).toBe(true);
     expect(out.ok && out.state.floor).toBe(5);
-    expect(out.ok && out.state.status).toBe("combat");
-  });
-
-  it("enchaîne sur le recrutement APRÈS la récompense, jamais avant", () => {
-    const state = { ...started(), floor: 3 };
-    const afterCombat = resolveFloor(state, plan(), won(state));
-    expect(afterCombat.status).toBe("reward");
-
-    const out = takeReward(afterCombat, plan(), { kind: "fragments", amount: 10 });
-    expect(out.ok && out.state.status).toBe("recruit");
-    expect(out.ok && out.state.floor).toBe(3);
+    expect(out.ok && out.state.status).toBe("map");
   });
 
   it("une défaite met fin à la run", () => {
@@ -247,9 +245,7 @@ describe("recrutement", () => {
     expect(out.ok).toBe(true);
     expect(out.ok && out.state.squad).toHaveLength(2);
     expect(out.ok && out.state.floor).toBe(4);
-    // L'étage 4 est un marchand (rythme d'une strate) : on y arrive
-    // directement, sans combat.
-    expect(out.ok && out.state.status).toBe("merchant");
+    expect(out.ok && out.state.status).toBe("map");
   });
 
   it("le nouveau venu arrive à PV pleins", () => {
@@ -543,7 +539,7 @@ describe("marchand", () => {
   it("quitter l'étal fait monter d'un étage", () => {
     const out = leaveMerchant(shopping(0));
     expect(out.ok && out.state.floor).toBe(5);
-    expect(out.ok && out.state.status).toBe("combat");
+    expect(out.ok && out.state.status).toBe("map");
   });
 });
 
@@ -621,5 +617,220 @@ describe("effets d'objets en combat", () => {
     );
 
     expect(rich.fragments).toBeGreaterThan(bare.fragments);
+  });
+});
+
+
+// ---------------------------------------------------------------------------
+// Carte, repos et evenements (phase 3)
+// ---------------------------------------------------------------------------
+
+describe("carte à embranchements", () => {
+  const onMap = (floor = 4): TowerRunState => ({
+    ...started(),
+    floor,
+    status: "map",
+  });
+
+  const branches = [
+    plan({ kind: "combat" }),
+    plan({ kind: "rest", enemyIds: [], recruitIds: [] }),
+  ];
+
+  it("mémorise l'index emprunté dans le chemin", () => {
+    const out = chooseNode(onMap(), branches, 1);
+
+    expect(out.ok).toBe(true);
+    expect(out.ok && out.state.path[3]).toBe(1);
+  });
+
+  it("ouvre l'écran correspondant au type du nœud choisi", () => {
+    const cases: Array<[Parameters<typeof plan>[0], string]> = [
+      [{ kind: "combat" }, "combat"],
+      [{ kind: "elite" }, "combat"],
+      [{ kind: "boss" }, "combat"],
+      [{ kind: "recruit" }, "recruit"],
+      [{ kind: "merchant" }, "merchant"],
+      [{ kind: "rest" }, "rest"],
+      [{ kind: "event" }, "event"],
+    ];
+
+    for (const [overrides, status] of cases) {
+      const out = chooseNode(onMap(), [plan(overrides)], 0);
+      expect(out.ok && out.state.status).toBe(status);
+    }
+  });
+
+  it("refuse une branche qui n'existe pas", () => {
+    expect(chooseNode(onMap(), branches, 5).ok).toBe(false);
+    expect(chooseNode(onMap(), branches, -1).ok).toBe(false);
+  });
+
+  it("refuse de choisir hors de l'écran de carte", () => {
+    // `started()` est DÉJÀ sur la carte : il faut un autre état pour tester le refus.
+    const out = chooseNode({ ...started(), status: "combat" }, branches, 0);
+    expect(out.ok === false && out.error).toBe("wrong-status");
+  });
+
+  it("garde un chemin DENSE, sans trou — Prisma refuse les undefined en JSON", () => {
+    // Cas réel : une run reprise à un étage avancé avec un chemin encore vide.
+    const out = chooseNode({ ...onMap(5), path: [] }, branches, 1);
+
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    expect(out.state.path).toEqual([0, 0, 0, 0, 1]);
+    expect(out.state.path.some((v) => v === undefined)).toBe(false);
+    // Sérialisable tel quel, ce que la base exige.
+    expect(JSON.parse(JSON.stringify(out.state.path))).toEqual([0, 0, 0, 0, 1]);
+  });
+
+  it("garde une trace de chaque étage franchi, dans l'ordre", () => {
+    let state = onMap(1);
+    for (let floor = 1; floor <= 3; floor += 1) {
+      const out = chooseNode({ ...state, floor, status: "map" }, branches, floor % 2);
+      if (!out.ok) throw new Error("branche refusée");
+      state = out.state;
+    }
+    expect(state.path.slice(0, 3)).toEqual([1, 0, 1]);
+  });
+});
+
+describe("repos", () => {
+  it("soigne l'escouade et remonte à la carte", () => {
+    const state: TowerRunState = {
+      ...started(),
+      floor: 4,
+      status: "rest",
+      squad: [{ characterId: "start", hp: 10, maxHp: 100 }],
+    };
+
+    const out = takeRest(state);
+    expect(out.ok && out.state.squad[0].hp).toBe(10 + REST_HEAL_PCT);
+    expect(out.ok && out.state.floor).toBe(5);
+    expect(out.ok && out.state.status).toBe("map");
+  });
+
+  it("ne dépasse pas les PV max", () => {
+    const state: TowerRunState = {
+      ...started(),
+      floor: 4,
+      status: "rest",
+      squad: [{ characterId: "start", hp: 95, maxHp: 100 }],
+    };
+    expect(takeRest(state).ok && takeRest(state).ok).toBe(true);
+    const out = takeRest(state);
+    expect(out.ok && out.state.squad[0].hp).toBe(100);
+  });
+});
+
+describe("évènements", () => {
+  const atEvent = (overrides: Partial<TowerRunState> = {}): TowerRunState => ({
+    ...started(),
+    floor: 4,
+    status: "event",
+    squad: [{ characterId: "start", hp: 50, maxHp: 100 }],
+    ...overrides,
+  });
+
+  const event: TowerEvent = {
+    slug: "test",
+    title: "Test",
+    text: "…",
+    choices: [
+      { label: "A", outcome: { text: "a", fragments: 30 } },
+      { label: "B", outcome: { text: "b", healPct: -20 } },
+    ],
+  };
+
+  it("crédite les fragments d'une issue", () => {
+    const out = resolveEvent(atEvent(), event.choices[0].outcome, null);
+    expect(out.ok && out.state.fragments).toBe(30);
+    expect(out.ok && out.state.status).toBe("map");
+  });
+
+  it("BLESSE l'escouade sur un soin négatif", () => {
+    const out = resolveEvent(atEvent(), event.choices[1].outcome, null);
+    expect(out.ok && out.state.squad[0].hp).toBe(30);
+  });
+
+  it("ne met jamais les fragments en dette", () => {
+    const out = resolveEvent(
+      atEvent({ fragments: 10 }),
+      { text: "", fragments: -100 },
+      null,
+    );
+    expect(out.ok && out.state.fragments).toBe(0);
+  });
+
+  it("ajoute l'objet accordé", () => {
+    const out = resolveEvent(atEvent(), { text: "", item: "any" }, "relique");
+    expect(out.ok && out.state.items).toEqual(["relique"]);
+  });
+
+  it("compense en fragments quand il n'y a plus rien à donner", () => {
+    const out = resolveEvent(atEvent(), { text: "", item: "any" }, null);
+    expect(out.ok && out.state.fragments).toBeGreaterThan(0);
+    expect(out.ok && out.state.items).toEqual([]);
+  });
+
+  it("une issue qui fauche toute l'escouade met fin à la run", () => {
+    const out = resolveEvent(
+      atEvent({ squad: [{ characterId: "start", hp: 5, maxHp: 100 }] }),
+      { text: "", healPct: -50 },
+      null,
+    );
+    expect(out.ok && out.state.status).toBe("lost");
+  });
+
+  it("résout l'index d'un choix, et refuse un index inconnu", () => {
+    expect(eventChoiceOf(event, 1)?.healPct).toBe(-20);
+    expect(eventChoiceOf(event, 7)).toBeNull();
+  });
+
+  it("refuse une issue hors de l'écran d'évènement", () => {
+    const out = resolveEvent(started(), { text: "" }, null);
+    expect(out.ok === false && out.error).toBe("wrong-status");
+  });
+});
+
+
+describe("relecture d'un état persisté", () => {
+  it("complète les champs qu'une version antérieure n'écrivait pas", () => {
+    // Exactement la forme d'une run écrite avant les phases 2 et 3 : ni
+    // `items`, ni `path`, ni `revived`.
+    const legacy = {
+      seed: 42,
+      floor: 4,
+      status: "combat",
+      squad: [{ characterId: "start", hp: 50, maxHp: 100 }],
+      fragments: 15,
+      enemiesKilled: 3,
+      bossesKilled: 0,
+      seen: ["start"],
+    };
+
+    const state = normalizeRunState(legacy);
+
+    expect(state.items).toEqual([]);
+    expect(state.path).toEqual([]);
+    expect(state.revived).toBe(false);
+    // Et rien de ce qui existait n'est perdu.
+    expect(state.floor).toBe(4);
+    expect(state.fragments).toBe(15);
+    expect(state.squad).toHaveLength(1);
+  });
+
+  it("survit à un blob vide ou corrompu plutôt que de jeter", () => {
+    for (const raw of [null, undefined, {}, { squad: "pas un tableau" }]) {
+      const state = normalizeRunState(raw);
+      expect(Array.isArray(state.squad)).toBe(true);
+      expect(Array.isArray(state.path)).toBe(true);
+      expect(Array.isArray(state.items)).toBe(true);
+    }
+  });
+
+  it("laisse un état complet intact", () => {
+    const full = { ...started(), floor: 7, items: ["a"], path: [0, 1] };
+    expect(normalizeRunState(full)).toEqual(full);
   });
 });

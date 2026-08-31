@@ -1,12 +1,8 @@
 import type { Character } from "@/data/roster/characters";
 import type { CombatSetup } from "./combat";
 
-import {
-  canRecruit,
-  isRecruitFloor,
-  nodeKindOf,
-  type TowerRoster,
-} from "./floors";
+import { canRecruit, isFightNode, type TowerRoster } from "./floors";
+import type { EventOutcome, TowerEvent } from "./events";
 import { modifiersOf, resolveItems, type TowerItem } from "./items";
 import { HEAL_REWARD_PCT, type Reward } from "./rewards";
 import { deriveStats, toEnemySpec, toFighterSpec } from "./stats";
@@ -44,10 +40,14 @@ export interface SquadMember {
  */
 export type RunStatus =
   | "starter"
+  /** La carte : deux nœuds proposés, le joueur choisit sa branche. */
+  | "map"
   | "combat"
   | "reward"
   | "recruit"
   | "merchant"
+  | "rest"
+  | "event"
   | "won"
   | "lost";
 
@@ -69,6 +69,14 @@ export interface TowerRunState {
   items: string[];
   /** L'objet de résurrection a-t-il déjà servi ? Une fois par run. */
   revived: boolean;
+  /**
+   * CHEMIN emprunté : l'index du nœud choisi à chaque étage franchi.
+   *
+   * C'est la seule chose à mémoriser d'une carte à embranchements — les deux
+   * options de chaque étage se regénèrent depuis la graine, seul le choix du
+   * joueur ne se devine pas.
+   */
+  path: number[];
 }
 
 /** Une action refusée, avec sa raison — jamais une exception (cf. `run.test.ts`). */
@@ -82,7 +90,9 @@ export type RunError =
   | "bad-slot"
   | "unknown-item"
   | "already-owned"
-  | "too-expensive";
+  | "too-expensive"
+  | "bad-node"
+  | "bad-choice";
 
 export type RunOutcome =
   | { ok: true; state: TowerRunState }
@@ -104,6 +114,7 @@ export function startRun(seed: number): TowerRunState {
     seen: [],
     items: [],
     revived: false,
+    path: [],
   };
 }
 
@@ -124,10 +135,45 @@ export function chooseStarter(
   const stats = deriveStats(character, config);
   return ok({
     ...state,
-    status: "combat",
+    status: "map",
     squad: [{ characterId: character.id, hp: stats.maxHp, maxHp: stats.maxHp }],
     seen: [character.id],
   });
+}
+
+/**
+ * Remet d'aplomb un état de run relu en base.
+ *
+ * ⚠️ Indispensable, et pas une précaution de principe : `TowerRun.state` est un
+ * blob JSON écrit par la version du code qui tournait au moment de la partie.
+ * Ajouter un champ à `TowerRunState` — ce qu'ont fait les phases 2 (`items`) et
+ * 3 (`path`) — casse donc TOUTES les runs en cours au moment du déploiement, et
+ * le joueur ne peut même pas relancer : la reprise plante avant de lui rendre
+ * la main.
+ *
+ * Tout champ absent reprend ici sa valeur par défaut. C'est le seul endroit à
+ * mettre à jour quand l'état gagne un champ.
+ */
+export function normalizeRunState(raw: unknown): TowerRunState {
+  const s = (raw ?? {}) as Partial<TowerRunState>;
+  const base = startRun(typeof s.seed === "number" ? s.seed : 0);
+
+  return {
+    ...base,
+    ...s,
+    squad: Array.isArray(s.squad) ? s.squad : base.squad,
+    seen: Array.isArray(s.seen) ? s.seen : base.seen,
+    items: Array.isArray(s.items) ? s.items : base.items,
+    path: Array.isArray(s.path) ? s.path : base.path,
+    revived: Boolean(s.revived),
+    floor: typeof s.floor === "number" ? s.floor : base.floor,
+    fragments: typeof s.fragments === "number" ? s.fragments : base.fragments,
+    enemiesKilled:
+      typeof s.enemiesKilled === "number" ? s.enemiesKilled : base.enemiesKilled,
+    bossesKilled:
+      typeof s.bossesKilled === "number" ? s.bossesKilled : base.bossesKilled,
+    status: s.status ?? base.status,
+  };
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -251,8 +297,7 @@ export function resolveFloor(
   if (!result.victory) return { ...next, status: "lost" };
   if (floor >= TOWER_FLOORS) return { ...next, status: "won" };
 
-  // Toute victoire ouvre un choix de récompense. Le recrutement vient APRÈS :
-  // le joueur doit savoir ce qu'il a gagné avant de décider qui sacrifier.
+  // Toute victoire ouvre un choix de récompense.
   return { ...next, status: "reward" };
 }
 
@@ -301,23 +346,21 @@ export function takeReward(
     next = { ...state, squad: healSquad(state.squad, reward.pct) };
   }
 
-  return ok(afterFloor(next, plan));
+  return ok(advance(next));
 }
 
-/** Soigne toute l'escouade d'un pourcentage de ses PV max. */
+/**
+ * Ajuste les PV de toute l'escouade d'un pourcentage de leur maximum.
+ *
+ * Un pourcentage NÉGATIF blesse : c'est ce qui permet aux évènements de faire
+ * payer un choix sans passer par un combat. Le résultat reste borné à
+ * [0, maxHp] — un membre à 0 PV est traité comme tombé par l'appelant.
+ */
 function healSquad(squad: SquadMember[], pct: number): SquadMember[] {
   return squad.map((m) => ({
     ...m,
-    hp: Math.min(m.maxHp, m.hp + Math.round((m.maxHp * pct) / 100)),
+    hp: Math.max(0, Math.min(m.maxHp, m.hp + Math.round((m.maxHp * pct) / 100))),
   }));
-}
-
-/** Étape suivant la récompense : recrutement s'il y en a un, sinon on monte. */
-function afterFloor(state: TowerRunState, plan: FloorPlan): TowerRunState {
-  if (isRecruitFloor(state.floor) && recruitChoices(state, plan).length > 0) {
-    return { ...state, status: "recruit" };
-  }
-  return advance(state);
 }
 
 // ---------------------------------------------------------------------------
@@ -454,20 +497,132 @@ export function skipRecruit(state: TowerRunState): RunOutcome {
 }
 
 /**
- * Monte d'un étage.
+ * Monte d'un étage et repasse par la CARTE.
  *
- * Le type du prochain étage se déduit de son seul NUMÉRO (`nodeKindOf`) : pas
- * besoin de régénérer la tour pour savoir s'il faut présenter un combat ou un
- * marchand, et l'état de run reste ignorant de la graine.
+ * L'état ne décide plus du type de l'étage suivant : il rend la main au joueur,
+ * qui choisit sa branche. C'est tout ce qui change entre une tour linéaire et
+ * une tour à embranchements — le reste de la machine est inchangé.
  */
 function advance(state: TowerRunState): TowerRunState {
   if (state.floor >= TOWER_FLOORS) return { ...state, status: "won" };
-  const floor = state.floor + 1;
-  return {
-    ...state,
-    floor,
-    status: nodeKindOf(floor) === "merchant" ? "merchant" : "combat",
-  };
+  return { ...state, floor: state.floor + 1, status: "map" };
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Carte
+// ──────────────────────────────────────────────────────────────────────────
+
+/** Écran correspondant à un type de nœud. */
+function statusForNode(kind: FloorPlan["kind"]): RunStatus {
+  if (isFightNode(kind)) return "combat";
+  if (kind === "recruit") return "recruit";
+  if (kind === "merchant") return "merchant";
+  if (kind === "rest") return "rest";
+  return "event";
+}
+
+/**
+ * Emprunte une des branches de l'étage courant.
+ *
+ * L'index choisi est mémorisé dans `path` : c'est la seule information d'une
+ * carte à embranchements qui ne se régénère pas depuis la graine.
+ */
+export function chooseNode(
+  state: TowerRunState,
+  options: readonly FloorPlan[],
+  index: number,
+): RunOutcome {
+  if (state.status !== "map") return fail("wrong-status");
+
+  const node = options[Math.trunc(index)];
+  if (!node) return fail("bad-node");
+
+  // Le chemin doit rester DENSE : écrire directement à `path[floor - 1]` sur un
+  // tableau plus court crée des trous, que `JSON` sérialise en `undefined` et
+  // que Prisma refuse (« Can not use `undefined` value within array »). Une run
+  // reprise à un étage avancé tombait donc en erreur au premier choix.
+  const path = Array.from(
+    { length: Math.max(state.path.length, state.floor) },
+    (_, i) => state.path[i] ?? 0,
+  );
+  path[state.floor - 1] = Math.trunc(index);
+
+  return ok({ ...state, path, status: statusForNode(node.kind) });
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Repos
+// ──────────────────────────────────────────────────────────────────────────
+
+/**
+ * Soin d'un nœud de repos.
+ *
+ * Généreux, et c'est voulu : renoncer à un combat, c'est renoncer à ses
+ * fragments, à son objet et à l'XP de l'étage. Il faut que ça vaille la peine,
+ * sinon la branche calme n'est jamais choisie et la carte n'a plus d'intérêt.
+ */
+export const REST_HEAL_PCT = 40;
+
+export function takeRest(state: TowerRunState): RunOutcome {
+  if (state.status !== "rest") return fail("wrong-status");
+  return ok(advance({ ...state, squad: healSquad(state.squad, REST_HEAL_PCT) }));
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Évènements
+// ──────────────────────────────────────────────────────────────────────────
+
+/**
+ * Applique l'issue d'un évènement.
+ *
+ * `grantedItem` est résolu par l'appelant (il a le catalogue et la graine) :
+ * cette fonction reste pure et ignore tout du tirage. Une issue qui promettait
+ * un objet mais n'a rien trouvé à donner est convertie en fragments — un
+ * évènement ne doit jamais ne rien faire du tout.
+ */
+export function resolveEvent(
+  state: TowerRunState,
+  outcome: EventOutcome,
+  grantedItemId: string | null,
+): RunOutcome {
+  if (state.status !== "event") return fail("wrong-status");
+
+  let next = { ...state };
+
+  if (outcome.healPct) {
+    next = { ...next, squad: healSquad(next.squad, outcome.healPct) };
+  }
+
+  let fragments = next.fragments + (outcome.fragments ?? 0);
+
+  if (outcome.item) {
+    if (grantedItemId && !next.items.includes(grantedItemId)) {
+      next = { ...next, items: [...next.items, grantedItemId] };
+    } else {
+      // Rien à donner : on compense plutôt que de servir une issue vide.
+      fragments += 40;
+    }
+  }
+
+  // Les fragments ne descendent jamais sous zéro : une issue coûteuse prend ce
+  // qu'il y a, elle ne met pas le joueur en dette.
+  next = { ...next, fragments: Math.max(0, fragments) };
+
+  // Une escouade entièrement fauchée par un évènement met fin à la run —
+  // `healSquad` peut retirer des PV (soin négatif).
+  if (next.squad.every((m) => m.hp <= 0)) {
+    return ok({ ...next, squad: [], status: "lost" });
+  }
+
+  return ok(advance(next));
+}
+
+/** L'évènement choisi est-il jouable ? (garde serveur) */
+export function eventChoiceOf(
+  event: TowerEvent,
+  index: number,
+): EventOutcome | null {
+  return event.choices[Math.trunc(index)]?.outcome ?? null;
 }
 
 // ──────────────────────────────────────────────────────────────────────────

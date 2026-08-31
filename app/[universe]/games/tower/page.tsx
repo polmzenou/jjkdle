@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { isGameEnabled } from "@/lib/config/app-config";
 import { GameJsonLd } from "@/components/seo/JsonLd";
+import { TowerLeaderboard } from "@/components/leaderboard/TowerLeaderboard";
+import { parseScope } from "@/lib/leaderboard/store";
 import { gameMetadata } from "@/lib/seo/config";
 import { universeHref } from "@/lib/universes/current";
 import { TowerGame } from "./TowerGame";
@@ -21,13 +23,22 @@ export const dynamic = "force-dynamic";
  * n'envoient jamais que l'étage courant — précharger le contenu du jeu ici
  * reviendrait à livrer la tour entière dans le HTML.
  */
-export default async function TowerPage() {
+export default async function TowerPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ scope?: string }>;
+}) {
   if (!(await isGameEnabled("tower"))) redirect(await universeHref("/games"));
+  const { scope } = await searchParams;
 
   return (
     <main className="mx-auto max-w-5xl px-4 pb-24 sm:px-6">
       <GameJsonLd id="tower" />
       <TowerGame />
+
+      <div className="mt-10">
+        <TowerLeaderboard limit={20} scope={parseScope(scope)} />
+      </div>
     </main>
   );
 }

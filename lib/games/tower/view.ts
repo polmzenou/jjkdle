@@ -4,6 +4,8 @@ import type { TowerConfig } from "./config";
 import { booleanAttribute, deriveStats, toEnemySpec } from "./stats";
 import { recruitChoices, runScore, type TowerRunState } from "./run";
 import { describeItem, itemRarityStyle, resolveItems, type TowerItem } from "./items";
+import { eventFor, type TowerEvent } from "./events";
+import { REST_HEAL_PCT } from "./run";
 import {
   MERCHANT_HEAL_PCT,
   MERCHANT_HEAL_PRICE,
@@ -78,6 +80,25 @@ export interface ShopOfferView {
   affordable: boolean;
 }
 
+/** Un nœud proposé sur la carte. */
+export interface NodeOptionView {
+  index: number;
+  kind: NodeKind;
+  /** Libellé court affiché sur la carte. */
+  label: string;
+  /** Ce que le nœud promet, en une phrase. */
+  hint: string;
+  /** Aperçu des adversaires (nœuds de combat). */
+  enemies: { id: string; name: string; image?: string }[];
+}
+
+/** Un évènement en cours, avec ses deux issues possibles. */
+export interface EventView {
+  title: string;
+  text: string;
+  choices: { index: number; label: string }[];
+}
+
 export interface TowerView {
   status: TowerRunState["status"];
   /** Tour du jour (classée) ou tour aléatoire (VIP/ADMIN, hors classement). */
@@ -99,6 +120,12 @@ export interface TowerView {
   healOffer: { price: number; pct: number; affordable: boolean };
   /** Objets déjà ramassés — l'inventaire est visible à tout moment. */
   inventory: ItemView[];
+  /** Branches proposées (`status: "map"`). */
+  options: NodeOptionView[];
+  /** Évènement en cours (`status: "event"`). */
+  event: EventView | null;
+  /** Soin d'un nœud de repos, pour l'afficher sans le coder en dur. */
+  restPct: number;
   fragments: number;
   enemiesKilled: number;
   bossesKilled: number;
@@ -115,7 +142,14 @@ export interface TowerView {
  * `lib/leaderboard/types.ts`).
  */
 export type TowerActionResult =
-  | { ok: true; view: TowerView; combat?: CombatResult; exp?: ExpResult }
+  | {
+      ok: true;
+      view: TowerView;
+      combat?: CombatResult;
+      exp?: ExpResult;
+      /** Message à afficher après coup (issue d'une rencontre, par exemple). */
+      notice?: string;
+    }
   | { ok: false; error: string };
 
 /** Fiche affichable d'un personnage, côté escouade ou choix. */
@@ -181,6 +215,10 @@ export function buildView(params: {
   /** Catalogue d'objets de l'univers. */
   items?: TowerItem[];
   itemsById?: Record<string, TowerItem>;
+  /** Catalogue d'évènements de l'univers. */
+  events?: TowerEvent[];
+  /** Les branches de l'étage courant, pour l'écran de carte. */
+  options?: FloorPlan[];
 }): TowerView {
   const { state, plan, roster, config } = params;
   const catalog = params.items ?? [];
@@ -242,6 +280,17 @@ export function buildView(params: {
       affordable: state.fragments >= MERCHANT_HEAL_PRICE,
     },
     inventory: resolveItems(state.items, byId).map(toItemView),
+    options:
+      state.status === "map"
+        ? (params.options ?? []).map((option, index) =>
+            toNodeView(option, index, roster),
+          )
+        : [],
+    event:
+      state.status === "event"
+        ? toEventView(eventFor(params.events ?? [], plan.eventIndex))
+        : null,
+    restPct: REST_HEAL_PCT,
     fragments: state.fragments,
     enemiesKilled: state.enemiesKilled,
     bossesKilled: state.bossesKilled,
@@ -302,4 +351,47 @@ export function toItemView(item: TowerItem): ItemView {
 function toRewardView(reward: Reward): RewardView {
   if (reward.kind === "item") return { kind: "item", item: toItemView(reward.item) };
   return reward;
+}
+
+/** Libellé et promesse d'un type de nœud, tels que le joueur les lit. */
+const NODE_COPY: Record<NodeKind, { label: string; hint: string }> = {
+  combat: { label: "Combat", hint: "Un ou plusieurs adversaires. Butin à la clé." },
+  elite: {
+    label: "Élite",
+    hint: "Un adversaire de la strate supérieure. Récompense rare ou épique.",
+  },
+  boss: { label: "Boss", hint: "Le gardien de la strate. Pas de détour possible." },
+  recruit: { label: "Renfort", hint: "Un personnage à faire entrer dans l'escouade." },
+  merchant: { label: "Marchand", hint: "Dépense tes fragments avant qu'ils ne servent plus." },
+  rest: { label: "Repos", hint: "Souffler. Aucun combat, aucun butin." },
+  event: { label: "Rencontre", hint: "Une situation, deux issues. On ne sait pas laquelle paie." },
+};
+
+function toNodeView(
+  option: FloorPlan,
+  index: number,
+  roster: Record<string, Character>,
+): NodeOptionView {
+  const copy = NODE_COPY[option.kind];
+  return {
+    index,
+    kind: option.kind,
+    label: copy.label,
+    hint: copy.hint,
+    // On montre les adversaires : choisir sa branche à l'aveugle ne serait pas
+    // un choix, juste un tirage.
+    enemies: option.enemyIds
+      .map((id) => roster[id])
+      .filter((c): c is Character => Boolean(c))
+      .map((c) => ({ id: c.id, name: c.name, image: c.image ?? undefined })),
+  };
+}
+
+function toEventView(event: TowerEvent | null): EventView | null {
+  if (!event) return null;
+  return {
+    title: event.title,
+    text: event.text,
+    choices: event.choices.map((c, index) => ({ index, label: c.label })),
+  };
 }

@@ -7,6 +7,8 @@ import { getUniverseBySlug } from "@/lib/universes/registry";
 import { resolveTowerConfig, type TowerConfig } from "./config";
 import { buildTowerRoster, isTowerPlayable, type TowerRoster } from "./floors";
 import { normalizeItem, type TowerItem } from "./items";
+import { isValidEvent, type TowerEvent } from "./events";
+import { JJK_EVENTS } from "@/lib/universes/jjk-events";
 import { prisma } from "@/lib/prisma";
 
 /**
@@ -33,6 +35,8 @@ export interface TowerContext {
   items: TowerItem[];
   /** Les mêmes, indexés par id, pour résoudre un inventaire de run. */
   itemsById: Record<string, TowerItem>;
+  /** Évènements de l'univers (contenu écrit, pas de la donnée en base). */
+  events: TowerEvent[];
   /**
    * Le contenu suffit-il à faire tenir une tour debout ? Même esprit que
    * `MIN_DRAFT_ROSTER` : mieux vaut refuser de lancer une partie que d'en
@@ -129,6 +133,7 @@ const loadContext = cache(
       arcOrder,
       items,
       itemsById: Object.fromEntries(items.map((i) => [i.id, i])),
+      events: eventsFor(slug),
       playable: arcOrder.length > 0 && isTowerPlayable(tower),
     };
   },
@@ -137,4 +142,17 @@ const loadContext = cache(
 export async function getTowerContext(): Promise<TowerContext> {
   const universe = await getCurrentUniverse();
   return loadContext(universe.id, universe.slug);
+}
+
+/**
+ * Évènements d'un univers.
+ *
+ * En CODE et non en base, contrairement aux objets : un évènement est un texte
+ * de trois lignes et deux issues, il n'y a rien à y régler au quotidien. Un
+ * univers sans catalogue n'a simplement pas de nœud d'évènement — la carte
+ * propose alors autre chose.
+ */
+function eventsFor(slug: string): TowerEvent[] {
+  const catalogs: Record<string, TowerEvent[]> = { jjk: JJK_EVENTS };
+  return (catalogs[slug] ?? []).filter(isValidEvent);
 }
