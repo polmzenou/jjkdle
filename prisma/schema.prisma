@@ -482,6 +482,7 @@ model Universe {
 
   characters        Character[]
   categories        Category[]
+  items             Item[]
   draftCharacters   DraftCharacter[]
   rankingConditions RankingCondition[]
   userProfiles      UserUniverseProfile[]
@@ -955,4 +956,51 @@ model TowerScore {
   @@index([userId])
   @@index([universeId, score])
   @@index([universeId, dateKey, cleared, attempt])
+}
+
+/// Objet du roster ITEM — « objets maudits » en JJK (cf. lib/games/tower/items).
+///
+/// Roster À PART ENTIÈRE, au même titre que `Character` ou `DraftCharacter` :
+/// rien n'entre dans le roster des personnages. Le modèle s'appelle `Item` et
+/// non `CursedItem` parce que « objet maudit » est du vocabulaire JJK — sur
+/// Demon Slayer ce sera un Nichirin, sur Chainsaw Man un contrat. Le libellé
+/// affiché vient de `UniverseLabels`, la donnée est taggée `universeId`.
+///
+/// Les EFFETS sont data-driven : `effectKind` est validé contre EFFECT_SPECS
+/// (lib/games/tower/effects.ts) et `effectValue` borné par le spec de l'effet.
+/// Un admin crée donc un objet sans écrire de code, mais un effet reste typé et
+/// testable.
+model Item {
+  id         String   @id @default(cuid())
+  slug       String
+  universeId String
+  universe   Universe @relation(fields: [universeId], references: [id])
+
+  name        String
+  description String  @default("")
+  /// URL d'affichage : chemin statique OU /api/items/[id]/image.
+  image       String?
+  imageData   Bytes?
+  imageMime   String?
+
+  /// "COMMON" | "RARE" | "EPIC" — échelle PROPRE aux objets, volontairement
+  /// distincte de CardRarity (qui dérive de Character.tier) : même mot,
+  /// concept différent.
+  rarity String @default("COMMON")
+
+  effectKind   String
+  effectValue  Int
+  /// Second effet optionnel : c'est lui qui permet les objets à double
+  /// tranchant (« +15 % de frappe, −10 % de PV ») sans complexifier le
+  /// formulaire.
+  effectKind2  String?
+  effectValue2 Int?
+
+  /// Décoché = retiré des tirages sans être supprimé.
+  enabled  Boolean @default(true)
+  position Int     @default(0)
+
+  @@unique([universeId, slug])
+  @@index([universeId, position])
+  @@index([universeId, enabled])
 }

@@ -5,6 +5,7 @@ import { useUniverseHref } from "@/components/universe/UniverseProvider";
 import { TOWER_FLOORS } from "@/lib/games/tower/types";
 import type { TowerView } from "@/lib/games/tower/view";
 import type { ExpResult } from "@/lib/leaderboard/types";
+import { InventoryStrip } from "./ItemCard";
 import { TowerCard } from "./TowerCard";
 
 /**
@@ -55,6 +56,12 @@ export function RunRecap({
               hp={{ current: member.hp, max: member.maxHp }}
             />
           ))}
+        </div>
+      )}
+
+      {view.inventory.length > 0 && (
+        <div className="flex w-full max-w-md justify-center">
+          <InventoryStrip items={view.inventory} />
         </div>
       )}
 

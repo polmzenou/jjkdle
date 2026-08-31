@@ -3,6 +3,14 @@ import { archetypeOf, passiveOf, techniqueOf } from "./abilities";
 import type { TowerConfig } from "./config";
 import { booleanAttribute, deriveStats, toEnemySpec } from "./stats";
 import { recruitChoices, runScore, type TowerRunState } from "./run";
+import { describeItem, itemRarityStyle, resolveItems, type TowerItem } from "./items";
+import {
+  MERCHANT_HEAL_PCT,
+  MERCHANT_HEAL_PRICE,
+  rollRewards,
+  rollShop,
+  type Reward,
+} from "./rewards";
 import type {
   Archetype,
   CombatResult,
@@ -43,6 +51,33 @@ export interface SquadSlotView extends TowerCardView {
   maxHp: number;
 }
 
+/** Un objet tel qu'il s'affiche : sa fiche + son effet en une ligne lisible. */
+export interface ItemView {
+  id: string;
+  name: string;
+  description: string;
+  image?: string;
+  rarity: string;
+  rarityLabel: string;
+  color: string;
+  /** Effets rendus en français, ex. « +15 % de dégâts · −8 % de PV max ». */
+  effect: string;
+}
+
+/** Une option de fin d'étage. */
+export type RewardView =
+  | { kind: "item"; item: ItemView }
+  | { kind: "fragments"; amount: number }
+  | { kind: "heal"; pct: number };
+
+/** Une ligne de l'étal du marchand. */
+export interface ShopOfferView {
+  item: ItemView;
+  price: number;
+  /** Le joueur a-t-il de quoi payer ? Calculé serveur pour éviter tout écart. */
+  affordable: boolean;
+}
+
 export interface TowerView {
   status: TowerRunState["status"];
   /** Tour du jour (classée) ou tour aléatoire (VIP/ADMIN, hors classement). */
@@ -56,6 +91,14 @@ export interface TowerView {
   enemies: TowerCardView[];
   /** Starters du jour (`status: "starter"`) ou recrues proposées. */
   choices: TowerCardView[];
+  /** Options de récompense (`status: "reward"`). */
+  rewards: RewardView[];
+  /** Étal du marchand (`status: "merchant"`). */
+  shop: ShopOfferView[];
+  /** Prix et effet du soin vendu à l'étal. */
+  healOffer: { price: number; pct: number; affordable: boolean };
+  /** Objets déjà ramassés — l'inventaire est visible à tout moment. */
+  inventory: ItemView[];
   fragments: number;
   enemiesKilled: number;
   bossesKilled: number;
@@ -135,8 +178,13 @@ export function buildView(params: {
   isAuthed: boolean;
   /** Starters du jour, uniquement quand la run attend ce choix. */
   starters?: Character[];
+  /** Catalogue d'objets de l'univers. */
+  items?: TowerItem[];
+  itemsById?: Record<string, TowerItem>;
 }): TowerView {
   const { state, plan, roster, config } = params;
+  const catalog = params.items ?? [];
+  const byId = params.itemsById ?? {};
 
   const squad: SquadSlotView[] = state.squad
     .map((member) => {
@@ -174,6 +222,26 @@ export function buildView(params: {
     squad,
     enemies,
     choices: buildChoices(params),
+    rewards:
+      state.status === "reward"
+        ? rollRewards(state.seed, state.floor, plan.kind, catalog, state.items).map(
+            toRewardView,
+          )
+        : [],
+    shop:
+      state.status === "merchant"
+        ? rollShop(state.seed, state.floor, catalog, state.items).map((o) => ({
+            item: toItemView(o.item),
+            price: o.price,
+            affordable: state.fragments >= o.price,
+          }))
+        : [],
+    healOffer: {
+      price: MERCHANT_HEAL_PRICE,
+      pct: MERCHANT_HEAL_PCT,
+      affordable: state.fragments >= MERCHANT_HEAL_PRICE,
+    },
+    inventory: resolveItems(state.items, byId).map(toItemView),
     fragments: state.fragments,
     enemiesKilled: state.enemiesKilled,
     bossesKilled: state.bossesKilled,
@@ -214,4 +282,24 @@ function archetypeOfCharacter(
 
 function hasDomainOf(character: Character, config: TowerConfig): boolean {
   return booleanAttribute(character, config.ultimateAttributeKey);
+}
+
+/** Fiche affichable d'un objet. */
+export function toItemView(item: TowerItem): ItemView {
+  const style = itemRarityStyle(item.rarity);
+  return {
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    image: item.image,
+    rarity: item.rarity,
+    rarityLabel: style.label,
+    color: style.color,
+    effect: describeItem(item),
+  };
+}
+
+function toRewardView(reward: Reward): RewardView {
+  if (reward.kind === "item") return { kind: "item", item: toItemView(reward.item) };
+  return reward;
 }

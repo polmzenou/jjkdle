@@ -14,7 +14,10 @@ import { planTower } from "@/lib/games/tower/floors";
 import { getTowerContext, type TowerContext } from "@/lib/games/tower/queries";
 import {
   buildCombatSetup,
+  buyHeal,
+  buyItem,
   chooseStarter,
+  leaveMerchant,
   isFinished,
   reachedFloor,
   recruit,
@@ -22,8 +25,15 @@ import {
   runScore,
   skipRecruit,
   startRun,
+  takeReward,
   type TowerRunState,
 } from "@/lib/games/tower/run";
+import {
+  MERCHANT_HEAL_PCT,
+  MERCHANT_HEAL_PRICE,
+  rollRewards,
+  rollShop,
+} from "@/lib/games/tower/rewards";
 import { dailyStarters, isDailyStarter } from "@/lib/games/tower/starters";
 import {
   TOWER_COOKIE,
@@ -121,6 +131,8 @@ async function viewOf(params: {
       params.state.status === "starter"
         ? dailyStarters(todayKey(), params.context.list)
         : undefined,
+    items: params.context.items,
+    itemsById: params.context.itemsById,
   });
 }
 
@@ -296,9 +308,15 @@ export async function resolveCombatAction(
   const plan = planFor(context, run.seed, run.state.floor);
   if (!plan) return fail("Étage introuvable.");
 
-  const setup = buildCombatSetup(run.state, plan, context.roster, context.config);
+  const setup = buildCombatSetup(
+    run.state,
+    plan,
+    context.roster,
+    context.config,
+    context.itemsById,
+  );
   const result = simulateCombat({ ...setup, interventions: sanitize(interventions) });
-  const next = resolveFloor(run.state, plan, result);
+  const next = resolveFloor(run.state, plan, result, context.itemsById);
 
   // Garde d'idempotence : si la run n'est plus à cet étage, un double envoi est
   // déjà passé. On ne rejoue pas le combat une seconde fois.
@@ -346,6 +364,110 @@ function sanitize(interventions: unknown): Intervention[] {
       // ensuite la légalité de l'action elle-même.
       kind: i.kind === "guard" ? ("guard" as const) : ("technique" as const),
     }));
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Récompense
+// ──────────────────────────────────────────────────────────────────────────
+
+/**
+ * Prend une des trois récompenses de fin d'étage.
+ *
+ * Le client n'envoie qu'un INDEX, jamais l'objet lui-même : le serveur
+ * régénère les trois options depuis la graine et l'étage, exactement comme il
+ * régénère la tour. Sans cela, il suffirait de réécrire la requête pour
+ * s'offrir l'épique de son choix.
+ */
+export async function takeRewardAction(index: number): Promise<TowerActionResult> {
+  const loaded = await requireRun();
+  if ("error" in loaded) return fail(loaded.error);
+  const { run, context, user } = loaded;
+
+  if (run.state.status !== "reward") return fail("Aucune récompense en attente.");
+
+  const plan = planFor(context, run.seed, run.state.floor);
+  if (!plan) return fail("Étage introuvable.");
+
+  const rewards = rollRewards(
+    run.seed,
+    run.state.floor,
+    plan.kind,
+    context.items,
+    run.state.items,
+  );
+  const reward = rewards[Math.trunc(index)];
+  if (!reward) return fail("Cette récompense n'existe pas.");
+
+  const outcome = takeReward(run.state, plan, reward);
+  if (!outcome.ok) return fail("Cette récompense n'est plus disponible.");
+
+  await saveRun(run.id, run.state.floor, outcome.state);
+  return viewResult(context, outcome.state, run, user);
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Marchand
+// ──────────────────────────────────────────────────────────────────────────
+
+/** Achète un objet à l'étal. Le PRIX vient du serveur, jamais du client. */
+export async function buyItemAction(itemId: string): Promise<TowerActionResult> {
+  const loaded = await requireRun();
+  if ("error" in loaded) return fail(loaded.error);
+  const { run, context, user } = loaded;
+
+  if (run.state.status !== "merchant") return fail("Tu n'es pas chez le marchand.");
+
+  const offer = rollShop(
+    run.seed,
+    run.state.floor,
+    context.items,
+    run.state.items,
+  ).find((o) => o.item.id === itemId);
+  if (!offer) return fail("Cet objet n'est pas en vente ici.");
+
+  const outcome = buyItem(run.state, offer.item.id, offer.price);
+  if (!outcome.ok) {
+    return fail(
+      outcome.error === "too-expensive"
+        ? "Pas assez de fragments."
+        : "Tu possèdes déjà cet objet.",
+    );
+  }
+
+  await saveRun(run.id, run.state.floor, outcome.state);
+  return viewResult(context, outcome.state, run, user);
+}
+
+/** Achète le soin d'escouade vendu à l'étal. */
+export async function buyHealAction(): Promise<TowerActionResult> {
+  const loaded = await requireRun();
+  if ("error" in loaded) return fail(loaded.error);
+  const { run, context, user } = loaded;
+
+  const outcome = buyHeal(run.state, MERCHANT_HEAL_PRICE, MERCHANT_HEAL_PCT);
+  if (!outcome.ok) {
+    return fail(
+      outcome.error === "too-expensive"
+        ? "Pas assez de fragments."
+        : "Tu n'es pas chez le marchand.",
+    );
+  }
+
+  await saveRun(run.id, run.state.floor, outcome.state);
+  return viewResult(context, outcome.state, run, user);
+}
+
+/** Quitte l'étal et monte d'un étage. */
+export async function leaveMerchantAction(): Promise<TowerActionResult> {
+  const loaded = await requireRun();
+  if ("error" in loaded) return fail(loaded.error);
+  const { run, context, user } = loaded;
+
+  const outcome = leaveMerchant(run.state);
+  if (!outcome.ok) return fail("Tu n'es pas chez le marchand.");
+
+  await saveRun(run.id, run.state.floor, outcome.state);
+  return viewResult(context, outcome.state, run, user);
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -492,6 +614,24 @@ async function finishRun(params: {
 // ──────────────────────────────────────────────────────────────────────────
 // Chargement commun
 // ──────────────────────────────────────────────────────────────────────────
+
+/** Réponse standard d'une action : la vue de l'état qui vient d'être écrit. */
+async function viewResult(
+  context: TowerContext,
+  state: TowerRunState,
+  run: { seed: number; dateKey: string | null; attempt: number },
+  user: { id: string } | null,
+): Promise<TowerActionResult> {
+  const view = await viewOf({
+    context,
+    state,
+    seed: run.seed,
+    mode: run.dateKey ? "daily" : "random",
+    attempt: run.attempt,
+    isAuthed: Boolean(user),
+  });
+  return view ? { ok: true, view } : fail("Étage introuvable.");
+}
 
 async function requireRun(): Promise<
   | { error: string }

@@ -14,11 +14,17 @@ import {
 /**
  * Structure de la tour — module PUR et DÉTERMINISTE.
  *
- * L'idée fondatrice : **les étages sont dérivés de l'attribut ORDINAL d'arc de
- * l'univers**, déjà rempli en /admin pour JJKdle. L'ordre chronologique du
- * récit sert à la fois d'échelle de puissance et de fil narratif — on monte
- * l'histoire dans l'ordre. Rien n'est écrit à la main, et un univers qui a son
- * propre attribut d'arc obtient sa tour sans une ligne de code.
+ * Les étages sont dérivés de DEUX critères croisés : l'attribut ORDINAL d'arc
+ * de l'univers (déjà rempli en /admin pour JJKdle) et la `battleValue`. L'arc
+ * donne le fil narratif — on monte l'histoire dans l'ordre — et la valeur donne
+ * la courbe de difficulté.
+ *
+ * Les croiser n'est pas une précaution mais une NÉCESSITÉ : la chronologie
+ * d'un récit n'est pas une échelle de puissance. Se fier au seul arc plaçait
+ * Sukuna à l'étage 1, puisqu'il apparaît dès le prologue (cf. `strateOf`).
+ *
+ * Rien n'est écrit à la main, et un univers qui a son propre attribut d'arc
+ * obtient sa tour sans une ligne de code.
  *
  * Tout ce fichier est une fonction de `(seed, roster)` : le serveur peut
  * régénérer la tour à volonté sans rien stocker, et n'envoie au client que
@@ -26,9 +32,12 @@ import {
  */
 
 /**
- * Plafond de `battleValue` recrutable par strate. C'est le curseur qui fait que
- * Gojo et Sukuna n'apparaissent qu'après 15 étages de survie : les rencontrer
- * est une récompense de fin de run, pas une ouverture.
+ * Plafond de `battleValue` par strate — pour le recrutement ET pour le
+ * placement des ennemis. C'est le curseur qui fait que Gojo et Sukuna
+ * n'apparaissent qu'après 15 étages de survie.
+ *
+ * Une seule échelle pour les deux usages, volontairement : on croise un
+ * personnage à l'étage même où on pourrait le recruter.
  */
 export const RECRUIT_CAPS: readonly number[] = [35, 55, 80, Infinity];
 
@@ -69,12 +78,44 @@ export interface TowerRoster {
  * Proportionnel et non par paquets fixes : JJK compte 12 arcs (3 par strate),
  * un autre anime en comptera 8 ou 20, et la tour doit rester à 4 strates dans
  * tous les cas. Avec 12 arcs, ce calcul redonne exactement le découpage du doc.
+ *
+ * ⚠️ Ne donne QUE la date d'entrée en scène, PAS la puissance : cf.
+ * `strateOf`.
  */
 export function strateOfArc(arcIndex: number, arcCount: number): number {
   if (arcCount <= 0) return 0;
   const clamped = Math.max(0, Math.min(arcCount - 1, arcIndex));
   const strate = Math.floor((clamped * STRATE_COUNT) / arcCount);
   return Math.min(STRATE_COUNT - 1, strate);
+}
+
+/**
+ * Strate correspondant à une `battleValue`, selon la même échelle que le
+ * plafond de recrutement.
+ */
+export function strateOfValue(value: number): number {
+  for (let strate = 0; strate < RECRUIT_CAPS.length; strate += 1) {
+    if (value <= RECRUIT_CAPS[strate]) return strate;
+  }
+  return STRATE_COUNT - 1;
+}
+
+/**
+ * Strate d'un personnage : la PLUS TARDIVE entre son arc d'apparition et sa
+ * puissance.
+ *
+ * ⚠️ C'est la correction d'une erreur de conception, trouvée en jouant : la
+ * chronologie du récit N'EST PAS une échelle de puissance. En JJK, Sukuna et
+ * Gojo entrent en scène dès le prologue — se fier au seul arc les faisait
+ * apparaître à l'étage 1, face à un starter seul. Le résultat était une
+ * défaite immédiate et incompréhensible.
+ *
+ * Croiser les deux critères garde ce que chacun apporte : un personnage ne peut
+ * pas surgir avant son entrée dans l'histoire (cohérence narrative), ni avant
+ * que la difficulté ne justifie sa puissance (courbe de jeu).
+ */
+export function strateOf(arcIndex: number, arcCount: number, value: number): number {
+  return Math.max(strateOfArc(arcIndex, arcCount), strateOfValue(value));
 }
 
 /** Strate d'un étage (1-indexé). */
@@ -91,13 +132,21 @@ export function isBossFloor(floor: number): boolean {
 /**
  * Un étage propose-t-il un recrutement ?
  *
- * Tous les 3 étages et à chaque boss — soit 8 occasions sur la tour. Assez pour
- * remplir les 3 slots ET pour que la mécanique de SACRIFICE se présente
- * plusieurs fois : c'est elle, et pas l'accumulation, qui fait la décision.
- * Le sommet est exclu : y recruter n'aurait plus d'usage.
+ * Les DEUX PREMIERS étages en proposent un d'office, puis tous les 3 étages et
+ * à chaque boss — soit 10 occasions sur la tour.
+ *
+ * Les deux premiers ne sont pas une faveur, c'est une nécessité mesurée en
+ * jouant : l'élite de l'étage 3 puise dans la strate supérieure, et un starter
+ * SEUL n'a aucune chance contre elle. L'escouade doit être complète avant d'y
+ * arriver — sinon la run se termine au troisième étage quoi que fasse le joueur.
+ *
+ * Au-delà, la fréquence sert surtout à faire revenir la mécanique de SACRIFICE :
+ * c'est elle, et pas l'accumulation, qui fait la décision. Le sommet est exclu,
+ * y recruter n'aurait plus d'usage.
  */
 export function isRecruitFloor(floor: number): boolean {
   if (floor >= TOWER_FLOORS) return false;
+  if (floor <= 2) return true;
   return floor % 3 === 0 || floor % FLOORS_PER_STRATE === 0;
 }
 
@@ -126,13 +175,14 @@ export function buildTowerRoster(
     const arcIndex = arcOrder.indexOf(String(raw ?? ""));
     if (arcIndex < 0) continue; // arc non renseigné ⇒ hors tour
 
-    const strate = strateOfArc(arcIndex, arcOrder.length);
+    const value = battleValueOf(character);
+    const strate = strateOf(arcIndex, arcOrder.length, value);
     const passive = passiveOf(archetypeOf(character, config.categoryArchetypes));
 
     entries[character.id] = {
       id: character.id,
       arcIndex,
-      value: battleValueOf(character),
+      value,
       ignoresRecruitCap: passive.ignoresRecruitCap,
     };
     byStrate[strate].push(character.id);
@@ -174,7 +224,7 @@ export function planTower(seed: number, tower: TowerRoster): FloorPlan[] {
 
   for (let floor = 1; floor <= TOWER_FLOORS; floor += 1) {
     const strate = strateOfFloor(floor);
-    const kind = kindOf(floor);
+    const kind = nodeKindOf(floor);
 
     plans.push({
       floor,
@@ -191,15 +241,21 @@ export function planTower(seed: number, tower: TowerRoster): FloorPlan[] {
 }
 
 /**
- * Type d'un étage. La phase 1 est une tour LINÉAIRE : seuls `combat`, `elite`
- * et `boss` sont produits. Les nœuds à choix arrivent en phase 3 sans changer
- * la forme de `FloorPlan`, donc sans migration de l'état de run.
+ * Type d'un étage — fonction du SEUL numéro d'étage.
+ *
+ * Rythme d'une strate : combat, combat, élite, marchand, boss. Le marchand
+ * tombe juste avant le boss, ce qui donne aux fragments un moment évident où
+ * ils valent quelque chose — ils meurent avec la run, les garder ne sert à rien.
+ *
+ * Ne dépend pas de la graine, et c'est ce qui permet à `run.ts` de savoir quel
+ * écran présenter à l'étage suivant sans avoir à regénérer la tour.
  */
-function kindOf(floor: number): NodeKind {
+export function nodeKindOf(floor: number): NodeKind {
   if (isBossFloor(floor)) return "boss";
-  // Un étage sur cinq est une élite : assez pour casser le rythme, assez peu
-  // pour rester une surprise.
-  return floor % FLOORS_PER_STRATE === 3 ? "elite" : "combat";
+  const rank = floor % FLOORS_PER_STRATE;
+  if (rank === 3) return "elite";
+  if (rank === 4) return "merchant";
+  return "combat";
 }
 
 function pickEnemies(
@@ -209,6 +265,9 @@ function pickEnemies(
   kind: NodeKind,
   usedBosses: Set<string>,
 ): string[] {
+  // Un marchand n'a pas d'ennemi : c'est une respiration entre l'élite et le boss.
+  if (kind === "merchant") return [];
+
   if (kind === "boss") {
     const boss = pickBoss(tower, strate, usedBosses);
     return boss ? [boss] : [];

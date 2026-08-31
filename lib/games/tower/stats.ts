@@ -70,11 +70,17 @@ export const FLUX_RANGE = 1.8;
  * C'est ce qui fait qu'un boss est un boss : sans lui, un combat à trois contre
  * un se résout en quelques secondes quelle que soit la `battleValue` de la
  * cible, parce que le nombre l'emporte toujours sur la qualité.
+ *
+ * Mesuré, pas deviné : à ×5, le boss de la strate I était imperdable-ment
+ * perdu même en jouant bien. À ×3, une escouade complète et fraîche l'emporte
+ * en gardant 44 % de ses PV, 59 % si le joueur se sert de sa garde — et comme
+ * les PV ne se régénèrent pas d'un étage à l'autre, la marge réelle est plus
+ * mince que ces chiffres.
  */
 export const ENEMY_HP_MULT: Readonly<Record<string, number>> = {
   combat: 1,
   elite: 2,
-  boss: 5,
+  boss: 3,
 };
 
 /**

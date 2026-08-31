@@ -1,7 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
+import { InventoryStrip } from "@/components/tower/ItemCard";
+import { MerchantScreen } from "@/components/tower/MerchantScreen";
 import { RecruitPicker } from "@/components/tower/RecruitPicker";
+import { RewardPicker } from "@/components/tower/RewardPicker";
 import { RunRecap } from "@/components/tower/RunRecap";
 import { TowerCard } from "@/components/tower/TowerCard";
 import { TowerCombat } from "@/components/tower/TowerCombat";
@@ -15,11 +18,15 @@ import type { TowerActionResult, TowerView } from "@/lib/games/tower/view";
 import type { ExpResult } from "@/lib/leaderboard/types";
 import {
   abandonRunAction,
+  buyHealAction,
+  buyItemAction,
   chooseStarterAction,
+  leaveMerchantAction,
   recruitAction,
   resolveCombatAction,
   skipRecruitAction,
   startTowerAction,
+  takeRewardAction,
 } from "./actions";
 
 /**
@@ -109,13 +116,20 @@ export function TowerGame() {
         </div>
         <div className="flex shrink-0 items-center gap-3">
           {view.status !== "won" && view.status !== "lost" && (
-            <p className="font-display text-sm tabular-nums text-white/50">
-              {view.score} pts
-            </p>
+            <>
+              <p className="font-display text-sm tabular-nums text-amber-300">
+                ◈ {view.fragments}
+              </p>
+              <p className="font-display text-sm tabular-nums text-white/50">
+                {view.score} pts
+              </p>
+            </>
           )}
           <TowerRulesButton />
         </div>
       </header>
+
+      {view.status !== "starter" && <InventoryStrip items={view.inventory} />}
 
       {error && (
         <p className="rounded-lg border border-cursed/40 bg-cursed/10 px-3 py-2 text-sm text-cursed-light">
@@ -143,6 +157,24 @@ export function TowerGame() {
               view={view}
               busy={pending}
               onResolved={onResolved}
+            />
+          )}
+
+          {view.status === "reward" && (
+            <RewardPicker
+              view={view}
+              busy={pending}
+              onPick={(index) => run(() => takeRewardAction(index))}
+            />
+          )}
+
+          {view.status === "merchant" && (
+            <MerchantScreen
+              view={view}
+              busy={pending}
+              onBuyItem={(id) => run(() => buyItemAction(id))}
+              onBuyHeal={() => run(() => buyHealAction())}
+              onLeave={() => run(() => leaveMerchantAction())}
             />
           )}
 

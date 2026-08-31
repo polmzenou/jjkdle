@@ -12,6 +12,8 @@ import {
   planTower,
   strateOfArc,
   strateOfFloor,
+  strateOf,
+  strateOfValue,
 } from "./floors";
 import { STRATE_COUNT, TOWER_FLOORS } from "./types";
 
@@ -97,6 +99,45 @@ describe("découpage en strates", () => {
   });
 });
 
+describe("croisement arc x puissance", () => {
+  // Régression : trouvée en jouant, Sukuna sortait à l'étage 1 parce qu'il
+  // entre en scène dès le prologue. La chronologie d'un récit n'est PAS une
+  // échelle de puissance.
+  it("retient la strate LA PLUS TARDIVE entre l'arc et la puissance", () => {
+    // Arc du prologue (strate 0) mais valeur de fin de série.
+    expect(strateOf(1, 12, 98)).toBe(3);
+    // Arc tardif mais personnage faible : c'est l'arc qui le retient.
+    expect(strateOf(10, 12, 5)).toBe(3);
+    // Les deux d'accord : rien ne bouge.
+    expect(strateOf(1, 12, 20)).toBe(0);
+  });
+
+  it("classe la puissance sur la même échelle que le plafond de recrutement", () => {
+    expect(strateOfValue(20)).toBe(0);
+    expect(strateOfValue(50)).toBe(1);
+    expect(strateOfValue(75)).toBe(2);
+    expect(strateOfValue(98)).toBe(3);
+  });
+
+  it("ne laisse AUCUN personnage dépasser le plafond de sa strate", () => {
+    const roster = [
+      // Prologue, mais surpuissant : le piège exact du bug d'origine.
+      character("sukuna", JJK_ARCS[1], 98),
+      character("gojo", JJK_ARCS[1], 96),
+      character("momo", JJK_ARCS[1], 2),
+    ];
+    const tower = buildTowerRoster(roster, JJK_ARCS, JJK_TOWER_CONFIG);
+
+    tower.byStrate.forEach((pool, strate) => {
+      for (const id of pool) {
+        expect(tower.entries[id].value).toBeLessThanOrEqual(RECRUIT_CAPS[strate]);
+      }
+    });
+    expect(tower.byStrate[0]).toEqual(["momo"]);
+    expect(tower.byStrate[3]).toContain("sukuna");
+  });
+});
+
 describe("vivier", () => {
   it("EXCLUT les personnages sans arc renseigné (sinon Sukuna sort à l'étage 2)", () => {
     const roster = [
@@ -155,9 +196,25 @@ describe("génération de la tour", () => {
     const plans = planTower(7, tower);
 
     for (const plan of plans) {
+      // Le marchand est une respiration : pas d'ennemi, c'est voulu.
+      if (plan.kind === "merchant") {
+        expect(plan.enemyIds).toEqual([]);
+        continue;
+      }
       expect(plan.enemyIds.length).toBeGreaterThan(0);
       expect(new Set(plan.enemyIds).size).toBe(plan.enemyIds.length);
     }
+  });
+
+  it("donne à chaque strate son rythme : combat, combat, élite, marchand, boss", () => {
+    const plans = planTower(7, tower);
+    expect(plans.slice(0, 5).map((p) => p.kind)).toEqual([
+      "combat",
+      "combat",
+      "elite",
+      "merchant",
+      "boss",
+    ]);
   });
 
   it("le boss d'une strate est le plus fort de son vivier, et ne resservira pas", () => {

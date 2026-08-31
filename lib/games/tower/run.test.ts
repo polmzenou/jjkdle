@@ -5,15 +5,20 @@ import { JJK_TOWER_CONFIG } from "./config";
 import { buildTowerRoster } from "./floors";
 import {
   buildCombatSetup,
+  buyHeal,
+  buyItem,
   chooseStarter,
+  leaveMerchant,
   recruit,
   recruitChoices,
   resolveFloor,
   runScore,
   skipRecruit,
   startRun,
+  takeReward,
   type TowerRunState,
 } from "./run";
+import type { TowerItem } from "./items";
 import { SQUAD_SIZE, TOWER_FLOORS, type CombatResult, type FloorPlan } from "./types";
 
 /**
@@ -152,20 +157,34 @@ describe("démarrage", () => {
 });
 
 describe("progression", () => {
-  it("monte d'un étage après une victoire sur un étage sans recrutement", () => {
+  it("ouvre un choix de récompense après toute victoire", () => {
     const state = { ...started(), floor: 4 };
     const next = resolveFloor(state, plan({ recruitIds: [] }), won(state));
 
-    expect(next.status).toBe("combat");
-    expect(next.floor).toBe(5);
+    expect(next.status).toBe("reward");
+    expect(next.floor).toBe(4);
   });
 
-  it("s'arrête sur un nœud de recrutement au lieu de monter", () => {
-    const state = { ...started(), floor: 3 };
-    const next = resolveFloor(state, plan(), won(state));
+  it("monte d'un étage une fois la récompense prise", () => {
+    const state = { ...started(), floor: 4, status: "reward" as const };
+    const out = takeReward(state, plan({ recruitIds: [] }), {
+      kind: "fragments",
+      amount: 10,
+    });
 
-    expect(next.status).toBe("recruit");
-    expect(next.floor).toBe(3);
+    expect(out.ok).toBe(true);
+    expect(out.ok && out.state.floor).toBe(5);
+    expect(out.ok && out.state.status).toBe("combat");
+  });
+
+  it("enchaîne sur le recrutement APRÈS la récompense, jamais avant", () => {
+    const state = { ...started(), floor: 3 };
+    const afterCombat = resolveFloor(state, plan(), won(state));
+    expect(afterCombat.status).toBe("reward");
+
+    const out = takeReward(afterCombat, plan(), { kind: "fragments", amount: 10 });
+    expect(out.ok && out.state.status).toBe("recruit");
+    expect(out.ok && out.state.floor).toBe(3);
   });
 
   it("une défaite met fin à la run", () => {
@@ -227,8 +246,10 @@ describe("recrutement", () => {
 
     expect(out.ok).toBe(true);
     expect(out.ok && out.state.squad).toHaveLength(2);
-    expect(out.ok && out.state.status).toBe("combat");
     expect(out.ok && out.state.floor).toBe(4);
+    // L'étage 4 est un marchand (rythme d'une strate) : on y arrive
+    // directement, sans combat.
+    expect(out.ok && out.state.status).toBe("merchant");
   });
 
   it("le nouveau venu arrive à PV pleins", () => {
@@ -396,5 +417,209 @@ describe("score", () => {
     };
 
     expect(runScore(healthy)).toBeGreaterThan(runScore(hurt));
+  });
+});
+
+
+// ---------------------------------------------------------------------------
+// Objets, recompense et marchand (phase 2)
+// ---------------------------------------------------------------------------
+
+function item(
+  id: string,
+  overrides: Partial<TowerItem> = {},
+): TowerItem {
+  return {
+    id,
+    slug: id,
+    name: id,
+    description: "",
+    rarity: "COMMON",
+    effects: [{ kind: "FRAPPE_PCT", value: 10 }],
+    enabled: true,
+    position: 0,
+    ...overrides,
+  };
+}
+
+describe("récompense", () => {
+  const rewarding = (): TowerRunState => ({
+    ...started(),
+    floor: 4,
+    status: "reward",
+  });
+
+  it("ajoute l'objet choisi à l'inventaire", () => {
+    const out = takeReward(rewarding(), plan({ recruitIds: [] }), {
+      kind: "item",
+      item: item("relique"),
+    });
+
+    expect(out.ok && out.state.items).toEqual(["relique"]);
+  });
+
+  it("refuse un objet déjà possédé", () => {
+    const state = { ...rewarding(), items: ["relique"] };
+    const out = takeReward(state, plan({ recruitIds: [] }), {
+      kind: "item",
+      item: item("relique"),
+    });
+
+    expect(out.ok).toBe(false);
+    expect(out.ok === false && out.error).toBe("already-owned");
+  });
+
+  it("crédite les fragments", () => {
+    const out = takeReward(rewarding(), plan({ recruitIds: [] }), {
+      kind: "fragments",
+      amount: 30,
+    });
+    expect(out.ok && out.state.fragments).toBe(30);
+  });
+
+  it("soigne l'escouade sans dépasser les PV max", () => {
+    const hurt: TowerRunState = {
+      ...rewarding(),
+      squad: [{ characterId: "start", hp: 10, maxHp: 100 }],
+    };
+
+    const out = takeReward(hurt, plan({ recruitIds: [] }), { kind: "heal", pct: 35 });
+    expect(out.ok && out.state.squad[0].hp).toBe(45);
+
+    const full: TowerRunState = {
+      ...rewarding(),
+      squad: [{ characterId: "start", hp: 95, maxHp: 100 }],
+    };
+    const capped = takeReward(full, plan({ recruitIds: [] }), { kind: "heal", pct: 35 });
+    expect(capped.ok && capped.state.squad[0].hp).toBe(100);
+  });
+
+  it("refuse une récompense hors de l'état prévu", () => {
+    const out = takeReward(started(), plan(), { kind: "fragments", amount: 10 });
+    expect(out.ok === false && out.error).toBe("wrong-status");
+  });
+});
+
+describe("marchand", () => {
+  const shopping = (fragments: number): TowerRunState => ({
+    ...started(),
+    floor: 4,
+    status: "merchant",
+    fragments,
+  });
+
+  it("achète un objet et débite les fragments", () => {
+    const out = buyItem(shopping(100), "relique", 40);
+
+    expect(out.ok).toBe(true);
+    expect(out.ok && out.state.fragments).toBe(60);
+    expect(out.ok && out.state.items).toEqual(["relique"]);
+    // On reste à l'étal : rien n'oblige à n'acheter qu'une chose.
+    expect(out.ok && out.state.status).toBe("merchant");
+  });
+
+  it("refuse un achat trop cher, sans rien débiter", () => {
+    const out = buyItem(shopping(20), "relique", 40);
+    expect(out.ok === false && out.error).toBe("too-expensive");
+  });
+
+  it("refuse d'acheter deux fois le même objet", () => {
+    const state = { ...shopping(200), items: ["relique"] };
+    const out = buyItem(state, "relique", 40);
+    expect(out.ok === false && out.error).toBe("already-owned");
+  });
+
+  it("vend un soin d'escouade", () => {
+    const state: TowerRunState = {
+      ...shopping(100),
+      squad: [{ characterId: "start", hp: 10, maxHp: 100 }],
+    };
+    const out = buyHeal(state, 50, 40);
+
+    expect(out.ok && out.state.fragments).toBe(50);
+    expect(out.ok && out.state.squad[0].hp).toBe(50);
+  });
+
+  it("quitter l'étal fait monter d'un étage", () => {
+    const out = leaveMerchant(shopping(0));
+    expect(out.ok && out.state.floor).toBe(5);
+    expect(out.ok && out.state.status).toBe("combat");
+  });
+});
+
+describe("effets d'objets en combat", () => {
+  const catalog: Record<string, TowerItem> = {
+    frappe: item("frappe", { effects: [{ kind: "FRAPPE_PCT", value: 50 }] }),
+    horde: item("horde", { effects: [{ kind: "ENNEMI_SUPP", value: 1 }] }),
+    rika: item("rika", { effects: [{ kind: "REVIVE_UNE_FOIS", value: 30 }] }),
+    bourse: item("bourse", { effects: [{ kind: "FRAGMENTS_PCT", value: 100 }] }),
+  };
+
+  it("transmet les modificateurs de l'inventaire au moteur", () => {
+    const bare = buildCombatSetup(started(), plan(), ROSTER, config, catalog);
+    const armed = buildCombatSetup(
+      { ...started(), items: ["frappe"] },
+      plan(),
+      ROSTER,
+      config,
+      catalog,
+    );
+
+    expect(bare.modifiers?.FRAPPE_PCT).toBe(0);
+    expect(armed.modifiers?.FRAPPE_PCT).toBe(50);
+  });
+
+  it("ENNEMI_SUPP ajoute un adversaire sans toucher à la graine de l'étage", () => {
+    const setup = buildCombatSetup(
+      { ...started(), items: ["horde"] },
+      plan({ enemyIds: ["a"] }),
+      ROSTER,
+      config,
+      catalog,
+    );
+    expect(setup.enemies).toHaveLength(2);
+  });
+
+  it("le Cœur de Rika relève le premier tombé, une seule fois", () => {
+    const squad = [
+      { characterId: "start", hp: 50, maxHp: 200 },
+      { characterId: "a", hp: 50, maxHp: 200 },
+    ];
+    const state: TowerRunState = { ...started(), floor: 4, squad, items: ["rika"] };
+
+    const oneDown: CombatResult = {
+      ...won(state),
+      squad: [
+        { uid: "s0", id: "start", hp: 0, maxHp: 200, alive: false },
+        { uid: "s1", id: "a", hp: 40, maxHp: 200, alive: true },
+      ],
+    };
+
+    const next = resolveFloor(state, plan({ recruitIds: [] }), oneDown, catalog);
+    expect(next.squad).toHaveLength(2);
+    expect(next.revived).toBe(true);
+    expect(next.squad[0].hp).toBe(60); // 30 % de 200
+
+    // La seconde fois, plus de sursis.
+    const again = resolveFloor(
+      { ...next, floor: 4 },
+      plan({ recruitIds: [] }),
+      oneDown,
+      catalog,
+    );
+    expect(again.squad).toHaveLength(1);
+  });
+
+  it("FRAGMENTS_PCT augmente le butin de l'étage", () => {
+    const state = { ...started(), floor: 4 };
+    const bare = resolveFloor(state, plan({ recruitIds: [] }), won(state, 4), catalog);
+    const rich = resolveFloor(
+      { ...state, items: ["bourse"] },
+      plan({ recruitIds: [] }),
+      won(state, 4),
+      catalog,
+    );
+
+    expect(rich.fragments).toBeGreaterThan(bare.fragments);
   });
 });

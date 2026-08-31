@@ -1,7 +1,14 @@
 import type { Character } from "@/data/roster/characters";
 import type { CombatSetup } from "./combat";
-import { NO_MODIFIERS } from "./effects";
-import { canRecruit, isRecruitFloor, type TowerRoster } from "./floors";
+
+import {
+  canRecruit,
+  isRecruitFloor,
+  nodeKindOf,
+  type TowerRoster,
+} from "./floors";
+import { modifiersOf, resolveItems, type TowerItem } from "./items";
+import { HEAL_REWARD_PCT, type Reward } from "./rewards";
 import { deriveStats, toEnemySpec, toFighterSpec } from "./stats";
 import type { TowerConfig } from "./config";
 import {
@@ -35,7 +42,14 @@ export interface SquadMember {
  * Où en est la run. `starter` et `recruit` sont des états d'ATTENTE : la run ne
  * peut pas avancer tant que le joueur n'a pas choisi.
  */
-export type RunStatus = "starter" | "combat" | "recruit" | "won" | "lost";
+export type RunStatus =
+  | "starter"
+  | "combat"
+  | "reward"
+  | "recruit"
+  | "merchant"
+  | "won"
+  | "lost";
 
 export interface TowerRunState {
   seed: number;
@@ -51,6 +65,10 @@ export interface TowerRunState {
    * cédé ne revient pas au vivier : le sacrifice doit coûter.
    */
   seen: string[];
+  /** Objets ramassés, dans l'ordre. Ids de `Item`. */
+  items: string[];
+  /** L'objet de résurrection a-t-il déjà servi ? Une fois par run. */
+  revived: boolean;
 }
 
 /** Une action refusée, avec sa raison — jamais une exception (cf. `run.test.ts`). */
@@ -61,7 +79,10 @@ export type RunError =
   | "already-in-squad"
   | "recruit-capped"
   | "squad-full"
-  | "bad-slot";
+  | "bad-slot"
+  | "unknown-item"
+  | "already-owned"
+  | "too-expensive";
 
 export type RunOutcome =
   | { ok: true; state: TowerRunState }
@@ -81,6 +102,8 @@ export function startRun(seed: number): TowerRunState {
     enemiesKilled: 0,
     bossesKilled: 0,
     seen: [],
+    items: [],
+    revived: false,
   };
 }
 
@@ -124,7 +147,9 @@ export function buildCombatSetup(
   plan: FloorPlan,
   roster: Record<string, Character>,
   config: TowerConfig,
+  catalog: Record<string, TowerItem> = {},
 ): CombatSetup {
+  const modifiers = modifiersOf(resolveItems(state.items, catalog));
   const squad = state.squad
     .map((m) => roster[m.characterId])
     .filter((c): c is Character => Boolean(c))
@@ -132,7 +157,17 @@ export function buildCombatSetup(
 
   // Les ennemis sont gonflés selon le type d'étage : c'est là qu'un boss
   // devient un boss (cf. `ENEMY_HP_MULT`).
-  const enemies = plan.enemyIds
+  const ids = [...plan.enemyIds];
+
+  // Objet « Doigt de Sukuna » : la puissance attire ce qui rôde. On duplique le
+  // dernier ennemi plutôt que d'en tirer un nouveau — la composition d'un étage
+  // ne dépend QUE de la graine, elle doit rester régénérable sans l'inventaire.
+  const extra = Math.max(0, Math.min(2, modifiers.ENNEMI_SUPP));
+  for (let i = 0; i < extra && ids.length > 0; i += 1) {
+    ids.push(ids[ids.length - 1]);
+  }
+
+  const enemies = ids
     .map((id) => roster[id])
     .filter((c): c is Character => Boolean(c))
     .map((c) => toEnemySpec(c, plan.kind, config, state.squad.length));
@@ -141,9 +176,7 @@ export function buildCombatSetup(
     squad,
     enemies,
     squadHp: state.squad.map((m) => m.hp),
-    // Phase 1 : aucun objet en jeu. La signature les accepte déjà pour que
-    // brancher le roster Item en phase 2 ne change pas cette fonction.
-    modifiers: NO_MODIFIERS,
+    modifiers,
   };
 }
 
@@ -162,10 +195,14 @@ export function resolveFloor(
   state: TowerRunState,
   plan: FloorPlan,
   result: CombatResult,
+  catalog: Record<string, TowerItem> = {},
 ): TowerRunState {
   const floor = state.floor;
+  const modifiers = modifiersOf(resolveItems(state.items, catalog));
+
   const survivors: SquadMember[] = [];
   const fallen: string[] = [];
+  let revived = state.revived;
 
   state.squad.forEach((member, index) => {
     const outcome = result.squad[index];
@@ -173,17 +210,38 @@ export function resolveFloor(
       survivors.push(member);
       return;
     }
-    if (outcome.alive) survivors.push({ ...member, hp: outcome.hp });
-    else fallen.push(member.characterId);
+    if (outcome.alive) {
+      survivors.push({ ...member, hp: outcome.hp });
+      return;
+    }
+
+    // Objet « Cœur de Rika » : le PREMIER des tiens à tomber se relève, une
+    // seule fois de toute la run. Uniquement après un combat GAGNÉ —
+    // ressusciter face à des ennemis encore debout ne relancerait rien.
+    if (result.victory && !revived && modifiers.REVIVE_UNE_FOIS > 0) {
+      revived = true;
+      survivors.push({
+        ...member,
+        hp: Math.max(
+          1,
+          Math.round((member.maxHp * modifiers.REVIVE_UNE_FOIS) / 100),
+        ),
+      });
+      return;
+    }
+
+    fallen.push(member.characterId);
   });
 
   const next: TowerRunState = {
     ...state,
     squad: survivors,
+    revived,
     enemiesKilled: state.enemiesKilled + result.enemiesKilled,
     bossesKilled:
       state.bossesKilled + (plan.kind === "boss" && result.victory ? 1 : 0),
-    fragments: state.fragments + fragmentsFor(plan, result),
+    fragments:
+      state.fragments + fragmentsFor(plan, result, modifiers.FRAGMENTS_PCT),
     seen: mergeSeen(state.seen, fallen),
   };
 
@@ -193,20 +251,116 @@ export function resolveFloor(
   if (!result.victory) return { ...next, status: "lost" };
   if (floor >= TOWER_FLOORS) return { ...next, status: "won" };
 
-  if (isRecruitFloor(floor) && plan.recruitIds.length > 0) {
-    return { ...next, status: "recruit" };
-  }
-
-  return { ...next, floor: floor + 1, status: "combat" };
+  // Toute victoire ouvre un choix de récompense. Le recrutement vient APRÈS :
+  // le joueur doit savoir ce qu'il a gagné avant de décider qui sacrifier.
+  return { ...next, status: "reward" };
 }
 
-/** Fragments gagnés sur un étage. Monnaie INTERNE : elle meurt avec la run. */
-function fragmentsFor(plan: FloorPlan, result: CombatResult): number {
+/**
+ * Fragments gagnés sur un étage. Monnaie INTERNE : elle meurt avec la run, ce
+ * qui interdit d'en faire une ferme à monnaie pour la boutique du site.
+ */
+function fragmentsFor(
+  plan: FloorPlan,
+  result: CombatResult,
+  bonusPct: number,
+): number {
   if (!result.victory) return 0;
-  const base = result.enemiesKilled * 5;
-  if (plan.kind === "boss") return base + 40;
-  if (plan.kind === "elite") return base + 15;
-  return base;
+  const base =
+    result.enemiesKilled * 5 +
+    (plan.kind === "boss" ? 40 : plan.kind === "elite" ? 15 : 0);
+  return Math.round(base * (1 + bonusPct / 100));
+}
+
+// ---------------------------------------------------------------------------
+// Recompense
+// ---------------------------------------------------------------------------
+
+/**
+ * Applique la récompense choisie après un étage gagné.
+ *
+ * Trois natures (objet / fragments / soin) plutôt que trois objets : le choix
+ * intéressant est « de quoi ai-je le plus besoin », pas « lequel de ces trois ».
+ * Le soin est un vrai concurrent, puisque les PV ne se régénèrent jamais seuls.
+ */
+export function takeReward(
+  state: TowerRunState,
+  plan: FloorPlan,
+  reward: Reward,
+): RunOutcome {
+  if (state.status !== "reward") return fail("wrong-status");
+
+  let next: TowerRunState;
+
+  if (reward.kind === "item") {
+    if (state.items.includes(reward.item.id)) return fail("already-owned");
+    next = { ...state, items: [...state.items, reward.item.id] };
+  } else if (reward.kind === "fragments") {
+    next = { ...state, fragments: state.fragments + reward.amount };
+  } else {
+    next = { ...state, squad: healSquad(state.squad, reward.pct) };
+  }
+
+  return ok(afterFloor(next, plan));
+}
+
+/** Soigne toute l'escouade d'un pourcentage de ses PV max. */
+function healSquad(squad: SquadMember[], pct: number): SquadMember[] {
+  return squad.map((m) => ({
+    ...m,
+    hp: Math.min(m.maxHp, m.hp + Math.round((m.maxHp * pct) / 100)),
+  }));
+}
+
+/** Étape suivant la récompense : recrutement s'il y en a un, sinon on monte. */
+function afterFloor(state: TowerRunState, plan: FloorPlan): TowerRunState {
+  if (isRecruitFloor(state.floor) && recruitChoices(state, plan).length > 0) {
+    return { ...state, status: "recruit" };
+  }
+  return advance(state);
+}
+
+// ---------------------------------------------------------------------------
+// Marchand
+// ---------------------------------------------------------------------------
+
+/** Achète un objet à l'étal. */
+export function buyItem(
+  state: TowerRunState,
+  itemId: string,
+  price: number,
+): RunOutcome {
+  if (state.status !== "merchant") return fail("wrong-status");
+  if (state.items.includes(itemId)) return fail("already-owned");
+  if (state.fragments < price) return fail("too-expensive");
+
+  return ok({
+    ...state,
+    fragments: state.fragments - price,
+    items: [...state.items, itemId],
+  });
+}
+
+/** Achète un soin d'escouade au marchand. */
+export function buyHeal(
+  state: TowerRunState,
+  price: number,
+  pct: number,
+): RunOutcome {
+  if (state.status !== "merchant") return fail("wrong-status");
+  if (state.fragments < price) return fail("too-expensive");
+
+  return ok({
+    ...state,
+    fragments: state.fragments - price,
+    squad: healSquad(state.squad, pct),
+  });
+}
+
+/** Quitte l'étal et monte d'un étage. */
+export function leaveMerchant(state: TowerRunState): RunOutcome {
+  if (state.status !== "merchant") return fail("wrong-status");
+  return ok(advance(state));
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -299,10 +453,21 @@ export function skipRecruit(state: TowerRunState): RunOutcome {
   return ok(advance(state));
 }
 
-/** Monte d'un étage après un nœud de recrutement. */
+/**
+ * Monte d'un étage.
+ *
+ * Le type du prochain étage se déduit de son seul NUMÉRO (`nodeKindOf`) : pas
+ * besoin de régénérer la tour pour savoir s'il faut présenter un combat ou un
+ * marchand, et l'état de run reste ignorant de la graine.
+ */
 function advance(state: TowerRunState): TowerRunState {
   if (state.floor >= TOWER_FLOORS) return { ...state, status: "won" };
-  return { ...state, floor: state.floor + 1, status: "combat" };
+  const floor = state.floor + 1;
+  return {
+    ...state,
+    floor,
+    status: nodeKindOf(floor) === "merchant" ? "merchant" : "combat",
+  };
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -326,6 +491,9 @@ export function runScore(state: TowerRunState): number {
     Math.round(hp)
   );
 }
+
+/** Soin de la récompense « repos », ré-exporté pour l'interface. */
+export { HEAL_REWARD_PCT };
 
 /** Étage réellement atteint (le sommet compte pour TOWER_FLOORS). */
 export function reachedFloor(state: TowerRunState): number {
