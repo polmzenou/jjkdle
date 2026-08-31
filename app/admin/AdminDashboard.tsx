@@ -26,6 +26,7 @@ import {
   clearImageCacheAction,
 } from "./actions";
 import { logoutAction } from "@/lib/auth/actions";
+import { TAB_GROUPS, TAB_LABELS, type Tab } from "@/lib/admin/tabs";
 import { LeaderboardAdmin } from "./LeaderboardAdmin";
 import { UserAdmin } from "./UserAdmin";
 import { DraftRosterAdmin } from "./DraftRosterAdmin";
@@ -146,43 +147,6 @@ interface AdminDashboardProps {
   casino: CasinoAdminData;
 }
 
-type Tab =
-  | "overview"
-  | "roster"
-  | "content"
-  | "jjkdle"
-  | "attributes"
-  | "categories"
-  | "pyramid"
-  | "draft"
-  | "leaderboard"
-  | "users"
-  | "cards"
-  | "casino"
-  | "items"
-  | "config";
-
-/**
- * Libellés des onglets. Deux d'entre eux nomment un JEU : leur libellé dépend de
- * l'univers administré (« Analytics JJKdle » / « Analytics CSMdle ») — d'où le
- * `useTabLabels()` plus bas plutôt qu'une constante figée.
- */
-const TAB_LABELS: Record<Tab, string> = {
-  overview: "Vue d'ensemble",
-  roster: "Roster",
-  content: "Santé contenu",
-  jjkdle: "Analytics JJKdle",
-  attributes: "Attributs",
-  categories: "Catégories",
-  pyramid: "Pyramid",
-  draft: "Jujutsu Draft",
-  items: "Objets",
-  leaderboard: "Leaderboard",
-  users: "Utilisateurs",
-  cards: "Booster Pack",
-  casino: "Casino",
-  config: "Config",
-};
 
 /** `TAB_LABELS` avec les noms de jeux de l'univers administré. */
 function useTabLabels(): Record<Tab, string> {
@@ -199,32 +163,6 @@ function useTabLabels(): Record<Tab, string> {
     [dailyTitle, draftTitle, rankingTitle],
   );
 }
-/**
- * Onglets regroupés par NATURE, et non plus alignés sur une seule rangée : à 11
- * onglets la barre débordait de l'écran à droite. Deux familles, qui ne se
- * consultent pas dans les mêmes moments — on écrit du contenu de jeu, ou on
- * regarde tourner la plateforme.
- */
-const TAB_GROUPS: { label: string; tabs: Tab[] }[] = [
-  {
-    label: "Contenu des jeux",
-    tabs: ["roster", "categories", "pyramid", "draft", "attributes"],
-  },
-  {
-    label: "Pilotage",
-    tabs: [
-      "overview",
-      "content",
-      "jjkdle",
-      "leaderboard",
-      "users",
-      "cards",
-      "casino",
-      "config",
-    ],
-  },
-];
-
 function slugify(s: string): string {
   return s
     .toLowerCase()
