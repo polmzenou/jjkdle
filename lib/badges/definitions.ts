@@ -116,6 +116,41 @@ const JJK_BADGES: Omit<BadgeRule, "universe">[] = [
     color: "#38bdf8",
     check: (ctx) => ctx.gamesPlayed >= 4,
   },
+  // ── The Culling Tower ──
+  {
+    key: "FIRST_PLAY_TOWER",
+    name: "Premier étage",
+    description: "Terminer une ascension de The Culling Tower.",
+    iconKey: "🗼",
+    color: "#7c3aed",
+    check: (ctx) => ctx.playedTower,
+  },
+  {
+    key: "TOWER_STRATE_III",
+    name: "Survivant de Shibuya",
+    description: "Atteindre l'étage 15 de la tour.",
+    iconKey: "🌃",
+    color: "#a78bfa",
+    check: (ctx) => ctx.towerBestFloor >= 15,
+  },
+  {
+    key: "TOWER_CLEAR",
+    name: "Sommet",
+    description: "Franchir les 20 étages de la tour.",
+    iconKey: "👑",
+    color: "#f59e0b",
+    check: (ctx) => ctx.towerCleared,
+  },
+  {
+    // Avec des essais illimités, tout le monde finit par boucler : c'est le
+    // PREMIER essai qui devient l'exploit.
+    key: "TOWER_FIRST_TRY",
+    name: "Ascension parfaite",
+    description: "Franchir la tour du jour du premier essai.",
+    iconKey: "⚡",
+    color: "#f43f5e",
+    check: (ctx) => ctx.towerBestAttempt === 1,
+  },
   // ── Badges manuels (admin uniquement) ──
   {
     key: "STAFF_PICK",

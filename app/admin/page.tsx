@@ -3,6 +3,7 @@ import { getCurrentUser, isSuperAdmin } from "@/lib/auth/session";
 import { readRoster } from "@/lib/admin/roster-store";
 import { getCategories } from "@/lib/content/queries";
 import { listDraftCharacters } from "@/lib/games/draft/queries";
+import { listItems } from "@/lib/admin/item-store";
 import { listAllScores, type AdminScore } from "@/lib/leaderboard/store";
 import { listAllDraftScores } from "@/lib/games/draft/store";
 import { listAllJjkdleScores } from "@/lib/games/jjkdle/leaderboard";
@@ -28,6 +29,7 @@ import { listRankingConditions } from "@/lib/admin/ranking-store";
 import { getCollection } from "@/lib/cards/store";
 import type { Character } from "@/data/roster/characters";
 import type { DraftCharacter } from "@/lib/games/draft/types";
+import type { TowerItem } from "@/lib/games/tower/items";
 import { getCasinoAdminData } from "@/lib/admin/casino";
 import { AdminDashboard } from "./AdminDashboard";
 import { accessDeniedFor } from "./AccessDenied";
@@ -61,6 +63,14 @@ export default async function AdminPage({
     roster = [];
   }
   let draftRoster: DraftCharacter[] = [];
+  // Meme tolerance que le roster draft : une table vide ou absente ne doit pas
+  // empecher l'admin de s'ouvrir.
+  let towerItems: TowerItem[] = [];
+  try {
+    towerItems = await listItems();
+  } catch {
+    towerItems = [];
+  }
   try {
     draftRoster = await listDraftCharacters();
   } catch {
@@ -145,6 +155,7 @@ export default async function AdminPage({
       cardCollection={cardCollection}
       casino={casino}
       draftRoster={draftRoster}
+      towerItems={towerItems}
       categories={categories}
       scores={[
         ...scores,

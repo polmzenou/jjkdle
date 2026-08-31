@@ -11,6 +11,7 @@
  */
 
 import type { UniverseGameCopy } from "@/lib/games/types";
+import type { TowerConfigOverride } from "@/lib/games/tower/config";
 
 /** Palette de thème d'un univers. Sert à générer des variables CSS (cf. étape 4). */
 export interface UniverseTheme {
@@ -179,6 +180,17 @@ export interface UniverseConfig {
   decorArtwork?: "jjk-cursed-objects";
   /** Attribut comparé par Higher/Lower. Absent = `cursedEnergy` (JJK). */
   higherLower?: UniverseHigherLower;
+  /**
+   * Réglages de « The Culling Tower » : quels attributs portent les arcs du
+   * récit, l'ultime et l'énergie, et à quel archétype de capacité correspond
+   * chaque catégorie du builder.
+   *
+   * Absent = la config JJK, qui fait office de défaut. Un champ absent au sein
+   * de l'objet garde lui aussi la valeur JJK (même convention que `gameCopy`).
+   * C'est le SEUL endroit où un univers déclare quoi que ce soit sur la Tour :
+   * `lib/games/tower/` ne doit contenir aucun `if (universe === …)`.
+   */
+  tower?: TowerConfigOverride;
   /** Synchro d'images automatique (bouton « OUAIS »). Absent = désactivée. */
   booru?: UniverseBooru;
 }

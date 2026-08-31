@@ -41,8 +41,10 @@ import { AttributesAdmin } from "./AttributesAdmin";
 import { CategoriesAdmin } from "./CategoriesAdmin";
 import { PyramidAdmin } from "./PyramidAdmin";
 import { CardsAdmin } from "./CardsAdmin";
+import { ItemsAdmin } from "./ItemsAdmin";
 import { CasinoAdmin } from "./CasinoAdmin";
 import type { CollectionCard } from "@/lib/cards/types";
+import type { TowerItem } from "@/lib/games/tower/items";
 import type { AdminAttribute } from "@/lib/admin/attribute-store";
 import type { AdminCategory } from "@/lib/admin/category-store";
 import type { AdminRankingCondition } from "@/lib/admin/ranking-store";
@@ -104,6 +106,8 @@ interface FormState {
 interface AdminDashboardProps {
   roster: Character[];
   draftRoster: DraftCharacter[];
+  /** Roster des objets maudits de l'univers administre (onglet Objets). */
+  towerItems: TowerItem[];
   categories: CategoryConfig[];
   scores: AdminScore[];
   users: AdminUser[];
@@ -155,6 +159,7 @@ type Tab =
   | "users"
   | "cards"
   | "casino"
+  | "items"
   | "config";
 
 /**
@@ -171,6 +176,7 @@ const TAB_LABELS: Record<Tab, string> = {
   categories: "Catégories",
   pyramid: "Pyramid",
   draft: "Jujutsu Draft",
+  items: "Objets",
   leaderboard: "Leaderboard",
   users: "Utilisateurs",
   cards: "Booster Pack",
@@ -231,6 +237,7 @@ function slugify(s: string): string {
 export function AdminDashboard({
   roster,
   draftRoster,
+  towerItems,
   categories,
   scores,
   users,
@@ -672,6 +679,7 @@ export function AdminDashboard({
     categories: `${adminCategories.length} catégorie(s) · ${universeName}`,
     pyramid: `${rankingConditions.length} consigne(s) · ${universeName}`,
     draft: `${draftRoster.length} personnages (draft)`,
+    items: `${towerItems.filter((i) => i.enabled).length} / ${towerItems.length} objets actifs · ${universeName}`,
     leaderboard: `${scores.length} scores`,
     config: "Feature flags & maintenance",
     users: `${users.length} utilisateurs`,
@@ -816,6 +824,8 @@ export function AdminDashboard({
       )}
 
       {tab === "draft" && <DraftRosterAdmin roster={draftRoster} />}
+
+      {tab === "items" && <ItemsAdmin items={towerItems} />}
 
       {tab === "leaderboard" && <LeaderboardAdmin scores={scores} />}
 

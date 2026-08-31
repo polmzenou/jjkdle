@@ -20,6 +20,10 @@ function ctx(partial: Partial<UserStatsContext> = {}): UserStatsContext {
     playedDraft: false,
     playedJjkdle: false,
     playedGuessWho: false,
+    towerBestFloor: 0,
+    towerCleared: false,
+    towerBestAttempt: 0,
+    playedTower: false,
     ...partial,
   };
 }

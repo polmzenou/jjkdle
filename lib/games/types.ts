@@ -13,7 +13,8 @@ export type GameId =
   | "guesswho"
   | "codenames"
   | "jjkdle"
-  | "higher-lower";
+  | "higher-lower"
+  | "tower";
 
 /**
  * Textes d'un jeu propres à un univers. Tout champ absent garde la valeur par
