@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
+import { EventScreen, RestScreen } from "@/components/tower/EventScreen";
 import { InventoryStrip } from "@/components/tower/ItemCard";
+import { NodePicker } from "@/components/tower/NodePicker";
 import { MerchantScreen } from "@/components/tower/MerchantScreen";
 import { RecruitPicker } from "@/components/tower/RecruitPicker";
 import { RewardPicker } from "@/components/tower/RewardPicker";
@@ -20,12 +22,15 @@ import {
   abandonRunAction,
   buyHealAction,
   buyItemAction,
+  chooseNodeAction,
   chooseStarterAction,
   leaveMerchantAction,
   recruitAction,
   resolveCombatAction,
+  resolveEventAction,
   skipRecruitAction,
   startTowerAction,
+  takeRestAction,
   takeRewardAction,
 } from "./actions";
 
@@ -41,6 +46,7 @@ export function TowerGame() {
   const [view, setView] = useState<TowerView | null>(null);
   const [exp, setExp] = useState<ExpResult | undefined>();
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [booting, setBooting] = useState(true);
 
@@ -48,6 +54,9 @@ export function TowerGame() {
     if (result.ok) {
       setView(result.view);
       if (result.exp) setExp(result.exp);
+      // `notice` porte l'issue d'une rencontre : on l'efface dès qu'une autre
+      // action passe, sinon elle survivrait plusieurs étages.
+      setNotice(result.notice ?? null);
       setError(null);
     } else {
       setError(result.error);
@@ -78,6 +87,7 @@ export function TowerGame() {
 
   const restart = useCallback(() => {
     setExp(undefined);
+    setNotice(null);
     startTransition(async () => {
       await abandonRunAction();
       apply(await startTowerAction(true));
@@ -137,6 +147,12 @@ export function TowerGame() {
         </p>
       )}
 
+      {notice && (
+        <p className="rounded-lg border border-sky-400/40 bg-sky-400/10 px-3 py-2 text-sm italic text-sky-100">
+          {notice}
+        </p>
+      )}
+
       <div className="flex flex-col gap-6 sm:flex-row">
         {view.status !== "starter" && <TowerMap floor={view.floor} />}
 
@@ -146,6 +162,30 @@ export function TowerGame() {
               view={view}
               busy={pending}
               onPick={(id) => run(() => chooseStarterAction(id))}
+            />
+          )}
+
+          {view.status === "map" && (
+            <NodePicker
+              view={view}
+              busy={pending}
+              onChoose={(index) => run(() => chooseNodeAction(index))}
+            />
+          )}
+
+          {view.status === "rest" && (
+            <RestScreen
+              view={view}
+              busy={pending}
+              onRest={() => run(() => takeRestAction())}
+            />
+          )}
+
+          {view.status === "event" && (
+            <EventScreen
+              view={view}
+              busy={pending}
+              onChoose={(index) => run(() => resolveEventAction(index))}
             />
           )}
 

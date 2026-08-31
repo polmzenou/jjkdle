@@ -10,27 +10,33 @@ import { towerRunExp } from "@/lib/progress/exp-rewards";
 import { awardExp } from "@/lib/progress/recompute";
 import type { ExpResult } from "@/lib/leaderboard/types";
 import { simulateCombat } from "@/lib/games/tower/combat";
-import { planTower } from "@/lib/games/tower/floors";
+import { optionsAt, planAt } from "@/lib/games/tower/floors";
 import { getTowerContext, type TowerContext } from "@/lib/games/tower/queries";
 import {
   buildCombatSetup,
   buyHeal,
   buyItem,
+  chooseNode,
   chooseStarter,
+  eventChoiceOf,
   leaveMerchant,
   isFinished,
   reachedFloor,
   recruit,
   resolveFloor,
   runScore,
+  resolveEvent,
   skipRecruit,
   startRun,
+  takeRest,
   takeReward,
   type TowerRunState,
 } from "@/lib/games/tower/run";
+import { eventFor } from "@/lib/games/tower/events";
 import {
   MERCHANT_HEAL_PCT,
   MERCHANT_HEAL_PRICE,
+  pickEventItem,
   rollRewards,
   rollShop,
 } from "@/lib/games/tower/rewards";
@@ -103,9 +109,17 @@ async function clearRunId(): Promise<void> {
   (await cookies()).delete(TOWER_COOKIE);
 }
 
-/** L'étage courant, régénéré depuis la graine — jamais lu en base. */
-function planFor(context: TowerContext, seed: number, floor: number): FloorPlan | null {
-  return planTower(seed, context.tower)[floor - 1] ?? null;
+/**
+ * Le nœud EMPRUNTÉ à un étage, régénéré depuis la graine et le chemin de la
+ * run — jamais lu en base.
+ */
+function planFor(
+  context: TowerContext,
+  seed: number,
+  floor: number,
+  path: readonly number[],
+): FloorPlan | null {
+  return planAt(seed, context.tower, floor, path);
 }
 
 async function viewOf(params: {
@@ -116,7 +130,12 @@ async function viewOf(params: {
   attempt: number;
   isAuthed: boolean;
 }): Promise<TowerView | null> {
-  const plan = planFor(params.context, params.seed, params.state.floor);
+  const plan = planFor(
+    params.context,
+    params.seed,
+    params.state.floor,
+    params.state.path,
+  );
   if (!plan) return null;
 
   return buildView({
@@ -133,6 +152,10 @@ async function viewOf(params: {
         : undefined,
     items: params.context.items,
     itemsById: params.context.itemsById,
+    events: params.context.events,
+    options:
+      optionsAt(params.seed, params.context.tower, params.state.floor)?.options ??
+      [],
   });
 }
 
@@ -305,7 +328,7 @@ export async function resolveCombatAction(
 
   if (run.state.status !== "combat") return fail("Aucun combat en cours.");
 
-  const plan = planFor(context, run.seed, run.state.floor);
+  const plan = planFor(context, run.seed, run.state.floor, run.state.path);
   if (!plan) return fail("Étage introuvable.");
 
   const setup = buildCombatSetup(
@@ -367,6 +390,111 @@ function sanitize(interventions: unknown): Intervention[] {
 }
 
 // ──────────────────────────────────────────────────────────────────────────
+// Carte
+// ──────────────────────────────────────────────────────────────────────────
+
+/**
+ * Emprunte une des deux branches de l'étage courant.
+ *
+ * Le client n'envoie qu'un INDEX. Le serveur régénère les options depuis la
+ * graine, exactement comme il régénère la tour : impossible de se fabriquer un
+ * étage de repos à la place d'un boss en réécrivant la requête.
+ */
+export async function chooseNodeAction(index: number): Promise<TowerActionResult> {
+  const loaded = await requireRun();
+  if ("error" in loaded) return fail(loaded.error);
+  const { run, context, user } = loaded;
+
+  if (run.state.status !== "map") return fail("Aucun choix en attente.");
+
+  const at = optionsAt(run.seed, context.tower, run.state.floor);
+  if (!at) return fail("Étage introuvable.");
+
+  const outcome = chooseNode(run.state, at.options, index);
+  if (!outcome.ok) return fail("Cette branche n'existe pas.");
+
+  await saveRun(run.id, run.state.floor, outcome.state);
+  return viewResult(context, outcome.state, run, user);
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Repos
+// ──────────────────────────────────────────────────────────────────────────
+
+export async function takeRestAction(): Promise<TowerActionResult> {
+  const loaded = await requireRun();
+  if ("error" in loaded) return fail(loaded.error);
+  const { run, context, user } = loaded;
+
+  const outcome = takeRest(run.state);
+  if (!outcome.ok) return fail("Tu n'es pas sur un lieu de repos.");
+
+  await saveRun(run.id, run.state.floor, outcome.state);
+  return viewResult(context, outcome.state, run, user);
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Évènements
+// ──────────────────────────────────────────────────────────────────────────
+
+/**
+ * Résout une rencontre.
+ *
+ * Comme partout ailleurs, le client n'envoie qu'un index : le serveur retrouve
+ * l'évènement depuis la graine de l'étage et le catalogue de l'univers, puis
+ * applique l'issue lui-même. Le TEXTE de l'issue remonte dans `notice` pour
+ * être affiché — c'est la seule chose que le joueur n'aurait pas pu deviner.
+ */
+export async function resolveEventAction(
+  index: number,
+): Promise<TowerActionResult> {
+  const loaded = await requireRun();
+  if ("error" in loaded) return fail(loaded.error);
+  const { run, context, user } = loaded;
+
+  if (run.state.status !== "event") return fail("Aucune rencontre en cours.");
+
+  const plan = planFor(context, run.seed, run.state.floor, run.state.path);
+  if (!plan) return fail("Étage introuvable.");
+
+  const event = eventFor(context.events, plan.eventIndex);
+  if (!event) return fail("Rencontre introuvable.");
+
+  const outcome = eventChoiceOf(event, index);
+  if (!outcome) return fail("Ce choix n'existe pas.");
+
+  // L'objet éventuel est tiré ICI : `resolveEvent` reste pur et ignore le
+  // catalogue comme la graine.
+  const granted = outcome.item
+    ? pickEventItem(
+        run.seed,
+        run.state.floor,
+        outcome.item,
+        context.items,
+        run.state.items,
+      )
+    : null;
+
+  const applied = resolveEvent(run.state, outcome, granted?.id ?? null);
+  if (!applied.ok) return fail("Cette rencontre est déjà résolue.");
+
+  await saveRun(run.id, run.state.floor, applied.state);
+
+  let exp: ExpResult | undefined;
+  if (isFinished(applied.state)) {
+    exp = await finishRun({
+      run,
+      context,
+      state: applied.state,
+      userId: user?.id ?? null,
+    });
+  }
+
+  const result = await viewResult(context, applied.state, run, user);
+  return result.ok ? { ...result, notice: outcome.text, exp } : result;
+}
+
+// ──────────────────────────────────────────────────────────────────────────
 // Récompense
 // ──────────────────────────────────────────────────────────────────────────
 
@@ -385,7 +513,7 @@ export async function takeRewardAction(index: number): Promise<TowerActionResult
 
   if (run.state.status !== "reward") return fail("Aucune récompense en attente.");
 
-  const plan = planFor(context, run.seed, run.state.floor);
+  const plan = planFor(context, run.seed, run.state.floor, run.state.path);
   if (!plan) return fail("Étage introuvable.");
 
   const rewards = rollRewards(
@@ -482,7 +610,7 @@ export async function recruitAction(
   if ("error" in loaded) return fail(loaded.error);
   const { run, context, user } = loaded;
 
-  const plan = planFor(context, run.seed, run.state.floor);
+  const plan = planFor(context, run.seed, run.state.floor, run.state.path);
   if (!plan) return fail("Étage introuvable.");
 
   const character = context.roster[characterId];

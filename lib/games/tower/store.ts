@@ -1,6 +1,13 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, type Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import type { TowerRunState } from "./run";
+import { getWeekBounds } from "@/lib/date";
+import { getCurrentUniverse } from "@/lib/universes/current";
+import {
+  userDecor,
+  userDecorSelect,
+  type LeaderboardScope,
+} from "@/lib/leaderboard/store";
+import { normalizeRunState, type TowerRunState } from "./run";
 
 /**
  * Persistance de « The Culling Tower » — module SERVER-ONLY.
@@ -79,7 +86,9 @@ export async function loadRun(runId: string): Promise<StoredRun | null> {
   });
   if (!row) return null;
 
-  return { ...row, state: row.state as unknown as TowerRunState };
+  // L'état vient d'un blob JSON écrit par une version antérieure du jeu :
+  // on le remet d'aplomb avant de le rendre (cf. `normalizeRunState`).
+  return { ...row, state: normalizeRunState(row.state) };
 }
 
 /**
@@ -253,4 +262,107 @@ export async function towerStats(
     ),
     played: rows.length > 0,
   };
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Classement
+// ──────────────────────────────────────────────────────────────────────────
+
+export interface TowerLeaderboardEntry {
+  id: string;
+  pseudo: string;
+  role: Role;
+  avatarImage: string | null;
+  level: number;
+  titleKey: string | null;
+  frameKey: string | null;
+  /** Étage atteint (20 = tour bouclée). */
+  floor: number;
+  score: number;
+  cleared: boolean;
+  /** Essai auquel ce résultat a été obtenu. */
+  attempt: number;
+}
+
+interface TowerBestRow {
+  id: string;
+  userId: string;
+  score: number;
+  floor: number;
+  cleared: boolean;
+  attempt: number;
+  createdAt: Date;
+}
+
+/**
+ * Classement de la Tour.
+ *
+ * ⚠️ Le tri n'est PAS le score seul, et c'est la conséquence directe des essais
+ * illimités : tout le monde finit par boucler la tour, donc un classement au
+ * score ne distinguerait plus personne. On classe donc, dans l'ordre :
+ *   1. avoir bouclé la tour ;
+ *   2. le NOMBRE D'ESSAIS qu'il a fallu (moins = mieux) ;
+ *   3. le score, puis l'antériorité.
+ *
+ * C'est la même métrique que JJKdle, qui classe déjà sur les tentatives : les
+ * joueurs la comprennent sans explication.
+ *
+ * Une seule ligne par joueur : sa MEILLEURE, selon ce même ordre.
+ */
+export async function topTowerEntries(
+  limit = 20,
+  scope: LeaderboardScope = "all-time",
+): Promise<TowerLeaderboardEntry[]> {
+  const { id: universeId } = await getCurrentUniverse();
+
+  const bestPerUser = await prisma.$queryRaw<TowerBestRow[]>(
+    scope === "weekly"
+      ? Prisma.sql`
+          SELECT DISTINCT ON ("userId")
+            "id", "userId", "score", "floor", "cleared", "attempt", "createdAt"
+          FROM "TowerScore"
+          WHERE "universeId" = ${universeId} AND "createdAt" >= ${getWeekBounds().start}
+          ORDER BY "userId", "cleared" DESC, "attempt" ASC, "score" DESC, "createdAt" ASC`
+      : Prisma.sql`
+          SELECT DISTINCT ON ("userId")
+            "id", "userId", "score", "floor", "cleared", "attempt", "createdAt"
+          FROM "TowerScore"
+          WHERE "universeId" = ${universeId}
+          ORDER BY "userId", "cleared" DESC, "attempt" ASC, "score" DESC, "createdAt" ASC`,
+  );
+
+  const ranked = bestPerUser
+    .sort(
+      (a, b) =>
+        Number(b.cleared) - Number(a.cleared) ||
+        a.attempt - b.attempt ||
+        b.score - a.score ||
+        a.createdAt.getTime() - b.createdAt.getTime(),
+    )
+    .slice(0, limit);
+  if (ranked.length === 0) return [];
+
+  const users = await prisma.user.findMany({
+    where: { id: { in: ranked.map((r) => r.userId) } },
+    select: { id: true, ...userDecorSelect(universeId) },
+  });
+  const userById = new Map(users.map((u) => [u.id, u]));
+
+  return ranked.map((r) => {
+    const u = userById.get(r.userId);
+    const d = u ? userDecor(u) : null;
+    return {
+      id: r.id,
+      pseudo: d?.pseudo ?? "—",
+      role: d?.role ?? "PLAYER",
+      avatarImage: d?.avatarImage ?? null,
+      level: d?.level ?? 1,
+      titleKey: d?.titleKey ?? null,
+      frameKey: d?.frameKey ?? null,
+      floor: r.floor,
+      score: r.score,
+      cleared: r.cleared,
+      attempt: r.attempt,
+    };
+  });
 }

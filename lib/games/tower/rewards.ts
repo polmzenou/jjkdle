@@ -142,6 +142,27 @@ export function rollShop(
   return offers;
 }
 
+/**
+ * Objet offert par un ÉVÈNEMENT, d'une rareté imposée ou quelconque.
+ *
+ * `null` quand il ne reste rien à donner : l'appelant convertit alors la
+ * récompense en fragments plutôt que de ne rien servir du tout.
+ */
+export function pickEventItem(
+  seed: number,
+  floor: number,
+  rarity: ItemRarity | "any",
+  catalog: readonly TowerItem[],
+  ownedIds: readonly string[],
+): TowerItem | null {
+  const owned = new Set(ownedIds);
+  const pool = catalog.filter(
+    (i) => i.enabled && !owned.has(i.id) && (rarity === "any" || i.rarity === rarity),
+  );
+  if (pool.length === 0) return null;
+  return weightedPick(rngFor(seed, floor, "event-item"), pool);
+}
+
 // ──────────────────────────────────────────────────────────────────────────
 // Outils
 // ──────────────────────────────────────────────────────────────────────────

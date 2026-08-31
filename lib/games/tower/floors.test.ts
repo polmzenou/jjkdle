@@ -7,7 +7,7 @@ import {
   buildTowerRoster,
   canRecruit,
   isBossFloor,
-  isRecruitFloor,
+  isFightNode,
   isTowerPlayable,
   planTower,
   strateOfArc,
@@ -90,12 +90,13 @@ describe("découpage en strates", () => {
     expect(bosses).toEqual([5, 10, 15, 20]);
   });
 
-  it("propose assez de recrutements pour remplir l'escouade et forcer des sacrifices", () => {
-    const floors = Array.from({ length: TOWER_FLOORS }, (_, i) => i + 1).filter(
-      isRecruitFloor,
-    );
-    expect(floors.length).toBeGreaterThanOrEqual(6);
-    expect(floors).not.toContain(TOWER_FLOORS); // pas au sommet
+  it("reconnaît les nœuds qui font combattre", () => {
+    expect(isFightNode("combat")).toBe(true);
+    expect(isFightNode("elite")).toBe(true);
+    expect(isFightNode("boss")).toBe(true);
+    expect(isFightNode("rest")).toBe(false);
+    expect(isFightNode("event")).toBe(false);
+    expect(isFightNode("merchant")).toBe(false);
   });
 });
 
@@ -174,6 +175,7 @@ describe("vivier", () => {
 
 describe("génération de la tour", () => {
   const tower = buildTowerRoster(syntheticRoster(), JJK_ARCS, JJK_TOWER_CONFIG);
+  const all = (seed: number) => planTower(seed, tower).flatMap((f) => f.options);
 
   it("est entièrement déterminée par la graine", () => {
     expect(planTower(1234, tower)).toEqual(planTower(1234, tower));
@@ -181,45 +183,55 @@ describe("génération de la tour", () => {
   });
 
   it("produit exactement 20 étages, bossés aux bons paliers", () => {
-    const plans = planTower(42, tower);
+    const floors = planTower(42, tower);
 
-    expect(plans).toHaveLength(TOWER_FLOORS);
-    expect(plans.map((p) => p.floor)).toEqual(
+    expect(floors).toHaveLength(TOWER_FLOORS);
+    expect(floors.map((f) => f.floor)).toEqual(
       Array.from({ length: TOWER_FLOORS }, (_, i) => i + 1),
     );
-    for (const plan of plans) {
-      expect(plan.kind === "boss").toBe(isBossFloor(plan.floor));
+    for (const f of floors) {
+      const isBoss = f.options.every((o) => o.kind === "boss");
+      expect(isBoss).toBe(isBossFloor(f.floor));
     }
   });
 
-  it("chaque étage combattant a au moins un ennemi, jamais deux fois le même", () => {
-    const plans = planTower(7, tower);
+  it("offre DEUX branches partout, sauf sur un boss qui n'en a qu'une", () => {
+    for (const f of planTower(42, tower)) {
+      expect(f.options).toHaveLength(isBossFloor(f.floor) ? 1 : 2);
+    }
+  });
 
-    for (const plan of plans) {
-      // Le marchand est une respiration : pas d'ennemi, c'est voulu.
-      if (plan.kind === "merchant") {
-        expect(plan.enemyIds).toEqual([]);
+  it("ne propose jamais deux fois le même type de nœud au même étage", () => {
+    for (const seed of [1, 42, 777, 99999]) {
+      for (const f of planTower(seed, tower)) {
+        if (f.options.length < 2) continue;
+        expect(f.options[0].kind).not.toBe(f.options[1].kind);
+      }
+    }
+  });
+
+  it("garantit une occasion de recruter aux deux premiers étages", () => {
+    for (const seed of [1, 42, 777]) {
+      const floors = planTower(seed, tower);
+      for (const floor of [0, 1]) {
+        expect(floors[floor].options.map((o) => o.kind)).toContain("recruit");
+      }
+    }
+  });
+
+  it("chaque nœud de combat a au moins un ennemi, jamais deux fois le même", () => {
+    for (const option of all(7)) {
+      if (!isFightNode(option.kind)) {
+        expect(option.enemyIds).toEqual([]);
         continue;
       }
-      expect(plan.enemyIds.length).toBeGreaterThan(0);
-      expect(new Set(plan.enemyIds).size).toBe(plan.enemyIds.length);
+      expect(option.enemyIds.length).toBeGreaterThan(0);
+      expect(new Set(option.enemyIds).size).toBe(option.enemyIds.length);
     }
-  });
-
-  it("donne à chaque strate son rythme : combat, combat, élite, marchand, boss", () => {
-    const plans = planTower(7, tower);
-    expect(plans.slice(0, 5).map((p) => p.kind)).toEqual([
-      "combat",
-      "combat",
-      "elite",
-      "merchant",
-      "boss",
-    ]);
   });
 
   it("le boss d'une strate est le plus fort de son vivier, et ne resservira pas", () => {
-    const plans = planTower(3, tower);
-    const bosses = plans.filter((p) => p.kind === "boss");
+    const bosses = all(3).filter((o) => o.kind === "boss");
 
     expect(new Set(bosses.map((b) => b.enemyIds[0])).size).toBe(bosses.length);
 
@@ -228,34 +240,26 @@ describe("génération de la tour", () => {
     expect(first.enemyIds[0]).toBe(pool[pool.length - 1]);
   });
 
-  it("les combats montent en nombre d'ennemis avec les strates", () => {
-    const plans = planTower(99, tower);
-    const maxIn = (strate: number) =>
-      Math.max(
-        ...plans
-          .filter((p) => p.strate === strate && p.kind === "combat")
-          .map((p) => p.enemyIds.length),
-      );
-
-    expect(maxIn(0)).toBe(1);
-    expect(maxIn(3)).toBeGreaterThan(1);
-  });
-
   it("ne propose au recrutement que des personnages sous le plafond de la strate", () => {
-    const plans = planTower(11, tower);
-
-    for (const plan of plans) {
-      for (const id of plan.recruitIds) {
+    for (const option of all(11)) {
+      for (const id of option.recruitIds) {
         expect(tower.entries[id].value).toBeLessThanOrEqual(
-          RECRUIT_CAPS[plan.strate],
+          RECRUIT_CAPS[option.strate],
         );
       }
     }
   });
 
-  it("n'offre de recrutement que sur les étages prévus", () => {
-    for (const plan of planTower(11, tower)) {
-      expect(plan.recruitIds.length > 0).toBe(isRecruitFloor(plan.floor));
+  it("n'attache des recrues qu'aux nœuds de recrutement", () => {
+    for (const option of all(11)) {
+      expect(option.recruitIds.length > 0).toBe(option.kind === "recruit");
+    }
+  });
+
+  it("produit tous les types de nœud sur l'ensemble d'une tour", () => {
+    const kinds = new Set(all(2024).map((o) => o.kind));
+    for (const kind of ["combat", "elite", "recruit", "merchant", "rest", "event"]) {
+      expect(kinds).toContain(kind);
     }
   });
 });
