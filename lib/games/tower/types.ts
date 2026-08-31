@@ -243,35 +243,59 @@ export interface CombatResult {
 // ──────────────────────────────────────────────────────────────────────────
 
 /**
- * Type d'un nœud d'étage. La phase 1 n'en implémente que trois (`combat`,
- * `elite`, `boss`) et une tour LINÉAIRE ; les autres arrivent en phase 3 avec
- * la carte à embranchements. L'union est complète dès maintenant pour que
- * l'état de run persisté n'ait pas à changer de forme entre les phases.
+ * Le COMBAT d'un étage. Il y en a un à chaque étage, sans exception : c'est
+ * lui qui ouvre l'étage suivant, et rien d'autre.
  */
-export type NodeKind =
-  | "combat"
-  | "elite"
-  | "boss"
-  | "recruit"
-  | "merchant"
-  | "rest"
-  | "event";
+export type FightKind = "combat" | "elite" | "boss";
 
-/** Un étage résolu, prêt à jouer. */
+/**
+ * Ce qui peut précéder le combat d'un étage — un bonus, jamais un passage.
+ *
+ * Un prélude ne remplace PAS le combat : il s'ajoute devant. Prendre la branche
+ * qui en porte un coûte la récompense d'après-combat (cf. `FloorPlan`), ce qui
+ * donne la règle du jeu en une phrase : **un gain par étage, avant le combat ou
+ * après**.
+ */
+export type PreludeKind = "recruit" | "merchant" | "rest" | "event";
+
+/** Tout type de nœud, prélude ou combat. Sert aux libellés d'interface. */
+export type NodeKind = FightKind | PreludeKind;
+
+/**
+ * Une branche d'étage, prête à jouer.
+ *
+ * TOUTE branche comporte un combat : c'est le seul moyen de monter d'un étage.
+ * `prelude` ajoute un bonus AVANT ce combat, et son prix est la récompense
+ * d'après-combat — un gain par étage, pas deux.
+ */
 export interface FloorPlan {
   /** 1…TOWER_FLOORS. */
   floor: number;
   /** 0…STRATE_COUNT-1. */
   strate: number;
-  kind: NodeKind;
-  /** Ids des ennemis à affronter (vide pour un nœud non combattant). */
+  /** Le combat de l'étage. Toujours présent. */
+  kind: FightKind;
+  /** Bonus précédant le combat, ou `null` si la branche va droit au but. */
+  prelude: PreludeKind | null;
+  /** Ids des ennemis à affronter. Jamais vide. */
   enemyIds: string[];
-  /** Ids proposés au recrutement (nœud `recruit`). */
+  /** Ids proposés au recrutement (prélude `recruit`). */
   recruitIds: string[];
   /**
-   * Graine de sélection de l'évènement (nœud `event`). Un entier plutôt que le
-   * slug : le catalogue d'évènements est de la donnée d'univers, il peut
+   * Graine de sélection de l'évènement (prélude `event`). Un entier plutôt que
+   * le slug : le catalogue d'évènements est de la donnée d'univers, il peut
    * grandir sans invalider les runs en cours.
    */
   eventIndex: number;
+}
+
+/**
+ * Une branche donne-t-elle droit à une récompense après son combat ?
+ *
+ * Non si elle portait un prélude : le joueur a déjà encaissé son gain avant le
+ * combat. C'est ce qui empêche la branche bonus d'être strictement meilleure
+ * que la branche directe, et donc ce qui fait qu'il y a un choix.
+ */
+export function grantsReward(plan: FloorPlan): boolean {
+  return plan.prelude === null;
 }

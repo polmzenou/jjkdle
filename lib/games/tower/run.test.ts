@@ -74,6 +74,7 @@ function plan(overrides: Partial<FloorPlan> = {}): FloorPlan {
     floor: 3,
     strate: 0,
     kind: "combat",
+    prelude: null,
     enemyIds: ["a"],
     recruitIds: ["a", "b", "c", "d"],
     eventIndex: 0,
@@ -165,12 +166,25 @@ describe("démarrage", () => {
 });
 
 describe("progression", () => {
-  it("ouvre un choix de récompense après toute victoire", () => {
+  it("ouvre un choix de récompense après une victoire sur la voie DIRECTE", () => {
     const state = { ...started(), floor: 4 };
     const next = resolveFloor(state, plan({ recruitIds: [] }), won(state));
 
     expect(next.status).toBe("reward");
     expect(next.floor).toBe(4);
+  });
+
+  it("PAS de récompense quand la branche portait un prélude — un gain par étage", () => {
+    const state = { ...started(), floor: 4 };
+    const next = resolveFloor(
+      state,
+      plan({ prelude: "rest", recruitIds: [] }),
+      won(state),
+    );
+
+    // Le gain a déjà été versé avant le combat : on monte directement.
+    expect(next.status).toBe("map");
+    expect(next.floor).toBe(5);
   });
 
   it("remonte à la carte une fois la récompense prise", () => {
@@ -244,8 +258,10 @@ describe("recrutement", () => {
 
     expect(out.ok).toBe(true);
     expect(out.ok && out.state.squad).toHaveLength(2);
-    expect(out.ok && out.state.floor).toBe(4);
-    expect(out.ok && out.state.status).toBe("map");
+    // Un renfort est un PRÉLUDE : il ne fait pas monter d'étage, il précède
+    // le combat de l'étage courant.
+    expect(out.ok && out.state.floor).toBe(3);
+    expect(out.ok && out.state.status).toBe("combat");
   });
 
   it("le nouveau venu arrive à PV pleins", () => {
@@ -264,7 +280,8 @@ describe("recrutement", () => {
 
     expect(out.ok).toBe(true);
     expect(out.ok && out.state.squad).toHaveLength(1);
-    expect(out.ok && out.state.floor).toBe(4);
+    expect(out.ok && out.state.floor).toBe(3);
+    expect(out.ok && out.state.status).toBe("combat");
   });
 
   it("refuse un personnage au-dessus du plafond de la strate", () => {
@@ -536,10 +553,10 @@ describe("marchand", () => {
     expect(out.ok && out.state.squad[0].hp).toBe(50);
   });
 
-  it("quitter l'étal fait monter d'un étage", () => {
+  it("quitter l'étal mène au COMBAT de l'étage, pas à l'étage suivant", () => {
     const out = leaveMerchant(shopping(0));
-    expect(out.ok && out.state.floor).toBe(5);
-    expect(out.ok && out.state.status).toBe("map");
+    expect(out.ok && out.state.floor).toBe(4);
+    expect(out.ok && out.state.status).toBe("combat");
   });
 });
 
@@ -634,7 +651,7 @@ describe("carte à embranchements", () => {
 
   const branches = [
     plan({ kind: "combat" }),
-    plan({ kind: "rest", enemyIds: [], recruitIds: [] }),
+    plan({ kind: "combat", prelude: "rest" }),
   ];
 
   it("mémorise l'index emprunté dans le chemin", () => {
@@ -644,19 +661,23 @@ describe("carte à embranchements", () => {
     expect(out.ok && out.state.path[3]).toBe(1);
   });
 
-  it("ouvre l'écran correspondant au type du nœud choisi", () => {
-    const cases: Array<[Parameters<typeof plan>[0], string]> = [
-      [{ kind: "combat" }, "combat"],
-      [{ kind: "elite" }, "combat"],
-      [{ kind: "boss" }, "combat"],
-      [{ kind: "recruit" }, "recruit"],
-      [{ kind: "merchant" }, "merchant"],
-      [{ kind: "rest" }, "rest"],
-      [{ kind: "event" }, "event"],
-    ];
+  it("va droit au combat quand la branche n'a pas de prélude", () => {
+    for (const kind of ["combat", "elite", "boss"] as const) {
+      const out = chooseNode(onMap(), [plan({ kind })], 0);
+      expect(out.ok && out.state.status).toBe("combat");
+    }
+  });
 
-    for (const [overrides, status] of cases) {
-      const out = chooseNode(onMap(), [plan(overrides)], 0);
+  it("ouvre l'écran du prélude quand la branche en porte un", () => {
+    const cases = [
+      ["recruit", "recruit"],
+      ["merchant", "merchant"],
+      ["rest", "rest"],
+      ["event", "event"],
+    ] as const;
+
+    for (const [prelude, status] of cases) {
+      const out = chooseNode(onMap(), [plan({ prelude })], 0);
       expect(out.ok && out.state.status).toBe(status);
     }
   });
@@ -706,8 +727,9 @@ describe("repos", () => {
 
     const out = takeRest(state);
     expect(out.ok && out.state.squad[0].hp).toBe(10 + REST_HEAL_PCT);
-    expect(out.ok && out.state.floor).toBe(5);
-    expect(out.ok && out.state.status).toBe("map");
+    // Souffler ne fait pas monter : le combat de l'étage attend toujours.
+    expect(out.ok && out.state.floor).toBe(4);
+    expect(out.ok && out.state.status).toBe("combat");
   });
 
   it("ne dépasse pas les PV max", () => {
@@ -745,7 +767,7 @@ describe("évènements", () => {
   it("crédite les fragments d'une issue", () => {
     const out = resolveEvent(atEvent(), event.choices[0].outcome, null);
     expect(out.ok && out.state.fragments).toBe(30);
-    expect(out.ok && out.state.status).toBe("map");
+    expect(out.ok && out.state.status).toBe("combat");
   });
 
   it("BLESSE l'escouade sur un soin négatif", () => {

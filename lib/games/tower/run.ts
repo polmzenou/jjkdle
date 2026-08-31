@@ -1,7 +1,7 @@
 import type { Character } from "@/data/roster/characters";
 import type { CombatSetup } from "./combat";
 
-import { canRecruit, isFightNode, type TowerRoster } from "./floors";
+import { canRecruit, type TowerRoster } from "./floors";
 import type { EventOutcome, TowerEvent } from "./events";
 import { modifiersOf, resolveItems, type TowerItem } from "./items";
 import { HEAL_REWARD_PCT, type Reward } from "./rewards";
@@ -10,6 +10,7 @@ import type { TowerConfig } from "./config";
 import {
   SQUAD_SIZE,
   TOWER_FLOORS,
+  grantsReward,
   type CombatResult,
   type FloorPlan,
 } from "./types";
@@ -297,7 +298,9 @@ export function resolveFloor(
   if (!result.victory) return { ...next, status: "lost" };
   if (floor >= TOWER_FLOORS) return { ...next, status: "won" };
 
-  // Toute victoire ouvre un choix de récompense.
+  // La récompense ne suit que la voie DIRECTE : une branche à prélude a déjà
+  // versé son gain avant le combat. Un gain par étage, pas deux.
+  if (!grantsReward(plan)) return advance(next);
   return { ...next, status: "reward" };
 }
 
@@ -400,10 +403,10 @@ export function buyHeal(
   });
 }
 
-/** Quitte l'étal et monte d'un étage. */
+/** Quitte l'étal — pour aller au combat de l'étage, pas à l'étage suivant. */
 export function leaveMerchant(state: TowerRunState): RunOutcome {
   if (state.status !== "merchant") return fail("wrong-status");
-  return ok(advance(state));
+  return ok(toFight(state));
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -482,7 +485,7 @@ export function recruit(
   }
 
   return ok(
-    advance({
+    toFight({
       ...state,
       squad,
       seen: mergeSeen(state.seen, [character.id, ...sacrificed]),
@@ -493,7 +496,7 @@ export function recruit(
 /** Passer son tour : toujours permis, y compris avec un slot libre. */
 export function skipRecruit(state: TowerRunState): RunOutcome {
   if (state.status !== "recruit") return fail("wrong-status");
-  return ok(advance(state));
+  return ok(toFight(state));
 }
 
 /**
@@ -512,13 +515,27 @@ function advance(state: TowerRunState): TowerRunState {
 // Carte
 // ──────────────────────────────────────────────────────────────────────────
 
-/** Écran correspondant à un type de nœud. */
-function statusForNode(kind: FloorPlan["kind"]): RunStatus {
-  if (isFightNode(kind)) return "combat";
-  if (kind === "recruit") return "recruit";
-  if (kind === "merchant") return "merchant";
-  if (kind === "rest") return "rest";
+/**
+ * Écran d'entrée d'une branche.
+ *
+ * Une branche sans prélude va DIRECTEMENT au combat. Une branche avec prélude
+ * ouvre l'écran du bonus — mais le combat vient juste après, quoi qu'il arrive :
+ * aucun prélude ne fait monter d'étage à lui seul.
+ */
+function statusForNode(plan: FloorPlan): RunStatus {
+  if (!plan.prelude) return "combat";
+  if (plan.prelude === "recruit") return "recruit";
+  if (plan.prelude === "merchant") return "merchant";
+  if (plan.prelude === "rest") return "rest";
   return "event";
+}
+
+/**
+ * Fin d'un prélude : on enchaîne sur le COMBAT de l'étage, jamais sur l'étage
+ * suivant. C'est la règle « un combat par étage », appliquée en un seul point.
+ */
+function toFight(state: TowerRunState): TowerRunState {
+  return { ...state, status: "combat" };
 }
 
 /**
@@ -547,7 +564,7 @@ export function chooseNode(
   );
   path[state.floor - 1] = Math.trunc(index);
 
-  return ok({ ...state, path, status: statusForNode(node.kind) });
+  return ok({ ...state, path, status: statusForNode(node) });
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -565,7 +582,7 @@ export const REST_HEAL_PCT = 40;
 
 export function takeRest(state: TowerRunState): RunOutcome {
   if (state.status !== "rest") return fail("wrong-status");
-  return ok(advance({ ...state, squad: healSquad(state.squad, REST_HEAL_PCT) }));
+  return ok(toFight({ ...state, squad: healSquad(state.squad, REST_HEAL_PCT) }));
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -614,7 +631,7 @@ export function resolveEvent(
     return ok({ ...next, squad: [], status: "lost" });
   }
 
-  return ok(advance(next));
+  return ok(toFight(next));
 }
 
 /** L'évènement choisi est-il jouable ? (garde serveur) */

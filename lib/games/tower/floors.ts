@@ -7,8 +7,9 @@ import {
   FLOORS_PER_STRATE,
   STRATE_COUNT,
   TOWER_FLOORS,
+  type FightKind,
   type FloorPlan,
-  type NodeKind,
+  type PreludeKind,
 } from "./types";
 
 /**
@@ -25,6 +26,11 @@ import {
  *
  * Rien n'est écrit à la main, et un univers qui a son propre attribut d'arc
  * obtient sa tour sans une ligne de code.
+ *
+ * RÈGLE STRUCTURANTE : **chaque étage a un combat**, sans exception. On ne
+ * monte qu'en gagnant. Les autres nœuds (marchand, repos, rencontre, renfort)
+ * sont des PRÉLUDES qui s'ajoutent devant ce combat, jamais des passages qui
+ * l'évitent.
  *
  * Tout ce fichier est une fonction de `(seed, roster)` : le serveur peut
  * régénérer la tour à volonté sans rien stocker, et n'envoie au client que
@@ -130,20 +136,28 @@ export function isBossFloor(floor: number): boolean {
 }
 
 /**
- * Poids de tirage des types de nœud, hors boss.
+ * Poids de tirage du PRÉLUDE de la branche bonus.
  *
- * Le combat domine — c'est le cœur du jeu et la seule source de fragments et
- * d'XP — mais chaque étage propose DEUX nœuds de types différents, si bien
- * qu'il y a toujours un arbitrage à faire : se renforcer, souffler, ou avancer.
+ * Le renfort domine : c'est le seul prélude qui répare une escouade amputée, et
+ * l'escouade est la ressource la plus difficile à reconstituer.
  */
-const NODE_WEIGHTS: ReadonlyArray<readonly [NodeKind, number]> = [
-  ["combat", 40],
-  ["recruit", 18],
-  ["elite", 12],
-  ["merchant", 10],
-  ["rest", 10],
-  ["event", 10],
+const PRELUDE_WEIGHTS: ReadonlyArray<readonly [PreludeKind, number]> = [
+  ["recruit", 34],
+  ["merchant", 22],
+  ["rest", 22],
+  ["event", 22],
 ];
+
+/**
+ * Probabilité que la branche DIRECTE soit une élite plutôt qu'un combat
+ * ordinaire.
+ *
+ * C'est ce qui empêche « aller droit au combat » d'être un choix par défaut
+ * sans relief : une fois sur quatre, la voie rapide est aussi la plus
+ * dangereuse — et la mieux payée (les épiques ne tombent que sur les élites et
+ * les boss).
+ */
+const ELITE_CHANCE = 0.25;
 
 /**
  * Les deux premiers étages proposent TOUJOURS un recrutement face à un combat.
@@ -242,19 +256,20 @@ export function planTower(seed: number, tower: TowerRoster): FloorOptions[] {
 
   for (let floor = 1; floor <= TOWER_FLOORS; floor += 1) {
     const strate = strateOfFloor(floor);
-    const kinds = pickKinds(rand, floor);
+    const kinds = pickBranches(rand, floor);
 
     floors.push({
       floor,
       strate,
-      options: kinds.map((kind) => ({
+      options: kinds.map(({ kind, prelude }) => ({
         floor,
         strate,
         kind,
+        prelude,
         enemyIds: pickEnemies(rand, tower, strate, kind, usedBosses),
         recruitIds:
-          kind === "recruit" ? pickRecruits(rand, tower, strate) : [],
-        eventIndex: kind === "event" ? Math.floor(rand() * 1_000_003) : 0,
+          prelude === "recruit" ? pickRecruits(rand, tower, strate) : [],
+        eventIndex: prelude === "event" ? Math.floor(rand() * 1_000_003) : 0,
       })),
     });
   }
@@ -289,29 +304,52 @@ export function planAt(
   return at.options[index] ?? at.options[0] ?? null;
 }
 
-/**
- * Types des nœuds proposés à un étage.
- *
- * Un boss n'offre pas de choix — c'est le palier de la strate, on le franchit
- * ou la run s'arrête. Partout ailleurs, deux types DIFFÉRENTS : proposer deux
- * combats reviendrait à ne rien proposer du tout.
- */
-function pickKinds(rand: () => number, floor: number): NodeKind[] {
-  if (isBossFloor(floor)) return ["boss"];
-  if (floor <= GUARANTEED_RECRUIT_FLOORS) return ["recruit", "combat"];
-
-  const first = weightedKind(rand, NODE_WEIGHTS);
-  const second = weightedKind(
-    rand,
-    NODE_WEIGHTS.filter(([kind]) => kind !== first),
-  );
-  return [first, second];
+/** Une branche : son combat, et l'éventuel bonus qui le précède. */
+interface Branch {
+  kind: FightKind;
+  prelude: PreludeKind | null;
 }
 
-function weightedKind(
+/**
+ * Les branches proposées à un étage.
+ *
+ * **Toutes portent un combat.** On ne monte d'un étage qu'en gagnant un
+ * combat — le marchand, le repos, les rencontres et les renforts sont des
+ * bonus qui s'ajoutent devant, jamais des passages qui l'évitent.
+ *
+ * Le choix est donc toujours le même, et il est lisible sans explication :
+ *   - aller DROIT au combat, et toucher la récompense qui le suit ;
+ *   - prendre un BONUS d'abord, et renoncer à cette récompense.
+ *
+ * Un boss n'offre pas de choix : c'est le palier de la strate.
+ */
+function pickBranches(rand: () => number, floor: number): Branch[] {
+  if (isBossFloor(floor)) return [{ kind: "boss", prelude: null }];
+
+  const direct: Branch = {
+    kind: rand() < ELITE_CHANCE ? "elite" : "combat",
+    prelude: null,
+  };
+
+  const bonus: Branch = {
+    kind: "combat",
+    // Les deux premiers étages garantissent un renfort : l'escouade doit
+    // pouvoir se compléter avant la première élite (cf. GUARANTEED_RECRUIT_FLOORS).
+    prelude:
+      floor <= GUARANTEED_RECRUIT_FLOORS
+        ? "recruit"
+        : weightedPrelude(rand, PRELUDE_WEIGHTS),
+  };
+
+  // Ordre tiré au sort : sans ça, la branche directe serait toujours à gauche
+  // et le joueur cliquerait au même endroit sans lire.
+  return rand() < 0.5 ? [direct, bonus] : [bonus, direct];
+}
+
+function weightedPrelude(
   rand: () => number,
-  weights: ReadonlyArray<readonly [NodeKind, number]>,
-): NodeKind {
+  weights: ReadonlyArray<readonly [PreludeKind, number]>,
+): PreludeKind {
   const total = weights.reduce((sum, [, w]) => sum + w, 0);
   let ticket = rand() * total;
   for (const [kind, weight] of weights) {
@@ -321,22 +359,13 @@ function weightedKind(
   return weights[weights.length - 1][0];
 }
 
-/** Un nœud fait-il combattre ? (combat, élite, boss) */
-export function isFightNode(kind: NodeKind): boolean {
-  return kind === "combat" || kind === "elite" || kind === "boss";
-}
-
 function pickEnemies(
   rand: () => number,
   tower: TowerRoster,
   strate: number,
-  kind: NodeKind,
+  kind: FightKind,
   usedBosses: Set<string>,
 ): string[] {
-  // Seuls les nœuds de combat ont des adversaires ; les autres sont des
-  // respirations ou des choix.
-  if (!isFightNode(kind)) return [];
-
   if (kind === "boss") {
     const boss = pickBoss(tower, strate, usedBosses);
     return boss ? [boss] : [];

@@ -7,7 +7,6 @@ import {
   buildTowerRoster,
   canRecruit,
   isBossFloor,
-  isFightNode,
   isTowerPlayable,
   planTower,
   strateOfArc,
@@ -90,14 +89,7 @@ describe("découpage en strates", () => {
     expect(bosses).toEqual([5, 10, 15, 20]);
   });
 
-  it("reconnaît les nœuds qui font combattre", () => {
-    expect(isFightNode("combat")).toBe(true);
-    expect(isFightNode("elite")).toBe(true);
-    expect(isFightNode("boss")).toBe(true);
-    expect(isFightNode("rest")).toBe(false);
-    expect(isFightNode("event")).toBe(false);
-    expect(isFightNode("merchant")).toBe(false);
-  });
+
 });
 
 describe("croisement arc x puissance", () => {
@@ -195,18 +187,35 @@ describe("génération de la tour", () => {
     }
   });
 
+  it("CHAQUE branche de CHAQUE étage comporte un combat — on ne monte qu'en gagnant", () => {
+    for (const seed of [1, 42, 777, 99999, 2024]) {
+      for (const option of all(seed)) {
+        expect(["combat", "elite", "boss"]).toContain(option.kind);
+        expect(option.enemyIds.length).toBeGreaterThan(0);
+      }
+    }
+  });
+
   it("offre DEUX branches partout, sauf sur un boss qui n'en a qu'une", () => {
     for (const f of planTower(42, tower)) {
       expect(f.options).toHaveLength(isBossFloor(f.floor) ? 1 : 2);
     }
   });
 
-  it("ne propose jamais deux fois le même type de nœud au même étage", () => {
+  it("oppose toujours une voie DIRECTE à une voie à prélude", () => {
     for (const seed of [1, 42, 777, 99999]) {
       for (const f of planTower(seed, tower)) {
         if (f.options.length < 2) continue;
-        expect(f.options[0].kind).not.toBe(f.options[1].kind);
+        const preludes = f.options.map((o) => o.prelude);
+        expect(preludes.filter((x) => x === null)).toHaveLength(1);
+        expect(preludes.filter((x) => x !== null)).toHaveLength(1);
       }
+    }
+  });
+
+  it("un boss ne porte jamais de prélude : pas de détour au palier", () => {
+    for (const option of all(2024).filter((o) => o.kind === "boss")) {
+      expect(option.prelude).toBeNull();
     }
   });
 
@@ -214,18 +223,13 @@ describe("génération de la tour", () => {
     for (const seed of [1, 42, 777]) {
       const floors = planTower(seed, tower);
       for (const floor of [0, 1]) {
-        expect(floors[floor].options.map((o) => o.kind)).toContain("recruit");
+        expect(floors[floor].options.map((o) => o.prelude)).toContain("recruit");
       }
     }
   });
 
-  it("chaque nœud de combat a au moins un ennemi, jamais deux fois le même", () => {
+  it("ne met jamais deux fois le même ennemi dans un combat", () => {
     for (const option of all(7)) {
-      if (!isFightNode(option.kind)) {
-        expect(option.enemyIds).toEqual([]);
-        continue;
-      }
-      expect(option.enemyIds.length).toBeGreaterThan(0);
       expect(new Set(option.enemyIds).size).toBe(option.enemyIds.length);
     }
   });
@@ -250,17 +254,24 @@ describe("génération de la tour", () => {
     }
   });
 
-  it("n'attache des recrues qu'aux nœuds de recrutement", () => {
+  it("n'attache des recrues qu'aux préludes de recrutement", () => {
     for (const option of all(11)) {
-      expect(option.recruitIds.length > 0).toBe(option.kind === "recruit");
+      expect(option.recruitIds.length > 0).toBe(option.prelude === "recruit");
     }
   });
 
-  it("produit tous les types de nœud sur l'ensemble d'une tour", () => {
-    const kinds = new Set(all(2024).map((o) => o.kind));
-    for (const kind of ["combat", "elite", "recruit", "merchant", "rest", "event"]) {
-      expect(kinds).toContain(kind);
+  it("produit tous les préludes sur l'ensemble d'une tour", () => {
+    const preludes = new Set(all(2024).map((o) => o.prelude));
+    for (const kind of ["recruit", "merchant", "rest", "event"]) {
+      expect(preludes).toContain(kind);
     }
+  });
+
+  it("sème des élites sur la voie directe, sans en faire la norme", () => {
+    const direct = all(2024).filter((o) => o.prelude === null && o.kind !== "boss");
+    const elites = direct.filter((o) => o.kind === "elite");
+    expect(elites.length).toBeGreaterThan(0);
+    expect(elites.length).toBeLessThan(direct.length / 2);
   });
 });
 

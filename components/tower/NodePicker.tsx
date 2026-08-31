@@ -6,9 +6,15 @@ import type { NodeOptionView, TowerView } from "@/lib/games/tower/view";
 /**
  * La carte : deux branches, un choix.
  *
- * Les adversaires d'un nœud de combat sont MONTRÉS. Choisir à l'aveugle ne
- * serait pas un choix mais un tirage — et c'est précisément la différence entre
- * une carte à embranchements et un couloir déguisé.
+ * TOUTES les branches mènent à un combat — on ne monte d'un étage qu'en
+ * gagnant. Ce qui se choisit, c'est ce qui vient AVANT, et son prix :
+ *   - voie directe : le combat, puis sa récompense ;
+ *   - voie bonus : un renfort / marchand / repos / rencontre, puis le même
+ *     combat, mais sans récompense après.
+ *
+ * Les adversaires sont MONTRÉS dans les deux cas. Choisir à l'aveugle ne serait
+ * pas un choix mais un tirage — et c'est précisément la différence entre une
+ * carte à embranchements et un couloir déguisé.
  */
 
 const ICONS: Record<string, string> = {
@@ -52,7 +58,7 @@ export function NodePicker({
         <p className="mt-1 text-sm text-white/50">
           {solo
             ? "Aucun détour : le gardien de la strate barre l'escalier."
-            : "Choisis par où tu montes. Un seul des deux se jouera."}
+            : "Chaque chemin finit par un combat — c'est lui qui ouvre l'étage suivant. Un gain par étage : avant le combat, ou après."}
         </p>
       </header>
 
@@ -86,17 +92,23 @@ function NodeCard({
       disabled={busy}
       className={[
         "flex flex-col gap-3 rounded-xl border p-4 text-left transition",
-        ACCENTS[option.kind] ?? ACCENTS.combat,
+        ACCENTS[option.prelude ?? option.kind] ?? ACCENTS.combat,
         busy ? "opacity-40" : "",
       ].join(" ")}
     >
       <div className="flex items-center gap-3">
         <span aria-hidden className="text-2xl">
-          {ICONS[option.kind] ?? "⚔"}
+          {ICONS[option.prelude ?? option.kind] ?? "⚔"}
         </span>
-        <div>
+        <div className="min-w-0">
           <p className="font-display text-sm font-bold uppercase tracking-wide text-white">
             {option.label}
+            {option.prelude && (
+              <span aria-hidden className="ml-1 text-white/40">
+                {" → "}
+                {ICONS[option.kind]}
+              </span>
+            )}
           </p>
           <p className="text-[11px] leading-snug text-white/50">{option.hint}</p>
         </div>

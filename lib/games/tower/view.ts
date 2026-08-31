@@ -80,15 +80,20 @@ export interface ShopOfferView {
   affordable: boolean;
 }
 
-/** Un nœud proposé sur la carte. */
+/** Une branche proposée sur la carte. Toutes mènent à un combat. */
 export interface NodeOptionView {
   index: number;
+  /** Le combat de la branche. */
   kind: NodeKind;
+  /** Bonus qui précède le combat, ou `null` pour la voie directe. */
+  prelude: NodeKind | null;
   /** Libellé court affiché sur la carte. */
   label: string;
-  /** Ce que le nœud promet, en une phrase. */
+  /** Ce que la branche promet, en une phrase. */
   hint: string;
-  /** Aperçu des adversaires (nœuds de combat). */
+  /** Cette branche donne-t-elle droit à la récompense d'après-combat ? */
+  rewarded: boolean;
+  /** Aperçu des adversaires — toujours renseigné, tout étage se combat. */
   enemies: { id: string; name: string; image?: string }[];
 }
 
@@ -355,29 +360,42 @@ function toRewardView(reward: Reward): RewardView {
 
 /** Libellé et promesse d'un type de nœud, tels que le joueur les lit. */
 const NODE_COPY: Record<NodeKind, { label: string; hint: string }> = {
-  combat: { label: "Combat", hint: "Un ou plusieurs adversaires. Butin à la clé." },
-  elite: {
-    label: "Élite",
-    hint: "Un adversaire de la strate supérieure. Récompense rare ou épique.",
-  },
+  combat: { label: "Combat", hint: "Un ou plusieurs adversaires." },
+  elite: { label: "Élite", hint: "Un adversaire de la strate supérieure." },
   boss: { label: "Boss", hint: "Le gardien de la strate. Pas de détour possible." },
-  recruit: { label: "Renfort", hint: "Un personnage à faire entrer dans l'escouade." },
-  merchant: { label: "Marchand", hint: "Dépense tes fragments avant qu'ils ne servent plus." },
-  rest: { label: "Repos", hint: "Souffler. Aucun combat, aucun butin." },
-  event: { label: "Rencontre", hint: "Une situation, deux issues. On ne sait pas laquelle paie." },
+  recruit: { label: "Renfort", hint: "Un personnage à faire entrer dans l'escouade" },
+  merchant: { label: "Marchand", hint: "De quoi dépenser tes fragments" },
+  rest: { label: "Repos", hint: "Un moment pour souffler" },
+  event: { label: "Rencontre", hint: "Une situation, deux issues" },
 };
 
+/**
+ * Fiche d'une branche.
+ *
+ * Le libellé dit le MARCHÉ, pas seulement le contenu : « Repos puis combat »
+ * plutôt que « Repos », et la promesse rappelle ce qu'on gagne ou ce qu'on
+ * cède. Sans ça, la branche bonus passerait pour un raccourci gratuit alors
+ * qu'elle coûte la récompense d'après-combat.
+ */
 function toNodeView(
   option: FloorPlan,
   index: number,
   roster: Record<string, Character>,
 ): NodeOptionView {
-  const copy = NODE_COPY[option.kind];
+  const fight = NODE_COPY[option.kind];
+  const prelude = option.prelude ? NODE_COPY[option.prelude] : null;
+
   return {
     index,
     kind: option.kind,
-    label: copy.label,
-    hint: copy.hint,
+    prelude: option.prelude,
+    label: prelude ? `${prelude.label} puis combat` : fight.label,
+    hint: prelude
+      ? `${prelude.hint}, puis le combat de l'étage — mais pas de butin après.`
+      : option.kind === "boss"
+        ? fight.hint
+        : `${fight.hint} Butin à la clé.`,
+    rewarded: option.prelude === null,
     // On montre les adversaires : choisir sa branche à l'aveugle ne serait pas
     // un choix, juste un tirage.
     enemies: option.enemyIds
