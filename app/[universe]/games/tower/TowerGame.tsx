@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
+import { UniverseLink } from "@/components/universe/UniverseLink";
 import { EventScreen, RestScreen } from "@/components/tower/EventScreen";
 import { InventoryStrip } from "@/components/tower/ItemCard";
 import { NodePicker } from "@/components/tower/NodePicker";
@@ -100,19 +101,31 @@ export function TowerGame() {
   );
 
   if (booting) {
-    return <p className="py-16 text-center text-white/40">Ouverture de la tour…</p>;
+    return (
+      <div className="flex flex-col gap-6">
+        <BackLink />
+        <p className="py-16 text-center text-white/40">Ouverture de la tour…</p>
+      </div>
+    );
   }
 
+  // Sans le lien de retour ici, une tour indisponible laissait le joueur sur un
+  // cul-de-sac : plus rien à cliquer, et aucun moyen de revenir aux jeux.
   if (!view) {
     return (
-      <div className="py-16 text-center">
-        <p className="text-white/60">{error ?? "La tour est close pour le moment."}</p>
+      <div className="flex flex-col gap-6">
+        <BackLink />
+        <p className="py-16 text-center text-white/60">
+          {error ?? "La tour est close pour le moment."}
+        </p>
       </div>
     );
   }
 
   return (
     <div className="flex flex-col gap-6">
+      <BackLink />
+
       <header className="flex items-baseline justify-between gap-4">
         <div>
           <h1 className="font-display text-2xl font-bold text-white">
@@ -232,6 +245,29 @@ export function TowerGame() {
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Retour aux jeux, présent sur TOUS les écrans de la tour.
+ *
+ * Quitter ne perd rien : la run vit en base et son cookie la retrouve, si bien
+ * qu'on revient exactement à l'étage où l'on s'était arrêté. Le lien le dit,
+ * sans quoi on hésite à cliquer au milieu d'une ascension de quinze minutes.
+ */
+function BackLink() {
+  return (
+    <div className="flex items-center gap-3">
+      <UniverseLink
+        href="/games"
+        className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 px-3 py-1.5 font-display text-xs font-bold uppercase tracking-wide text-white/60 transition hover:border-domain/60 hover:text-domain-light"
+      >
+        <span aria-hidden>←</span> Les jeux
+      </UniverseLink>
+      <span className="text-[11px] text-white/35">
+        Ton ascension est gardée : tu reprendras où tu t'es arrêté.
+      </span>
     </div>
   );
 }

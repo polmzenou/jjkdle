@@ -3,7 +3,6 @@ import {
   type TowerLeaderboardEntry,
 } from "@/lib/games/tower/store";
 import type { LeaderboardScope } from "@/lib/leaderboard/store";
-import { TOWER_FLOORS } from "@/lib/games/tower/types";
 import { VipBadge } from "@/components/VipBadge";
 import { TitleBadge } from "@/components/TitleBadge";
 import { UserAvatar } from "@/components/UserAvatar";
@@ -133,6 +132,11 @@ function TowerRow({
         )}
       </p>
 
+      {/*
+        Bouclée : le nombre d'essais, c'est le classement. Inachevée : l'étage
+        atteint — libellé « étage N » et non « N / 20 », qui se lisait comme un
+        sans-faute quand on mourait justement sur le boss du 20e.
+      */}
       <span className="shrink-0 text-right">
         {entry.cleared ? (
           <>
@@ -148,11 +152,9 @@ function TowerRow({
           </>
         ) : (
           <>
+            <span className="mr-1 text-xs font-normal text-white/35">étage</span>
             <span className="font-display text-lg font-bold tabular-nums text-white/70">
               {entry.floor}
-            </span>
-            <span className="ml-1 text-xs font-normal text-white/35">
-              / {TOWER_FLOORS}
             </span>
           </>
         )}

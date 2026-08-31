@@ -8,6 +8,7 @@ import {
   type LeaderboardScope,
 } from "@/lib/leaderboard/store";
 import { normalizeRunState, type TowerRunState } from "./run";
+import { TOWER_BEST_ORDER_SQL, compareTowerRuns } from "./ranking";
 
 /**
  * Persistance de « The Culling Tower » — module SERVER-ONLY.
@@ -315,6 +316,11 @@ export async function topTowerEntries(
 ): Promise<TowerLeaderboardEntry[]> {
   const { id: universeId } = await getCurrentUniverse();
 
+  // `DISTINCT ON` retient la PREMIÈRE ligne de chaque joueur selon l'ordre
+  // ci-dessous : c'est donc lui qui décide « quelle run représente ce joueur ».
+  // Il doit rester le miroir de `compareTowerRuns` (cf. ranking.ts).
+  const bestOrder = Prisma.raw(TOWER_BEST_ORDER_SQL);
+
   const bestPerUser = await prisma.$queryRaw<TowerBestRow[]>(
     scope === "weekly"
       ? Prisma.sql`
@@ -322,24 +328,16 @@ export async function topTowerEntries(
             "id", "userId", "score", "floor", "cleared", "attempt", "createdAt"
           FROM "TowerScore"
           WHERE "universeId" = ${universeId} AND "createdAt" >= ${getWeekBounds().start}
-          ORDER BY "userId", "cleared" DESC, "attempt" ASC, "score" DESC, "createdAt" ASC`
+          ORDER BY "userId", ${bestOrder}`
       : Prisma.sql`
           SELECT DISTINCT ON ("userId")
             "id", "userId", "score", "floor", "cleared", "attempt", "createdAt"
           FROM "TowerScore"
           WHERE "universeId" = ${universeId}
-          ORDER BY "userId", "cleared" DESC, "attempt" ASC, "score" DESC, "createdAt" ASC`,
+          ORDER BY "userId", ${bestOrder}`,
   );
 
-  const ranked = bestPerUser
-    .sort(
-      (a, b) =>
-        Number(b.cleared) - Number(a.cleared) ||
-        a.attempt - b.attempt ||
-        b.score - a.score ||
-        a.createdAt.getTime() - b.createdAt.getTime(),
-    )
-    .slice(0, limit);
+  const ranked = bestPerUser.sort(compareTowerRuns).slice(0, limit);
   if (ranked.length === 0) return [];
 
   const users = await prisma.user.findMany({
