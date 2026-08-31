@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   TOWER_BEST_ORDER_SQL,
   compareTowerRuns,
+  parseTowerScope,
   type TowerRankable,
 } from "./ranking";
 
@@ -125,5 +126,25 @@ describe("miroir SQL", () => {
 
     expect(positions.every((p) => p >= 0)).toBe(true);
     expect([...positions].sort((a, b) => a - b)).toEqual(positions);
+  });
+});
+
+
+describe("portée du classement", () => {
+  it("affiche la tour DU JOUR par défaut", () => {
+    // La portée par défaut n'est pas un détail : le nombre d'essais ne se
+    // compare qu'entre joueurs ayant affronté la même tour.
+    expect(parseTowerScope(undefined)).toBe("today");
+    expect(parseTowerScope("")).toBe("today");
+  });
+
+  it("accepte le panthéon quand il est demandé explicitement", () => {
+    expect(parseTowerScope("all-time")).toBe("all-time");
+  });
+
+  it("ignore une portée inconnue plutôt que de la propager", () => {
+    for (const value of ["weekly", "monthly", 42, null, {}]) {
+      expect(parseTowerScope(value)).toBe("today");
+    }
   });
 });

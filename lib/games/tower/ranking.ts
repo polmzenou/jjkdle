@@ -66,3 +66,28 @@ export const TOWER_BEST_ORDER_SQL = `
   "score" DESC,
   "createdAt" ASC
 `;
+
+
+// ──────────────────────────────────────────────────────────────────────────
+// Portée du classement
+// ──────────────────────────────────────────────────────────────────────────
+
+/**
+ * Portées du classement de la Tour.
+ *
+ * Type PROPRE au jeu, et non le `LeaderboardScope` partagé (« all-time /
+ * hebdo ») : la Tour se classe sur le NOMBRE D'ESSAIS, or ce nombre ne veut
+ * rien dire d'une tour à l'autre. Boucler la tour d'aujourd'hui en trois essais
+ * et boucler celle de la semaine dernière en trois essais ne sont pas
+ * comparables — les deux tours n'avaient ni les mêmes ennemis ni la même
+ * difficulté.
+ *
+ * D'où « aujourd'hui » comme portée PAR DÉFAUT : c'est la seule où le
+ * classement compare des joueurs ayant affronté exactement la même tour.
+ */
+export type TowerScope = "today" | "all-time";
+
+/** Normalise un `?scope=` d'URL. Défaut : la tour du jour. */
+export function parseTowerScope(value: unknown): TowerScope {
+  return value === "all-time" ? "all-time" : "today";
+}

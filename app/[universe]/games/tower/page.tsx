@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { isGameEnabled } from "@/lib/config/app-config";
 import { GameJsonLd } from "@/components/seo/JsonLd";
 import { TowerLeaderboard } from "@/components/leaderboard/TowerLeaderboard";
-import { parseScope } from "@/lib/leaderboard/store";
+import { parseTowerScope } from "@/lib/games/tower/ranking";
 import { gameMetadata } from "@/lib/seo/config";
 import { universeHref } from "@/lib/universes/current";
 import { TowerGame } from "./TowerGame";
@@ -37,7 +37,7 @@ export default async function TowerPage({
       <TowerGame />
 
       <div className="mt-10">
-        <TowerLeaderboard limit={20} scope={parseScope(scope)} />
+        <TowerLeaderboard limit={20} scope={parseTowerScope(scope)} />
       </div>
     </main>
   );

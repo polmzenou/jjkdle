@@ -2,11 +2,11 @@ import {
   topTowerEntries,
   type TowerLeaderboardEntry,
 } from "@/lib/games/tower/store";
-import type { LeaderboardScope } from "@/lib/leaderboard/store";
+import type { TowerScope } from "@/lib/games/tower/ranking";
 import { VipBadge } from "@/components/VipBadge";
 import { TitleBadge } from "@/components/TitleBadge";
 import { UserAvatar } from "@/components/UserAvatar";
-import { ScopeToggle } from "./ScopeToggle";
+import { TowerScopeToggle } from "./TowerScopeToggle";
 import { UniverseLink } from "@/components/universe/UniverseLink";
 
 /** Couleurs des médailles : 1er Or, 2e Argent, 3e Bronze. */
@@ -26,10 +26,10 @@ const MEDALS = [
  */
 export async function TowerLeaderboard({
   limit = 20,
-  scope = "all-time",
+  scope = "today",
 }: {
   limit?: number;
-  scope?: LeaderboardScope;
+  scope?: TowerScope;
 }) {
   const entries = await topTowerEntries(limit, scope);
 
@@ -43,19 +43,20 @@ export async function TowerLeaderboard({
           🏆 Leaderboard 🗼 The Culling Tower
         </h2>
         <span className="h-px flex-1 bg-gradient-to-r from-domain/40 to-transparent" />
-        <ScopeToggle scope={scope} />
+        <TowerScopeToggle scope={scope} />
       </div>
 
       <p className="mb-3 text-xs text-white/40">
-        Classé sur le nombre d&apos;essais qu&apos;il a fallu pour franchir la
-        tour — puis sur l&apos;étage atteint et le score.
+        {scope === "today"
+          ? "La tour d'aujourd'hui, la même pour tout le monde. Classé sur le nombre d'essais qu'il a fallu pour la franchir — puis sur l'étage atteint. Remise à zéro à minuit, avec la tour."
+          : "Les meilleures ascensions, toutes tours confondues. À titre indicatif : le nombre d'essais ne se compare vraiment qu'à l'intérieur d'une même tour."}
       </p>
 
       {entries.length === 0 ? (
         <p className="py-8 text-center text-sm text-white/40">
-          {scope === "weekly"
-            ? "Personne n'a encore tenté l'ascension cette semaine."
-            : "Personne n'a encore tenté l'ascension — sois le premier."}
+          {scope === "today"
+            ? "Personne n'a encore tenté la tour d'aujourd'hui — sois le premier."
+            : "Personne n'a encore tenté l'ascension."}
         </p>
       ) : (
         <ol className="space-y-2">

@@ -1,14 +1,14 @@
 import { Prisma, type Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { getWeekBounds } from "@/lib/date";
 import { getCurrentUniverse } from "@/lib/universes/current";
-import {
-  userDecor,
-  userDecorSelect,
-  type LeaderboardScope,
-} from "@/lib/leaderboard/store";
+import { userDecor, userDecorSelect } from "@/lib/leaderboard/store";
 import { normalizeRunState, type TowerRunState } from "./run";
-import { TOWER_BEST_ORDER_SQL, compareTowerRuns } from "./ranking";
+import {
+  TOWER_BEST_ORDER_SQL,
+  compareTowerRuns,
+  type TowerScope,
+} from "./ranking";
+import { todayKey } from "@/lib/games/jjkdle/daily";
 
 /**
  * Persistance de « The Culling Tower » — module SERVER-ONLY.
@@ -312,7 +312,7 @@ interface TowerBestRow {
  */
 export async function topTowerEntries(
   limit = 20,
-  scope: LeaderboardScope = "all-time",
+  scope: TowerScope = "today",
 ): Promise<TowerLeaderboardEntry[]> {
   const { id: universeId } = await getCurrentUniverse();
 
@@ -322,18 +322,21 @@ export async function topTowerEntries(
   const bestOrder = Prisma.raw(TOWER_BEST_ORDER_SQL);
 
   const bestPerUser = await prisma.$queryRaw<TowerBestRow[]>(
-    scope === "weekly"
-      ? Prisma.sql`
+    scope === "today"
+      ? // Filtré sur `dateKey` et non sur une fenêtre de dates : c'est la clé
+        // de la TOUR du jour. Elle écarte au passage les tours aléatoires
+        // (VIP/ADMIN), qui n'ont pas de `dateKey` et ne sont pas classées.
+        Prisma.sql`
           SELECT DISTINCT ON ("userId")
             "id", "userId", "score", "floor", "cleared", "attempt", "createdAt"
           FROM "TowerScore"
-          WHERE "universeId" = ${universeId} AND "createdAt" >= ${getWeekBounds().start}
+          WHERE "universeId" = ${universeId} AND "dateKey" = ${todayKey()}
           ORDER BY "userId", ${bestOrder}`
       : Prisma.sql`
           SELECT DISTINCT ON ("userId")
             "id", "userId", "score", "floor", "cleared", "attempt", "createdAt"
           FROM "TowerScore"
-          WHERE "universeId" = ${universeId}
+          WHERE "universeId" = ${universeId} AND "dateKey" IS NOT NULL
           ORDER BY "userId", ${bestOrder}`,
   );
 
