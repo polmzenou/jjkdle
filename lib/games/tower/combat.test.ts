@@ -47,6 +47,15 @@ function run(setup: CombatSetup) {
   return simulateCombat(setup);
 }
 
+/** Les frappes du journal, typées — `filter` ne restreint pas l'union seul. */
+function strikes(
+  events: readonly CombatEvent[],
+): Extract<CombatEvent, { kind: "strike" }>[] {
+  return events.filter(
+    (e): e is Extract<CombatEvent, { kind: "strike" }> => e.kind === "strike",
+  );
+}
+
 /** Premier évènement d'un type donné, au tick donné. */
 function eventAt<K extends CombatEvent["kind"]>(
   events: CombatEvent[],
@@ -816,5 +825,157 @@ describe("ciblage ennemi", () => {
       result.events.filter((e) => e.kind === "strike" && e.from === "s0").map((e) => e.kind === "strike" ? e.to : ""),
     );
     expect([...targets]).toEqual(["e0"]);
+  });
+});
+
+/**
+ * LE FOCUS — l'escouade attaque l'ennemi que le joueur désigne.
+ *
+ * Ajouté sur un constat de jeu : face à deux ou trois adversaires, les frappes
+ * partaient toujours sur le premier ennemi vivant. Le joueur regardait son
+ * escouade achever un comparse pendant que l'élite le taillait en pièces, sans
+ * pouvoir rien y faire — alors que le jeu tout entier repose sur le fait que
+ * ses décisions comptent.
+ *
+ * C'est une INTERVENTION, donc journalisée, donc rejouée à l'identique par le
+ * serveur. Le déterminisme reste la contrainte non négociable.
+ */
+describe("focus de l'escouade", () => {
+  /** Trois ennemis, dont un seul sera visé. */
+  function trio() {
+    return [
+      fighter({ id: "e0", archetype: "brute", side: "enemy", stats: { maxHp: 5_000, strike: 1, speed: 1, flux: 0 } }),
+      fighter({ id: "e1", archetype: "brute", side: "enemy", stats: { maxHp: 5_000, strike: 1, speed: 1, flux: 0 } }),
+      fighter({ id: "e2", archetype: "brute", side: "enemy", stats: { maxHp: 5_000, strike: 1, speed: 1, flux: 0 } }),
+    ];
+  }
+
+  const hitter = fighter({
+    id: "a",
+    archetype: "brute",
+    stats: { maxHp: 5_000, strike: 30, speed: 90, flux: 1 },
+  });
+
+  it("sans focus, tout part sur le premier — le comportement d'avant", () => {
+    const result = run({ squad: [hitter], enemies: trio() });
+    const touched = new Set(strikes(result.events).map((e) => e.to));
+
+    expect([...touched]).toEqual(["e0"]);
+  });
+
+  it("désigner un ennemi y redirige toutes les frappes de l'escouade", () => {
+    const result = run({
+      squad: [hitter],
+      enemies: trio(),
+      interventions: [{ tick: 1, slot: 2, kind: "focus" }],
+    });
+
+    const after = strikes(result.events).filter(
+      (e) => e.from === "s0" && e.t > 1,
+    );
+    expect(after.length).toBeGreaterThan(0);
+    expect(after.every((e) => e.to === "e2")).toBe(true);
+  });
+
+  it("la technique déclenchée par le joueur suit la même cible", () => {
+    // Sinon le clic sur un ennemi redirigerait les frappes automatiques mais
+    // pas l'action que le joueur déclenche lui-même — incompréhensible.
+    const result = run({
+      squad: [fighter({ id: "a", archetype: "technique", stats: { maxHp: 5_000, strike: 30, speed: 1, flux: 1 } })],
+      enemies: trio(),
+      modifiers: withEnergy(100),
+      interventions: [
+        { tick: 1, slot: 1, kind: "focus" },
+        { tick: 5, slot: 0 },
+      ],
+    });
+
+    const technique = result.events.find((e) => e.kind === "technique");
+    expect(technique).toBeDefined();
+    expect(eventAt(result.events, "strike", 5)?.to).toBe("e1");
+  });
+
+  it("journalise le changement de cible", () => {
+    const result = run({
+      squad: [hitter],
+      enemies: trio(),
+      interventions: [{ tick: 3, slot: 1, kind: "focus" }],
+    });
+
+    expect(eventAt(result.events, "focus", 3)?.to).toBe("e1");
+  });
+
+  it("une cible qui tombe ne fige pas l'escouade sur un cadavre", () => {
+    // Le focus est une PRÉFÉRENCE : le joueur n'a pas à re-cliquer après chaque
+    // mort, sinon la fonctionnalité coûterait plus d'attention qu'elle n'en
+    // fait gagner.
+    const result = run({
+      squad: [hitter],
+      enemies: [
+        // PV modestes : le combat doit pouvoir aller à son terme, sinon on
+        // mesurerait un plafond de durée et non le report de cible.
+        fighter({ id: "e0", archetype: "brute", side: "enemy", stats: { maxHp: 200, strike: 1, speed: 1, flux: 0 } }),
+        fighter({ id: "e1", archetype: "brute", side: "enemy", stats: { maxHp: 1, strike: 1, speed: 1, flux: 0 } }),
+      ],
+      interventions: [{ tick: 1, slot: 1, kind: "focus" }],
+    });
+
+    expect(result.events.some((e) => e.kind === "death" && e.who === "e1")).toBe(true);
+    expect(result.events.some((e) => e.kind === "strike" && e.to === "e0")).toBe(true);
+    expect(result.victory).toBe(true);
+  });
+
+  it("refuse — et journalise — un ennemi inexistant ou déjà tombé", () => {
+    const result = run({
+      squad: [hitter],
+      enemies: trio(),
+      interventions: [{ tick: 2, slot: 9, kind: "focus" }],
+    });
+
+    expect(
+      result.events.some((e) => e.kind === "reject" && e.reason === "no-target"),
+    ).toBe(true);
+    // Rien n'a bougé : les frappes restent sur le premier.
+    expect(strikes(result.events).every((e) => e.to === "e0")).toBe(true);
+  });
+
+  it("reste DÉTERMINISTE : deux simulations identiques, un même journal", () => {
+    const setup: CombatSetup = {
+      squad: [hitter, fighter({ id: "b", archetype: "swift" })],
+      enemies: trio(),
+      interventions: [
+        { tick: 2, slot: 2, kind: "focus" },
+        { tick: 40, slot: 1, kind: "focus" },
+      ],
+    };
+
+    expect(run(setup).events).toEqual(run(setup).events);
+  });
+
+  it("le focus ne change RIEN au ciblage ennemi", () => {
+    // Les ennemis frappent qui ils veulent : le joueur choisit sa cible, pas
+    // la leur.
+    const enemies = [
+      fighter({ id: "e0", archetype: "brute", side: "enemy", stats: { maxHp: 5_000, strike: 10, speed: 80, flux: 0 } }),
+    ];
+    const squad = [
+      fighter({ id: "a", archetype: "brute", stats: { maxHp: 5_000, strike: 1, speed: 1, flux: 0 } }),
+      fighter({ id: "b", archetype: "brute", stats: { maxHp: 5_000, strike: 1, speed: 1, flux: 0 } }),
+      fighter({ id: "c", archetype: "brute", stats: { maxHp: 5_000, strike: 1, speed: 1, flux: 0 } }),
+    ];
+
+    const plain = run({ squad, enemies });
+    const focused = run({
+      squad,
+      enemies,
+      interventions: [{ tick: 1, slot: 0, kind: "focus" }],
+    });
+
+    const victims = (r: ReturnType<typeof run>) =>
+      strikes(r.events)
+        .filter((e) => e.from === "e0")
+        .map((e) => e.to);
+
+    expect(victims(focused)).toEqual(victims(plain));
   });
 });

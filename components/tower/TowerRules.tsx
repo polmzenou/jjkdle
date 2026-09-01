@@ -138,12 +138,20 @@ export function TowerRulesModal({
 
               <Rule n="5" title="L'énergie occulte">
                 Elle monte toute seule pendant le combat. Chaque technique en
-                coûte ; l&apos;Extension de Territoire, elle, se charge avec les
-                dégâts que tu <strong>subis</strong> — elle arrive donc quand ça
-                va mal, et remplace alors le bouton du personnage.
+                coûte ; l&apos;<strong>ultime</strong>, lui, se charge avec les
+                dégâts que tu <strong>subis</strong> — il arrive donc quand ça va
+                mal, et remplace alors le bouton du personnage.
               </Rule>
 
-              <Rule n="6" title="Une escouade qui se construit">
+              <Rule n="6" title="Choisis qui prend les coups">
+                Face à plusieurs adversaires, <strong>clique sur l&apos;un
+                d&apos;eux</strong> : toute ton escouade se concentre dessus. Sans
+                ça, elle achève celui de devant pendant que le plus dangereux te
+                taille en pièces. Si ta cible tombe, l&apos;escouade enchaîne
+                toute seule — tu n&apos;as pas à re-cliquer.
+              </Rule>
+
+              <Rule n="7" title="Une escouade qui se construit">
                 Tu entres avec <strong>un seul</strong> personnage sur{" "}
                 {SQUAD_SIZE} places. Les autres se recrutent en montant. Une fois
                 l&apos;escouade pleine, recruter oblige à en{" "}
@@ -151,7 +159,7 @@ export function TowerRulesModal({
                 noms ne se croisent que dans les étages élevés.
               </Rule>
 
-              <Rule n="7" title="Un mort reste mort">
+              <Rule n="8" title="Un mort reste mort">
                 Les points de vie ne se régénèrent pas d&apos;un étage à
                 l&apos;autre, et un personnage tombé ne revient pas. L&apos;usure
                 est une ressource : c&apos;est elle qui rend le sacrifice d&apos;un
@@ -161,7 +169,7 @@ export function TowerRulesModal({
                 {STRATE_CLEAR_HEAL_PCT} % des PV à toute l&apos;escouade.
               </Rule>
 
-              <Rule n="8" title="La tour du jour">
+              <Rule n="9" title="La tour du jour">
                 Les {TOWER_FLOORS} étages sont les mêmes pour tout le monde
                 jusqu&apos;à minuit. Tu peux <strong>réessayer autant de fois
                 que tu veux</strong> jusqu&apos;à la franchir — le classement

@@ -33,6 +33,25 @@ export interface FighterSnapshot {
   healed: number;
   /** Jauge d'ultime pleine : le bouton du slot bascule sur l'Extension. */
   domainReady: boolean;
+  /**
+   * Ce combattant a FRAPPÉ à ce tick.
+   *
+   * Sert à l'animation de charge : la carte d'un allié se soulève, celle d'un
+   * ennemi plonge. Sans ce champ, l'interface devrait deviner qui a attaqué en
+   * relisant le journal elle-même — c'est-à-dire ré-implémenter un morceau de
+   * la relecture, et fatalement diverger d'elle.
+   */
+  struck: boolean;
+  /**
+   * Ce combattant a été touché par une action DÉCLENCHÉE PAR LE JOUEUR
+   * (technique, contre ou ultime) à ce tick, et non par une frappe automatique.
+   *
+   * C'est la distinction qui justifie une animation à part : le joueur doit
+   * voir la différence entre « mon escouade tape toute seule » et « le bouton
+   * sur lequel je viens d'appuyer a fait ça ». Sans elle, le seul retour à son
+   * appui était un nombre rouge identique à tous les autres.
+   */
+  slashed: boolean;
 }
 
 export interface CombatSnapshot {
@@ -102,6 +121,10 @@ export function snapshotAt(
           target.hp = Math.max(0, target.hp - event.damage);
           if (atTick) target.damageTaken += event.damage;
         }
+        if (atTick) {
+          const attacker = byUid.get(event.from);
+          if (attacker) attacker.struck = true;
+        }
         break;
       }
       case "heal": {
@@ -162,6 +185,8 @@ export function snapshotAt(
           damageTaken: 0,
           healed: 0,
           domainReady: false,
+          struck: false,
+          slashed: false,
         };
         summons.push(snapshot);
         byUid.set(snapshot.uid, snapshot);
@@ -169,6 +194,21 @@ export function snapshotAt(
       }
       default:
         break;
+    }
+  }
+
+  // Un coup déclenché PAR LE JOUEUR marque ses cibles de ce tick. On le déduit
+  // de la co-occurrence `technique`/`ultimate` + `strike` au même tick plutôt
+  // que d'ajouter un drapeau à chaque frappe : le moteur n'a pas à porter une
+  // information dont seule l'animation a besoin.
+  const byPlayer = current.some(
+    (e) => e.kind === "technique" || e.kind === "ultimate",
+  );
+  if (byPlayer) {
+    for (const event of current) {
+      if (event.kind !== "strike") continue;
+      const target = byUid.get(event.to);
+      if (target) target.slashed = true;
     }
   }
 
@@ -220,5 +260,7 @@ function initial(
     damageTaken: 0,
     healed: 0,
     domainReady: false,
+    struck: false,
+    slashed: false,
   };
 }

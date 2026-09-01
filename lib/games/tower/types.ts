@@ -136,14 +136,26 @@ export interface FighterSpec {
  */
 export interface Intervention {
   tick: number;
-  /** Slot de l'escouade. Ignoré pour une garde, qui est d'escouade. */
+  /**
+   * Slot de l'escouade — sauf pour les deux kinds qui ne visent personne :
+   *   - `"guard"` : ignoré, la garde est d'escouade ;
+   *   - `"focus"` : index de l'ENNEMI à prendre pour cible.
+   */
   slot: number;
   /**
    * `"technique"` par défaut (et absent des anciens logs, d'où l'optionalité).
+   *
    * `"guard"` lève la GARDE : une défense d'escouade, gratuite mais en temps de
    * recharge, qui donne au joueur quelque chose à faire ENTRE deux fenêtres.
+   *
+   * `"focus"` désigne l'ennemi que l'escouade attaque. Sans elle, les frappes
+   * partaient toujours sur le premier ennemi vivant : à deux ou trois
+   * adversaires, le joueur regardait son escouade achever un comparse pendant
+   * que l'élite le taillait en pièces, sans pouvoir rien y faire. C'est une
+   * INTERVENTION comme les autres — donc journalisée, donc rejouée à
+   * l'identique par le serveur (§14).
    */
-  kind?: "technique" | "guard";
+  kind?: "technique" | "guard" | "focus";
 }
 
 /** Pourquoi une intervention a été ignorée (utile au debug et aux tests). */
@@ -153,6 +165,7 @@ export type InterventionReject =
   | "no-ability" // ni technique ni ultime disponible
   | "energy" // énergie insuffisante
   | "cooldown" // garde encore en temps de recharge
+  | "no-target" // cible de focus inconnue ou déjà tombée
   | "out-of-range"; // tick hors bornes ou non croissant
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -183,6 +196,8 @@ export type CombatEvent =
   | { t: number; kind: "ultimate"; from: string }
   /** Garde levée : l'escouade encaisse moins jusqu'à `until`. */
   | { t: number; kind: "guard"; until: number }
+  /** L'escouade change de cible. `to` est l'uid de l'ennemi visé. */
+  | { t: number; kind: "focus"; to: string }
   /** La jauge d'ultime d'un membre d'escouade vient de se remplir. Émis par
    * le MOTEUR pour que l'interface n'ait pas à recalculer le remplissage —
    * seule façon de garantir que le bouton affiché correspond à l'action qui

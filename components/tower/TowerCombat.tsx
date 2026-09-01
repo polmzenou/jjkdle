@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { CharacterImage } from "@/components/CharacterImage";
 import {
   GUARD_SLOT,
@@ -110,7 +111,7 @@ export function TowerCombat({
   }, [snap.finished, interventions, onResolved, casting]);
 
   const intervene = useCallback(
-    (slot: number, kind: "technique" | "guard" = "technique") => {
+    (slot: number, kind: "technique" | "guard" | "focus" = "technique") => {
       setInterventions((prev) => {
         // Les ticks doivent croître STRICTEMENT (garde anti-rejeu du moteur) :
         // deux appuis dans le même dixième de seconde, et le second serait
@@ -125,6 +126,39 @@ export function TowerCombat({
 
   const canGuard =
     !snap.finished && !busy && snap.guardCooldown === 0 && !snap.guardActive;
+
+  /**
+   * Ennemi actuellement visé par l'escouade.
+   *
+   * Relu dans le JOURNAL et non gardé dans un état local : le moteur peut
+   * refuser un focus (cible déjà tombée) ou retomber sur le premier vivant, et
+   * un état local afficherait alors un repère « CIBLE » sur un ennemi que
+   * l'escouade n'attaque pas.
+   */
+  /**
+   * Y a-t-il seulement un choix à faire ?
+   *
+   * Face à un adversaire unique, désigner une cible ne veut rien dire : ni
+   * repère « CIBLE », ni carte cliquable. Un bouton qui n'a qu'une réponse
+   * possible est un bouton de trop.
+   */
+  const canFocus =
+    snap.enemies.filter((e) => e.alive).length > 1 && !snap.finished && !busy;
+
+  const focused = useMemo(() => {
+    let uid: string | null = null;
+    for (const event of result.events) {
+      if (event.t > snap.tick) break;
+      if (event.kind === "focus") uid = event.to;
+    }
+    const alive = snap.enemies.find((e) => e.uid === uid && e.alive);
+    return alive?.uid ?? snap.enemies.find((e) => e.alive)?.uid ?? null;
+  }, [result.events, snap.tick, snap.enemies]);
+
+  const focus = useCallback(
+    (index: number) => intervene(index, "focus"),
+    [intervene],
+  );
 
   return (
     <div className="relative flex flex-col gap-4">
@@ -142,7 +176,10 @@ export function TowerCombat({
             key={enemy.uid}
             fighter={enemy}
             card={view.enemies[i]}
+            ultimateName={view.ultimateName}
             hostile
+            focused={canFocus && enemy.uid === focused}
+            onFocus={canFocus ? () => focus(i) : undefined}
           />
         ))}
       </section>
@@ -155,6 +192,7 @@ export function TowerCombat({
             key={member.uid}
             fighter={member}
             card={view.squad[i]}
+            ultimateName={view.ultimateName}
           />
         ))}
         {snap.summons.map((summon) => (
@@ -294,75 +332,168 @@ function EnergyGauge({
   );
 }
 
+/**
+ * Une carte de combattant : portrait, barres, et tout le retour visuel.
+ *
+ * Trois animations s'y superposent, chacune répondant à une question que le
+ * joueur se posait sans réponse :
+ *
+ *   « qui vient de frapper ? »  — la carte se déplace au moment du coup. Vers
+ *     le HAUT pour l'escouade, vers le BAS pour les ennemis : les deux camps
+ *     bougent en sens opposés, donc un regard suffit à savoir de quel côté
+ *     part le coup, sans lire un nom.
+ *
+ *   « mon appui a-t-il servi ? » — un trait lumineux barre la cible quand le
+ *     coup vient d'une action DÉCLENCHÉE par le joueur. Avant, une technique
+ *     et une frappe automatique produisaient le même nombre rouge.
+ *
+ *   « qui mon escouade attaque-t-elle ? » — l'ennemi ciblé porte un liseré et
+ *     un repère. Cliquer sur un autre le désigne (cf. `onFocus`).
+ */
 function FighterTile({
   fighter,
   card,
   hostile = false,
   summon = false,
+  focused = false,
+  onFocus,
+  ultimateName,
 }: {
   fighter: FighterSnapshot;
   /** Fiche complète, pour la bulle de survol. Absente pour un shikigami. */
   card?: TowerCardView;
   hostile?: boolean;
   summon?: boolean;
+  /** Cet ennemi est la cible actuelle de l'escouade. */
+  focused?: boolean;
+  /** Le désigner comme cible. Absent = carte non cliquable. */
+  onFocus?: () => void;
+  ultimateName?: string;
 }) {
   const ratio = Math.max(0, Math.min(1, fighter.hp / fighter.maxHp));
+  const targetable = Boolean(onFocus) && fighter.alive;
+
+  // Le recul se joue en un tick (100 ms) : au-delà, deux frappes rapprochées se
+  // chevaucheraient et la carte flotterait au lieu de cogner.
+  const lunge = hostile ? 7 : -7;
+
+  const Tag = targetable ? motion.button : motion.div;
+
+  const button = targetable
+    ? {
+        type: "button" as const,
+        onClick: onFocus,
+        "aria-pressed": focused,
+        "aria-label": `Concentrer les attaques sur ${fighter.name}`,
+      }
+    : {};
+
+  const className = [
+    "relative w-[104px] overflow-hidden rounded-lg border transition",
+    fighter.alive ? "" : "opacity-30 grayscale",
+    fighter.charging
+      ? "border-cursed shadow-glow-cursed"
+      : focused
+        ? "border-amber-300 shadow-[0_0_12px_2px_rgba(252,211,77,0.45)]"
+        : hostile
+          ? "border-cursed/30"
+          : "border-domain/30",
+    targetable && !focused ? "cursor-pointer hover:border-amber-300/60" : "",
+    summon ? "w-[76px] border-dashed" : "",
+  ].join(" ");
 
   return (
-    <div
-      className={[
-        "group relative",
-        "relative w-[104px] overflow-hidden rounded-lg border transition",
-        fighter.alive ? "" : "opacity-30 grayscale",
-        fighter.charging
-          ? "border-cursed shadow-glow-cursed"
-          : hostile
-            ? "border-cursed/30"
-            : "border-domain/30",
-        summon ? "w-[76px] border-dashed" : "",
-      ].join(" ")}
-    >
-      <div className="relative aspect-square w-full bg-void-900">
-        {summon ? (
-          <div className="flex h-full w-full items-center justify-center text-2xl">
-            🐕
-          </div>
-        ) : (
-          <CharacterImage character={{ name: fighter.name, image: card?.image }} />
-        )}
-
-        {fighter.damageTaken > 0 && (
-          <span className="absolute inset-x-0 top-1 text-center font-display text-lg font-bold text-cursed drop-shadow">
-            −{fighter.damageTaken}
-          </span>
-        )}
-        {fighter.healed > 0 && (
-          <span className="absolute inset-x-0 top-1 text-center font-display text-lg font-bold text-emerald-400 drop-shadow">
-            +{fighter.healed}
-          </span>
-        )}
-      </div>
-
-      {/* Barre de charge : c'est elle qui annonce la fenêtre. */}
-      {fighter.charging && (
-        <div className="h-1 w-full bg-black/60">
-          <div
-            className="h-full bg-cursed"
-            style={{ width: `${fighter.chargeProgress * 100}%` }}
-          />
-        </div>
+    <div className="group relative">
+      {/* La bulle vit HORS de la carte : celle-ci est `overflow-hidden` (elle
+          la rognerait) et devient un <button> quand l'ennemi est ciblable — un
+          <div role="tooltip"> à l'intérieur serait du HTML invalide. */}
+      {card && (
+        <CharacterTip
+          card={card}
+          hp={{ current: fighter.hp, max: fighter.maxHp }}
+          ultimateName={ultimateName}
+          // Les ennemis sont en HAUT de l'écran : leur bulle s'ouvre vers le
+          // bas. L'escouade est juste au-dessus des boutons d'action : la
+          // sienne s'ouvre vers le haut, sinon elle les recouvre au moment
+          // précis où le joueur vise.
+          align={hostile ? "bottom" : "top"}
+        />
       )}
 
-      <div className="h-1.5 w-full bg-black/60">
-        <div
-          className={ratio > 0.35 ? "h-full bg-emerald-400" : "h-full bg-cursed"}
-          style={{ width: `${ratio * 100}%` }}
-        />
-      </div>
+      <Tag
+        {...button}
+        animate={fighter.struck ? { y: [0, lunge, 0] } : { y: 0 }}
+        transition={{ duration: 0.22, ease: "easeOut" }}
+        className={className}
+      >
+        <div className="relative aspect-square w-full bg-void-900">
+          {summon ? (
+            <div className="flex h-full w-full items-center justify-center text-2xl">
+              🐕
+            </div>
+          ) : (
+            <CharacterImage character={{ name: fighter.name, image: card?.image }} />
+          )}
 
-      <p className="truncate px-1.5 py-1 text-center text-[10px] text-white/60">
-        {fighter.name}
-      </p>
+          {fighter.damageTaken > 0 && (
+            <span className="absolute inset-x-0 top-1 text-center font-display text-lg font-bold text-cursed drop-shadow">
+              −{fighter.damageTaken}
+            </span>
+          )}
+          {fighter.healed > 0 && (
+            <span className="absolute inset-x-0 top-1 text-center font-display text-lg font-bold text-emerald-400 drop-shadow">
+              +{fighter.healed}
+            </span>
+          )}
+
+          {/* Le trait du joueur : il barre le portrait en diagonale, puis
+              s'efface. C'est le seul retour propre à SON action. */}
+          <AnimatePresence>
+            {fighter.slashed && (
+              <motion.span
+                key={`slash-${fighter.uid}`}
+                aria-hidden
+                className="pointer-events-none absolute left-[-20%] top-1/2 h-[3px] w-[140%] origin-center -rotate-45 bg-gradient-to-r from-transparent via-white to-transparent"
+                initial={{ opacity: 0, scaleX: 0.2 }}
+                animate={{ opacity: [0, 1, 0], scaleX: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              />
+            )}
+          </AnimatePresence>
+
+          {focused && (
+            <span
+              aria-hidden
+              className="absolute right-1 top-1 rounded bg-amber-300/90 px-1 text-[9px] font-bold leading-4 text-void-900"
+              title="Cible de ton escouade"
+            >
+              CIBLE
+            </span>
+          )}
+        </div>
+
+        {/* Barre de charge : c'est elle qui annonce la fenêtre. */}
+        {fighter.charging && (
+          <div className="h-1 w-full bg-black/60">
+            <div
+              className="h-full bg-cursed"
+              style={{ width: `${fighter.chargeProgress * 100}%` }}
+            />
+          </div>
+        )}
+
+        <div className="h-1.5 w-full bg-black/60">
+          <div
+            className={ratio > 0.35 ? "h-full bg-emerald-400" : "h-full bg-cursed"}
+            style={{ width: `${ratio * 100}%` }}
+          />
+        </div>
+
+          <p className="truncate px-1.5 py-1 text-center text-[10px] text-white/60">
+            {fighter.name}
+          </p>
+      </Tag>
     </div>
   );
 }

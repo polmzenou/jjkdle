@@ -73,6 +73,7 @@ export function CharacterTip({
   card,
   hp,
   open = false,
+  align,
   ultimateName = DEFAULT_ULTIMATE_NAME,
 }: {
   card: TowerCardView;
@@ -80,6 +81,8 @@ export function CharacterTip({
   hp?: { current: number; max: number };
   /** Cf. `InfoTip.open`. */
   open?: boolean;
+  /** Cf. `InfoTip.align`. */
+  align?: "top" | "bottom";
   /**
    * Nom de l'ultime dans l'univers courant (`TowerView.ultimateName`).
    *
@@ -94,7 +97,7 @@ export function CharacterTip({
   const interval = card.stats.speed > 0 ? ACTION_GAUGE / card.stats.speed : 0;
 
   return (
-    <InfoTip open={open}>
+    <InfoTip open={open} align={align}>
       <p className="font-display text-sm font-bold text-white">{card.name}</p>
 
       <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">

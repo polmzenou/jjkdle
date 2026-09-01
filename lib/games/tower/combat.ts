@@ -203,6 +203,11 @@ interface State {
   firstTelegraphUsed: boolean;
   /** Aucun ennemi ne peut télégraphier avant ce tick (ultime). */
   telegraphSuppressedUntil: number;
+  /**
+   * Index de l'ennemi que l'escouade attaque, ou `null` pour « le premier
+   * vivant ». Piloté par les interventions `focus`.
+   */
+  focus: number | null;
   /** L'escouade est en garde jusqu'à ce tick (exclu). */
   guardUntil: number;
   /** La garde n'est re-levable qu'à partir de ce tick. */
@@ -376,6 +381,7 @@ function buildState(setup: CombatSetup): State {
     absorption: Math.max(0, modifiers.ABSORPTION),
     firstTelegraphUsed: false,
     telegraphSuppressedUntil: -1,
+    focus: null,
     guardUntil: -1,
     guardReadyAt: 0,
     modifiers,
@@ -441,9 +447,25 @@ function allyTargets(state: State): Runtime[] {
   return [...state.squad, ...state.summons];
 }
 
-/** Premier combattant vivant d'une liste. Ciblage des techniques du joueur. */
+/** Premier combattant vivant d'une liste. */
 function firstAlive(fighters: Runtime[]): Runtime | null {
   return fighters.find((f) => f.alive) ?? null;
+}
+
+/**
+ * Cible des frappes de l'ESCOUADE et de ses shikigami : l'ennemi désigné par le
+ * joueur s'il tient encore debout, le premier vivant sinon.
+ *
+ * Le repli est important : une cible qui tombe ne doit pas figer l'escouade sur
+ * un cadavre, et le joueur n'a pas à re-cliquer après chaque mort. Le focus est
+ * une PRÉFÉRENCE, pas une contrainte.
+ */
+function squadTarget(state: State, targets: Runtime[]): Runtime | null {
+  if (state.focus !== null) {
+    const chosen = targets[state.focus];
+    if (chosen?.alive) return chosen;
+  }
+  return firstAlive(targets);
 }
 
 /**
@@ -498,7 +520,7 @@ function advanceAndStrike(state: State, fighter: Runtime, targets: Runtime[]): v
   const target =
     fighter.spec.side === "enemy"
       ? pickTarget(state, fighter, targets)
-      : firstAlive(targets);
+      : squadTarget(state, targets);
   if (!target) return;
 
   let mult = 1;
@@ -729,6 +751,7 @@ function resolveIntervention(state: State, intervention: Intervention): void {
   const { slot } = intervention;
 
   if (intervention.kind === "guard") return raiseGuard(state);
+  if (intervention.kind === "focus") return setFocus(state, slot);
 
   const fighter = state.squad[slot];
 
@@ -749,6 +772,21 @@ function resolveIntervention(state: State, intervention: Intervention): void {
 
   state.energy -= cost;
   castTechnique(state, fighter, technique, cost);
+}
+
+/**
+ * Désigne l'ennemi que l'escouade attaque.
+ *
+ * Refusé sur un ennemi inconnu ou déjà tombé, et journalisé comme tel : un
+ * focus accepté en silence sur un index absurde laisserait le serveur et le
+ * client diverger sans que rien ne le signale.
+ */
+function setFocus(state: State, index: number): void {
+  const enemy = state.enemies[index];
+  if (!enemy || !enemy.alive) return reject(state, index, "no-target");
+
+  state.focus = index;
+  state.events.push({ t: state.tick, kind: "focus", to: enemy.uid });
 }
 
 /**
@@ -856,12 +894,12 @@ function applyTechnique(
     }
     // Sans technique précédente, `mimic` dégénère en frappe simple plutôt
     // qu'en clic perdu.
-    const target = firstAlive(state.enemies);
+    const target = squadTarget(state, state.enemies);
     if (target) strikeWithCounter(state, fighter, target, 1, timed);
     return;
   }
 
-  const primary = firstAlive(state.enemies);
+  const primary = squadTarget(state, state.enemies);
   if (!primary) return;
 
   switch (effect.type) {
@@ -874,7 +912,7 @@ function applyTechnique(
       // courante, qui peut changer si le premier l'abat.
       let counterLeft = timed;
       for (let i = 0; i < effect.hits; i += 1) {
-        const target = firstAlive(state.enemies);
+        const target = squadTarget(state, state.enemies);
         if (!target) return;
         strikeWithCounter(state, fighter, target, effect.mult, counterLeft);
         counterLeft = false;
@@ -1003,7 +1041,7 @@ function spawnSummon(
 
   // Coup d'entrée : sans lui, invoquer pendant une fenêtre n'aurait aucun
   // effet visible et le contre serait perdu.
-  const target = firstAlive(state.enemies);
+  const target = squadTarget(state, state.enemies);
   if (target) hit(state, caster, target, 0.5 * bonus);
 }
 
