@@ -259,13 +259,16 @@ export const TECHNIQUES: Record<Archetype, TechniqueSpec | null> = {
 // ──────────────────────────────────────────────────────────────────────────
 
 /**
- * L'ultime, réservé aux personnages dont l'attribut BOOLEAN de l'univers
- * (`hasDomain` en JJK) vaut vrai. Sa jauge se remplit avec les dégâts SUBIS,
- * pas infligés : elle arrive donc quand ça va mal, ce qui en fait un
- * retournement de situation plutôt qu'une récompense de domination.
+ * L'ultime, réservé aux personnages que la config de l'univers désigne
+ * (`hasUltimate`). Sa jauge se remplit avec les dégâts SUBIS, pas infligés :
+ * elle arrive donc quand ça va mal, ce qui en fait un retournement de
+ * situation plutôt qu'une récompense de domination.
+ *
+ * ⚠️ Son NOM ne vit PAS ici : « Extension de Territoire » est du vocabulaire
+ * JJK, et ce module ne connaît aucun univers. Il se lit dans
+ * `TowerConfig.ultimateName`.
  */
 export const ULTIMATE = {
-  name: "Extension de Territoire",
   description:
     "Frappe tous les ennemis et suspend leurs attaques chargées 5 secondes.",
   /** Multiplicateur de frappe, sur tous les ennemis. */

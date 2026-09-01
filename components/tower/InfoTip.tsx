@@ -1,6 +1,10 @@
 "use client";
 
 import { ULTIMATE, passiveOf } from "@/lib/games/tower/abilities";
+import { JJK_TOWER_CONFIG } from "@/lib/games/tower/config";
+
+/** Repli quand l'appelant n'a pas la vue sous la main. */
+const DEFAULT_ULTIMATE_NAME = JJK_TOWER_CONFIG.ultimateName;
 import { ACTION_GAUGE } from "@/lib/games/tower/combat";
 import type { ItemView, TowerCardView } from "@/lib/games/tower/view";
 
@@ -69,12 +73,20 @@ export function CharacterTip({
   card,
   hp,
   open = false,
+  ultimateName = DEFAULT_ULTIMATE_NAME,
 }: {
   card: TowerCardView;
   /** Usure actuelle, quand le personnage est déjà en jeu. */
   hp?: { current: number; max: number };
   /** Cf. `InfoTip.open`. */
   open?: boolean;
+  /**
+   * Nom de l'ultime dans l'univers courant (`TowerView.ultimateName`).
+   *
+   * Défaut JJK plutôt que prop obligatoire : cette bulle est rendue depuis une
+   * dizaine d'endroits, dont plusieurs n'ont pas la vue sous la main.
+   */
+  ultimateName?: string;
 }) {
   const passive = passiveOf(card.archetype);
   // La célérité est en points de jauge par seconde et la jauge part à 100 :
@@ -108,12 +120,12 @@ export function CharacterTip({
         </Block>
       ) : (
         <Block label="Technique" title="Aucune">
-          Ce personnage mise tout sur son Extension de Territoire.
+          Ce personnage mise tout sur son ultime.
         </Block>
       )}
 
       {card.hasDomain && (
-        <Block label="Ultime" title={ULTIMATE.name} accent="cursed">
+        <Block label="Ultime" title={ultimateName} accent="cursed">
           {ULTIMATE.description} La jauge se remplit avec les dégâts subis.
         </Block>
       )}

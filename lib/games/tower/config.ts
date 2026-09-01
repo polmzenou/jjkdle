@@ -34,6 +34,15 @@ export interface TowerConfig {
    * suffit (Pilier, Classe Spéciale).
    */
   ultimateAttributeValues?: readonly string[];
+  /**
+   * NOM de l'ultime dans cet univers.
+   *
+   * « Extension de Territoire » est du vocabulaire Jujutsu Kaisen, et il était
+   * écrit en dur dans `abilities.ts` — un module qui ne connaît par ailleurs
+   * aucun univers. Il se serait affiché tel quel sur Demon Slayer et sur
+   * Attack on Titan, à l'écran de combat comme dans les bulles d'info.
+   */
+  ultimateName: string;
   /** Attribut NUMERIC alimentant le Flux (énergie occulte par tick). */
   energyAttributeKey: string;
   /**
@@ -54,6 +63,7 @@ export interface TowerConfig {
  */
 export const JJK_TOWER_CONFIG: TowerConfig = {
   arcAttributeKey: "appearanceArc",
+  ultimateName: "Extension de Territoire",
   ultimateAttributeKey: "hasDomain",
   energyAttributeKey: "cursedEnergy",
   categoryArchetypes: {
@@ -99,6 +109,7 @@ export function resolveTowerConfig(
       override.energyAttributeKey ?? JJK_TOWER_CONFIG.energyAttributeKey,
     categoryArchetypes:
       override.categoryArchetypes ?? JJK_TOWER_CONFIG.categoryArchetypes,
+    ultimateName: override.ultimateName ?? JJK_TOWER_CONFIG.ultimateName,
   };
 }
 

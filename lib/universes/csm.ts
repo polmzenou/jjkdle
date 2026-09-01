@@ -154,6 +154,7 @@ export const csm: UniverseConfig = {
     ultimateAttributeKey: "csmspecies",
     ultimateAttributeValues: ["HYBRID", "FIEND"],
     energyAttributeKey: "csmpower",
+    ultimateName: "Forme Démoniaque",
     // Chainsaw Man n'a pas de catégorie « battle IQ » : ses catégories sont
     // pour moitié des CASTINGS (Division 4, Antagonistes, Coéquipier) et non
     // des statistiques. C'est précisément le cas que `categoryArchetypes`

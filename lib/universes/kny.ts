@@ -166,6 +166,7 @@ export const kny: UniverseConfig = {
     ultimateAttributeKey: "knyrank",
     ultimateAttributeValues: ["HASHIRA"],
     energyAttributeKey: "knypower",
+    ultimateName: "Marque du Pourfendeur",
     categoryArchetypes: {
       "kny-souffle": "technique",
       "kny-speed": "swift",

@@ -10,6 +10,7 @@ import {
   type CombatSetup,
 } from "./combat";
 import { NO_MODIFIERS, type RunModifiers } from "./effects";
+import { snapshotAt } from "./playback";
 import type { Archetype, CombatEvent, FighterSpec } from "./types";
 
 /**
@@ -370,6 +371,21 @@ describe("passifs", () => {
   });
 });
 
+/** Même escouade/ennemis que le scénario d'ultime, pour la relecture. */
+const SETUP_FOR_ULTIMATE: CombatSetup = {
+  squad: [
+    fighter({
+      id: "a",
+      archetype: "technique",
+      hasDomain: true,
+      stats: { maxHp: 300, strike: 30, speed: 40, flux: 1.6 },
+    }),
+  ],
+  enemies: [
+    fighter({ id: "x", archetype: "brute", side: "enemy", stats: { maxHp: 100_000, strike: 60, speed: 20, flux: 0 } }),
+  ],
+};
+
 describe("ultime", () => {
   it("remplace la technique quand la jauge est pleine et frappe tous les ennemis", () => {
     const result = run({
@@ -399,6 +415,49 @@ describe("ultime", () => {
       (e) => e.kind === "strike" && e.t === ultimate?.t,
     );
     expect(blast).toHaveLength(2); // les deux ennemis touchés
+  });
+
+  /**
+   * Contrat dont dépend la CINÉMATIQUE (`DomainCinematic`) : elle se déclenche
+   * sur l'évènement `ultimate` remonté par `snapshotAt` au tick courant, et
+   * elle suspend l'horloge de lecture le temps de se jouer.
+   *
+   * Si l'évènement portait un `from` introuvable dans l'escouade, ou tombait à
+   * un tick que la relecture ne sert jamais, la cinématique ne partirait
+   * simplement pas — sans erreur, et sans que rien ne le signale.
+   */
+  it("l'évènement est attribué à un membre de l'escouade, à un tick relisible", () => {
+    const result = run({
+      squad: [
+        fighter({
+          id: "a",
+          archetype: "technique",
+          hasDomain: true,
+          stats: { maxHp: 300, strike: 30, speed: 40, flux: 1.6 },
+        }),
+      ],
+      enemies: [
+        fighter({ id: "x", archetype: "brute", side: "enemy", stats: { maxHp: 100_000, strike: 60, speed: 20, flux: 0 } }),
+      ],
+      modifiers: withEnergy(100),
+      interventions: [{ tick: 110, slot: 0 }],
+    });
+
+    const ultimate = result.events.find((e) => e.kind === "ultimate");
+    expect(ultimate).toBeDefined();
+
+    // Le lanceur doit être identifiable : c'est son nom que la cinématique
+    // affiche au-dessus de celui de l'ultime.
+    const snapshot = snapshotAt(result, SETUP_FOR_ULTIMATE, ultimate!.t);
+    expect(snapshot.squad.some((f) => f.uid === ultimate!.from)).toBe(true);
+
+    // Et il doit tomber DANS le combat : un évènement au-delà du dernier tick
+    // ne serait jamais rejoué.
+    expect(ultimate!.t).toBeGreaterThan(0);
+    expect(ultimate!.t).toBeLessThanOrEqual(result.ticks);
+
+    // Enfin, la relecture doit le servir à ce tick-là, et à lui seul.
+    expect(snapshot.events.some((e) => e.kind === "ultimate")).toBe(true);
   });
 
   it("sans jauge pleine, c'est la technique qui part", () => {

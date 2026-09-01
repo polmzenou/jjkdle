@@ -152,6 +152,7 @@ export const aot: UniverseConfig = {
     arcAttributeKey: "aotAppearanceArc",
     ultimateAttributeKey: "aottitan",
     energyAttributeKey: "aotpower",
+    ultimateName: "Transformation en Titan",
     categoryArchetypes: {
       "aot-titan-shifter": "technique",
       "aot-agilite": "swift",

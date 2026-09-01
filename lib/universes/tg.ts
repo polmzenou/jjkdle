@@ -158,14 +158,18 @@ export const tg: UniverseConfig = {
    * Tour de Tokyo Ghoul.
    *
    * Comme Demon Slayer, Tokyo Ghoul n'a pas d'attribut booléen : l'ultime
-   * s'ouvre sur le GRADE CCG, au sommet de la hiérarchie des enquêteurs.
-   * `tgrate` (le taux SS/SSS) aurait été l'autre candidat, mais il ne couvre
-   * que les goules — la moitié du roster en serait restée exclue.
+   * s'ouvre sur le TAUX de goule, et le palier est SS.
+   *
+   * `tgrank` (le grade CCG) était l'autre candidat, et il a d'abord été retenu
+   * à tort : il ne décrit que les enquêteurs, si bien que pas une seule goule
+   * n'aurait eu d'ultime dans Tokyo Ghoul. Le taux est aussi le bon nom — le
+   * Kakuja est précisément ce que débloquent les goules SS et SSS.
    */
   tower: {
     arcAttributeKey: "tgAppearanceArc",
-    ultimateAttributeKey: "tgrank",
-    ultimateAttributeValues: ["SPECIAL_CLASS", "ASSOCIATE_SPECIAL"],
+    ultimateAttributeKey: "tgrate",
+    ultimateAttributeValues: ["SS", "SSS"],
+    ultimateName: "Kakuja",
     energyAttributeKey: "tgpower",
     categoryArchetypes: {
       "tg-kagune": "technique",

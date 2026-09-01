@@ -16,6 +16,7 @@ import {
   type TowerCardView,
   type TowerView,
 } from "@/lib/games/tower/view";
+import { CINEMATIC_MS, DomainCinematic } from "./DomainCinematic";
 import { CharacterTip } from "./InfoTip";
 import type { Intervention } from "@/lib/games/tower/types";
 
@@ -56,6 +57,12 @@ export function TowerCombat({
   const [tick, setTick] = useState(0);
   const sent = useRef(false);
 
+  /** Personnage dont l'ultime est en train d'être joué à l'écran. */
+  const [casting, setCasting] = useState<string | null>(null);
+  /** Dernier tick d'ultime déjà mis en scène — la re-simulation rejoue le
+   *  journal, et sans ce garde-fou la même cinématique repartirait en boucle. */
+  const shown = useRef(-1);
+
   const result = useMemo(
     () => simulateCombat({ ...setup, interventions }),
     [setup, interventions],
@@ -66,22 +73,41 @@ export function TowerCombat({
     [result, setup, tick],
   );
 
+  // Un ultime vient de partir : on coupe pour le mettre en scène.
+  useEffect(() => {
+    const ultimate = snap.events.find((e) => e.kind === "ultimate");
+    if (!ultimate || shown.current === snap.tick) return;
+
+    shown.current = snap.tick;
+    const who = snap.squad.find((f) => f.uid === ultimate.from);
+    setCasting(who?.name ?? "");
+
+    const id = window.setTimeout(() => setCasting(null), CINEMATIC_MS);
+    return () => window.clearTimeout(id);
+  }, [snap.events, snap.tick, snap.squad]);
+
   // Horloge du combat. `TICK_MS` est le tick du moteur : l'animation tourne
   // donc à la même cadence que la simulation, pas à une cadence approchée.
+  //
+  // Elle s'arrête pendant la cinématique. Le combat étant DÉJÀ résolu, cette
+  // pause ne change strictement rien à son issue — elle ne fait que retenir la
+  // lecture, comme un arrêt sur image.
   useEffect(() => {
-    if (snap.finished) return;
+    if (snap.finished || casting !== null) return;
     const id = window.setInterval(() => setTick((t) => t + 1), TICK_MS);
     return () => window.clearInterval(id);
-  }, [snap.finished]);
+  }, [snap.finished, casting]);
 
   // Fin du combat : on remonte le SEUL apport du client — le log
   // d'interventions. Ni dégâts, ni résultat : c'est le serveur qui tranche.
   useEffect(() => {
-    if (!snap.finished || sent.current) return;
+    // On ne quitte pas l'écran sur une cinématique en cours : l'ultime qui
+    // achève le dernier ennemi est précisément celui qu'il faut voir.
+    if (!snap.finished || sent.current || casting !== null) return;
     sent.current = true;
     const id = window.setTimeout(() => onResolved(interventions), 900);
     return () => window.clearTimeout(id);
-  }, [snap.finished, interventions, onResolved]);
+  }, [snap.finished, interventions, onResolved, casting]);
 
   const intervene = useCallback(
     (slot: number, kind: "technique" | "guard" = "technique") => {
@@ -101,7 +127,13 @@ export function TowerCombat({
     !snap.finished && !busy && snap.guardCooldown === 0 && !snap.guardActive;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="relative flex flex-col gap-4">
+      <DomainCinematic
+        caster={casting}
+        ultimateName={view.ultimateName}
+        onDone={() => undefined}
+      />
+
       <FloorHeader view={view} tick={snap.tick} />
 
       <section aria-label="Ennemis" className="flex flex-wrap justify-center gap-2">
@@ -160,7 +192,10 @@ export function TowerCombat({
               ].join(" ")}
             >
               <span className="font-display text-[11px] font-bold uppercase leading-tight tracking-wide">
-                {ultimate ? "Territoire" : (card.technique?.name ?? "—")}
+                {/* « ULTIME » et non le nom de l'univers : « Extension de
+                    Territoire » ne tient pas dans un tiers de largeur d'écran.
+                    Le nom complet est annoncé par la cinématique, en grand. */}
+                {ultimate ? "Ultime" : (card.technique?.name ?? "—")}
               </span>
               <span className="text-[11px] tabular-nums opacity-70">
                 {ultimate ? "PRÊT" : cost}

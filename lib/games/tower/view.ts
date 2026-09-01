@@ -137,6 +137,14 @@ export interface TowerView {
   event: EventView | null;
   /** Soin d'un nœud de repos, pour l'afficher sans le coder en dur. */
   restPct: number;
+  /**
+   * Nom de l'ultime DANS CET UNIVERS (« Extension de Territoire » en JJK).
+   *
+   * Il transite par la vue plutôt que d'être lu côté client : les composants
+   * n'ont pas accès à la `TowerConfig`, qui est résolue sur le serveur à partir
+   * de l'univers courant.
+   */
+  ultimateName: string;
   fragments: number;
   enemiesKilled: number;
   bossesKilled: number;
@@ -309,6 +317,7 @@ export function buildView(params: {
         ? toEventView(eventFor(params.events ?? [], plan.eventIndex))
         : null,
     restPct: REST_HEAL_PCT,
+    ultimateName: config.ultimateName,
     fragments: state.fragments,
     enemiesKilled: state.enemiesKilled,
     bossesKilled: state.bossesKilled,
