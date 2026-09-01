@@ -141,6 +141,29 @@ export const aot: UniverseConfig = {
   // ⚠️ L'attribut `aotpower` doit exister en base pour cet univers (créé via
   // /admin) : sans lui, le jeu n'a rien à comparer.
   higherLower: { attributeKey: "aotpower" },
+  /**
+   * Tour d'AOT — « La Tour de Wall Maria ».
+   *
+   * L'ultime se lit sur `aottitan` (BOOLEAN) : se transformer en Titan EST
+   * l'abattage de carte de cet univers, exactement comme l'Extension de
+   * Territoire en JJK. Aucune valeur qualifiante n'est donc nécessaire.
+   */
+  tower: {
+    arcAttributeKey: "aotAppearanceArc",
+    ultimateAttributeKey: "aottitan",
+    energyAttributeKey: "aotpower",
+    categoryArchetypes: {
+      "aot-titan-shifter": "technique",
+      "aot-agilite": "swift",
+      "aot-menace": "beast",
+      "aot-battle-iq": "tactician",
+      "aot-man-uvre-tridimensionnel": "brute",
+      "aot-mahr": "channeler",
+      "aot-commandement": "domain",
+      "aot-bataillon-d-exploration": "adaptive",
+      "aot-determination": "stalwart",
+    },
+  },
   labels: {
     tagline:
       "Une collection de mini-jeux nerveux pour tester ta connaissance de l'univers et mériter tes ailes de la liberté.",

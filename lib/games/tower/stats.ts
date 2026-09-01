@@ -152,6 +152,35 @@ export function booleanAttribute(character: Character, key: string): boolean {
   return String(raw ?? "").toLowerCase() === "true";
 }
 
+/**
+ * Ce personnage peut-il déclencher l'ultime ?
+ *
+ * Deux lectures, selon ce que l'univers a sous la main : un attribut BOOLEAN
+ * dédié (JJK `hasDomain`, AOT `aottitan`), ou une LISTE de valeurs qualifiantes
+ * sur n'importe quel attribut fermé (`ultimateAttributeValues`).
+ *
+ * Le second cas n'est pas un raffinement : Demon Slayer et Tokyo Ghoul n'ont
+ * aucun attribut booléen, et sans lui leur ultime — jauge, bouton, cinématique
+ * — n'aurait jamais pu se déclencher, sans erreur ni trace.
+ *
+ * La comparaison ignore la casse : ces valeurs sont saisies en admin, et un
+ * `Hashira` au lieu de `HASHIRA` ne doit pas priver la moitié d'un roster de sa
+ * mécanique.
+ */
+export function hasUltimate(character: Character, config: TowerConfig): boolean {
+  const allowed = config.ultimateAttributeValues;
+  if (!allowed || allowed.length === 0) {
+    return booleanAttribute(character, config.ultimateAttributeKey);
+  }
+
+  const raw = String(character.attributes?.[config.ultimateAttributeKey] ?? "")
+    .trim()
+    .toLowerCase();
+  if (!raw) return false;
+
+  return allowed.some((value) => value.trim().toLowerCase() === raw);
+}
+
 // ──────────────────────────────────────────────────────────────────────────
 // Dérivation
 // ──────────────────────────────────────────────────────────────────────────
@@ -197,7 +226,7 @@ export function toFighterSpec(
     side,
     stats: deriveStats(character, config),
     archetype: archetypeOf(character, config.categoryArchetypes),
-    hasDomain: booleanAttribute(character, config.ultimateAttributeKey),
+    hasDomain: hasUltimate(character, config),
   };
 }
 

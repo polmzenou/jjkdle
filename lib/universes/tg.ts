@@ -154,6 +154,31 @@ export const tg: UniverseConfig = {
   // ⚠️ L'attribut `tgpower` doit exister en base pour cet univers : sans lui, le
   // jeu n'a rien à comparer (cf. lib/universes/tg-attributes.ts).
   higherLower: { attributeKey: "tgpower" },
+  /**
+   * Tour de Tokyo Ghoul.
+   *
+   * Comme Demon Slayer, Tokyo Ghoul n'a pas d'attribut booléen : l'ultime
+   * s'ouvre sur le GRADE CCG, au sommet de la hiérarchie des enquêteurs.
+   * `tgrate` (le taux SS/SSS) aurait été l'autre candidat, mais il ne couvre
+   * que les goules — la moitié du roster en serait restée exclue.
+   */
+  tower: {
+    arcAttributeKey: "tgAppearanceArc",
+    ultimateAttributeKey: "tgrank",
+    ultimateAttributeValues: ["SPECIAL_CLASS", "ASSOCIATE_SPECIAL"],
+    energyAttributeKey: "tgpower",
+    categoryArchetypes: {
+      "tg-kagune": "technique",
+      "tg-speed": "swift",
+      "tg-semi-goules": "beast",
+      "tg-battle-iq": "tactician",
+      "tg-force-physique": "brute",
+      "tg-regeneration": "channeler",
+      "tg-ccg": "domain",
+      "tg-aogiri": "adaptive",
+      "tg-mental": "stalwart",
+    },
+  },
   labels: {
     tagline:
       "Une collection de mini-jeux nerveux pour tester ta connaissance de l'univers et t'imposer dans le 20e arrondissement.",

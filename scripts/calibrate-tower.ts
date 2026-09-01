@@ -1,8 +1,17 @@
 /**
  * Calibrage de « The Culling Tower » par SIMULATION.
  *
- *   npx tsx scripts/calibrate-tower.ts          # 200 tours par politique
- *   npx tsx scripts/calibrate-tower.ts 1000     # plus de tours, moins de bruit
+ *   npx tsx scripts/calibrate-tower.ts               # JJK, 200 tours
+ *   npx tsx scripts/calibrate-tower.ts kny           # un autre univers
+ *   npx tsx scripts/calibrate-tower.ts kny 1000      # moins de bruit
+ *
+ * L'univers est un ARGUMENT et non une constante : la tour est data-driven, et
+ * la seule façon de savoir si celle d'un nouvel anime tient debout est de la
+ * jouer. Le rapport commence donc par un état des lieux du CONTENU — vivier par
+ * strate, part du roster ouvrant l'ultime, objets — avant de mesurer quoi que
+ * ce soit. Une tour dont la strate I ne compte que deux personnages resservira
+ * les deux mêmes ennemis cinq étages de suite, et aucun coefficient n'y changera
+ * rien.
  *
  * ── Pourquoi cet outil existe ──
  * Les coefficients d'équilibrage (PV, frappe, multiplicateur de boss, handicap
@@ -44,15 +53,18 @@ import {
   simulateCombat,
   type CombatSetup,
 } from "../lib/games/tower/combat";
-import { JJK_TOWER_CONFIG } from "../lib/games/tower/config";
-import { eventFor } from "../lib/games/tower/events";
+import {
+  resolveTowerConfig,
+  type TowerConfig,
+} from "../lib/games/tower/config";
+import { eventFor, type TowerEvent } from "../lib/games/tower/events";
 import {
   buildTowerRoster,
   isTowerPlayable,
   optionsAt,
   type TowerRoster,
 } from "../lib/games/tower/floors";
-import { normalizeItem, type TowerItem } from "../lib/games/tower/items";
+import { MIN_ITEMS, normalizeItem, type TowerItem } from "../lib/games/tower/items";
 import { rollRewards } from "../lib/games/tower/rewards";
 import {
   buildCombatSetup,
@@ -75,8 +87,13 @@ import {
   type FightKind,
   type Intervention,
 } from "../lib/games/tower/types";
+import { hasUltimate } from "../lib/games/tower/stats";
 import { JJK_EVENTS } from "../lib/universes/jjk-events";
-import { jjk } from "../lib/universes/jjk";
+import {
+  DEFAULT_UNIVERSE_SLUG,
+  getUniverseBySlug,
+  listUniverses,
+} from "../lib/universes/registry";
 
 const prisma = new PrismaClient();
 
@@ -85,6 +102,10 @@ const POLICIES: readonly Policy[] = ["passif", "moyen", "expert"];
 
 /** Tout ce qu'il faut pour jouer une tour sans retoucher la base. */
 interface Context {
+  slug: string;
+  config: TowerConfig;
+  /** Évènements écrits à la main. Vide pour un univers qui n'en a pas encore. */
+  events: TowerEvent[];
   roster: Record<string, Character>;
   list: Character[];
   tower: TowerRoster;
@@ -226,7 +247,7 @@ interface RunReport {
 }
 
 function playRun(seed: number, policy: Policy, ctx: Context): RunReport {
-  const config = JJK_TOWER_CONFIG;
+  const config = ctx.config;
   const rand = mulberry32(seed ^ 0x5f3759df);
 
   let state = startRun(seed);
@@ -373,7 +394,7 @@ function playRun(seed: number, policy: Policy, ctx: Context): RunReport {
       }
 
       case "event": {
-        const event = eventFor(JJK_EVENTS, plan.eventIndex);
+        const event = eventFor(ctx.events, plan.eventIndex);
         const choice = event?.choices[rand() < 0.5 ? 0 : 1];
         const applied = resolveEvent(state, choice?.outcome ?? { text: "" }, null);
         if (!applied.ok) return finish();
@@ -473,7 +494,11 @@ function verdict(question: string, ok: boolean, detail: string) {
  * mémoïsé par le `cache()` de React et résout l'univers via `next/headers`,
  * deux choses qui n'existent pas dans un script.
  */
-async function loadContext(universeId: string): Promise<Context> {
+async function loadContext(
+  slug: string,
+  universeId: string,
+  config: TowerConfig,
+): Promise<Context> {
   const [rows, itemRows, withImage, arcAttribute] = await Promise.all([
     prisma.character.findMany({
       where: { universeId },
@@ -518,7 +543,7 @@ async function loadContext(universeId: string): Promise<Context> {
     }),
     prisma.attribute.findUnique({
       where: {
-        universeId_key: { universeId, key: JJK_TOWER_CONFIG.arcAttributeKey },
+        universeId_key: { universeId, key: config.arcAttributeKey },
       },
       select: {
         options: {
@@ -557,36 +582,134 @@ async function loadContext(universeId: string): Promise<Context> {
     .map((o) => o.value);
 
   return {
+    slug,
+    config,
+    // Les évènements sont du contenu ÉCRIT, pas de la donnée : un univers qui
+    // n'a pas encore le sien joue sans nœud d'évènement, comme en vrai (cf.
+    // `eventsFor` dans queries.ts).
+    events: slug === "jjk" ? JJK_EVENTS : [],
     roster: Object.fromEntries(list.map((c) => [c.id, c])),
     list,
-    tower: buildTowerRoster(list, arcOrder, JJK_TOWER_CONFIG),
+    tower: buildTowerRoster(list, arcOrder, config),
     items,
     itemsById: Object.fromEntries(items.map((i) => [i.id, i])),
   };
 }
 
+/**
+ * Lit `[univers] [tours]`, dans n'importe quel ordre et l'un comme l'autre
+ * facultatif : `kny`, `500`, `kny 500` et `500 kny` marchent tous. Une CLI
+ * d'outil interne ne doit pas se refuser à servir pour une virgule de syntaxe.
+ */
+function parseArgs(argv: readonly string[]): { slug: string; runs: number } {
+  let slug = DEFAULT_UNIVERSE_SLUG;
+  let runs = 200;
+
+  for (const raw of argv) {
+    const n = Number(raw);
+    if (Number.isFinite(n) && n > 0) runs = Math.max(20, Math.trunc(n));
+    else if (raw.trim()) slug = raw.trim().toLowerCase();
+  }
+
+  return { slug, runs };
+}
+
+/**
+ * État des lieux du CONTENU, avant toute mesure.
+ *
+ * Aucun coefficient ne répare un vivier vide. Cette section existe pour qu'on
+ * voie d'un coup d'œil si la tour d'un univers a de quoi tenir debout : c'est
+ * la première chose à regarder en en ouvrant un nouveau, et souvent la seule
+ * qui explique un rapport aberrant.
+ */
+function contentReport(ctx: Context): void {
+  const strates = ctx.tower.byStrate.map((pool) => pool.length);
+  const placed = strates.reduce((sum, n) => sum + n, 0);
+  const ultimates = ctx.list.filter((c) => hasUltimate(c, ctx.config)).length;
+  const share = (ultimates / Math.max(1, ctx.list.length)) * 100;
+
+  console.log(`\nUnivers « ${ctx.slug} »`);
+  console.log(
+    `  roster : ${placed}/${ctx.list.length} placés · strates ${strates.join(" / ")}`,
+  );
+  console.log(`  ultime : ${ultimates}/${ctx.list.length} (${share.toFixed(0)} %)`);
+  console.log(
+    `  objets : ${ctx.items.length} · évènements écrits : ${ctx.events.length}`,
+  );
+
+  // Les avertissements ne portent QUE sur ce qu'aucun réglage ne compense.
+  const warnings: string[] = [];
+
+  if (placed < ctx.list.length) {
+    warnings.push(
+      `${ctx.list.length - placed} personnage(s) hors tour : arc non renseigné en /admin`,
+    );
+  }
+  strates.forEach((n, i) => {
+    if (n < 4) {
+      warnings.push(
+        `strate ${i + 1} à ${n} personnage(s) — les mêmes ennemis reviendront ` +
+          "cinq étages de suite",
+      );
+    }
+  });
+  if (ctx.items.length < MIN_ITEMS) {
+    warnings.push(
+      `${ctx.items.length} objets pour ${MIN_ITEMS} requis : les nœuds à objet ` +
+        "serviront des fragments",
+    );
+  }
+  if (ultimates === 0) {
+    warnings.push(
+      "aucun personnage n'ouvre l'ultime — vérifier `ultimateAttributeKey` et " +
+        "`ultimateAttributeValues`",
+    );
+  } else if (share > 60) {
+    warnings.push(
+      `${share.toFixed(0)} % du roster ouvre l'ultime : ce n'est plus un ` +
+        "évènement, c'est la norme",
+    );
+  }
+  if (ctx.events.length === 0) {
+    warnings.push("aucun évènement écrit : ces nœuds n'apparaîtront pas");
+  }
+
+  for (const w of warnings) console.log(`  ⚠ ${w}`);
+}
+
 async function main() {
-  const runs = Math.max(20, Number(process.argv[2]) || 200);
+  const { slug, runs } = parseArgs(process.argv.slice(2));
+
+  const universeConfig = getUniverseBySlug(slug);
+  if (!universeConfig) {
+    throw new Error(
+      `Univers « ${slug} » inconnu. Connus : ` +
+        listUniverses()
+          .map((u) => u.slug)
+          .join(", "),
+    );
+  }
 
   const universe = await prisma.universe.findUnique({
-    where: { slug: jjk.slug },
+    where: { slug },
     select: { id: true },
   });
-  if (!universe) throw new Error(`Univers "${jjk.slug}" absent en base.`);
+  if (!universe) throw new Error(`Univers « ${slug} » absent en base.`);
 
-  const ctx = await loadContext(universe.id);
+  const ctx = await loadContext(
+    slug,
+    universe.id,
+    resolveTowerConfig(universeConfig.tower),
+  );
+  contentReport(ctx);
+
   if (!isTowerPlayable(ctx.tower)) {
     throw new Error(
       "Vivier insuffisant : les arcs des personnages sont-ils renseignés en /admin ?",
     );
   }
 
-  console.log(
-    `\n${ctx.list.length} personnages · ` +
-      `${ctx.tower.byStrate.map((p) => p.length).join("/")} par strate · ` +
-      `${ctx.items.length} objets`,
-  );
-  console.log(`${runs} tours simulées par politique.\n`);
+  console.log(`\n${runs} tours simulées par politique.\n`);
 
   console.log(
     "politique   clear%   médian   p90   combats   durée/combat   1re perte",

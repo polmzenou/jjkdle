@@ -133,6 +133,43 @@ export const csm: UniverseConfig = {
   // plutôt qu'une jauge chiffrée — CSM n'a pas d'équivalent de l'énergie occulte.
   // Les ex æquo de rang sont départagés par `battleValue` (cf. lib/games/higher-lower).
   higherLower: { attributeKey: "csmpower" },
+  /**
+   * Tour de Chainsaw Man.
+   *
+   * L'ultime se lit sur `csmspecies`, et sur les seuls HYBRIDES et FIENDS :
+   * ceux qui ont une SECONDE FORME à déchaîner. Un démon, lui, est déjà
+   * pleinement lui-même — il n'a rien à révéler.
+   *
+   * Y ajouter `DEVIL` aurait donné l'ultime à 49 personnages sur 67 : la
+   * mécanique aurait cessé d'être un évènement pour devenir la norme. À 18 sur
+   * 67, cet univers tombe dans la même fourchette que les quatre autres.
+   *
+   * ⚠️ `csmpower` est ORDINAL dans cet univers, pas NUMERIC. Le Flux retombe
+   * donc sur sa valeur par défaut et tout le monde régénère à la même vitesse.
+   * C'est une perte de relief assumée — pas un bug — jusqu'à ce que CSM ait un
+   * attribut chiffré ; le reste du jeu, lui, fonctionne.
+   */
+  tower: {
+    arcAttributeKey: "csmAppearanceArc",
+    ultimateAttributeKey: "csmspecies",
+    ultimateAttributeValues: ["HYBRID", "FIEND"],
+    energyAttributeKey: "csmpower",
+    // Chainsaw Man n'a pas de catégorie « battle IQ » : ses catégories sont
+    // pour moitié des CASTINGS (Division 4, Antagonistes, Coéquipier) et non
+    // des statistiques. C'est précisément le cas que `categoryArchetypes`
+    // anticipait — on mappe sur le sens, pas sur le nom.
+    categoryArchetypes: {
+      "csm-hax": "technique",
+      "csm-speed": "swift",
+      "csm-devils": "beast",
+      "csm-devil-hunters": "tactician",
+      "csm-combat-overall": "brute",
+      "csm-hybrid": "channeler",
+      "csm-antagonistes": "domain",
+      "csm-division-4": "adaptive",
+      "csm-coequipier": "stalwart",
+    },
+  },
   labels: {
     tagline:
       "Une collection de mini-jeux nerveux pour tester ta connaissance de l'univers et faire hurler la tronçonneuse.",

@@ -17,8 +17,23 @@ export interface TowerConfig {
    * ET de fil narratif : l'étage N puise dans les arcs de sa strate.
    */
   arcAttributeKey: string;
-  /** Attribut BOOLEAN ouvrant l'ultime (JJK : l'Extension de Territoire). */
+  /** Attribut ouvrant l'ultime (JJK : l'Extension de Territoire). */
   ultimateAttributeKey: string;
+  /**
+   * Valeurs de `ultimateAttributeKey` qui OUVRENT l'ultime.
+   *
+   * Absent ⇒ l'attribut est lu comme un BOOLEAN (`"true"`), ce qui est le cas
+   * JJK (`hasDomain`) et AOT (`aottitan`).
+   *
+   * ⚠️ Cette clé existe parce que la première version supposait qu'un univers
+   * aurait forcément un attribut booléen pour son ultime — hypothèse tirée du
+   * seul JJK, et fausse : ni Demon Slayer ni Tokyo Ghoul n'en ont un. Sans
+   * elle, l'ultime — une mécanique centrale, avec sa jauge et son bouton —
+   * n'aurait jamais pu se déclencher dans ces deux univers, en silence. Le
+   * palier se lit donc sur n'importe quel attribut à liste fermée : un GRADE
+   * suffit (Pilier, Classe Spéciale).
+   */
+  ultimateAttributeValues?: readonly string[];
   /** Attribut NUMERIC alimentant le Flux (énergie occulte par tick). */
   energyAttributeKey: string;
   /**
@@ -70,6 +85,16 @@ export function resolveTowerConfig(
     arcAttributeKey: override.arcAttributeKey ?? JJK_TOWER_CONFIG.arcAttributeKey,
     ultimateAttributeKey:
       override.ultimateAttributeKey ?? JJK_TOWER_CONFIG.ultimateAttributeKey,
+    // Pas de `??` ici : une surcharge qui redéfinit l'attribut d'ultime SANS
+    // lister de valeurs veut dire « lis-le comme un booléen », et non « garde
+    // les valeurs de JJK », qui ne voudraient rien dire sur son attribut.
+    ...(override.ultimateAttributeKey
+      ? { ultimateAttributeValues: override.ultimateAttributeValues }
+      : {
+          ultimateAttributeValues:
+            override.ultimateAttributeValues ??
+            JJK_TOWER_CONFIG.ultimateAttributeValues,
+        }),
     energyAttributeKey:
       override.energyAttributeKey ?? JJK_TOWER_CONFIG.energyAttributeKey,
     categoryArchetypes:

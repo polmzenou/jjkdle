@@ -153,6 +153,31 @@ export const kny: UniverseConfig = {
   // ⚠️ L'attribut `knypower` doit exister en base pour cet univers : sans lui, le
   // jeu n'a rien à comparer.
   higherLower: { attributeKey: "knypower" },
+  /**
+   * Tour de Demon Slayer.
+   *
+   * Demon Slayer n'a AUCUN attribut booléen : l'ultime s'ouvre donc sur le
+   * GRADE, et le palier est le rang de Pilier — le seuil que l'œuvre elle-même
+   * traite comme un changement de nature, pas de degré. Les Lunes Supérieures
+   * le franchissent côté démons.
+   */
+  tower: {
+    arcAttributeKey: "knyAppearanceArc",
+    ultimateAttributeKey: "knyrank",
+    ultimateAttributeValues: ["HASHIRA"],
+    energyAttributeKey: "knypower",
+    categoryArchetypes: {
+      "kny-souffle": "technique",
+      "kny-speed": "swift",
+      "kny-lunes": "beast",
+      "kny-battle-iq": "tactician",
+      "kny-force-physique": "brute",
+      "kny-pouvoir-sanguinaire": "channeler",
+      "kny-piliers": "domain",
+      "kny-nouvelle-generation": "adaptive",
+      "kny-corps-des-pourfendeurs": "stalwart",
+    },
+  },
   labels: {
     tagline:
       "Une collection de mini-jeux nerveux pour tester ta connaissance de l'univers et graver ton nom au rang de Pilier.",
