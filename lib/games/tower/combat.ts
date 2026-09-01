@@ -150,6 +150,9 @@ export interface CombatSetup {
 
 interface Runtime {
   uid: string;
+  /** Rang d'entrée du combattant. Sert à ce que deux ennemis ne visent pas
+   *  systématiquement la même cible au même tick. */
+  seat: number;
   spec: FighterSpec;
   hp: number;
   maxHp: number;
@@ -306,6 +309,7 @@ function buildState(setup: CombatSetup): State {
 
     return {
       uid: `s${index}`,
+      seat: index,
       spec,
       hp,
       maxHp,
@@ -332,6 +336,7 @@ function buildState(setup: CombatSetup): State {
 
   const enemies = setup.enemies.map((spec, index) => ({
     uid: `e${index}`,
+    seat: index,
     spec,
     hp: spec.stats.maxHp,
     maxHp: spec.stats.maxHp,
@@ -436,9 +441,48 @@ function allyTargets(state: State): Runtime[] {
   return [...state.squad, ...state.summons];
 }
 
-/** Premier combattant vivant d'une liste — le ciblage est positionnel. */
+/** Premier combattant vivant d'une liste. Ciblage des techniques du joueur. */
 function firstAlive(fighters: Runtime[]): Runtime | null {
   return fighters.find((f) => f.alive) ?? null;
+}
+
+/**
+ * Cible d'un ATTAQUANT ENNEMI : n'importe quel allié encore debout.
+ *
+ * Les ennemis frappaient tous le premier slot, si bien qu'un personnage
+ * encaissait l'intégralité du combat pendant que les deux autres finissaient
+ * intacts. Cela donnait un jeu bancal : un « tank » involontaire mourait sans
+ * qu'on l'ait décidé, et la position dans l'escouade — que le joueur ne choisit
+ * pas — comptait plus que la composition.
+ *
+ * Le tirage est DÉTERMINISTE, dérivé du tick et du siège de l'attaquant : c'est
+ * la condition non négociable pour que la re-simulation serveur reste exacte
+ * (§14 du doc). Le siège entre dans le calcul pour que deux ennemis agissant au
+ * même tick ne convergent pas sur la même victime.
+ */
+function pickTarget(
+  state: State,
+  attacker: Runtime,
+  targets: Runtime[],
+): Runtime | null {
+  const alive = targets.filter((f) => f.alive);
+  if (alive.length === 0) return null;
+  if (alive.length === 1) return alive[0];
+  return alive[spread(state.tick, attacker.seat, alive.length)];
+}
+
+/**
+ * Indice pseudo-aléatoire mais REPRODUCTIBLE, dérivé de `(tick, siège)`.
+ *
+ * Un simple modulo produirait des motifs — avec des cadences régulières, le
+ * même slot serait touché encore et encore. Le brassage de bits répartit sans
+ * introduire la moindre source de hasard réel.
+ */
+function spread(tick: number, seat: number, count: number): number {
+  let h = Math.imul(tick + 1, 0x9e3779b1) ^ Math.imul(seat + 1, 0x85ebca6b);
+  h = Math.imul(h ^ (h >>> 15), 0x2c1b3c6d);
+  h ^= h >>> 13;
+  return Math.abs(h) % count;
 }
 
 function advanceAndStrike(state: State, fighter: Runtime, targets: Runtime[]): void {
@@ -449,7 +493,12 @@ function advanceAndStrike(state: State, fighter: Runtime, targets: Runtime[]): v
 
   fighter.gauge -= ACTION_GAUGE;
 
-  const target = firstAlive(targets);
+  // Un ennemi frappe n'importe qui ; l'escouade et les shikigami visent
+  // toujours l'adversaire de devant (le joueur, lui, choisit ses techniques).
+  const target =
+    fighter.spec.side === "enemy"
+      ? pickTarget(state, fighter, targets)
+      : firstAlive(targets);
   if (!target) return;
 
   let mult = 1;
@@ -493,7 +542,9 @@ function advanceTelegraphs(state: State): void {
       if (state.tick >= enemy.chargeEndsAt) {
         enemy.charging = false;
         enemy.sinceTelegraph = 0;
-        const target = firstAlive(allyTargets(state));
+        // Le coup chargé vise lui aussi n'importe qui : le télégraphe
+        // annonce QUAND il tombe, pas sur qui.
+        const target = pickTarget(state, enemy, allyTargets(state));
         if (target) {
           const damage = Math.max(1, Math.round(enemy.strike * TELEGRAPH_MULT));
           dealDamage(state, enemy, target, damage, "telegraph-hit");
@@ -918,6 +969,7 @@ function spawnSummon(
 
   state.summons.push({
     uid,
+    seat: state.summonCount,
     spec: {
       id: `${caster.spec.id}-shikigami`,
       name: `Shikigami de ${caster.spec.name}`,

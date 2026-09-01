@@ -640,3 +640,122 @@ describe("garde", () => {
     expect(run(setup)).toEqual(run(setup));
   });
 });
+
+
+describe("ciblage ennemi", () => {
+  const squad = (n: number) =>
+    Array.from({ length: n }, (_, i) =>
+      fighter({
+        id: `a${i}`,
+        archetype: "brute",
+        stats: { maxHp: 4_000, strike: 1, speed: 1, flux: 1.6 },
+      }),
+    );
+
+  const attacker = (id: string) =>
+    fighter({
+      id,
+      archetype: "brute",
+      side: "enemy",
+      stats: { maxHp: 100_000, strike: 20, speed: 95, flux: 0 },
+    });
+
+  /** Combien de coups chaque slot a-t-il encaissés ? */
+  function hitsPerSlot(setup: CombatSetup, slots: number): number[] {
+    const counts = new Array(slots).fill(0);
+    for (const e of run(setup).events) {
+      if (e.kind !== "strike" && e.kind !== "telegraph-hit") continue;
+      const m = /^s(\d+)$/.exec(e.to);
+      if (m) counts[Number(m[1])] += 1;
+    }
+    return counts;
+  }
+
+  it("répartit les coups sur TOUTE l'escouade, pas sur le premier slot", () => {
+    const counts = hitsPerSlot(
+      { squad: squad(3), enemies: [attacker("x")] },
+      3,
+    );
+
+    // Le vrai défaut d'avant : counts valait [n, 0, 0].
+    for (const c of counts) expect(c).toBeGreaterThan(0);
+  });
+
+  it("ne concentre pas non plus tout sur un seul autre slot", () => {
+    const counts = hitsPerSlot(
+      { squad: squad(3), enemies: [attacker("x")] },
+      3,
+    );
+    const total = counts.reduce((a, b) => a + b, 0);
+
+    // Aucun slot ne doit encaisser plus des deux tiers des coups.
+    for (const c of counts) expect(c).toBeLessThan(total * 0.67);
+  });
+
+  it("reste DÉTERMINISTE — sans quoi le serveur ne peut plus rejouer le combat", () => {
+    const setup: CombatSetup = { squad: squad(3), enemies: [attacker("x")] };
+    expect(run(setup)).toEqual(run(setup));
+  });
+
+  it("deux ennemis au même tick ne convergent pas sur la même victime", () => {
+    const setup: CombatSetup = {
+      squad: squad(3),
+      enemies: [attacker("x"), attacker("y")],
+    };
+    const byPair = new Set<string>();
+    for (const e of run(setup).events) {
+      if (e.kind === "strike" && e.from.startsWith("e")) {
+        byPair.add(`${e.t}:${e.from}->${e.to}`);
+      }
+    }
+    // Au moins une paire de cibles distinctes sur un même tick.
+    const perTick = new Map<number, Set<string>>();
+    for (const key of byPair) {
+      const [t, rest] = key.split(":");
+      const to = rest.split("->")[1];
+      perTick.set(Number(t), (perTick.get(Number(t)) ?? new Set()).add(to));
+    }
+    expect([...perTick.values()].some((s) => s.size > 1)).toBe(true);
+  });
+
+  it("cesse de viser un personnage tombé", () => {
+    const result = run({
+      squad: [
+        fighter({ id: "frele", archetype: "brute", stats: { maxHp: 30, strike: 1, speed: 1, flux: 1.6 } }),
+        fighter({ id: "solide", archetype: "brute", stats: { maxHp: 9_000, strike: 1, speed: 1, flux: 1.6 } }),
+      ],
+      enemies: [attacker("x")],
+    });
+
+    const deathAt = result.events.find((e) => e.kind === "death" && e.who === "s0")?.t ?? 0;
+    expect(deathAt).toBeGreaterThan(0);
+
+    const afterDeath = result.events.filter(
+      (e) => (e.kind === "strike" || e.kind === "telegraph-hit") && e.to === "s0" && e.t > deathAt,
+    );
+    expect(afterDeath).toEqual([]);
+  });
+
+  it("l'escouade, elle, frappe toujours l'adversaire de devant", () => {
+    const result = run({
+      // Célérité réelle : avec celle de `squad()`, la jauge n'atteindrait
+      // jamais 100 avant la fin du combat et personne ne frapperait.
+      squad: [
+        fighter({
+          id: "a0",
+          archetype: "brute",
+          stats: { maxHp: 4_000, strike: 10, speed: 90, flux: 1.6 },
+        }),
+      ],
+      enemies: [
+        fighter({ id: "x", archetype: "brute", side: "enemy", stats: { maxHp: 100_000, strike: 1, speed: 1, flux: 0 } }),
+        fighter({ id: "y", archetype: "brute", side: "enemy", stats: { maxHp: 100_000, strike: 1, speed: 1, flux: 0 } }),
+      ],
+    });
+
+    const targets = new Set(
+      result.events.filter((e) => e.kind === "strike" && e.from === "s0").map((e) => e.kind === "strike" ? e.to : ""),
+    );
+    expect([...targets]).toEqual(["e0"]);
+  });
+});
