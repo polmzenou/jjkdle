@@ -22,6 +22,7 @@ import {
   takeRest,
   takeReward,
   REST_HEAL_PCT,
+  STRATE_CLEAR_HEAL_PCT,
   type TowerRunState,
 } from "./run";
 import type { TowerEvent } from "./events";
@@ -248,6 +249,75 @@ describe("progression", () => {
 
     const next = resolveFloor(state, plan({ recruitIds: [] }), result);
     expect(next.squad[0].hp).toBe(12);
+  });
+});
+
+/**
+ * Le seul soin PRÉVISIBLE de la run.
+ *
+ * Il vient d'une mesure et non d'une intuition : le calibrage par simulation
+ * (`scripts/calibrate-tower.ts`) montrait qu'un joueur jouant bien mourait
+ * surtout sur des combats ORDINAIRES, en y entrant à 59 % de vie. Le problème
+ * n'était pas la puissance des ennemis mais l'usure — rien, dans une run, ne
+ * pouvait plus remettre l'escouade d'aplomb.
+ */
+describe("souffle de palier", () => {
+  it("un boss de strate abattu rend des PV à toute l'escouade", () => {
+    const state = { ...fullSquad(), floor: 5 };
+    const hurt: CombatResult = {
+      ...won(state),
+      squad: state.squad.map((m, i) => ({
+        uid: `s${i}`,
+        id: m.characterId,
+        hp: 10,
+        maxHp: m.maxHp,
+        alive: true,
+      })),
+    };
+
+    const next = resolveFloor(state, plan({ kind: "boss", floor: 5 }), hurt);
+
+    for (const member of next.squad) {
+      expect(member.hp).toBe(
+        10 + Math.round((member.maxHp * STRATE_CLEAR_HEAL_PCT) / 100),
+      );
+    }
+  });
+
+  it("un combat ordinaire ne rend rien — le souffle se mérite", () => {
+    const state = { ...started(), floor: 4 };
+    const hurt: CombatResult = {
+      ...won(state),
+      squad: [{ uid: "s0", id: "start", hp: 10, maxHp: 90, alive: true }],
+    };
+
+    expect(resolveFloor(state, plan(), hurt).squad[0].hp).toBe(10);
+  });
+
+  it("ne dépasse jamais les PV max", () => {
+    const state = { ...started(), floor: 5 };
+    const next = resolveFloor(state, plan({ kind: "boss", floor: 5 }), won(state));
+
+    expect(next.squad[0].hp).toBe(next.squad[0].maxHp);
+  });
+
+  it("ne relève pas une escouade fauchée : la run est finie avant le souffle", () => {
+    const state = { ...started(), floor: 5 };
+    const next = resolveFloor(state, plan({ kind: "boss", floor: 5 }), wiped(state));
+
+    expect(next.status).toBe("lost");
+    expect(next.squad).toHaveLength(0);
+  });
+
+  it("le sommet reste une victoire, pas un soin", () => {
+    const state = { ...started(), floor: TOWER_FLOORS };
+    const next = resolveFloor(
+      state,
+      plan({ kind: "boss", floor: TOWER_FLOORS }),
+      won(state),
+    );
+
+    expect(next.status).toBe("won");
   });
 });
 

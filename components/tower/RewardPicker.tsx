@@ -1,5 +1,6 @@
 "use client";
 
+import { STRATE_CLEAR_HEAL_PCT } from "@/lib/games/tower/run";
 import type { TowerView } from "@/lib/games/tower/view";
 import { ItemCard } from "./ItemCard";
 
@@ -31,6 +32,17 @@ export function RewardPicker({
         <p className="mt-1 text-sm text-white/50">
           Prends une seule de ces trois choses avant de continuer.
         </p>
+
+        {/* Le souffle de palier est déjà appliqué à ce stade. Il faut le DIRE :
+            un soin silencieux ne compte pas pour le joueur, qui verrait ses
+            barres remonter sans savoir pourquoi ni s'il peut y compter. */}
+        {view.kind === "boss" ? (
+          <p className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 text-xs font-semibold text-emerald-200">
+            <span aria-hidden>✚</span>
+            Palier franchi — l&apos;escouade récupère {STRATE_CLEAR_HEAL_PCT} % de
+            ses PV.
+          </p>
+        ) : null}
       </header>
 
       <div className="grid gap-3 sm:grid-cols-3">
@@ -72,7 +84,7 @@ export function RewardPicker({
               <span className="text-[11px] leading-snug text-white/50">
                 {isHeal
                   ? hurt
-                    ? "Toute l'escouade. Rien d'autre ne rend de PV."
+                    ? "Toute l'escouade. Les PV ne remontent pas seuls."
                     : "Ton escouade est déjà au complet."
                   : "À dépenser chez le marchand, avant le boss."}
               </span>

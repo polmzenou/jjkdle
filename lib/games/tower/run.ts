@@ -280,7 +280,7 @@ export function resolveFloor(
     fallen.push(member.characterId);
   });
 
-  const next: TowerRunState = {
+  let next: TowerRunState = {
     ...state,
     squad: survivors,
     revived,
@@ -298,11 +298,36 @@ export function resolveFloor(
   if (!result.victory) return { ...next, status: "lost" };
   if (floor >= TOWER_FLOORS) return { ...next, status: "won" };
 
+  // Palier de strate franchi : l'escouade souffle.
+  if (plan.kind === "boss") {
+    next = { ...next, squad: healSquad(next.squad, STRATE_CLEAR_HEAL_PCT) };
+  }
+
   // La récompense ne suit que la voie DIRECTE : une branche à prélude a déjà
   // versé son gain avant le combat. Un gain par étage, pas deux.
   if (!grantsReward(plan)) return advance(next);
   return { ...next, status: "reward" };
 }
+
+/**
+ * PV rendus à l'escouade quand un boss de strate tombe.
+ *
+ * ⚠️ Ajouté sur une mesure, pas sur une intuition : `scripts/calibrate-tower.ts`
+ * a montré qu'un joueur qui joue BIEN mourait à 46 % sur des combats
+ * ORDINAIRES, en y entrant à 59 % de vie. Ce n'était donc pas un problème de
+ * puissance des ennemis — c'était l'usure. Les ennemis étaient au bon niveau,
+ * mais l'escouade arrivait à moitié morte devant eux, et rien dans la run ne
+ * pouvait plus la remettre d'aplomb.
+ *
+ * Le palier de strate est le bon endroit pour ce souffle, et pas un soin plus
+ * généreux ailleurs : il est PRÉVISIBLE (le joueur sait qu'il tiendra jusqu'au
+ * cinquième étage), il ne concurrence aucun choix de récompense — sans quoi
+ * « soin » deviendrait la seule bonne réponse — et il découpe l'ascension en
+ * quatre chapitres, ce qui est déjà la structure de la tour.
+ *
+ * Partiel, et volontairement : l'usure reste la ressource centrale du jeu.
+ */
+export const STRATE_CLEAR_HEAL_PCT = 30;
 
 /**
  * Fragments gagnés sur un étage. Monnaie INTERNE : elle meurt avec la run, ce

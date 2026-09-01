@@ -8,6 +8,7 @@ import {
   GUARD_REDUCTION,
   TICKS_PER_SECOND,
 } from "@/lib/games/tower/combat";
+import { STRATE_CLEAR_HEAL_PCT } from "@/lib/games/tower/run";
 import { SQUAD_SIZE, TOWER_FLOORS } from "@/lib/games/tower/types";
 
 /**
@@ -154,7 +155,10 @@ export function TowerRulesModal({
                 Les points de vie ne se régénèrent pas d&apos;un étage à
                 l&apos;autre, et un personnage tombé ne revient pas. L&apos;usure
                 est une ressource : c&apos;est elle qui rend le sacrifice d&apos;un
-                vétéran blessé pour une recrue fraîche intéressant.
+                vétéran blessé pour une recrue fraîche intéressant. Seule
+                exception, la seule sur laquelle tu peux compter d&apos;avance :
+                chaque <strong>boss de palier</strong> abattu rend{" "}
+                {STRATE_CLEAR_HEAL_PCT} % des PV à toute l&apos;escouade.
               </Rule>
 
               <Rule n="8" title="La tour du jour">
