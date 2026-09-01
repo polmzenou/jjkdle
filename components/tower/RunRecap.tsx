@@ -6,6 +6,7 @@ import { TOWER_FLOORS } from "@/lib/games/tower/types";
 import type { TowerView } from "@/lib/games/tower/view";
 import type { ExpResult } from "@/lib/leaderboard/types";
 import { InventoryStrip } from "./ItemCard";
+import { ShareRun } from "./ShareRun";
 import { TowerCard } from "./TowerCard";
 
 /**
@@ -125,6 +126,12 @@ export function RunRecap({
         >
           {won ? "Nouvelle ascension" : "Réessayer"}
         </button>
+        <ShareRun
+          floor={reached}
+          score={view.score}
+          attempt={view.attempt}
+          cleared={won}
+        />
         <Link
           href={href("/games")}
           className="rounded-lg border border-white/15 px-5 py-2.5 font-display text-white/70"

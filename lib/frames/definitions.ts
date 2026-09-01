@@ -111,6 +111,30 @@ export const FRAMES: FrameDefinition[] = [
     universe: "jjk",
     isUnlocked: (u) => u.stats.jjkdleBestAttempts === 1,
   },
+  // ── The Culling Tower ──
+  // Deux cadres seulement, et pas trois comme pour les titres : un cadre se
+  // remarque au premier coup d'œil sur un profil, il doit rester rare. Le
+  // premier récompense l'ascension, le second la manière — les essais étant
+  // illimités, boucler la tour finit par arriver, mais la boucler DU PREMIER
+  // COUP reste l'exploit du jeu.
+  {
+    key: "TOWER_SUMMIT_FRAME",
+    name: "Sommet de la Tour",
+    description: "Franchir les 20 étages de The Culling Tower.",
+    rarity: "epic",
+    styleKey: "towerSummit",
+    universe: "jjk",
+    isUnlocked: (u) => u.stats.towerCleared,
+  },
+  {
+    key: "TOWER_FLAWLESS_FRAME",
+    name: "Ascension Parfaite",
+    description: "Franchir la tour du jour du premier essai.",
+    rarity: "legendary",
+    styleKey: "towerFlawless",
+    universe: "jjk",
+    isUnlocked: (u) => u.stats.towerBestAttempt === 1,
+  },
 
   // ── Cadres CSM ────────────────────────────────────────────────────────────
   // Mêmes paliers que JJK, noms Chainsaw Man, clés PRÉFIXÉES (possession

@@ -116,6 +116,31 @@ const JJK_TITLES: Omit<TitleDefinition, "universe">[] = [
     rarity: "epic",
     isUnlocked: (u) => u.badgeCount >= 10,
   },
+  // ── The Culling Tower ──
+  // Trois paliers, et le dernier n'est PAS « aller plus haut » : les essais
+  // étant illimités, tout joueur obstiné finit par boucler la tour. Ce qui se
+  // distingue, c'est de l'avoir bouclée sans s'y reprendre.
+  {
+    key: "TOWER_CLIMBER",
+    name: "Grimpeur",
+    description: "Atteindre l'étage 10 de The Culling Tower.",
+    rarity: "rare",
+    isUnlocked: (u) => u.stats.towerBestFloor >= 10,
+  },
+  {
+    key: "TOWER_SUMMIT",
+    name: "Voix du Sommet",
+    description: "Franchir les 20 étages de The Culling Tower.",
+    rarity: "epic",
+    isUnlocked: (u) => u.stats.towerCleared,
+  },
+  {
+    key: "TOWER_FLAWLESS",
+    name: "Ascension Parfaite",
+    description: "Franchir la tour du jour du premier essai.",
+    rarity: "legendary",
+    isUnlocked: (u) => u.stats.towerBestAttempt === 1,
+  },
   // ── Titres MANUELS (octroi admin uniquement, non dérivables simplement) ──
   {
     key: "UNDEFEATED",
