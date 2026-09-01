@@ -61,3 +61,39 @@
     text-shadow: 0 0 12px rgb(var(--color-domain) / 0.7);
   }
 }
+
+@layer utilities {
+  /*
+   * Trait de frappe de « The Culling Tower » : il barre le portrait de la cible
+   * quand le coup vient d'une action DECLENCHEE par le joueur.
+   *
+   * En CSS et non en JavaScript : le span est monte neuf a chaque coup (sa
+   * `key` change), donc l'animation repart d'elle-meme. Rien a orchestrer,
+   * rien a remettre a zero, et elle tourne sur le compositeur.
+   */
+  .tower-slash {
+    animation: tower-slash 0.34s ease-out 1 both;
+  }
+
+  @keyframes tower-slash {
+    0% {
+      opacity: 0;
+      transform: rotate(-45deg) scaleX(0.15);
+    }
+    35% {
+      opacity: 1;
+      transform: rotate(-45deg) scaleX(1);
+    }
+    100% {
+      opacity: 0;
+      transform: rotate(-45deg) scaleX(1);
+    }
+  }
+
+  /* Un ecran qui demande la sobriete garde l'information, pas le mouvement. */
+  @media (prefers-reduced-motion: reduce) {
+    .tower-slash {
+      animation-duration: 0.01s;
+    }
+  }
+}
