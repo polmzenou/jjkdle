@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 76" width="300" height="76" role="img" aria-label="Bleach Arcade">
+  <desc>Logo PLACEHOLDER de l'univers Bleach — à remplacer par le visuel définitif (lib/universes/bleach.ts, champ logo.src).</desc>
+  <defs>
+    <linearGradient id="bleach-blood" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f8f6f0" />
+      <stop offset="62%" stop-color="#e6e2d8" />
+      <stop offset="100%" stop-color="#a4161a" />
+    </linearGradient>
+  </defs>
+  <!-- Zanpakutō dégainé : lame blanc os, garde carmin, ruban d'emballage -->
+  <g>
+    <path d="M10 46 L44 12 L48 16 L14 50 Z" fill="#e6e2d8" stroke="#08080a" stroke-width="1" />
+    <path d="M10 46 L44 12 L46 14 L12 48 Z" fill="#f8f6f0" opacity="0.9" />
+    <rect x="4" y="46" width="14" height="5" rx="1" transform="rotate(-45 11 48.5)" fill="#a4161a" />
+    <path d="M6 52 L2 56 L6 60 L10 56 Z" fill="#660708" />
+    <path d="M14 52 q8 6 2 12" fill="none" stroke="#a4161a" stroke-width="2" stroke-linecap="round" opacity="0.75" />
+  </g>
+  <!-- Wordmark : blanc os saignant en carmin vers le bas, comme le logo TYBW.
+       Le dégradé EST la signature — ne pas l'aplatir en blanc plein. -->
+  <text x="58" y="46" font-family="Impact, Haettenschweiler, 'Arial Narrow', 'Arial Black', sans-serif" font-size="34" font-weight="900" letter-spacing="3" fill="url(#bleach-blood)">BLEACH</text>
+  <text x="196" y="46" font-family="Impact, Haettenschweiler, 'Arial Narrow', 'Arial Black', sans-serif" font-size="34" font-weight="900" letter-spacing="3" fill="#a4161a">ARCADE</text>
+  <!-- Filet de base : trait d'encre coupé net, comme un coup de lame -->
+  <rect x="58" y="60" width="176" height="3" rx="1.5" fill="#e6e2d8" opacity="0.55" />
+  <rect x="238" y="60" width="52" height="3" rx="1.5" fill="#a4161a" opacity="0.85" />
+</svg>

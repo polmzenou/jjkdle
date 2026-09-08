@@ -69,6 +69,14 @@ export const FRAME_STYLES = {
   kakuganRed: {
     ring: "border-2 border-rose-600/85 shadow-[0_0_16px_4px_rgba(200,16,46,0.65)]",
   },
+  /**
+   * Blanc os saignant en carmin (Bleach) — le wordmark de la série en un
+   * anneau. Distinct de `paperInk`, dont le halo est blanc lui aussi : ici
+   * l'anneau est clair mais le halo est ROUGE, comme le dégradé du logo.
+   */
+  hollowBone: {
+    ring: "border-2 border-stone-100/85 shadow-[0_0_16px_4px_rgba(164,22,26,0.55)]",
+  },
 } as const satisfies Record<string, FrameStyle>;
 
 export type FrameStyleKey = keyof typeof FRAME_STYLES;

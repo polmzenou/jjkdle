@@ -130,6 +130,27 @@ const WIKIS: Record<string, Wiki> = {
       "(tg_",
     ],
   },
+  bleach: {
+    api: "https://bleach.fandom.com/api.php",
+    // Trois familles de déclinaisons portent exactement le nom des personnages
+    // sans en montrer le bon dessin : les spin-offs parodiques (`burn_the_witch`
+    // est un autre univers de Kubo, mais son wiki partage des pages), les
+    // adaptations hors manga (film live, comédie musicale, jeux vidéo — dont
+    // `brave_souls`, très fourni en illustrations 3D), et les versions non
+    // canoniques de l'anime. `(tybw` n'est PAS écarté : la Guerre Sanglante
+    // Millénaire est la suite canonique, et c'est souvent d'elle que vient le
+    // meilleur portrait d'un personnage.
+    offCanon: [
+      "live-action",
+      "musical",
+      "rock_musical",
+      "brave_souls",
+      "video_game",
+      "burn_the_witch",
+      "chibi",
+      "(bleach_",
+    ],
+  },
 };
 
 type Target = string | { file: string };

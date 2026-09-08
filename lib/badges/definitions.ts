@@ -14,6 +14,8 @@ const aotGame = (id: string) => gameTitleIn("aot", id);
 const knyGame = (id: string) => gameTitleIn("kny", id);
 /** Idem côté TG (`lib/universes/tg.ts`). */
 const tgGame = (id: string) => gameTitleIn("tg", id);
+/** Idem côté Bleach (`lib/universes/bleach.ts`). */
+const bleachGame = (id: string) => gameTitleIn("bleach", id);
 
 /**
  * Catalogue des badges (source de vérité = code, pas de table `Badge`).
@@ -518,6 +520,95 @@ const TG_BADGES: Omit<BadgeRule, "universe">[] = [
   },
 ];
 
+// Catalogue Bleach. Mêmes règles, vocabulaire Bleach, clés préfixées. Palette du
+// logo officiel : blanc os du wordmark et carmin du sous-titre TYBW (cf.
+// `lib/universes/bleach.ts`).
+const BLEACH_BADGES: Omit<BadgeRule, "universe">[] = [
+  // ── Badges de découverte : jouer à chaque jeu pour la première fois ──
+  {
+    key: "BLEACH_FIRST_PLAY_BUILDER",
+    name: "Premier Shikai",
+    description: `Jouer à ${bleachGame("builder")} pour la première fois.`,
+    iconKey: "🗡️",
+    color: "#a4161a",
+    check: (ctx) => ctx.playedBuilder,
+  },
+  {
+    key: "BLEACH_FIRST_PLAY_RANKING",
+    name: "Premier classement",
+    description: `Jouer à ${bleachGame("ranking")} pour la première fois.`,
+    iconKey: "🔺",
+    color: "#e5383b",
+    check: (ctx) => ctx.playedRanking,
+  },
+  {
+    key: "BLEACH_FIRST_PLAY_DRAFT",
+    name: "Première mission",
+    description: `Jouer à ${bleachGame("jujutsu-draft")} pour la première fois.`,
+    iconKey: "⚔️",
+    color: "#660708",
+    check: (ctx) => ctx.playedDraft,
+  },
+  {
+    key: "BLEACH_FIRST_PLAY_DAILY",
+    name: "Première énigme",
+    description: `Jouer à ${bleachGame("jjkdle")} pour la première fois.`,
+    iconKey: "🎭",
+    color: "#e6e2d8",
+    check: (ctx) => ctx.playedJjkdle,
+  },
+  // ── Badges de performance ──
+  {
+    key: "BLEACH_FIRST_S_GRADE",
+    name: "Rang S",
+    description: `Atteindre le rang S sur ${bleachGame("builder")} (≥ 980).`,
+    iconKey: "🏅",
+    color: "#a4161a",
+    check: (ctx) => ctx.builderBest >= 980,
+  },
+  {
+    key: "BLEACH_PYRAMID_PERFECT",
+    name: "Pyramide parfaite",
+    description: `Résoudre ${bleachGame("ranking")} sans faute, du premier coup (10 000).`,
+    iconKey: "🔺",
+    color: "#e5383b",
+    check: (ctx) => ctx.rankingBest >= 10000,
+  },
+  {
+    key: "BLEACH_DRAFT_CONQUEROR",
+    name: "Capitaine accompli",
+    description: `Vaincre les 6 boss de ${bleachGame("jujutsu-draft")} (victoire totale).`,
+    iconKey: "⚔️",
+    color: "#660708",
+    check: (ctx) => ctx.draftVictory,
+  },
+  {
+    key: "BLEACH_DAILY_STREAK_7",
+    name: "Assidu",
+    description: `Enchaîner 7 jours de ${bleachGame("jjkdle")} d'affilée.`,
+    iconKey: "🔥",
+    color: "#fb923c",
+    check: (ctx) => ctx.jjkdleStreak >= 7 || ctx.jjkdleBestStreak >= 7,
+  },
+  {
+    key: "BLEACH_POLYVALENT",
+    name: "Polyvalent",
+    description: "Avoir un score sur au moins 4 jeux différents.",
+    iconKey: "🎴",
+    color: "#38bdf8",
+    check: (ctx) => ctx.gamesPlayed >= 4,
+  },
+  // ── Badges manuels (admin uniquement) ──
+  {
+    key: "BLEACH_STAFF_PICK",
+    name: "Choix du staff",
+    description: "Distinction décernée manuellement par l'équipe.",
+    iconKey: "⭐",
+    color: "#facc15",
+    check: () => false,
+  },
+];
+
 /**
  * Catalogue COMPLET (tous univers). La possession étant globale, c'est ce
  * catalogue qui sert de référence de clés ; pour ce qui se gagne et s'affiche
@@ -529,6 +620,7 @@ export const BADGES: BadgeRule[] = [
   ...tagUniverse(AOT_BADGES, "aot"),
   ...tagUniverse(KNY_BADGES, "kny"),
   ...tagUniverse(TG_BADGES, "tg"),
+  ...tagUniverse(BLEACH_BADGES, "bleach"),
 ];
 
 /** Badges d'un univers (slug) — évaluation des déblocages et vitrine profil. */

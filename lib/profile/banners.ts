@@ -375,6 +375,75 @@ export const BANNER_PALETTE = {
     requiredLevel: MAX_LEVEL,
     universe: "tg",
   },
+
+  // ── Bannières Bleach (mêmes paliers, blanc os & carmin sur noir d'encre) ──
+  bleachShihakusho: {
+    label: "Shihakushō",
+    gradient: "linear-gradient(120deg, #08080a 0%, #1d1d21 55%, #4b4b52 100%)",
+    requiredLevel: 1,
+    universe: "bleach",
+  },
+  bleachZanpakuto: {
+    label: "Zanpakutō",
+    gradient: "linear-gradient(120deg, #08080a 0%, #3f3f46 50%, #d4d4d8 100%)",
+    requiredLevel: 3,
+    universe: "bleach",
+  },
+  bleachShikai: {
+    label: "Shikai",
+    gradient: "linear-gradient(120deg, #08080a 0%, #660708 55%, #a4161a 100%)",
+    requiredLevel: 5,
+    universe: "bleach",
+  },
+  bleachKido: {
+    label: "Kidō",
+    gradient: "linear-gradient(120deg, #131316 0%, #1e3a8a 50%, #60a5fa 100%)",
+    requiredLevel: 8,
+    universe: "bleach",
+  },
+  bleachHollow: {
+    label: "Hollow",
+    gradient: "linear-gradient(120deg, #08080a 0%, #52525b 45%, #e6e2d8 100%)",
+    requiredLevel: 11,
+    universe: "bleach",
+  },
+  bleachEspada: {
+    label: "Espada",
+    gradient: "linear-gradient(120deg, #1d1d21 0%, #a1a1aa 50%, #f8f6f0 100%)",
+    requiredLevel: 15,
+    universe: "bleach",
+  },
+  bleachBankai: {
+    label: "Bankai",
+    gradient: "linear-gradient(120deg, #000000 0%, #450a0a 55%, #e5383b 100%)",
+    requiredLevel: 20,
+    universe: "bleach",
+  },
+  bleachQuincy: {
+    label: "Quincy",
+    gradient: "linear-gradient(120deg, #08080a 0%, #0c4a6e 50%, #7dd3fc 100%)",
+    requiredLevel: 26,
+    universe: "bleach",
+  },
+  bleachVisored: {
+    label: "Visored",
+    gradient: "linear-gradient(120deg, #08080a 0%, #78350f 50%, #fbbf24 100%)",
+    requiredLevel: 33,
+    universe: "bleach",
+  },
+  bleachSenkaimon: {
+    label: "Senkaimon",
+    gradient: "linear-gradient(120deg, #131316 0%, #4c1d95 50%, #c4b5fd 100%)",
+    requiredLevel: 41,
+    universe: "bleach",
+  },
+  // Le wordmark, en dégradé : blanc os en haut, saignement carmin en bas.
+  bleachFinalGetsuga: {
+    label: "Getsuga Ultime",
+    gradient: "linear-gradient(120deg, #e6e2d8 0%, #08080a 50%, #a4161a 100%)",
+    requiredLevel: MAX_LEVEL,
+    universe: "bleach",
+  },
 } as const satisfies Record<string, BannerStyle>;
 
 export type BannerKey = keyof typeof BANNER_PALETTE;

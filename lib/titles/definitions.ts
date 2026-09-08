@@ -17,6 +17,8 @@ const aotGame = (id: string) => gameTitleIn("aot", id);
 const knyGame = (id: string) => gameTitleIn("kny", id);
 /** Idem côté TG (`lib/universes/tg.ts`). */
 const tgGame = (id: string) => gameTitleIn("tg", id);
+/** Idem côté Bleach (`lib/universes/bleach.ts`). */
+const bleachGame = (id: string) => gameTitleIn("bleach", id);
 
 /**
  * Catalogue des TITRES (source de vérité = code, comme les badges/bannières —
@@ -516,6 +518,96 @@ const TG_TITLES: Omit<TitleDefinition, "universe">[] = [
   },
 ];
 
+// Catalogue Bleach : mêmes paliers, vocabulaire Bleach, clés PRÉFIXÉES.
+// L'échelle de progression reprend les grades du Gotei 13 (Académie →
+// Capitaine-commandant), la même que l'attribut `bleachrank` de Bleachdle — et
+// non les libérations, qui ne classent personne entre factions.
+const BLEACH_TITLES: Omit<TitleDefinition, "universe">[] = [
+  // ── Progression par niveau (titre de départ → légendaire au niveau max) ──
+  {
+    key: "BLEACH_ACADEMY",
+    name: "Élève de l'Académie",
+    description: "Titre de départ — disponible dès le niveau 1.",
+    rarity: "common",
+    isUnlocked: (u) => u.level >= 1,
+  },
+  {
+    key: "BLEACH_SEATED_OFFICER",
+    name: "Officier Gradé",
+    description: "Atteindre le niveau 5.",
+    rarity: "common",
+    isUnlocked: (u) => u.level >= 5,
+  },
+  {
+    key: "BLEACH_LIEUTENANT",
+    name: "Vice-capitaine",
+    description: "Atteindre le niveau 15.",
+    rarity: "rare",
+    isUnlocked: (u) => u.level >= 15,
+  },
+  {
+    key: "BLEACH_CAPTAIN",
+    name: "Capitaine",
+    description: "Atteindre le niveau 30.",
+    rarity: "epic",
+    isUnlocked: (u) => u.level >= 30,
+  },
+  {
+    key: "BLEACH_CAPTAIN_COMMANDER",
+    name: "Capitaine-commandant",
+    description: `Atteindre le niveau maximum (${MAX_LEVEL}).`,
+    rarity: "legendary",
+    isUnlocked: (u) => u.level >= MAX_LEVEL,
+  },
+  // ── Exploits méta-site ──
+  {
+    key: "BLEACH_DAILY_MASTER",
+    name: "Maître de l'Énigme",
+    description: `Trouver le ${bleachGame("jjkdle")} du jour en un seul essai.`,
+    rarity: "epic",
+    isUnlocked: (u) => u.stats.jjkdleBestAttempts === 1,
+  },
+  {
+    key: "BLEACH_PERFECT_WEEK",
+    name: "Semaine Sans Faille",
+    description: `Atteindre un streak ${bleachGame("jjkdle")} de 7 jours.`,
+    rarity: "rare",
+    isUnlocked: (u) => u.stats.jjkdleBestStreak >= 7,
+  },
+  {
+    key: "BLEACH_SUBSTITUTE",
+    name: "Shinigami Remplaçant",
+    description:
+      "Atteindre le score maximal d'un jeu (rang S au Builder ou Pyramide parfaite).",
+    rarity: "epic",
+    isUnlocked: (u) =>
+      u.stats.builderBest >= 980 || u.stats.rankingBest >= 10000,
+  },
+  {
+    key: "BLEACH_COLLECTOR",
+    name: "Collectionneur",
+    description: "Débloquer au moins 10 badges.",
+    rarity: "epic",
+    isUnlocked: (u) => u.badgeCount >= 10,
+  },
+  // ── Titres MANUELS (octroi admin uniquement) ──
+  {
+    key: "BLEACH_UNDEFEATED",
+    name: "Invaincu",
+    description: `Battre un membre VIP en ${bleachGame("battle")} — distinction décernée par le staff.`,
+    rarity: "rare",
+    isUnlocked: () => false,
+  },
+  {
+    key: "BLEACH_DRAFT_KING",
+    name: "Roi du Draft",
+    description:
+      "Terminer 1er d'un classement hebdomadaire — distinction décernée par le staff.",
+    rarity: "legendary",
+    isUnlocked: () => false,
+  },
+];
+
 /**
  * Catalogue COMPLET (tous univers). Sert à la possession/au déblocage, qui sont
  * globaux ; pour l'affichage et l'équipement, filtrer par univers courant via
@@ -527,6 +619,7 @@ export const TITLES: TitleDefinition[] = [
   ...tagUniverse(AOT_TITLES, "aot"),
   ...tagUniverse(KNY_TITLES, "kny"),
   ...tagUniverse(TG_TITLES, "tg"),
+  ...tagUniverse(BLEACH_TITLES, "bleach"),
 ];
 
 /** Titres d'un univers (slug) — catalogue affiché par le sélecteur de profil. */

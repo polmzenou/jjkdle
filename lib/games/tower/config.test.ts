@@ -6,6 +6,8 @@ import { KNY_ATTRIBUTES } from "@/lib/universes/kny-attributes";
 import { KNY_CATEGORIES } from "@/lib/universes/kny-categories";
 import { TG_ATTRIBUTES } from "@/lib/universes/tg-attributes";
 import { TG_CATEGORIES } from "@/lib/universes/tg-categories";
+import { BLEACH_ATTRIBUTES } from "@/lib/universes/bleach-attributes";
+import { BLEACH_CATEGORIES } from "@/lib/universes/bleach-categories";
 import { listUniverses } from "@/lib/universes/registry";
 import type { AttributeSpec } from "@/lib/games/jjkdle/attribute-schema";
 import type { CategoryConfig } from "@/data/roster/categories";
@@ -35,6 +37,7 @@ const SOURCES: Record<
   aot: { attributes: AOT_ATTRIBUTES },
   kny: { attributes: KNY_ATTRIBUTES, categories: KNY_CATEGORIES },
   tg: { attributes: TG_ATTRIBUTES, categories: TG_CATEGORIES },
+  bleach: { attributes: BLEACH_ATTRIBUTES, categories: BLEACH_CATEGORIES },
   csm: { categories: CSM_CATEGORIES },
 };
 

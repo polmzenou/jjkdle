@@ -4,6 +4,7 @@ import { csm } from "./csm";
 import { aot } from "./aot";
 import { kny } from "./kny";
 import { tg } from "./tg";
+import { bleach } from "./bleach";
 
 /**
  * Registre des univers disponibles. Module PUR (client + serveur).
@@ -19,6 +20,7 @@ export const UNIVERSES: Record<string, UniverseConfig> = {
   [aot.slug]: aot,
   [kny.slug]: kny,
   [tg.slug]: tg,
+  [bleach.slug]: bleach,
 };
 
 /**

@@ -18,6 +18,8 @@ const aotGame = (id: string) => gameTitleIn("aot", id);
 const knyGame = (id: string) => gameTitleIn("kny", id);
 /** Idem côté TG (`lib/universes/tg.ts`). */
 const tgGame = (id: string) => gameTitleIn("tg", id);
+/** Idem côté Bleach (`lib/universes/bleach.ts`). */
+const bleachGame = (id: string) => gameTitleIn("bleach", id);
 
 /**
  * Catalogue des CADRES (nameplates) — source de vérité = code (aucune table
@@ -369,6 +371,65 @@ export const FRAMES: FrameDefinition[] = [
     rarity: "epic",
     styleKey: "paperInk",
     universe: "tg",
+    isUnlocked: (u) => u.stats.jjkdleBestAttempts === 1,
+  },
+
+  // ── Cadres Bleach ─────────────────────────────────────────────────────────
+  // Mêmes paliers, noms Bleach, clés PRÉFIXÉES. `hollowBone` (ajouté avec cet
+  // univers) porte le blanc os du wordmark saignant en carmin ; `infinity`,
+  // cyan et pulsé, sert le palier ultime comme ailleurs.
+  {
+    key: "BLEACH_SHIKAI",
+    name: "Shikai",
+    description: "Atteindre le niveau 5.",
+    rarity: "common",
+    styleKey: "hollowBone",
+    universe: "bleach",
+    isUnlocked: (u) => u.level >= 5,
+  },
+  {
+    key: "BLEACH_BANKAI",
+    name: "Bankai",
+    description: "Atteindre le niveau 20.",
+    rarity: "epic",
+    styleKey: "idleLegend",
+    universe: "bleach",
+    isUnlocked: (u) => u.level >= 20,
+  },
+  {
+    key: "BLEACH_FINAL_GETSUGA",
+    name: "Getsuga Ultime",
+    description: `Atteindre le niveau maximum (${MAX_LEVEL}).`,
+    rarity: "legendary",
+    styleKey: "infinity",
+    universe: "bleach",
+    isUnlocked: (u) => u.level >= MAX_LEVEL,
+  },
+  {
+    key: "BLEACH_BURNING_STREAK",
+    name: "Reiatsu Continu",
+    description: `Atteindre un streak ${bleachGame("jjkdle")} de 7 jours.`,
+    rarity: "rare",
+    styleKey: "flameStreak",
+    universe: "bleach",
+    isUnlocked: (u) => u.stats.jjkdleBestStreak >= 7,
+  },
+  {
+    key: "BLEACH_VIP_HUNTER",
+    name: "Chasseur de VIP",
+    description: `Battre un membre VIP en ${bleachGame("battle")} — décerné par le staff.`,
+    rarity: "rare",
+    styleKey: "vipHunter",
+    universe: "bleach",
+    isUnlocked: () => false,
+  },
+  {
+    key: "BLEACH_DAILY_LEGEND",
+    name: "Légende du Quotidien",
+    description: `Trouver le ${bleachGame("jjkdle")} du jour en un seul essai.`,
+    rarity: "epic",
+    styleKey: "paperInk",
+    universe: "bleach",
     isUnlocked: (u) => u.stats.jjkdleBestAttempts === 1,
   },
 ];
