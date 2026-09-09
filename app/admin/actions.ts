@@ -123,8 +123,35 @@ import {
 
 export type ActionResult = { ok: boolean; error?: string };
 
-/** Résultat d'un enregistrement de personnage : nomme l'univers écrit. */
-export type SaveCharacterResult = ActionResult & { universe?: string };
+/**
+ * Résultat d'un enregistrement de personnage : nomme l'univers écrit.
+ *
+ * `canForceId` signale au client que le SEUL reproche est la forme de
+ * l'identifiant, et qu'un nouvel appel avec `forceId` passerait. Un drapeau
+ * plutôt qu'une comparaison de la chaîne d'erreur : le message peut être
+ * reformulé sans casser le bouton « forcer » du dashboard.
+ */
+export type SaveCharacterResult = ActionResult & {
+  universe?: string;
+  canForceId?: boolean;
+};
+
+/** Forme canonique d'un identifiant : minuscules, chiffres, tirets. */
+const ID_PATTERN = /^[a-z0-9-]+$/;
+
+/**
+ * Ce qu'un identifiant FORCÉ ne peut toujours pas contenir.
+ *
+ * Le forçage lève la casse et les caractères non ASCII — c'est tout l'intérêt :
+ * des personnages importés depuis un wiki portent des id comme
+ * « toshirō-hitsugaya », que la forme canonique rejette et qui devenaient donc
+ * ineditables depuis /admin. Restent interdits les seuls caractères qui
+ * rendraient la fiche INACCESSIBLE : l'id voyage dans des URLs
+ * (`/api/characters/<id>/image`), donc espaces, séparateurs de chemin, réservés
+ * de query et caractères de contrôle resteraient cassés quoi qu'en décide
+ * l'admin.
+ */
+const UNSAFE_IN_FORCED_ID = /[\s/\\?#%&+]|[\u0000-\u001f\u007f]/;
 
 const GAMES: LeaderboardGame[] = ["builder", "ranking"];
 const DRAFT_GAME = "jujutsu-draft";
@@ -141,10 +168,17 @@ const DRAFT_TIERS: DraftTier[] = ["S", "A", "B", "C"];
  * l'univers réellement résolu côté serveur et on refuse en cas d'écart : un
  * cookie d'admin désynchronisé (autre onglet, session reprise) faisait sinon
  * atterrir en silence un personnage dans le roster du mauvais anime.
+ *
+ * `forceId` laisse passer un identifiant hors de la forme canonique. C'est un
+ * geste d'admin DÉLIBÉRÉ (le dashboard ne le propose qu'après un premier refus,
+ * cf. `canForceId`) : sans lui, un personnage déjà en base avec un id accentué —
+ * les imports de wiki en produisent, « toshirō-hitsugaya » par exemple —
+ * n'était plus enregistrable du tout depuis /admin.
  */
 export async function saveCharacterAction(
   input: Character,
   expectedUniverse?: string,
+  forceId = false,
 ): Promise<SaveCharacterResult> {
   if (!(await getAdminUser())) {
     return { ok: false, error: "Accès réservé aux administrateurs." };
@@ -161,11 +195,26 @@ export async function saveCharacterAction(
   const id = String(input.id ?? "").trim();
   const name = String(input.name ?? "").trim();
 
-  if (!/^[a-z0-9-]+$/.test(id)) {
-    return {
-      ok: false,
-      error: "L'identifiant doit être en minuscules (lettres, chiffres, tirets).",
-    };
+  if (!ID_PATTERN.test(id)) {
+    // Non canonique : on refuse une première fois en signalant que c'est
+    // forçable, plutôt que de laisser l'admin devant un mur.
+    if (!forceId) {
+      return {
+        ok: false,
+        canForceId: true,
+        error: "L'identifiant doit être en minuscules (lettres, chiffres, tirets).",
+      };
+    }
+    // Forcé : ne reste refusé que ce qui rendrait la fiche inatteignable.
+    if (!id || UNSAFE_IN_FORCED_ID.test(id)) {
+      return {
+        ok: false,
+        error:
+          "Même forcé, l'identifiant ne peut pas être vide ni contenir d'espace " +
+          "ou de caractère réservé aux URL (/ \\ ? # % & +) — il sert d'adresse " +
+          "à la fiche et à son image.",
+      };
+    }
   }
   if (!name) return { ok: false, error: "Le nom est obligatoire." };
   // Tier normalisé (casse/espaces) : une ligne importée en « S » majuscule ne

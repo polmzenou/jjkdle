@@ -214,9 +214,17 @@ export function AdminDashboard({
     [attributeColumns],
   );
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<{ ok: boolean; msg: string } | null>(
-    null,
-  );
+  /**
+   * Bandeau de retour du formulaire. `onForce` n'est rempli que lorsque le
+   * serveur signale un refus RATTRAPABLE (`canForceId`) : la bulle porte alors
+   * un lien qui rejoue l'enregistrement en passant outre, sans que l'admin ait
+   * à renommer un personnage déjà en base.
+   */
+  const [feedback, setFeedback] = useState<{
+    ok: boolean;
+    msg: string;
+    onForce?: () => void;
+  } | null>(null);
   const [query, setQuery] = useState("");
   const [rosterCat, setRosterCat] = useState<CategoryId | "all">("all");
   // Tri de la liste du roster (cf. ROSTER_SORTS) — indépendant du filtre.
@@ -349,17 +357,25 @@ export function AdminDashboard({
     };
   };
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
+  /**
+   * Enregistrement du formulaire. `forceId` n'est vrai que sur un second appel
+   * déclenché depuis la bulle d'erreur — jamais à la première soumission : on
+   * veut que l'admin VOIE la règle avant de la lever.
+   */
+  const save = (forceId: boolean) => {
     setFeedback(null);
     const char = buildCharacter();
     startTransition(async () => {
       // 1) Enregistre les champs texte/ratings (crée la ligne si nouvelle).
       // L'univers administré est envoyé : le serveur refuse si le sien diffère,
       // plutôt que de créer le personnage dans le roster du mauvais anime.
-      const res = await saveCharacterAction(char, currentUniverse);
+      const res = await saveCharacterAction(char, currentUniverse, forceId);
       if (!res.ok) {
-        setFeedback({ ok: false, msg: res.error ?? "Échec." });
+        setFeedback({
+          ok: false,
+          msg: res.error ?? "Échec.",
+          ...(res.canForceId ? { onForce: () => save(true) } : {}),
+        });
         return;
       }
 
@@ -400,6 +416,11 @@ export function AdminDashboard({
       resetForm();
       router.refresh();
     });
+  };
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    save(false);
   };
 
   const remove = (c: Character) => {
@@ -815,6 +836,19 @@ export function AdminDashboard({
           }`}
         >
           {feedback.msg}
+          {feedback.onForce && (
+            <>
+              {" "}
+              <button
+                type="button"
+                onClick={feedback.onForce}
+                disabled={pending}
+                className="underline underline-offset-2 transition-opacity hover:opacity-70 disabled:opacity-40"
+              >
+                Forcer
+              </button>
+            </>
+          )}
         </div>
       )}
 
