@@ -108,7 +108,7 @@ export const bleach: UniverseConfig = {
       description:
         "Classe 8 personnages du plus fort au plus faible selon la consigne. Les bonnes positions se verrouillent, les fausses reviennent. 4 tentatives, jusqu'à 10 000 points.",
       tags: ["ranking", "drag & drop", "roster Bleach"],
-      previewImage: "/assets/pyramid-bleach.png",
+      previewImage: "/assets/pyramid-screen-bleach.png",
     },
     "jujutsu-draft": {
       title: "Zanpakutō Draft",
@@ -121,12 +121,14 @@ export const bleach: UniverseConfig = {
       description:
         "Affronte un ami en 1v1 : drafte une carte tirée au hasard à tour de rôle (garde-la ou refile-la), compose ton escouade de 5, puis laisse parler les lames. Le cumul le plus fort gagne.",
       tags: ["1v1", "multijoueur", "draft", "roster Bleach"],
+      previewImage: "/assets/battle-bleach.png",
     },
     guesswho: {
       title: "Qui est-ce ?",
       description:
         "Affronte un ami en 1v1 : une grille de 25 personnages, un secret pour chacun. Pose des questions, élimine des cartes et devine le perso secret de l'adversaire avant lui. Un mauvais guess et c'est perdu.",
       tags: ["1v1", "multijoueur", "déduction", "roster Bleach"],
+      previewImage: "/assets/guesswho-bleach.png",
     },
     codenames: {
       title: "Bleach Codenames",
