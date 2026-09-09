@@ -101,12 +101,14 @@ export const bleach: UniverseConfig = {
       description:
         "Compose ton shinigami idéal catégorie par catégorie. Chaque choix verrouille une stat et re-mélange le reste. Score sur 1000, du simple élève de l'Académie au Capitaine-commandant.",
       tags: ["tap game", "roster Bleach", "score"],
+      previewImage: "/assets/builder-bleach.png",
     },
     ranking: {
       title: "Bleach Pyramid",
       description:
         "Classe 8 personnages du plus fort au plus faible selon la consigne. Les bonnes positions se verrouillent, les fausses reviennent. 4 tentatives, jusqu'à 10 000 points.",
       tags: ["ranking", "drag & drop", "roster Bleach"],
+      previewImage: "/assets/pyramid-bleach.png",
     },
     "jujutsu-draft": {
       title: "Zanpakutō Draft",
@@ -137,12 +139,14 @@ export const bleach: UniverseConfig = {
       description:
         "Devine le personnage Bleach mystère du jour. Chaque proposition révèle des indices par attribut (espèce, libération, rang, arc…) avec des flèches ↑/↓. Un perso par jour, essais illimités.",
       tags: ["quotidien", "déduction", "roster Bleach"],
+      previewImage: "/assets/idle-bleach.png",
     },
     "higher-lower": {
       title: "Bleach Higher/Lower",
       description:
         "Plus ou moins de reiatsu ? Compare deux personnages du roster, devine si celui de droite dépasse celui de gauche en puissance et enchaîne les bonnes réponses le plus loin possible.",
       tags: ["quickfire", "déduction", "roster Bleach"],
+      previewImage: "/assets/higher-lower-bleach.png",
     },
     tower: {
       title: "La Tour du Repentir",
