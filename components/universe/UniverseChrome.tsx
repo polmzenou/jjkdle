@@ -8,8 +8,11 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { getCachedImageCount } from "@/lib/admin/image-cache";
 import { getMaintenance } from "@/lib/config/app-config";
 import { prisma } from "@/lib/prisma";
-import { getCurrentUniverse } from "@/lib/universes/current";
-import { themeCss } from "@/lib/universes/theme";
+import {
+  getCurrentUniverse,
+  listAvailableUniverses,
+} from "@/lib/universes/current";
+import { themeCss, themeCssVars } from "@/lib/universes/theme";
 
 /**
  * CHROME d'un univers : palette, fond, barre de nav, provider de branding.
@@ -33,10 +36,14 @@ export async function UniverseChrome({
   children: React.ReactNode;
   jsonLd?: boolean;
 }) {
-  const [user, maintenance, universe] = await Promise.all([
+  const [user, maintenance, universe, available] = await Promise.all([
     getCurrentUser(),
     getMaintenance(),
     getCurrentUniverse(),
+    // Arcades en ligne, pour le sélecteur d'univers de l'en-tête. Résolu ICI
+    // (serveur) plutôt que dans la nav : la liste vient de la base, et le
+    // sélecteur est un composant client.
+    listAvailableUniverses(),
   ]);
   const isAdmin = user?.role === "ADMIN";
   const maintenanceActive = maintenance.enabled && !isAdmin;
@@ -74,6 +81,15 @@ export async function UniverseChrome({
         coins: profile?.coins ?? 0,
       }
     : null;
+  // Le sélecteur d'arcade ne reçoit que du sérialisable : la palette part en
+  // variables CSS, comme pour les cartes du hub.
+  const switcherUniverses = available.map(({ slug, config }) => ({
+    slug,
+    name: config.name,
+    sourceWork: config.sourceWork,
+    logo: config.logo,
+    vars: themeCssVars(config.theme),
+  }));
   // Compteur du cache d'images (pour afficher « Vider le cache »).
   const cachedImageCount = navUser?.canSyncImages ? getCachedImageCount() : 0;
 
@@ -110,7 +126,11 @@ export async function UniverseChrome({
                 Mode maintenance actif — visible par les admins uniquement
               </div>
             )}
-            <SiteNav user={navUser} cachedImageCount={cachedImageCount} />
+            <SiteNav
+              user={navUser}
+              cachedImageCount={cachedImageCount}
+              universes={switcherUniverses}
+            />
             {children}
             <TutorialButton />
           </>

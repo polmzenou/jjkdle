@@ -10,6 +10,10 @@ import { ShopLink } from "@/components/shop/ShopLink";
 import { logoutAction } from "@/lib/auth/actions";
 import { UniverseLink } from "@/components/universe/UniverseLink";
 import { HubLink } from "@/components/universe/HubLink";
+import {
+  UniverseSwitcher,
+  type SwitcherUniverse,
+} from "@/components/universe/UniverseSwitcher";
 import { useUniversePathname } from "@/components/universe/UniverseProvider";
 import {
   refreshRosterImagesFromApiAction,
@@ -53,9 +57,12 @@ export type NavUser = {
 export function SiteNav({
   user,
   cachedImageCount = 0,
+  universes = [],
 }: {
   user: NavUser | null;
   cachedImageCount?: number;
+  /** Arcades en ligne, pour le sélecteur d'univers (cf. UniverseSwitcher). */
+  universes?: SwitcherUniverse[];
 }) {
   const pathname = useUniversePathname();
 
@@ -66,11 +73,13 @@ export function SiteNav({
   return (
     <header className="sticky top-0 z-50 border-b border-white/5 bg-void-900/70 backdrop-blur-xl">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3 sm:px-6">
-        {/* Sortie vers le hub + logo de l'univers : deux destinations distinctes
-            (tous les animes / la landing de celui-ci), d'où le séparateur. */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        {/* Sortie vers le hub + saut direct dans une autre arcade + logo de
+            l'univers : trois destinations distinctes (toutes les arcades / une
+            arcade précise / la landing de celle-ci), d'où le séparateur. */}
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <HubLink />
-          <span aria-hidden className="h-6 w-px bg-white/10" />
+          <UniverseSwitcher universes={universes} />
+          <span aria-hidden className="mx-0.5 h-6 w-px bg-white/10" />
           <Logo className="h-9 w-auto sm:h-10" />
         </div>
 
