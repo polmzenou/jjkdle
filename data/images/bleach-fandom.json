@@ -1,0 +1,162 @@
+{
+  "_comment": [
+    "Correspondance roster Bleach → wiki bleach.fandom.com/fr.",
+    "Lu par : npx tsx scripts/seed-images-fandom.ts --universe bleach",
+    "Clé = Character.id. Valeur = titre de PAGE, ou { file } pour épingler un fichier.",
+    "",
+    "── Contrainte : anime uniquement ──",
+    "Les 101 portraits ont été regardés un par un. Le wiki FR sert le plus souvent",
+    "un rendu anime en infobox, mais pas toujours : les entrées { file } ci-dessous",
+    "corrigent les cas où la page menait à une planche manga, à un plan trop large",
+    "ou au mauvais personnage.",
+    "",
+    "── Pourquoi ces fichiers épinglés ──",
+    "· genryusai-yamamoto : l'infobox le montre de dos, capuche relevée.",
+    "· hiyori-sarugaki, isane-kotetsu, urahara-yushiro : l'infobox est une planche",
+    "  MANGA (« 606Hiyori_profile », « 685Isane_profile », « Yūshirō_Shihōin »).",
+    "  Yūshirō n'a qu'un seul plan anime sur ce wiki — une silhouette de nuit.",
+    "· ichibe-hyosube : l'infobox le montre de dos.",
+    "· kaname-tosen : « Kaname-Portrait » (2048²) plutôt que la capture d'épisode.",
+    "· kaname-tosen-hollow : le roster porte DEUX Kaname Tōsen ; sans épinglage, ils",
+    "  partageraient le même visage. Le seul plan anime de sa forme hollowifiée est",
+    "  un plan large — sa forme complète n'existe ici qu'en manga.",
+    "· kugo-ginjo : l'infobox sert une illustration signée, pas un plan de l'anime.",
+    "· meninas-mcallon : l'infobox est un profil de nuit, quasi illisible.",
+    "· nel-tu / nelliel-tu-oderschvank : une seule page wiki pour les deux entrées du",
+    "  roster — l'enfant et l'adulte. L'épinglage sépare les deux visages.",
+    "· nnoitra-fraccion-tesla : Tesla n'a pas de page FR ; la recherche tombait sur",
+    "  « Chapitre 263 ».",
+    "· zommari-rureaux : l'infobox est un plan large très sombre.",
+    "",
+    "── Page forcée ──",
+    "· ryuken-ishida : sans le titre exact « Ryûken Ishida », la recherche renvoie",
+    "  la page « Sugama » — un autre personnage."
+  ],
+  "aaroniero-arruruerie": "Aaroniero Arurueri",
+  "abirama-redder": "Abirama Redder",
+  "as-nodt": "Äs Nödt",
+  "askin-nakk-le-vaar": "Askin Nakk Le Vaar",
+  "bambietta-basterbine": "Bambietta Basterbine",
+  "baraggan-louisenbairn": "Baraggan Luisenbarn",
+  "bazz-b": "Bazz-B",
+  "byakuya-kuchiki": "Byakuya Kuchiki",
+  "candice-catnipp": "Candice Catnipp",
+  "cang-du": "Cang Du",
+  "chad-gantenbainne": "Choe Neng Poww",
+  "charlotte-chuhlhourne": "Charlotte Cuuhlhourne",
+  "coyote-starrk": "Coyote Stark",
+  "don-kanonji": "Don Kanonji",
+  "driscoll-berci": "Driscoll Berci",
+  "findorr-calius": "Findorr Calius",
+  "genryusai-yamamoto": {
+    "file": "Yamamoto-Profil.png"
+  },
+  "gerard-valkyrie": "Gerard Valkyrie",
+  "gin-ichimaru": "Gin Ichimaru",
+  "giriko-kutsuzawa": "Giriko Kutsuzawa",
+  "giselle-gewelle": "Giselle Gewelle",
+  "grand-fisher": "Grand Fisher",
+  "gremmy-thoumeaux": "Gremmy Thoumeaux",
+  "grimmjow-jaegerjaquez": "Grimmjow Jaggerjack",
+  "hachigen-ushoda": "Hachigen Ushôda",
+  "hiyori-sarugaki": {
+    "file": "Hiyori_Sarugaki.jpg"
+  },
+  "ichibe-hyosube": {
+    "file": "Ichibe-Carre.jpg"
+  },
+  "ichigo-kurosaki": "Ichigo Kurosaki",
+  "ikkaku-madarame": "Ikkaku Madarame",
+  "isane-kotetsu": {
+    "file": "Isane241.jpg"
+  },
+  "isshin-kurosaki": "Isshin Kurosaki",
+  "izuru-kira": "Izuru Kira",
+  "jackie-tristan": "Jackie Tristan",
+  "jugram-haschwalth": "Jugram Haschwalth",
+  "jushiro-ukitake": "Jûshirô Ukitake",
+  "kaname-tosen": {
+    "file": "Kaname-Portrait.jpg"
+  },
+  "kaname-tosen-hollow": {
+    "file": "Tosen_hollow_1er_forme.jpg"
+  },
+  "keigo-asano": "Keigo Asano",
+  "kenpachi-zaraki": "Kenpachi Zaraki",
+  "kensei-muguruma": "Kensei Muguruma",
+  "kirio-hikifune": "Kirio Hikifune",
+  "kisuke-urahara": "Kisuke Urahara",
+  "kon": "Kon",
+  "kugo-ginjo": {
+    "file": "Ginjo_Kûgo.jpg"
+  },
+  "lille-barro": "Lille Barro",
+  "liltotto-lamperd": "Liltotto Lamperd",
+  "lisa-yadomaru": "Lisa Yadômaru",
+  "love-aikawa": "Love Aikawa",
+  "masaki-kurosaki": "Masaki Kurosaki",
+  "mashiro-kuna": "Mashiro Kuna",
+  "mask-de-masculine": "Mask De Masculine",
+  "mayuri-kurotsuchi": "Mayuri Kurotsuchi",
+  "meninas-mcallon": {
+    "file": "Meninas_McAllon.png"
+  },
+  "mizuiro-kuchiki": "Mizuiro Kojima",
+  "moe-shishigawara": "Moe Shishigawara",
+  "nanana-najahkoop": "NaNaNa Najahkoop",
+  "nanao-ise": "Nanao Ise",
+  "nel-tu": {
+    "file": "Nelliel-Profil-Enfant.png"
+  },
+  "nelliel-tu-oderschvank": {
+    "file": "Nelliel-Profil-2001.png"
+  },
+  "nianzol-weizol": "Nianzol Weizol",
+  "nnoitra-fraccion-tesla": {
+    "file": "Tesla.jpeg"
+  },
+  "nnoitra-gilga": "Nnoitra Gilga",
+  "oetsu-nimaiya": "Ôetsu Nimaiya",
+  "orihime-inoue": "Orihime Inoue",
+  "pepe-waccabrada": "PePe Waccabrada",
+  "pernida-parnkgjas": "Pernida Parnkgjas",
+  "quilge-opie": "Quilge Opie",
+  "rangiku-matsumoto": "Rangiku Matsumoto",
+  "renji-abarai": "Renji Abarai",
+  "retsu-unohana": "Retsu Unohana",
+  "riruka-dokugamine": "Riruka Dokugamine",
+  "robert-accutrone": "Robert Accutrone",
+  "rose-otoribashi": "Rôjûrô Ôtoribashi",
+  "rukia-kuchiki": "Rukia Kuchiki",
+  "ryuken-ishida": "Ryûken Ishida",
+  "sajin-komamura": "Sajin Komamura",
+  "senjumaru-shutara": "Senjumaru Shutara",
+  "shin​​ji-hirako": "Shinji Hirako",
+  "shuhei-hisagi": "Shūhei Hisagi",
+  "shukuro-tsukishima": "Shûkurô Tsukishima",
+  "shunsui-kyoraku": "Shunsui Kyôraku",
+  "soi-fon": "Soi Fon",
+  "soken-ishida": "Sôken Ishida",
+  "sosuke-aizen": "Sôsuke Aizen",
+  "szayelaporro-granz": "Szayelaporro Granz",
+  "tatsuki-arizawa": "Tatsuki Arisawa",
+  "tenjiro-kirinji": "Tenjirô Kirinji",
+  "tetsuzaemon-iba": "Tetsuzaemon Iba",
+  "tier-harribel": "Tier Halibel",
+  "toshirō-hitsugaya": "Tôshirô Hitsugaya",
+  "ulquiorra-cifer": "Ulquiorra Cifer",
+  "urahara-yushiro": {
+    "file": "Yushiro-apparition.png"
+  },
+  "uryu-ishida": "Uryû Ishida",
+  "wonderweiss-margela": "Wonderweiss Margela",
+  "yammy-llargo": "Yammy Riyalgo",
+  "yasutora-sado": "Yasutora Sado",
+  "yhwach": "Yhwach",
+  "yoruichi-shihouin": "Yoruichi Shihôin",
+  "yukio-hans-vorarlberna": "Yukio Hans Vorarlberna",
+  "yumichika-ayasegawa": "Yumichika Ayasegawa",
+  "zommari-rureaux": {
+    "file": "Zommari_leroux.jpg"
+  }
+}

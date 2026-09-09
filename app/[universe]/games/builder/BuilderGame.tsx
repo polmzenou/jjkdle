@@ -130,6 +130,25 @@ export function BuilderGame({
   const total = categories.length;
   const lockedCount = lockedIds.size;
 
+  /**
+   * Découpage de la grille en DEUX rangées au-delà de dix catégories.
+   *
+   * La grille tient cinq tuiles par ligne sur grand écran. À onze catégories, le
+   * retour à la ligne naturel donne 5 / 5 / 1 : la dernière tuile se retrouve
+   * seule et centrée, ce qui casse la lecture du plateau. On force donc cinq en
+   * haut et TOUT LE RESTE en bas, quitte à ce que la rangée du bas déborde
+   * latéralement — six tuiles à 20 % font 120 % de large, soit ~10 % qui sortent
+   * de chaque côté.
+   *
+   * Le seuil est à dix : en dessous, le retour à la ligne remplit déjà les deux
+   * rangées (2×5 au plus) et il n'y a rien à corriger.
+   */
+  const splitRows = total > 10;
+  const rows = useMemo(
+    () => (splitRows ? [categories.slice(0, 5), categories.slice(5)] : [categories]),
+    [categories, splitRows],
+  );
+
   const handleTap = useCallback(
     (category: CategoryConfig) => {
       if (lockedIds.has(category.id) || finished) return;
@@ -234,19 +253,42 @@ export function BuilderGame({
           {loading && Object.keys(drawIds).length === 0 ? (
             <p className="py-20 text-center text-white/40">Tirage en cours…</p>
           ) : (
-            <div className="flex flex-wrap justify-center gap-3">
-              {categories.map((category) => (
+            /* Le découpage en rangées ne s'active qu'à `xl`. En dessous, les
+               groupes sont en `display: contents` : leurs tuiles remontent dans
+               le flex-wrap du parent, qui reprend son comportement d'origine
+               (2 / 3 / 4 / 5 colonnes selon la largeur). Le seuil est `xl` et non
+               `lg` parce que le débordement de la rangée du bas doit tenir dans
+               le viewport : à 1280 px il sort de ~96 px de chaque côté pour 128 px
+               de marge disponible, alors qu'à 1024 px il ferait scroller la page
+               horizontalement. */
+            <div
+              className={`flex flex-wrap justify-center gap-3${
+                splitRows ? " xl:flex-col xl:flex-nowrap" : ""
+              }`}
+            >
+              {rows.map((row, index) => (
                 <div
-                  key={category.id}
-                  className="w-[calc(50%-12px)] sm:w-[calc(33.333%-12px)] md:w-[calc(25%-12px)] lg:w-[calc(20%-12px)]"
+                  key={index}
+                  className={`contents${
+                    splitRows ? " xl:flex xl:justify-center xl:gap-3" : ""
+                  }`}
                 >
-                  <CategoryTile
-                    category={category}
-                    character={draw[category.id] ?? null}
-                    locked={lockedIds.has(category.id)}
-                    onTap={handleTap}
-                    drawKey={drawKey}
-                  />
+                  {row.map((category) => (
+                    <div
+                      key={category.id}
+                      className={`w-[calc(50%-12px)] sm:w-[calc(33.333%-12px)] md:w-[calc(25%-12px)] lg:w-[calc(20%-12px)]${
+                        splitRows ? " xl:shrink-0" : ""
+                      }`}
+                    >
+                      <CategoryTile
+                        category={category}
+                        character={draw[category.id] ?? null}
+                        locked={lockedIds.has(category.id)}
+                        onTap={handleTap}
+                        drawKey={drawKey}
+                      />
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>

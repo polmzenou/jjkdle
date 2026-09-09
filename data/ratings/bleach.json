@@ -1,0 +1,1015 @@
+{
+  "_comment": [
+    "Notes du builder « Build the Perfect Shinigami » (univers Bleach).",
+    "Lu par : npx tsx scripts/seed-ratings.ts --universe bleach",
+    "Cle de 1er niveau = Character.slug, cle de 2e = slug de categorie.",
+    "",
+    "-- Rien ici ne vient du wiki --",
+    "Une note sur 100 est un jugement. Les attributs (data/attributes/bleach.json) ont",
+    "une source verifiable, ces notes n'en ont pas : elles ne visent que la coherence",
+    "interne du roster.",
+    "",
+    "-- Un seul 100 par categorie, et il doit se defendre --",
+    "  zanpakuto      Yamamoto      Ryujin Jakka, le zanpakuto le plus destructeur.",
+    "  bankai         Ichibe        Shirafude Ichimonji, le bankai le plus haut du Gotei.",
+    "  reiatsu        Yhwach        le plafond de la serie.",
+    "  kido           Aizen         kido de rang 90 sans incantation.",
+    "  vitesse        Yoruichi      la Deesse de la Vitesse ; c'est son titre.",
+    "  force-physique Kenpachi      le combattant physique pur de la serie.",
+    "  battle-iq      Aizen         tout le recit est son plan.",
+    "  endurance      Gerard        The Miracle : plus il est brise, plus il grandit.",
+    "  hollows        Coyote Starrk le Primera, rang le plus haut de l'Espada.",
+    "  gotei-13       Yamamoto      capitaine-commandant, fondateur du Gotei.",
+    "  quincy         Yhwach        le roi quincy, pere de tous les Sternritter.",
+    "Aizen prend deux 100 (kido et battle-iq) et Yhwach deux (reiatsu et quincy) : ce",
+    "sont bien leurs deux sommets a chacun, pas un raccourci.",
+    "",
+    "-- Les huit categories de STAT : qui est note, et qui ne l'est pas --",
+    "· zanpakuto  : il faut EN AVOIR un — shinigami, Visored, arrancar (la resurreccion",
+    "  est leur zanpakuto). Aucun quincy, aucun humain, aucun fullbringer n'y figure :",
+    "  ce sont des armes de reishi ou des Fullbring, pas des zanpakuto. Yoruichi et",
+    "  Yushiro non plus : ils n'en degainent jamais.",
+    "· bankai     : reserve aux trois liberations que la categorie nomme — bankai,",
+    "  Resurreccion, Vollstandig. Aizen n'y est donc PAS (il n'a aucune des trois), ni",
+    "  les capitaines dont le bankai n'a jamais ete montre (Ukitake, Isshin, Hisagi,",
+    "  Rangiku, Kira, Isane, Iba, Yumichika, Lisa, Love, Hachigen, Hiyori, Mashiro), ni",
+    "  les Sternritter sans Vollstandig connu (Gremmy, Driscoll, Nianzol), ni Ryuken,",
+    "  Soken et Masaki. Kugo Ginjo fait exception cote fullbringer : il obtient un vrai",
+    "  bankai en volant les pouvoirs d'Ichigo.",
+    "· kido       : art shinigami. Seuls les shinigami et les Visored y sont notes —",
+    "  un arrancar ou un quincy n'en pratique pas. Kenpachi non plus : il n'en a jamais",
+    "  lance une seule.",
+    "· reiatsu, vitesse, force-physique, battle-iq, endurance : ouvertes a tout le",
+    "  monde, civils compris. Les six non-combattants (Orihime, Tatsuki, Kon, Don",
+    "  Kanonji, Mizuiro, Keigo) n'ont QUE ces cinq-la, et bas.",
+    "",
+    "-- Les trois categories d'APPARTENANCE : un seul camp par personnage --",
+    "· hollows  : arrancar et hollows, plus ce que le hollow interieur apporte a un",
+    "  shinigami — d'ou Ichigo, les huit Visored et le Tosen hollowifie. Aizen y figure",
+    "  a 80 pour sa hollowfication par le Hogyoku. Aucun quincy, aucun humain.",
+    "· gotei-13 : le poids REEL dans les treize divisions, donc les membres en poste",
+    "  seulement. En sont exclus : les traitres (Aizen, Gin, Tosen), les exiles (Urahara,",
+    "  Yoruichi, Isshin, et les Visored non reintegres — Love, Hachigen, Hiyori) et la",
+    "  Division Zero, qui repond au Roi des Ames et non au Sereitei. Shinji, Kensei,",
+    "  Rose, Lisa et Mashiro y sont : ils ont repris du service. Renji plafonne a 74 —",
+    "  vice-capitaine, il n'est evidemment pas le sommet du Gotei.",
+    "· quincy   : les quincy, et rien d'autre. Ichigo y figure a 70 : il est quincy par",
+    "  sa mere et se sert du Blut. Aizen n'y est pas — il n'en est pas un.",
+    "",
+    "-- Bareme --",
+    "  100      sommet absolu de la serie pour cette categorie",
+    "  85-99    elite (capitaines de premier plan, Schutzstaffel, Espada superieurs)",
+    "  70-84    tres fort (capitaines, Espada, Sternritter majeurs)",
+    "  55-69    fort (vice-capitaines, Sternritter, bas de l'Espada)",
+    "  40-54    correct (officiers grades, Fraccion)",
+    "  20-39    faible",
+    "  1-19     civil"
+  ],
+  "aaroniero-arruruerie": {
+    "zanpakuto": 64,
+    "bankai": 70,
+    "reiatsu": 62,
+    "vitesse": 58,
+    "force-physique": 60,
+    "battle-iq": 66,
+    "endurance": 64,
+    "hollows": 72
+  },
+  "abirama-redder": {
+    "zanpakuto": 44,
+    "bankai": 48,
+    "reiatsu": 42,
+    "vitesse": 54,
+    "force-physique": 46,
+    "battle-iq": 38,
+    "endurance": 44,
+    "hollows": 44
+  },
+  "as-nodt": {
+    "bankai": 78,
+    "reiatsu": 74,
+    "vitesse": 72,
+    "force-physique": 62,
+    "battle-iq": 68,
+    "endurance": 70,
+    "quincy": 76
+  },
+  "askin-nakk-le-vaar": {
+    "bankai": 86,
+    "reiatsu": 82,
+    "vitesse": 76,
+    "force-physique": 66,
+    "battle-iq": 90,
+    "endurance": 84,
+    "quincy": 86
+  },
+  "bambietta-basterbine": {
+    "bankai": 72,
+    "reiatsu": 68,
+    "vitesse": 66,
+    "force-physique": 60,
+    "battle-iq": 58,
+    "endurance": 62,
+    "quincy": 70
+  },
+  "baraggan-louisenbairn": {
+    "zanpakuto": 84,
+    "bankai": 88,
+    "reiatsu": 88,
+    "vitesse": 58,
+    "force-physique": 76,
+    "battle-iq": 78,
+    "endurance": 84,
+    "hollows": 94
+  },
+  "bazz-b": {
+    "bankai": 72,
+    "reiatsu": 70,
+    "vitesse": 74,
+    "force-physique": 68,
+    "battle-iq": 66,
+    "endurance": 68,
+    "quincy": 72
+  },
+  "byakuya-kuchiki": {
+    "zanpakuto": 90,
+    "bankai": 89,
+    "reiatsu": 84,
+    "kido": 86,
+    "vitesse": 90,
+    "force-physique": 70,
+    "battle-iq": 86,
+    "endurance": 76,
+    "gotei-13": 86
+  },
+  "candice-catnipp": {
+    "bankai": 70,
+    "reiatsu": 66,
+    "vitesse": 82,
+    "force-physique": 58,
+    "battle-iq": 56,
+    "endurance": 60,
+    "quincy": 68
+  },
+  "cang-du": {
+    "bankai": 62,
+    "reiatsu": 58,
+    "vitesse": 56,
+    "force-physique": 62,
+    "battle-iq": 52,
+    "endurance": 72,
+    "quincy": 60
+  },
+  "charlotte-chuhlhourne": {
+    "zanpakuto": 46,
+    "bankai": 50,
+    "reiatsu": 44,
+    "vitesse": 44,
+    "force-physique": 50,
+    "battle-iq": 40,
+    "endurance": 46,
+    "hollows": 46
+  },
+  "choe-neng-poww": {
+    "zanpakuto": 42,
+    "bankai": 46,
+    "reiatsu": 44,
+    "vitesse": 32,
+    "force-physique": 58,
+    "battle-iq": 32,
+    "endurance": 52,
+    "hollows": 44
+  },
+  "coyote-starrk": {
+    "zanpakuto": 88,
+    "bankai": 90,
+    "reiatsu": 92,
+    "vitesse": 92,
+    "force-physique": 76,
+    "battle-iq": 80,
+    "endurance": 82,
+    "hollows": 100
+  },
+  "don-kanonji": {
+    "reiatsu": 14,
+    "vitesse": 16,
+    "force-physique": 14,
+    "battle-iq": 18,
+    "endurance": 18
+  },
+  "driscoll-berci": {
+    "reiatsu": 56,
+    "vitesse": 48,
+    "force-physique": 66,
+    "battle-iq": 40,
+    "endurance": 58,
+    "quincy": 54
+  },
+  "findorr-calius": {
+    "zanpakuto": 42,
+    "bankai": 46,
+    "reiatsu": 40,
+    "vitesse": 44,
+    "force-physique": 44,
+    "battle-iq": 42,
+    "endurance": 42,
+    "hollows": 42
+  },
+  "genryusai-yamamoto": {
+    "zanpakuto": 100,
+    "bankai": 97,
+    "reiatsu": 96,
+    "kido": 88,
+    "vitesse": 82,
+    "force-physique": 90,
+    "battle-iq": 88,
+    "endurance": 90,
+    "gotei-13": 100
+  },
+  "gerard-valkyrie": {
+    "bankai": 94,
+    "reiatsu": 90,
+    "vitesse": 70,
+    "force-physique": 96,
+    "battle-iq": 60,
+    "endurance": 100,
+    "quincy": 90
+  },
+  "gin-ichimaru": {
+    "zanpakuto": 88,
+    "bankai": 86,
+    "reiatsu": 78,
+    "kido": 76,
+    "vitesse": 92,
+    "force-physique": 66,
+    "battle-iq": 90,
+    "endurance": 70
+  },
+  "giriko-kutsuzawa": {
+    "reiatsu": 26,
+    "vitesse": 22,
+    "force-physique": 30,
+    "battle-iq": 46,
+    "endurance": 28
+  },
+  "giselle-gewelle": {
+    "bankai": 68,
+    "reiatsu": 62,
+    "vitesse": 56,
+    "force-physique": 52,
+    "battle-iq": 70,
+    "endurance": 74,
+    "quincy": 68
+  },
+  "grand-fisher": {
+    "zanpakuto": 36,
+    "bankai": 44,
+    "reiatsu": 38,
+    "vitesse": 40,
+    "force-physique": 44,
+    "battle-iq": 48,
+    "endurance": 40,
+    "hollows": 40
+  },
+  "gremmy-thoumeaux": {
+    "reiatsu": 88,
+    "vitesse": 70,
+    "force-physique": 76,
+    "battle-iq": 74,
+    "endurance": 78,
+    "quincy": 86
+  },
+  "grimmjow-jaegerjaquez": {
+    "zanpakuto": 78,
+    "bankai": 82,
+    "reiatsu": 78,
+    "vitesse": 86,
+    "force-physique": 80,
+    "battle-iq": 66,
+    "endurance": 82,
+    "hollows": 84
+  },
+  "hachigen-ushoda": {
+    "zanpakuto": 50,
+    "reiatsu": 76,
+    "kido": 94,
+    "vitesse": 52,
+    "force-physique": 60,
+    "battle-iq": 78,
+    "endurance": 74,
+    "hollows": 64
+  },
+  "hiyori-sarugaki": {
+    "zanpakuto": 56,
+    "reiatsu": 58,
+    "kido": 50,
+    "vitesse": 62,
+    "force-physique": 58,
+    "battle-iq": 54,
+    "endurance": 60,
+    "hollows": 60
+  },
+  "ichibe-hyosube": {
+    "zanpakuto": 98,
+    "bankai": 100,
+    "reiatsu": 95,
+    "kido": 92,
+    "vitesse": 85,
+    "force-physique": 88,
+    "battle-iq": 90,
+    "endurance": 88
+  },
+  "ichigo-kurosaki": {
+    "zanpakuto": 92,
+    "bankai": 95,
+    "reiatsu": 94,
+    "kido": 25,
+    "vitesse": 94,
+    "force-physique": 90,
+    "battle-iq": 78,
+    "endurance": 96,
+    "hollows": 90,
+    "quincy": 70
+  },
+  "ikkaku-madarame": {
+    "zanpakuto": 66,
+    "bankai": 68,
+    "reiatsu": 62,
+    "kido": 30,
+    "vitesse": 64,
+    "force-physique": 72,
+    "battle-iq": 62,
+    "endurance": 76,
+    "gotei-13": 66
+  },
+  "isane-kotetsu": {
+    "zanpakuto": 54,
+    "reiatsu": 54,
+    "kido": 72,
+    "vitesse": 52,
+    "force-physique": 44,
+    "battle-iq": 56,
+    "endurance": 52,
+    "gotei-13": 58
+  },
+  "isshin-kurosaki": {
+    "zanpakuto": 84,
+    "reiatsu": 84,
+    "kido": 72,
+    "vitesse": 84,
+    "force-physique": 82,
+    "battle-iq": 84,
+    "endurance": 82
+  },
+  "izuru-kira": {
+    "zanpakuto": 58,
+    "reiatsu": 56,
+    "kido": 66,
+    "vitesse": 56,
+    "force-physique": 48,
+    "battle-iq": 62,
+    "endurance": 54,
+    "gotei-13": 60
+  },
+  "jackie-tristan": {
+    "reiatsu": 30,
+    "vitesse": 44,
+    "force-physique": 48,
+    "battle-iq": 36,
+    "endurance": 40
+  },
+  "jugram-haschwalth": {
+    "bankai": 92,
+    "reiatsu": 88,
+    "vitesse": 88,
+    "force-physique": 82,
+    "battle-iq": 92,
+    "endurance": 86,
+    "quincy": 94
+  },
+  "jushiro-ukitake": {
+    "zanpakuto": 84,
+    "reiatsu": 82,
+    "kido": 84,
+    "vitesse": 80,
+    "force-physique": 66,
+    "battle-iq": 86,
+    "endurance": 64,
+    "gotei-13": 84
+  },
+  "kaname-tosen": {
+    "zanpakuto": 82,
+    "bankai": 84,
+    "reiatsu": 76,
+    "kido": 80,
+    "vitesse": 84,
+    "force-physique": 68,
+    "battle-iq": 78,
+    "endurance": 72
+  },
+  "kaname-tosen-hollow": {
+    "zanpakuto": 84,
+    "bankai": 88,
+    "reiatsu": 84,
+    "kido": 80,
+    "vitesse": 88,
+    "force-physique": 80,
+    "battle-iq": 74,
+    "endurance": 82,
+    "hollows": 78
+  },
+  "keigo-asano": {
+    "reiatsu": 6,
+    "vitesse": 14,
+    "force-physique": 10,
+    "battle-iq": 14,
+    "endurance": 12
+  },
+  "kenpachi-zaraki": {
+    "zanpakuto": 88,
+    "bankai": 90,
+    "reiatsu": 93,
+    "vitesse": 80,
+    "force-physique": 100,
+    "battle-iq": 55,
+    "endurance": 95,
+    "gotei-13": 90
+  },
+  "kensei-muguruma": {
+    "zanpakuto": 76,
+    "bankai": 78,
+    "reiatsu": 74,
+    "kido": 58,
+    "vitesse": 74,
+    "force-physique": 82,
+    "battle-iq": 68,
+    "endurance": 80,
+    "hollows": 72,
+    "gotei-13": 74
+  },
+  "kirio-hikifune": {
+    "zanpakuto": 70,
+    "reiatsu": 86,
+    "kido": 88,
+    "vitesse": 68,
+    "force-physique": 66,
+    "battle-iq": 80,
+    "endurance": 76
+  },
+  "kisuke-urahara": {
+    "zanpakuto": 90,
+    "bankai": 88,
+    "reiatsu": 82,
+    "kido": 96,
+    "vitesse": 88,
+    "force-physique": 72,
+    "battle-iq": 98,
+    "endurance": 80
+  },
+  "kon": {
+    "reiatsu": 10,
+    "vitesse": 30,
+    "force-physique": 14,
+    "battle-iq": 20,
+    "endurance": 22
+  },
+  "kugo-ginjo": {
+    "bankai": 70,
+    "reiatsu": 72,
+    "vitesse": 74,
+    "force-physique": 76,
+    "battle-iq": 78,
+    "endurance": 74
+  },
+  "lille-barro": {
+    "bankai": 92,
+    "reiatsu": 88,
+    "vitesse": 90,
+    "force-physique": 78,
+    "battle-iq": 78,
+    "endurance": 90,
+    "quincy": 90
+  },
+  "liltotto-lamperd": {
+    "bankai": 66,
+    "reiatsu": 64,
+    "vitesse": 62,
+    "force-physique": 56,
+    "battle-iq": 68,
+    "endurance": 62,
+    "quincy": 66
+  },
+  "lisa-yadomaru": {
+    "zanpakuto": 70,
+    "reiatsu": 68,
+    "kido": 62,
+    "vitesse": 72,
+    "force-physique": 64,
+    "battle-iq": 70,
+    "endurance": 66,
+    "hollows": 68,
+    "gotei-13": 70
+  },
+  "love-aikawa": {
+    "zanpakuto": 68,
+    "reiatsu": 66,
+    "kido": 54,
+    "vitesse": 66,
+    "force-physique": 74,
+    "battle-iq": 62,
+    "endurance": 70,
+    "hollows": 66
+  },
+  "masaki-kurosaki": {
+    "reiatsu": 66,
+    "vitesse": 66,
+    "force-physique": 54,
+    "battle-iq": 64,
+    "endurance": 60,
+    "quincy": 74
+  },
+  "mashiro-kuna": {
+    "zanpakuto": 48,
+    "reiatsu": 62,
+    "kido": 40,
+    "vitesse": 70,
+    "force-physique": 74,
+    "battle-iq": 46,
+    "endurance": 66,
+    "hollows": 68,
+    "gotei-13": 64
+  },
+  "mask-de-masculine": {
+    "bankai": 76,
+    "reiatsu": 74,
+    "vitesse": 68,
+    "force-physique": 84,
+    "battle-iq": 54,
+    "endurance": 86,
+    "quincy": 74
+  },
+  "mayuri-kurotsuchi": {
+    "zanpakuto": 78,
+    "bankai": 80,
+    "reiatsu": 74,
+    "kido": 88,
+    "vitesse": 66,
+    "force-physique": 58,
+    "battle-iq": 96,
+    "endurance": 78,
+    "gotei-13": 82
+  },
+  "meninas-mcallon": {
+    "bankai": 64,
+    "reiatsu": 62,
+    "vitesse": 54,
+    "force-physique": 82,
+    "battle-iq": 48,
+    "endurance": 62,
+    "quincy": 64
+  },
+  "mizuiro-kojima": {
+    "reiatsu": 6,
+    "vitesse": 14,
+    "force-physique": 10,
+    "battle-iq": 24,
+    "endurance": 12
+  },
+  "moe-shishigawara": {
+    "reiatsu": 20,
+    "vitesse": 30,
+    "force-physique": 42,
+    "battle-iq": 20,
+    "endurance": 36
+  },
+  "nanana-najahkoop": {
+    "bankai": 60,
+    "reiatsu": 58,
+    "vitesse": 60,
+    "force-physique": 54,
+    "battle-iq": 62,
+    "endurance": 56,
+    "quincy": 60
+  },
+  "nanao-ise": {
+    "reiatsu": 58,
+    "kido": 78,
+    "vitesse": 56,
+    "force-physique": 42,
+    "battle-iq": 74,
+    "endurance": 50,
+    "gotei-13": 62
+  },
+  "nel-tu": {
+    "reiatsu": 30,
+    "vitesse": 40,
+    "force-physique": 26,
+    "battle-iq": 32,
+    "endurance": 34,
+    "hollows": 30
+  },
+  "nelliel-tu-oderschvank": {
+    "zanpakuto": 80,
+    "bankai": 84,
+    "reiatsu": 82,
+    "vitesse": 82,
+    "force-physique": 80,
+    "battle-iq": 76,
+    "endurance": 78,
+    "hollows": 88
+  },
+  "nianzol-weizol": {
+    "reiatsu": 66,
+    "vitesse": 58,
+    "force-physique": 56,
+    "battle-iq": 58,
+    "endurance": 70,
+    "quincy": 64
+  },
+  "nnoitra-gilga": {
+    "zanpakuto": 74,
+    "bankai": 80,
+    "reiatsu": 76,
+    "vitesse": 70,
+    "force-physique": 86,
+    "battle-iq": 60,
+    "endurance": 90,
+    "hollows": 82
+  },
+  "oetsu-nimaiya": {
+    "zanpakuto": 92,
+    "reiatsu": 85,
+    "kido": 78,
+    "vitesse": 88,
+    "force-physique": 80,
+    "battle-iq": 84,
+    "endurance": 78
+  },
+  "orihime-inoue": {
+    "reiatsu": 58,
+    "vitesse": 22,
+    "force-physique": 16,
+    "battle-iq": 44,
+    "endurance": 40
+  },
+  "pepe-waccabrada": {
+    "bankai": 64,
+    "reiatsu": 62,
+    "vitesse": 44,
+    "force-physique": 40,
+    "battle-iq": 62,
+    "endurance": 52,
+    "quincy": 64
+  },
+  "pernida-parnkgjas": {
+    "bankai": 90,
+    "reiatsu": 88,
+    "vitesse": 74,
+    "force-physique": 80,
+    "battle-iq": 72,
+    "endurance": 92,
+    "quincy": 88
+  },
+  "quilge-opie": {
+    "bankai": 70,
+    "reiatsu": 68,
+    "vitesse": 70,
+    "force-physique": 60,
+    "battle-iq": 72,
+    "endurance": 64,
+    "quincy": 70
+  },
+  "rangiku-matsumoto": {
+    "zanpakuto": 60,
+    "reiatsu": 60,
+    "kido": 58,
+    "vitesse": 62,
+    "force-physique": 50,
+    "battle-iq": 60,
+    "endurance": 56,
+    "gotei-13": 62
+  },
+  "renji-abarai": {
+    "zanpakuto": 76,
+    "bankai": 78,
+    "reiatsu": 74,
+    "kido": 56,
+    "vitesse": 72,
+    "force-physique": 78,
+    "battle-iq": 66,
+    "endurance": 80,
+    "gotei-13": 74
+  },
+  "retsu-unohana": {
+    "zanpakuto": 86,
+    "bankai": 88,
+    "reiatsu": 86,
+    "kido": 94,
+    "vitesse": 84,
+    "force-physique": 80,
+    "battle-iq": 92,
+    "endurance": 86,
+    "gotei-13": 88
+  },
+  "riruka-dokugamine": {
+    "reiatsu": 28,
+    "vitesse": 26,
+    "force-physique": 20,
+    "battle-iq": 44,
+    "endurance": 26
+  },
+  "robert-accutrone": {
+    "bankai": 56,
+    "reiatsu": 54,
+    "vitesse": 58,
+    "force-physique": 50,
+    "battle-iq": 54,
+    "endurance": 52,
+    "quincy": 56
+  },
+  "rose-otoribashi": {
+    "zanpakuto": 74,
+    "bankai": 76,
+    "reiatsu": 70,
+    "kido": 66,
+    "vitesse": 70,
+    "force-physique": 60,
+    "battle-iq": 72,
+    "endurance": 66,
+    "hollows": 70,
+    "gotei-13": 72
+  },
+  "rukia-kuchiki": {
+    "zanpakuto": 82,
+    "bankai": 82,
+    "reiatsu": 74,
+    "kido": 80,
+    "vitesse": 76,
+    "force-physique": 56,
+    "battle-iq": 78,
+    "endurance": 66,
+    "gotei-13": 76
+  },
+  "ryuken-ishida": {
+    "reiatsu": 62,
+    "vitesse": 68,
+    "force-physique": 52,
+    "battle-iq": 76,
+    "endurance": 58,
+    "quincy": 72
+  },
+  "sajin-komamura": {
+    "zanpakuto": 80,
+    "bankai": 84,
+    "reiatsu": 78,
+    "kido": 60,
+    "vitesse": 62,
+    "force-physique": 90,
+    "battle-iq": 66,
+    "endurance": 92,
+    "gotei-13": 78
+  },
+  "senjumaru-shutara": {
+    "zanpakuto": 85,
+    "bankai": 86,
+    "reiatsu": 84,
+    "kido": 82,
+    "vitesse": 76,
+    "force-physique": 62,
+    "battle-iq": 85,
+    "endurance": 74
+  },
+  "shinji-hirako": {
+    "zanpakuto": 82,
+    "bankai": 80,
+    "reiatsu": 76,
+    "kido": 74,
+    "vitesse": 78,
+    "force-physique": 66,
+    "battle-iq": 84,
+    "endurance": 72,
+    "hollows": 74,
+    "gotei-13": 76
+  },
+  "shuhei-hisagi": {
+    "zanpakuto": 62,
+    "reiatsu": 58,
+    "kido": 64,
+    "vitesse": 58,
+    "force-physique": 56,
+    "battle-iq": 60,
+    "endurance": 58,
+    "gotei-13": 62
+  },
+  "shukuro-tsukishima": {
+    "reiatsu": 48,
+    "vitesse": 62,
+    "force-physique": 52,
+    "battle-iq": 86,
+    "endurance": 50
+  },
+  "shunsui-kyoraku": {
+    "zanpakuto": 94,
+    "bankai": 93,
+    "reiatsu": 88,
+    "kido": 84,
+    "vitesse": 86,
+    "force-physique": 78,
+    "battle-iq": 94,
+    "endurance": 84,
+    "gotei-13": 96
+  },
+  "soi-fon": {
+    "zanpakuto": 80,
+    "bankai": 76,
+    "reiatsu": 72,
+    "kido": 78,
+    "vitesse": 94,
+    "force-physique": 66,
+    "battle-iq": 78,
+    "endurance": 68,
+    "gotei-13": 80
+  },
+  "soken-ishida": {
+    "reiatsu": 48,
+    "vitesse": 50,
+    "force-physique": 40,
+    "battle-iq": 70,
+    "endurance": 44,
+    "quincy": 60
+  },
+  "sosuke-aizen": {
+    "zanpakuto": 96,
+    "reiatsu": 97,
+    "kido": 100,
+    "vitesse": 90,
+    "force-physique": 88,
+    "battle-iq": 100,
+    "endurance": 92,
+    "hollows": 80
+  },
+  "szayelaporro-granz": {
+    "zanpakuto": 68,
+    "bankai": 76,
+    "reiatsu": 68,
+    "vitesse": 62,
+    "force-physique": 52,
+    "battle-iq": 88,
+    "endurance": 72,
+    "hollows": 74
+  },
+  "tatsuki-arizawa": {
+    "reiatsu": 12,
+    "vitesse": 30,
+    "force-physique": 28,
+    "battle-iq": 32,
+    "endurance": 30
+  },
+  "tenjiro-kirinji": {
+    "zanpakuto": 80,
+    "reiatsu": 84,
+    "kido": 85,
+    "vitesse": 82,
+    "force-physique": 86,
+    "battle-iq": 76,
+    "endurance": 86
+  },
+  "tesla-lindocruz": {
+    "zanpakuto": 48,
+    "bankai": 52,
+    "reiatsu": 46,
+    "vitesse": 48,
+    "force-physique": 56,
+    "battle-iq": 40,
+    "endurance": 50,
+    "hollows": 48
+  },
+  "tetsuzaemon-iba": {
+    "zanpakuto": 56,
+    "reiatsu": 52,
+    "kido": 48,
+    "vitesse": 54,
+    "force-physique": 60,
+    "battle-iq": 54,
+    "endurance": 58,
+    "gotei-13": 60
+  },
+  "tier-harribel": {
+    "zanpakuto": 82,
+    "bankai": 84,
+    "reiatsu": 84,
+    "vitesse": 82,
+    "force-physique": 78,
+    "battle-iq": 78,
+    "endurance": 80,
+    "hollows": 90
+  },
+  "toshirō-hitsugaya": {
+    "zanpakuto": 88,
+    "bankai": 87,
+    "reiatsu": 82,
+    "kido": 74,
+    "vitesse": 88,
+    "force-physique": 68,
+    "battle-iq": 82,
+    "endurance": 74,
+    "gotei-13": 84
+  },
+  "ulquiorra-cifer": {
+    "zanpakuto": 88,
+    "bankai": 94,
+    "reiatsu": 90,
+    "vitesse": 90,
+    "force-physique": 86,
+    "battle-iq": 82,
+    "endurance": 88,
+    "hollows": 96
+  },
+  "uryu-ishida": {
+    "bankai": 82,
+    "reiatsu": 78,
+    "vitesse": 84,
+    "force-physique": 58,
+    "battle-iq": 88,
+    "endurance": 74,
+    "quincy": 92
+  },
+  "wonderweiss-margela": {
+    "zanpakuto": 52,
+    "bankai": 70,
+    "reiatsu": 74,
+    "vitesse": 72,
+    "force-physique": 78,
+    "battle-iq": 12,
+    "endurance": 80,
+    "hollows": 72
+  },
+  "yammy-llargo": {
+    "zanpakuto": 62,
+    "bankai": 76,
+    "reiatsu": 82,
+    "vitesse": 46,
+    "force-physique": 92,
+    "battle-iq": 32,
+    "endurance": 88,
+    "hollows": 80
+  },
+  "yasutora-sado": {
+    "reiatsu": 62,
+    "vitesse": 52,
+    "force-physique": 78,
+    "battle-iq": 48,
+    "endurance": 74
+  },
+  "yhwach": {
+    "bankai": 98,
+    "reiatsu": 100,
+    "vitesse": 92,
+    "force-physique": 92,
+    "battle-iq": 96,
+    "endurance": 95,
+    "quincy": 100
+  },
+  "yoruichi-shihouin": {
+    "reiatsu": 82,
+    "kido": 82,
+    "vitesse": 100,
+    "force-physique": 84,
+    "battle-iq": 90,
+    "endurance": 80
+  },
+  "yukio-hans-vorarlberna": {
+    "reiatsu": 24,
+    "vitesse": 24,
+    "force-physique": 18,
+    "battle-iq": 58,
+    "endurance": 24
+  },
+  "yumichika-ayasegawa": {
+    "zanpakuto": 62,
+    "reiatsu": 58,
+    "kido": 46,
+    "vitesse": 62,
+    "force-physique": 56,
+    "battle-iq": 64,
+    "endurance": 58,
+    "gotei-13": 58
+  },
+  "yushiro-shihouin": {
+    "reiatsu": 55,
+    "vitesse": 72,
+    "force-physique": 52,
+    "battle-iq": 50,
+    "endurance": 50
+  },
+  "zommari-rureaux": {
+    "zanpakuto": 70,
+    "bankai": 74,
+    "reiatsu": 70,
+    "vitesse": 84,
+    "force-physique": 62,
+    "battle-iq": 68,
+    "endurance": 66,
+    "hollows": 76
+  }
+}

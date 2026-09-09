@@ -131,7 +131,10 @@ const WIKIS: Record<string, Wiki> = {
     ],
   },
   bleach: {
-    api: "https://bleach.fandom.com/api.php",
+    // Wiki FRANCOPHONE (`/fr/api.php`), pas le wiki anglais : c'est celui dont le
+    // fichier de correspondance nomme les pages (« Ryûken Ishida », « Coyote
+    // Stark »…), et ses infobox servent bien plus souvent un rendu ANIME.
+    api: "https://bleach.fandom.com/fr/api.php",
     // Trois familles de déclinaisons portent exactement le nom des personnages
     // sans en montrer le bon dessin : les spin-offs parodiques (`burn_the_witch`
     // est un autre univers de Kubo, mais son wiki partage des pages), les
