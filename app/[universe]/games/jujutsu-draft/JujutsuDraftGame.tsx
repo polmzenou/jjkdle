@@ -74,9 +74,17 @@ export function JujutsuDraftGame({
     setExpBadges([]);
   }, [roster, categories]);
 
+  // Tirage INITIAL seulement — d'où la condition « pas déjà tiré ».
+  //
+  // C'est elle qui protège la partie en cours. `roster` et `categories`
+  // descendent du serveur, et l'octroi d'XP de fin de partie est une Server
+  // Action : elle fait re-rendre l'arbre RSC, qui renvoie des tableaux neufs.
+  // Sans la condition, ce simple changement d'identité relançait une partie —
+  // l'écran de fin s'affichait puis disparaissait aussitôt. Vérifié : n'importe
+  // quel re-rendu serveur suffisait, jusqu'au clic sur un onglet du classement.
   useEffect(() => {
-    startNewGame();
-  }, [startNewGame]);
+    setDraw((current) => current ?? pickDraw(categories, Math.random, roster));
+  }, [categories, roster]);
 
   const handleSelect = useCallback(
     (categoryId: DraftCategoryId, character: DraftCharacter) => {
