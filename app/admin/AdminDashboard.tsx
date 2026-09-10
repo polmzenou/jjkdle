@@ -259,6 +259,38 @@ export function AdminDashboard({
 
   const [form, setForm] = useState<FormState>(emptyForm);
 
+  /**
+   * Remise à zéro sur CHANGEMENT D'UNIVERS ADMINISTRÉ.
+   *
+   * Le sélecteur d'univers ne recharge pas la page : il pose le cookie puis
+   * appelle `router.refresh()`. Le dashboard garde donc son état client alors
+   * que TOUTES ses props changent (roster, catégories, attributs de l'autre
+   * univers). Or le formulaire est indexé par id de catégorie : `form.cats` ne
+   * contenait plus que des clés de l'ancien univers, et lire `form.cats[cat.id]`
+   * pour une catégorie du NOUVEL univers rendait `undefined` — l'exception
+   * client qui obligeait à rafraîchir la page à la main.
+   *
+   * Ajustement PENDANT le rendu (motif React « corriger l'état quand une prop
+   * change ») : React jette ce rendu et recommence aussitôt avec l'état neuf,
+   * sans effet ni aller-retour visible. L'onglet courant est volontairement
+   * préservé — on change de cible, pas de sujet.
+   */
+  const [stateUniverse, setStateUniverse] = useState(currentUniverse);
+  if (stateUniverse !== currentUniverse) {
+    setStateUniverse(currentUniverse);
+    setEditingId(null);
+    setForm(emptyForm);
+    setFeedback(null);
+    setImageFile(null);
+    setImageRemoved(false);
+    setQuery("");
+    setRosterCat("all");
+    setRosterSort("default");
+    setAttrFilters({});
+    setPreviewChar(null);
+    setSelectedIds(new Set());
+  }
+
   // Aperçu : objectURL du fichier déposé, sinon l'image existante (sauf si retirée).
   const objectUrl = useMemo(
     () => (imageFile ? URL.createObjectURL(imageFile) : null),
@@ -745,6 +777,7 @@ export function AdminDashboard({
 
       {tab === "content" && (
         <ContentHealthAdmin
+          key={currentUniverse}
           roster={roster}
           attributeColumns={attributeColumns}
           onEdit={editCharacter}
@@ -754,11 +787,16 @@ export function AdminDashboard({
       {tab === "jjkdle" && <JjkdleAnalyticsAdmin data={jjkdleAnalytics} />}
 
       {tab === "attributes" && (
-        <AttributesAdmin attributes={attributes} universeName={universeName} />
+        <AttributesAdmin
+          key={currentUniverse}
+          attributes={attributes}
+          universeName={universeName}
+        />
       )}
 
       {tab === "categories" && (
         <CategoriesAdmin
+          key={currentUniverse}
           categories={adminCategories}
           universeName={universeName}
         />
@@ -766,6 +804,7 @@ export function AdminDashboard({
 
       {tab === "pyramid" && (
         <PyramidAdmin
+          key={currentUniverse}
           conditions={rankingConditions}
           roster={roster}
           universeName={universeName}
@@ -774,6 +813,7 @@ export function AdminDashboard({
 
       {tab === "config" && (
         <ConfigAdmin
+          key={currentUniverse}
           roster={roster}
           gameFlags={gameFlags}
           maintenance={maintenance}
@@ -782,9 +822,13 @@ export function AdminDashboard({
         />
       )}
 
-      {tab === "draft" && <DraftRosterAdmin roster={draftRoster} />}
+      {tab === "draft" && (
+        <DraftRosterAdmin key={currentUniverse} roster={draftRoster} />
+      )}
 
-      {tab === "items" && <ItemsAdmin items={towerItems} />}
+      {tab === "items" && (
+        <ItemsAdmin key={currentUniverse} items={towerItems} />
+      )}
 
       {tab === "leaderboard" && <LeaderboardAdmin scores={scores} />}
 
@@ -798,7 +842,11 @@ export function AdminDashboard({
       )}
 
       {tab === "cards" && (
-        <CardsAdmin collection={cardCollection} universeName={universeName} />
+        <CardsAdmin
+          key={currentUniverse}
+          collection={cardCollection}
+          universeName={universeName}
+        />
       )}
 
       {tab === "casino" && <CasinoAdmin casino={casino} />}
@@ -988,7 +1036,11 @@ export function AdminDashboard({
             </p>
             <div className="space-y-1.5">
               {categories.map((cat) => {
-                const f = form.cats[cat.id];
+                // Secours : le rendu que React s'apprête à jeter après un
+                // changement d'univers passe encore ici avec l'ANCIEN `form`
+                // (cf. `stateUniverse` plus haut) — sans ce défaut, la lecture
+                // d'une catégorie inconnue lèverait avant le nouveau rendu.
+                const f = form.cats[cat.id] ?? { enabled: false, value: "" };
                 return (
                   <div
                     key={cat.id}
