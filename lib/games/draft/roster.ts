@@ -13,6 +13,11 @@ import type { DraftCharacter, DraftCategoryId, DraftTier } from "./types";
  * (cf. tirage) : le bonus de placement n'est obtenu que s'il est draftÉ dans sa
  * catégorie d'excellence. Les images réutilisent `public/assets/characters/*` ;
  * faute d'asset, `CharacterImage` retombe sur les initiales.
+ *
+ * Les catégories sont celles du BUILDER JJK (`UniverseConfig.draft`), et non
+ * plus une liste propre au draft : c'est la même clé des deux côtés, sans quoi
+ * ce repli servirait des personnages rangés dans des catégories que le plateau
+ * n'affiche pas — soit un plateau vide.
  */
 
 const ASSET = (file: string) => `/assets/characters/${file}`;
@@ -38,13 +43,13 @@ function ch(
 }
 
 export const DRAFT_ROSTER: DraftCharacter[] = [
-  // ── Stock d'énergie occulte ──
-  ch("yuta", "Yuta Okkotsu", "occult-energy", "S", 25, 28, "Yuta_Portrait_Anime.webp"),
-  ch("choso", "Choso", "occult-energy", "A", 18, 16, "Choso_Portrait_Anime.webp"),
-  ch("mei-mei", "Mei Mei", "occult-energy", "B", 13, 10, "Mei_Mei_recieves_the_payment_from_Gojo_29.webp"),
-  ch("noritoshi", "Noritoshi Kamo", "occult-energy", "B", 12, 9, "Noritoshi_Portrait_Anime.webp"),
-  ch("momo", "Momo Nishimiya", "occult-energy", "C", 8, 5, "Momo_Portrait_Anime.webp"),
-  ch("miwa", "Kasumi Miwa", "occult-energy", "C", 7, 4, "Kasumi_Portrait_Anime.webp"),
+  // ── Énergie occulte ──
+  ch("yuta", "Yuta Okkotsu", "cursed-energy", "S", 25, 28, "Yuta_Portrait_Anime.webp"),
+  ch("choso", "Choso", "cursed-energy", "A", 18, 16, "Choso_Portrait_Anime.webp"),
+  ch("mei-mei", "Mei Mei", "cursed-energy", "B", 13, 10, "Mei_Mei_recieves_the_payment_from_Gojo_29.webp"),
+  ch("noritoshi", "Noritoshi Kamo", "cursed-energy", "B", 12, 9, "Noritoshi_Portrait_Anime.webp"),
+  ch("momo", "Momo Nishimiya", "cursed-energy", "C", 8, 5, "Momo_Portrait_Anime.webp"),
+  ch("miwa", "Kasumi Miwa", "cursed-energy", "C", 7, 4, "Kasumi_Portrait_Anime.webp"),
 
   // ── Force physique ──
   ch("todo", "Aoi Todo", "physical-strength", "S", 24, 26, "Aoi_Portrait_Anime.webp"),
@@ -86,21 +91,21 @@ export const DRAFT_ROSTER: DraftCharacter[] = [
   ch("fumihiko", "Fumihiko Takaba", "domain-expansion", "C", 7, 4, "Fumihiko_Portrait_Anime.webp"),
   ch("manami", "Manami Suda", "domain-expansion", "C", 6, 3),
 
-  // ── Black Flash ──
-  ch("yuki", "Yuki Tsukumo", "black-flash", "S", 24, 25, "Yuki_Portrait_Anime.webp"),
-  ch("toji", "Toji Fushiguro", "black-flash", "A", 19, 18, "Toji_Portrait_Anime.webp"),
-  ch("inumaki", "Toge Inumaki", "black-flash", "B", 11, 8, "Toge_Portrait_Anime.webp"),
-  ch("nobara", "Nobara Kugisaki", "black-flash", "B", 12, 9, "Nobara_Portrait_Anime.webp"),
-  ch("toad", "Toad", "black-flash", "C", 8, 5, "Toad_EP35.webp"),
-  ch("nitta", "Akari Nitta", "black-flash", "C", 6, 3),
+  // ── Fléau / Shikigami ──
+  ch("yuki", "Yuki Tsukumo", "curse-status", "S", 24, 25, "Yuki_Portrait_Anime.webp"),
+  ch("toji", "Toji Fushiguro", "curse-status", "A", 19, 18, "Toji_Portrait_Anime.webp"),
+  ch("inumaki", "Toge Inumaki", "curse-status", "B", 11, 8, "Toge_Portrait_Anime.webp"),
+  ch("nobara", "Nobara Kugisaki", "curse-status", "B", 12, 9, "Nobara_Portrait_Anime.webp"),
+  ch("toad", "Toad", "curse-status", "C", 8, 5, "Toad_EP35.webp"),
+  ch("nitta", "Akari Nitta", "curse-status", "C", 6, 3),
 
-  // ── Coéquipier ──
-  ch("mahoraga", "Mahoraga", "teammate", "S", 25, 28, "Mahoraga_EP41.webp"),
-  ch("rika", "Rika Orimoto", "teammate", "A", 19, 17, "Rika_Portrait_Anime.webp"),
-  ch("gakuganji", "Yoshinobu Gakuganji", "teammate", "B", 12, 9, "Yoshinobu_Portrait_Anime.webp"),
-  ch("larue", "Larue", "teammate", "B", 13, 10),
-  ch("megumi", "Megumi Fushiguro", "teammate", "C", 9, 6, "Megumi_Portrait_Anime.webp"),
-  ch("yorozu", "Yorozu", "teammate", "C", 7, 4),
+  // ── Endurance ──
+  ch("mahoraga", "Mahoraga", "endurance", "S", 25, 28, "Mahoraga_EP41.webp"),
+  ch("rika", "Rika Orimoto", "endurance", "A", 19, 17, "Rika_Portrait_Anime.webp"),
+  ch("gakuganji", "Yoshinobu Gakuganji", "endurance", "B", 12, 9, "Yoshinobu_Portrait_Anime.webp"),
+  ch("larue", "Larue", "endurance", "B", 13, 10),
+  ch("megumi", "Megumi Fushiguro", "endurance", "C", 9, 6, "Megumi_Portrait_Anime.webp"),
+  ch("yorozu", "Yorozu", "endurance", "C", 7, 4),
 ];
 
 export const DRAFT_ROSTER_BY_ID: Record<string, DraftCharacter> =

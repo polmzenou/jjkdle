@@ -7,7 +7,7 @@ import type {
   DuelResult,
 } from "./types";
 import { personOf } from "./types";
-import { DRAFT_CATEGORIES } from "./categories";
+import type { DraftCategory } from "./categories";
 import { DRAFT_ROSTER_BY_ID } from "./roster";
 import { defaultBossesFor } from "./bosses";
 
@@ -84,10 +84,11 @@ export function totalCost(
 /** Score global caché = somme des contributions des persos sélectionnés. */
 export function computeGlobalScore(
   selection: DraftSelection,
+  categories: DraftCategory[],
   rosterById: Record<string, DraftCharacter> = DRAFT_ROSTER_BY_ID,
 ): number {
   let score = 0;
-  for (const category of DRAFT_CATEGORIES) {
+  for (const category of categories) {
     const charId = selection[category.id];
     const character = charId ? rosterById[charId] : undefined;
     if (character) score += contribution(character, category.id);
@@ -124,10 +125,14 @@ export function resolveCombat(
 /** Raccourci : score + combat à partir d'une sélection. */
 export function evaluateDraft(
   selection: DraftSelection,
+  categories: DraftCategory[],
   rosterById: Record<string, DraftCharacter> = DRAFT_ROSTER_BY_ID,
   bosses: Boss[] = BOSSES,
 ): CombatResult {
-  return resolveCombat(computeGlobalScore(selection, rosterById), bosses);
+  return resolveCombat(
+    computeGlobalScore(selection, categories, rosterById),
+    bosses,
+  );
 }
 
 /**
@@ -143,6 +148,7 @@ export type ValidationResult =
 
 export function validateSelection(
   raw: unknown,
+  categories: DraftCategory[],
   rosterById: Record<string, DraftCharacter> = DRAFT_ROSTER_BY_ID,
 ): ValidationResult {
   if (!raw || typeof raw !== "object") {
@@ -152,7 +158,7 @@ export function validateSelection(
   const selection: DraftSelection = {};
   const seen = new Set<string>();
 
-  for (const category of DRAFT_CATEGORIES) {
+  for (const category of categories) {
     const value = obj[category.id];
     if (typeof value !== "string") {
       return { ok: false, error: `Catégorie non remplie : ${category.id}.` };

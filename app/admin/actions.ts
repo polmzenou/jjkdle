@@ -91,7 +91,7 @@ import {
   adminUpdateHigherLowerScore,
   adminDeleteHigherLowerScore,
 } from "@/lib/games/higher-lower/store";
-import { DRAFT_CATEGORY_BY_ID } from "@/lib/games/draft/categories";
+import { getDraftCategories } from "@/lib/games/draft/queries";
 import type {
   DraftCharacter,
   DraftCategoryId,
@@ -457,7 +457,10 @@ export async function saveDraftCharacterAction(
     };
   }
   if (!name) return { ok: false, error: "Le nom est obligatoire." };
-  if (!(input.excellenceCategory in DRAFT_CATEGORY_BY_ID)) {
+  // Les catégories du draft sont celles du builder de l'univers administré :
+  // la liste valide se lit en base, elle n'est plus figée dans le code.
+  const categories = await getDraftCategories();
+  if (!categories.some((c) => c.id === input.excellenceCategory)) {
     return { ok: false, error: "Catégorie d'excellence invalide." };
   }
   if (!DRAFT_TIERS.includes(input.tier)) {

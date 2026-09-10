@@ -218,21 +218,22 @@ export const bleach: UniverseConfig = {
     kanjiColumns: ["死神", "斬魄刀", "卍解", "尸魂界"],
   },
   /**
-   * Draft : Bleach note tout le roster sur ses cinq axes de stat, les pools y
-   * seront donc toujours pleins. « Bankai » tient le rôle de l'ultime, « Kido »
-   * celui du coup d'éclat.
+   * Draft : les huit axes de STAT de Bleach. Les trois castings (Hollows,
+   * Quincy, Gotei 13) sont écartés — à 25-29 notés ils tenaient la route, mais
+   * un plateau de huit stats se lit mieux qu'un mélange des deux natures.
    */
   draft: {
-    categorySources: {
-      "occult-energy": "reiatsu",
-      "physical-strength": "force-physique",
-      speed: "vitesse",
-      "battle-iq": "battle-iq",
-      "innate-technique": "zanpakuto",
-      "domain-expansion": "bankai",
-      "black-flash": "kido",
-      teammate: "gotei-13",
-    },
+    categories: [
+      "zanpakuto",
+      "bankai",
+      "reiatsu",
+      "kido",
+      "vitesse",
+      "force-physique",
+      "battle-iq",
+      "endurance",
+    ],
+    avatarCategory: "zanpakuto",
   },
   booru: {
     seriesTag: "bleach",

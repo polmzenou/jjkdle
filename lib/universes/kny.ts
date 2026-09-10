@@ -194,21 +194,21 @@ export const kny: UniverseConfig = {
     kanjiColumns: ["鬼滅之刃", "全集中", "呼吸法", "柱"],
   },
   /**
-   * Draft : les huit axes lus sur les catégories Demon Slayer. « Lunes » et
-   * « Piliers » plafonnent à 15 notés — c'est exactement la taille d'un pool,
-   * donc tout juste suffisant.
+   * Draft : huit des dix catégories KNY. « Nouvelle génération » (10 notés) et
+   * « Sensei » (14) sont écartés, les moins fournies des dix.
    */
   draft: {
-    categorySources: {
-      "occult-energy": "pouvoir-sanguinaire",
-      "physical-strength": "force-physique",
-      speed: "speed",
-      "battle-iq": "battle-iq",
-      "innate-technique": "souffle",
-      "domain-expansion": "lunes",
-      "black-flash": "piliers",
-      teammate: "corps-des-pourfendeurs",
-    },
+    categories: [
+      "souffle",
+      "pouvoir-sanguinaire",
+      "force-physique",
+      "speed",
+      "battle-iq",
+      "lunes",
+      "piliers",
+      "corps-des-pourfendeurs",
+    ],
+    avatarCategory: "souffle",
   },
   booru: {
     seriesTag: "kimetsu_no_yaiba",

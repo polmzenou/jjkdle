@@ -6,7 +6,7 @@ import {
   validateSelection,
 } from "./scoring";
 import { DRAFT_ROSTER_BY_ID } from "./roster";
-import { DRAFT_CATEGORIES } from "./categories";
+import { JJK_CATEGORIES } from "./categories.fixture";
 import { defaultBossesFor } from "./bosses";
 import type { DraftCharacter } from "./types";
 
@@ -84,7 +84,7 @@ describe("resolveCombat", () => {
 describe("validateSelection", () => {
   /** Roster de test : un perso par catégorie, tous bon marché. */
   const roster: Record<string, DraftCharacter> = Object.fromEntries(
-    DRAFT_CATEGORIES.map((cat, i) => [
+    JJK_CATEGORIES.map((cat, i) => [
       `c${i}`,
       {
         id: `c${i}`,
@@ -97,11 +97,11 @@ describe("validateSelection", () => {
     ]),
   );
   const full = Object.fromEntries(
-    DRAFT_CATEGORIES.map((cat, i) => [cat.id, `c${i}`]),
+    JJK_CATEGORIES.map((cat, i) => [cat.id, `c${i}`]),
   );
 
   it("accepte une sélection complète sous budget", () => {
-    const res = validateSelection(full, roster);
+    const res = validateSelection(full, JJK_CATEGORIES, roster);
     expect(res.ok).toBe(true);
   });
 
@@ -114,14 +114,14 @@ describe("validateSelection", () => {
       c0: { ...roster.c0, sourceId: "gojo" },
       c1: { ...roster.c1, sourceId: "gojo" },
     };
-    const res = validateSelection(full, withClone);
+    const res = validateSelection(full, JJK_CATEGORIES, withClone);
     expect(res.ok).toBe(false);
     if (!res.ok) expect(res.error).toMatch(/double/i);
   });
 
   it("refuse deux fois la même carte", () => {
-    const duped = { ...full, [DRAFT_CATEGORIES[1].id]: "c0" };
-    expect(validateSelection(duped, roster).ok).toBe(false);
+    const duped = { ...full, [JJK_CATEGORIES[1].id]: "c0" };
+    expect(validateSelection(duped, JJK_CATEGORIES, roster).ok).toBe(false);
   });
 });
 

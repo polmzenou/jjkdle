@@ -4,7 +4,10 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useUniverseHref } from "@/components/universe/UniverseProvider";
 import { CharacterImage } from "@/components/CharacterImage";
-import { DRAFT_CATEGORIES, DRAFT_CATEGORY_BY_ID } from "@/lib/games/draft/categories";
+import {
+  draftCategoryById,
+  type DraftCategory,
+} from "@/lib/games/draft/categories";
 import { MIN_DRAFT_ROSTER } from "@/lib/games/draft/types";
 import { DRAFT_POOL_SIZE } from "@/lib/games/draft/generate";
 import type {
@@ -34,6 +37,8 @@ const TIER_COLOR: Record<DraftTier, string> = {
 
 interface DraftRosterAdminProps {
   roster: DraftCharacter[];
+  /** Les catégories de l'univers qui composent le plateau de draft. */
+  categories: DraftCategory[];
   /** Boss de l'univers, dans l'ordre d'affrontement. */
   bosses: AdminDraftBoss[];
   /** Roster du builder : source de l'import et des visages de boss. */
@@ -50,15 +55,17 @@ interface FormState {
   statValue: string;
 }
 
-const EMPTY_FORM: FormState = {
-  id: "",
-  name: "",
-  image: "",
-  excellenceCategory: DRAFT_CATEGORIES[0].id,
-  tier: "B",
-  cost: "10",
-  statValue: "12",
-};
+function emptyForm(categories: DraftCategory[]): FormState {
+  return {
+    id: "",
+    name: "",
+    image: "",
+    excellenceCategory: categories[0]?.id ?? "",
+    tier: "B",
+    cost: "10",
+    statValue: "12",
+  };
+}
 
 function slugify(s: string): string {
   return s
@@ -75,6 +82,7 @@ const inputCls =
 /** Onglet admin : roster du jeu « Jujutsu Draft » (catégorie, tier, coût, stat, image). */
 export function DraftRosterAdmin({
   roster,
+  categories,
   bosses,
   builderRoster,
 }: DraftRosterAdminProps) {
@@ -83,7 +91,7 @@ export function DraftRosterAdmin({
   const withUniverse = useUniverseHref();
   const [pending, startTransition] = useTransition();
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [form, setForm] = useState<FormState>(() => emptyForm(categories));
   const [query, setQuery] = useState("");
   const [catFilter, setCatFilter] = useState<DraftCategoryId | "all">("all");
   const [feedback, setFeedback] = useState<{ ok: boolean; msg: string } | null>(
@@ -146,7 +154,7 @@ export function DraftRosterAdmin({
     setFeedback(null);
     setImageFile(null);
     setImageRemoved(false);
-    setForm(EMPTY_FORM);
+    setForm(emptyForm(categories));
   };
 
   const submit = (e: React.FormEvent) => {
@@ -235,6 +243,11 @@ export function DraftRosterAdmin({
     });
   };
 
+  const categoryById = useMemo(
+    () => draftCategoryById(categories),
+    [categories],
+  );
+
   const filtered = useMemo(
     () =>
       roster.filter(
@@ -279,7 +292,8 @@ export function DraftRosterAdmin({
           <p className="text-xs text-white/50">
             Génère {DRAFT_POOL_SIZE} personnages par catégorie (2 S, 3 A, 5 B,
             5 C) depuis les notes du roster, et pose les 6 boss par défaut de
-            l&apos;univers. Un personnage bien noté sur plusieurs axes alimente
+            l&apos;univers. Les catégories sont celles du builder de cet
+            univers, dans l&apos;ordre du plateau. Un personnage bien noté sur plusieurs axes alimente
             plusieurs catégories — le tirage n&apos;en montre qu&apos;un
             exemplaire par partie. Réappuyer met à jour les mêmes lignes au lieu
             d&apos;en créer de nouvelles, et ne réécrit jamais les PV réglés
@@ -305,6 +319,13 @@ export function DraftRosterAdmin({
             · {report.updated} mis à jour · {report.bossesCreated} boss
             créé(s)
           </p>
+          {report.removed > 0 && (
+            <p className="text-white/60">
+              {report.removed} ligne(s) supprimée(s) : elles étaient rangées
+              dans une catégorie qui ne fait pas partie du plateau de cet
+              univers, donc jamais tirables.
+            </p>
+          )}
           {report.linked > 0 && (
             <p className="text-white/60">
               {report.linked} ancienne(s) ligne(s) rattachée(s) à leur
@@ -401,7 +422,7 @@ export function DraftRosterAdmin({
               }
               className={inputCls}
             >
-              {DRAFT_CATEGORIES.map((c) => (
+              {categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.label}
                 </option>
@@ -480,7 +501,7 @@ export function DraftRosterAdmin({
               className="ml-auto rounded-lg border border-white/10 bg-void-900 px-3 py-1.5 text-sm text-white outline-none focus:border-domain"
             >
               <option value="all">Toutes catégories</option>
-              {DRAFT_CATEGORIES.map((c) => (
+              {categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.label}
                 </option>
@@ -518,7 +539,7 @@ export function DraftRosterAdmin({
                       {c.tier}
                     </span>
                     <span className="rounded bg-domain/15 px-1.5 py-0.5 text-[10px] text-domain-light">
-                      {DRAFT_CATEGORY_BY_ID[c.excellenceCategory]?.label ??
+                      {categoryById[c.excellenceCategory]?.label ??
                         c.excellenceCategory}
                     </span>
                     <span className="rounded bg-amber-300/15 px-1.5 py-0.5 text-[10px] text-amber-200">

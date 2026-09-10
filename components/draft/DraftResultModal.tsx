@@ -7,7 +7,7 @@ import { CharacterImage } from "@/components/CharacterImage";
 import { BadgeToast } from "@/components/badges/BadgeToast";
 import { ExpReward } from "@/components/progress/ExpReward";
 import { BoosterDrop } from "@/components/cards/BoosterDrop";
-import { DRAFT_CATEGORIES } from "@/lib/games/draft/categories";
+import type { DraftCategory } from "@/lib/games/draft/categories";
 import type { DroppedBooster } from "@/lib/progress/recompute";
 import { useUniverseHref } from "@/components/universe/UniverseProvider";
 import type {
@@ -18,6 +18,8 @@ import type {
 
 interface DraftResultModalProps {
   result: CombatResult;
+  /** Les catégories de l'univers, pour le récap ligne à ligne du draft. */
+  categories: DraftCategory[];
   selection: DraftSelection;
   rosterById: Record<string, DraftCharacter>;
   isAuthed: boolean;
@@ -39,6 +41,7 @@ interface DraftResultModalProps {
  */
 export function DraftResultModal({
   result,
+  categories,
   selection,
   rosterById,
   isAuthed,
@@ -87,7 +90,7 @@ export function DraftResultModal({
 
         {/* Récap du draft */}
         <div className="mt-6 grid grid-cols-4 gap-2 sm:grid-cols-8 sm:gap-3">
-          {DRAFT_CATEGORIES.map((cat) => {
+          {categories.map((cat) => {
             const id = selection[cat.id];
             const character = id ? rosterById[id] : undefined;
             if (!character) return null;

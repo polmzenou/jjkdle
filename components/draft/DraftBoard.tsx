@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { DraftCard } from "./DraftCard";
-import { DRAFT_CATEGORIES } from "@/lib/games/draft/categories";
+import type { DraftCategory } from "@/lib/games/draft/categories";
 import { BUDGET } from "@/lib/games/draft/scoring";
 import { canSelect } from "@/lib/games/draft/budget";
 import type {
@@ -14,6 +14,8 @@ import type {
 } from "@/lib/games/draft/types";
 
 interface DraftBoardProps {
+  /** Les 8 catégories de l'univers, dans l'ordre d'affichage. */
+  categories: DraftCategory[];
   draw: DraftPick;
   selection: DraftSelection;
   rosterById: Record<string, DraftCharacter>;
@@ -40,11 +42,12 @@ function RankTag({ children }: { children: ReactNode }) {
 }
 
 /**
- * Plateau de draft : budget en évidence, 8 catégories de 5 cartes, bouton
- * « Lancer le combat » actif seulement quand les 8 slots sont remplis. Les
- * scores cachés ne sont jamais affichés.
+ * Plateau de draft : budget en évidence, une ligne de 5 cartes par catégorie de
+ * l'univers, bouton « Lancer le combat » actif seulement quand tous les slots
+ * sont remplis. Les scores cachés ne sont jamais affichés.
  */
 export function DraftBoard({
+  categories,
   draw,
   selection,
   rosterById,
@@ -56,8 +59,8 @@ export function DraftBoard({
     0,
   );
   const left = BUDGET - spent;
-  const filled = DRAFT_CATEGORIES.filter((c) => selection[c.id]).length;
-  const allFilled = filled === DRAFT_CATEGORIES.length;
+  const filled = categories.filter((c) => selection[c.id]).length;
+  const allFilled = filled === categories.length;
   const pct = Math.max(0, Math.min(100, (left / BUDGET) * 100));
 
   return (
@@ -80,7 +83,7 @@ export function DraftBoard({
             </p>
             <p className="font-display text-lg font-bold text-white">
               {filled}
-              <span className="text-white/35"> / {DRAFT_CATEGORIES.length}</span>
+              <span className="text-white/35"> / {categories.length}</span>
             </p>
           </div>
           <button
@@ -102,7 +105,7 @@ export function DraftBoard({
 
       {/* Catégories — disposition en lignes (cf. maquette) */}
       <div className="space-y-3">
-        {DRAFT_CATEGORIES.map((category) => {
+        {categories.map((category) => {
           const picks = byRankDesc(draw[category.id]);
           const pickedId = selection[category.id];
 
@@ -130,6 +133,7 @@ export function DraftBoard({
                     const affordable = canSelect(
                       selection,
                       draw,
+                      categories,
                       category.id,
                       character,
                       rosterById,

@@ -198,21 +198,21 @@ export const tg: UniverseConfig = {
     kanjiColumns: ["東京喰種", "赫子", "隻眼", "二十区"],
   },
   /**
-   * Draft : « Aogiri » ne compte que 13 personnages notés, mais c'est le moins
-   * étroit des trois castings (Anteiku en a 8) — le pool sera juste un peu plus
-   * court, l'import le signale.
+   * Draft : huit des dix catégories TG. « Anteiku » (8 notés) et « Arbre
+   * Aogiri » (11) sont écartés au profit des axes de stat, tous très fournis.
    */
   draft: {
-    categorySources: {
-      "occult-energy": "regeneration",
-      "physical-strength": "force-physique",
-      speed: "speed",
-      "battle-iq": "battle-iq",
-      "innate-technique": "kagune",
-      "domain-expansion": "ccg",
-      "black-flash": "mental",
-      teammate: "aogiri",
-    },
+    categories: [
+      "kagune",
+      "regeneration",
+      "force-physique",
+      "speed",
+      "battle-iq",
+      "mental",
+      "ccg",
+      "semi-goules",
+    ],
+    avatarCategory: "kagune",
   },
   booru: {
     seriesTag: "tokyo_ghoul",

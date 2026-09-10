@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { getCurrentUser, isSuperAdmin } from "@/lib/auth/session";
 import { readRoster } from "@/lib/admin/roster-store";
 import { getCategories } from "@/lib/content/queries";
-import { listDraftCharacters } from "@/lib/games/draft/queries";
+import {
+  getDraftCategories,
+  listDraftCharacters,
+} from "@/lib/games/draft/queries";
 import { listItems } from "@/lib/admin/item-store";
 import { listAllScores, type AdminScore } from "@/lib/leaderboard/store";
 import { listAllDraftScores } from "@/lib/games/draft/store";
@@ -30,6 +33,7 @@ import { listDraftBosses, type AdminDraftBoss } from "@/lib/admin/draft-store";
 import { getCollection } from "@/lib/cards/store";
 import type { Character } from "@/data/roster/characters";
 import type { DraftCharacter } from "@/lib/games/draft/types";
+import type { DraftCategory } from "@/lib/games/draft/categories";
 import type { TowerItem } from "@/lib/games/tower/items";
 import { getCasinoAdminData } from "@/lib/admin/casino";
 import { AdminDashboard } from "./AdminDashboard";
@@ -65,6 +69,7 @@ export default async function AdminPage({
   }
   let draftRoster: DraftCharacter[] = [];
   let draftBosses: AdminDraftBoss[] = [];
+  let draftCategories: DraftCategory[] = [];
   // Meme tolerance que le roster draft : une table vide ou absente ne doit pas
   // empecher l'admin de s'ouvrir.
   let towerItems: TowerItem[] = [];
@@ -82,6 +87,11 @@ export default async function AdminPage({
     draftBosses = await listDraftBosses();
   } catch {
     draftBosses = [];
+  }
+  try {
+    draftCategories = await getDraftCategories();
+  } catch {
+    draftCategories = [];
   }
   const [categories, scores, users, attributeSchema, universes] =
     await Promise.all([
@@ -163,6 +173,7 @@ export default async function AdminPage({
       casino={casino}
       draftRoster={draftRoster}
       draftBosses={draftBosses}
+      draftCategories={draftCategories}
       towerItems={towerItems}
       categories={categories}
       scores={[

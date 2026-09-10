@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { evaluateDraft, validateSelection } from "@/lib/games/draft/scoring";
-import { getDraftBosses, getDraftRosterMap } from "@/lib/games/draft/queries";
+import {
+  getDraftBosses,
+  getDraftCategories,
+  getDraftRosterMap,
+} from "@/lib/games/draft/queries";
 import { saveDraftScore } from "@/lib/games/draft/store";
 import { refreshLevelAndBadges } from "@/lib/progress/recompute";
 
@@ -37,18 +41,19 @@ export async function POST(req: Request) {
 
   // Roster et boss autoritatifs (base) : on recalcule tout avec les valeurs
   // actuelles, pas celles que le client croyait avoir.
-  const [rosterById, bosses] = await Promise.all([
+  const [rosterById, bosses, categories] = await Promise.all([
     getDraftRosterMap(),
     getDraftBosses(),
+    getDraftCategories(),
   ]);
 
   const draft = (body as { draft?: unknown } | null)?.draft;
-  const validation = validateSelection(draft, rosterById);
+  const validation = validateSelection(draft, categories, rosterById);
   if (!validation.ok) {
     return NextResponse.json({ ok: false, error: validation.error }, { status: 400 });
   }
 
-  const result = evaluateDraft(validation.selection, rosterById, bosses);
+  const result = evaluateDraft(validation.selection, categories, rosterById, bosses);
   const { best, isNewRecord } = await saveDraftScore(user.id, {
     enemiesKilled: result.enemiesKilled,
     globalScore: result.globalScore,

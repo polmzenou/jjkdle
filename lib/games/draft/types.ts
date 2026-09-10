@@ -16,16 +16,15 @@
 export const MIN_DRAFT_ROSTER = 40;
 export const MIN_DRAFT_TIER_C = 8;
 
-/** Les 8 catégories de stats du draft (slugs kebab, façon repo). */
-export type DraftCategoryId =
-  | "occult-energy"
-  | "physical-strength"
-  | "speed"
-  | "battle-iq"
-  | "innate-technique"
-  | "domain-expansion"
-  | "black-flash"
-  | "teammate";
+/**
+ * Identifiant d'une catégorie du plateau = **slug de la `Category`** du builder
+ * dans l'univers courant (`souffle`, `kagune`, `hax`…).
+ *
+ * C'était naguère une union figée des huit axes de Jujutsu Kaisen, qui
+ * s'affichait telle quelle sur les cinq autres animes. Une chaîne libre : la
+ * liste effective vit en base et est résolue par `getDraftCategories`.
+ */
+export type DraftCategoryId = string;
 
 /** Tier du draft (échelle propre, distincte du roster builder). */
 export type DraftTier = "S" | "A" | "B" | "C";

@@ -180,20 +180,21 @@ export const aot: UniverseConfig = {
     kanjiColumns: ["進撃巨人", "自由之翼", "調査兵団", "献身"],
   },
   /**
-   * Draft : « Titan Shifter » est écarté (13 personnages notés) au profit de
-   * « Détermination », le seul axe assez large pour tenir un pool de 15.
+   * Draft : huit des neuf catégories AOT. « Titan » est écarté (13 personnages
+   * notés) — les pouvoirs de titan restent lisibles via « Mahr ».
    */
   draft: {
-    categorySources: {
-      "occult-energy": "determination",
-      "physical-strength": "menace",
-      speed: "agilite",
-      "battle-iq": "battle-iq",
-      "innate-technique": "man-uvre-tridimensionnel",
-      "domain-expansion": "mahr",
-      "black-flash": "bataillon-d-exploration",
-      teammate: "commandement",
-    },
+    categories: [
+      "man-uvre-tridimensionnel",
+      "agilite",
+      "menace",
+      "battle-iq",
+      "determination",
+      "commandement",
+      "bataillon-d-exploration",
+      "mahr",
+    ],
+    avatarCategory: "man-uvre-tridimensionnel",
   },
   booru: {
     seriesTag: "shingeki_no_kyojin",

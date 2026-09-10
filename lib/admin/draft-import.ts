@@ -3,7 +3,6 @@ import { getRoster } from "@/lib/content/queries";
 import { getCurrentUniverse } from "@/lib/universes/current";
 import { getUniverseBySlug } from "@/lib/universes/registry";
 import { deriveRanking } from "@/lib/ranking/derive";
-import { DRAFT_CATEGORIES } from "@/lib/games/draft/categories";
 import { resolveDraftConfig } from "@/lib/games/draft/config";
 import { DEFAULT_DRAFT_BOSSES } from "@/lib/games/draft/bosses";
 import {
@@ -27,11 +26,18 @@ import type { CategoryId } from "@/data/roster/categories";
  * ── Pourquoi un personnage peut apparaître dans plusieurs catégories ───────
  * Un pool complet fait 15 personnages (2 S, 3 A, 5 B, 5 C) et il y a 8
  * catégories, soit ~120 lignes — plus que le roster de n'importe quel univers
- * (45 à 101 personnages). Chaque ligne est donc un couple PERSONNAGE ×
+ * (59 à 101 personnages). Chaque ligne est donc un couple PERSONNAGE ×
  * CATÉGORIE : le même visage peut être S en Vitesse et B en Battle IQ, avec un
- * coût différent à chaque fois. Le tirage (`pickDraw`) garantit qu'il n'en
- * apparaît qu'un seul exemplaire par partie, et `validateSelection` le
- * revérifie côté serveur.
+ * coût différent à chaque fois. Le tirage (`pickDraw`) évite de le montrer deux
+ * fois, `canSelect` verrouille la seconde carte s'il y parvient quand même, et
+ * `validateSelection` refuse la sélection côté serveur.
+ *
+ * ── Les catégories ────────────────────────────────────────────────────────
+ * Ce sont les catégories du BUILDER de l'univers, celles-là mêmes qui portent
+ * les notes : l'import range donc un personnage dans la catégorie où il est
+ * noté, sans traduction. Un plateau Demon Slayer parle de « Souffle » et de
+ * « Piliers », et le pool de chaque ligne est classé sur la note qui porte ce
+ * nom-là.
  */
 
 /**
@@ -58,6 +64,11 @@ export interface DraftImportReport {
    * montrer deux fois le même visage.
    */
   linked: number;
+  /**
+   * Lignes SUPPRIMÉES parce que rangées dans une catégorie qui ne fait pas
+   * partie du plateau de cet univers — donc jamais tirables.
+   */
+  removed: number;
   /** Boss créés (les boss existants ne sont JAMAIS écrasés). */
   bossesCreated: number;
   /** Catégories sans source exploitable, avec la raison affichée telle quelle. */
@@ -100,6 +111,7 @@ export async function importDraftRoster(): Promise<DraftImportReport> {
     created: 0,
     updated: 0,
     linked: 0,
+    removed: 0,
     bossesCreated: 0,
     skipped: [],
     thin: [],
@@ -110,13 +122,12 @@ export async function importDraftRoster(): Promise<DraftImportReport> {
 
   let position = 0;
 
-  for (const draftCategory of DRAFT_CATEGORIES) {
-    const sourceSlug = config.categorySources[draftCategory.id];
-    const source = categoryBySlug.get(sourceSlug);
+  for (const categorySlug of config.categories) {
+    const source = categoryBySlug.get(categorySlug);
     if (!source) {
       report.skipped.push({
-        label: draftCategory.label,
-        reason: `catégorie « ${sourceSlug} » absente de cet univers`,
+        label: categorySlug,
+        reason: "catégorie absente de cet univers",
       });
       continue;
     }
@@ -134,13 +145,13 @@ export async function importDraftRoster(): Promise<DraftImportReport> {
 
     if (order.length === 0) {
       report.skipped.push({
-        label: draftCategory.label,
-        reason: `aucun personnage noté en « ${source.label} »`,
+        label: source.label,
+        reason: "aucun personnage noté sur cette catégorie",
       });
       continue;
     }
     if (order.length < DRAFT_POOL_SIZE) {
-      report.thin.push({ label: draftCategory.label, count: order.length });
+      report.thin.push({ label: source.label, count: order.length });
     }
 
     const slots = generatePool(order.length);
@@ -152,11 +163,11 @@ export async function importDraftRoster(): Promise<DraftImportReport> {
 
       // `Character.slug` vaut toujours `Character.id` (cf. `roster-store`), et
       // le type métier ne porte que l'id : on s'appuie donc sur ce dernier.
-      const slug = draftSlug(character.id, draftCategory.id);
+      const slug = draftSlug(character.id, source.slug);
       const data = {
         name: character.name,
         image: character.image ?? null,
-        excellenceCategory: draftCategory.id,
+        excellenceCategory: source.slug,
         tier: slot.tier,
         cost: slot.cost,
         statValue: slot.statValue,
@@ -182,7 +193,13 @@ export async function importDraftRoster(): Promise<DraftImportReport> {
     }
   }
 
-  report.linked = await linkLegacyRows(existingCharacters, regenerated, characterById);
+  report.linked = await linkLegacyRows(
+    existingCharacters,
+    regenerated,
+    characterById,
+  );
+
+  report.removed = await removeOrphanRows(universeId, config.categories);
 
   report.bossesCreated = await importDefaultBosses(
     universeId,
@@ -192,6 +209,27 @@ export async function importDraftRoster(): Promise<DraftImportReport> {
   );
 
   return report;
+}
+
+/**
+ * Supprime les lignes rangées dans une catégorie hors plateau.
+ *
+ * Le draft a longtemps eu ses PROPRES catégories, calquées sur Jujutsu Kaisen
+ * (« Black Flash », « Coéquipier »), plaquées telles quelles sur les cinq
+ * autres animes. Maintenant que les catégories du plateau sont celles du
+ * builder de l'univers, ces lignes-là désignent des axes qui n'existent plus :
+ * le tirage ne les regarde jamais, elles ne font qu'encombrer l'admin. On les
+ * retire donc, et le rapport le dit — c'est la seule suppression que l'import
+ * s'autorise.
+ */
+async function removeOrphanRows(
+  universeId: string,
+  categories: readonly string[],
+): Promise<number> {
+  const { count } = await prisma.draftCharacter.deleteMany({
+    where: { universeId, excellenceCategory: { notIn: [...categories] } },
+  });
+  return count;
 }
 
 /**

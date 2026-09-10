@@ -1,61 +1,34 @@
 import type { DraftCategoryId } from "./types";
 
+/**
+ * Catégories du plateau de draft.
+ *
+ * Il n'y a plus de liste en dur : les catégories du draft SONT celles du
+ * builder de l'univers (table `Category`), dont on retient les huit déclarées
+ * par `UniverseConfig.draft`. Un plateau Demon Slayer affiche donc « Souffle »
+ * et « Piliers », et non « Black Flash » — du vocabulaire Jujutsu Kaisen qui ne
+ * voulait rien dire ailleurs, et qui obligeait surtout l'import à plaquer les
+ * notes d'un axe sur un axe qui n'existait pas.
+ *
+ * La liste effective est résolue côté serveur (`getDraftCategories`) puis
+ * passée en props : tout ce qui vit sous `lib/games/draft/` la reçoit en
+ * paramètre plutôt que de l'importer.
+ */
+
 /** Métadonnées d'affichage d'une catégorie de draft. */
 export interface DraftCategory {
+  /** Slug de la `Category` du builder — clé stable par univers. */
   id: DraftCategoryId;
   label: string;
   description: string;
 }
 
-/** Les 8 catégories du draft, dans l'ordre d'affichage du plateau. */
-export const DRAFT_CATEGORIES: DraftCategory[] = [
-  {
-    id: "occult-energy",
-    label: "Stock d'énergie occulte",
-    description: "Réserve brute d'énergie maudite.",
-  },
-  {
-    id: "physical-strength",
-    label: "Force physique",
-    description: "Puissance au corps à corps.",
-  },
-  {
-    id: "speed",
-    label: "Vitesse",
-    description: "Vitesse de déplacement et de réaction.",
-  },
-  {
-    id: "battle-iq",
-    label: "Battle IQ",
-    description: "Intelligence tactique en plein combat.",
-  },
-  {
-    id: "innate-technique",
-    label: "Sort inné",
-    description: "Puissance de la technique innée (perso meneur au combat).",
-  },
-  {
-    id: "domain-expansion",
-    label: "Extension du territoire",
-    description: "Maîtrise de l'Extension du Territoire.",
-  },
-  {
-    id: "black-flash",
-    label: "Black Flash",
-    description: "Facilité à déclencher le Black Flash.",
-  },
-  {
-    id: "teammate",
-    label: "Coéquipier",
-    description: "Valeur du sorcier comme coéquipier / soutien d'équipe.",
-  },
-];
+/** Nombre de catégories du plateau : un slot par catégorie, donc un budget. */
+export const DRAFT_CATEGORY_COUNT = 8;
 
-export const DRAFT_CATEGORY_BY_ID: Record<DraftCategoryId, DraftCategory> =
-  Object.fromEntries(DRAFT_CATEGORIES.map((c) => [c.id, c])) as Record<
-    DraftCategoryId,
-    DraftCategory
-  >;
-
-/** Catégorie servant d'avatar de combat (perso affiché face aux boss). */
-export const COMBAT_AVATAR_CATEGORY: DraftCategoryId = "innate-technique";
+/** Index par id, pour résoudre un libellé sans reparcourir la liste. */
+export function draftCategoryById(
+  categories: DraftCategory[],
+): Record<string, DraftCategory> {
+  return Object.fromEntries(categories.map((c) => [c.id, c]));
+}

@@ -3,10 +3,12 @@ import { getCachedImage } from "@/lib/admin/image-cache";
 import { getCurrentUniverse } from "@/lib/universes/current";
 import type { Boss, DraftCharacter, DraftCategoryId, DraftTier } from "./types";
 import { DRAFT_ROSTER } from "./roster";
-import { DRAFT_CATEGORIES } from "./categories";
+import type { DraftCategory } from "./categories";
 import { DRAW_PER_CATEGORY } from "./draw";
 import { MIN_DRAFT_ROSTER, MIN_DRAFT_TIER_C } from "./types";
 import { defaultBossesFor } from "./bosses";
+import { resolveDraftConfig } from "./config";
+import { getUniverseBySlug } from "@/lib/universes/registry";
 
 /**
  * Lecture du roster « Jujutsu Draft » en base (source de vérité éditable depuis
@@ -72,16 +74,54 @@ export async function listDraftCharacters(
   return rows.map(toDraftCharacter);
 }
 
+/**
+ * Les 8 catégories du plateau pour l'univers courant.
+ *
+ * Ce sont des catégories du BUILDER : libellé et description viennent donc de
+ * la table `Category`, éditable depuis l'admin, et l'univers ne déclare que
+ * lesquelles retenir et dans quel ordre (`UniverseConfig.draft`). Une catégorie
+ * déclarée mais absente de la base est simplement ignorée — le jeu tourne avec
+ * une ligne de moins plutôt que de planter sur une clé morte.
+ */
+export async function getDraftCategories(
+  universeId?: string,
+): Promise<DraftCategory[]> {
+  const universe = await getCurrentUniverse();
+  const uid = universeId ?? universe.id;
+  const config = resolveDraftConfig(getUniverseBySlug(universe.slug)?.draft);
+  const rows = await prisma.category.findMany({
+    where: { universeId: uid, slug: { in: [...config.categories] } },
+    select: { slug: true, label: true, description: true },
+  });
+  const bySlug = new Map(rows.map((r) => [r.slug, r]));
+  return config.categories.flatMap((slug) => {
+    const row = bySlug.get(slug);
+    return row
+      ? [{ id: row.slug, label: row.label, description: row.description }]
+      : [];
+  });
+}
+
+/** Catégorie dont le perso draftÉ sert d'avatar de combat face aux boss. */
+export async function getDraftAvatarCategory(): Promise<string> {
+  const universe = await getCurrentUniverse();
+  return resolveDraftConfig(getUniverseBySlug(universe.slug)?.draft)
+    .avatarCategory;
+}
+
 /** Roster utilisé par le jeu (univers courant) — repli sur la liste maître si
  * la base est insuffisante. Le repli est RÉSERVÉ à JJK : un autre univers ne
  * doit jamais afficher des persos JJK, il assume son propre roster en base. */
 export async function getDraftRoster(): Promise<DraftCharacter[]> {
   const universe = await getCurrentUniverse();
-  const roster = await listDraftCharacters(universe.id);
+  const [roster, categories] = await Promise.all([
+    listDraftCharacters(universe.id),
+    getDraftCategories(universe.id),
+  ]);
   const cCount = roster.filter((c) => c.tier === "C").length;
   // Cloisonnement : chaque catégorie doit avoir assez de membres pour remplir
   // une ligne (DRAW_PER_CATEGORY). Sinon, repli sur le roster maître équilibré.
-  const perCategoryOk = DRAFT_CATEGORIES.every(
+  const perCategoryOk = categories.every(
     (cat) =>
       roster.filter((c) => c.excellenceCategory === cat.id).length >=
       DRAW_PER_CATEGORY,

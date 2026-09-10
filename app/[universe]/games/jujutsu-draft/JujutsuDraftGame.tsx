@@ -9,7 +9,7 @@ import type { DroppedBooster } from "@/lib/progress/recompute";
 import { pickDraw } from "@/lib/games/draft/draw";
 import { evaluateDraft } from "@/lib/games/draft/scoring";
 import { awardDraftExpAction } from "./actions";
-import { COMBAT_AVATAR_CATEGORY } from "@/lib/games/draft/categories";
+import type { DraftCategory } from "@/lib/games/draft/categories";
 import { UniverseLink } from "@/components/universe/UniverseLink";
 import type {
   Boss,
@@ -27,6 +27,10 @@ interface JujutsuDraftGameProps {
   roster: DraftCharacter[];
   /** Boss de l'univers, dans l'ordre (depuis la base, éditables en /admin). */
   bosses: Boss[];
+  /** Les catégories de l'univers formant les lignes du plateau. */
+  categories: DraftCategory[];
+  /** Catégorie dont le perso draftÉ mène le combat contre les boss. */
+  avatarCategory: string;
 }
 
 type Phase = "draft" | "combat" | "result";
@@ -41,6 +45,8 @@ export function JujutsuDraftGame({
   initialBest,
   roster,
   bosses,
+  categories,
+  avatarCategory,
 }: JujutsuDraftGameProps) {
   const rosterById = useMemo(
     () => Object.fromEntries(roster.map((c) => [c.id, c])),
@@ -59,14 +65,14 @@ export function JujutsuDraftGame({
     useState<DroppedBooster | null>(null);
 
   const startNewGame = useCallback(() => {
-    setDraw(pickDraw(Math.random, roster));
+    setDraw(pickDraw(categories, Math.random, roster));
     setSelection({});
     setCombat(null);
     setPhase("draft");
     setGainedExp(null);
     setGainedCoins(null);
     setExpBadges([]);
-  }, [roster]);
+  }, [roster, categories]);
 
   useEffect(() => {
     startNewGame();
@@ -80,9 +86,9 @@ export function JujutsuDraftGame({
   );
 
   const launchCombat = useCallback(() => {
-    setCombat(evaluateDraft(selection, rosterById, bosses));
+    setCombat(evaluateDraft(selection, categories, rosterById, bosses));
     setPhase("combat");
-  }, [selection, rosterById, bosses]);
+  }, [selection, categories, rosterById, bosses]);
 
   // Fin du combat → écran de résultat + octroi automatique de l'XP (connecté).
   // Le serveur recalcule le nombre de boss (anti-triche) à partir de la sélection.
@@ -100,7 +106,12 @@ export function JujutsuDraftGame({
     }
   }, [isAuthed, selection]);
 
-  const avatarId = selection[COMBAT_AVATAR_CATEGORY];
+  // Le libellé vient de la catégorie de l'univers : « Sort inné » était écrit
+  // en dur, et s'affichait donc tel quel sur Demon Slayer ou Bleach.
+  const avatarLabel =
+    categories.find((c) => c.id === avatarCategory)?.label ?? avatarCategory;
+
+  const avatarId = selection[avatarCategory];
   const avatar: DraftCharacter | undefined = avatarId
     ? rosterById[avatarId]
     : undefined;
@@ -133,7 +144,7 @@ export function JujutsuDraftGame({
               le combat. Place chaque perso dans{" "}
               <span className="text-white">sa</span> catégorie pour maximiser sa
               puissance — ton avatar de combat sera ton choix en{" "}
-              <span className="text-domain-light">Sort inné</span>.
+              <span className="text-domain-light">{avatarLabel}</span>.
             </p>
           </div>
 
@@ -141,6 +152,7 @@ export function JujutsuDraftGame({
             <p className="py-24 text-center text-white/40">Tirage en cours…</p>
           ) : (
             <DraftBoard
+              categories={categories}
               draw={draw}
               selection={selection}
               rosterById={rosterById}
@@ -164,6 +176,7 @@ export function JujutsuDraftGame({
       {phase === "result" && combat && (
         <DraftResultModal
           result={combat}
+          categories={categories}
           selection={selection}
           rosterById={rosterById}
           isAuthed={isAuthed}
