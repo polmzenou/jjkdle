@@ -185,6 +185,24 @@ export const csm: UniverseConfig = {
     // 契約 (contrat).
     kanjiColumns: ["電気鋸人", "悪魔", "公安", "契約"],
   },
+  /**
+   * Draft : les huit axes du plateau lus sur les catégories CSM. « Hybride »
+   * est écarté (8 personnages notés seulement, pool trop maigre) au profit de
+   * « Division 4 ». Comme pour la Tour, on mappe sur le SENS et non sur le nom
+   * — Chainsaw Man n'a ni Black Flash ni Extension du Territoire.
+   */
+  draft: {
+    categorySources: {
+      "occult-energy": "hax",
+      "physical-strength": "combat-overall",
+      speed: "speed",
+      "battle-iq": "devil-hunters",
+      "innate-technique": "devils",
+      "domain-expansion": "division-4",
+      "black-flash": "antagonistes",
+      teammate: "coequipier",
+    },
+  },
   booru: {
     seriesTag: "chainsaw_man",
     // La clé de l'attribut de sexe est propre à l'univers : « csmgender » ici,

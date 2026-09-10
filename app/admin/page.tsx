@@ -26,6 +26,7 @@ import {
 import { listAttributes } from "@/lib/admin/attribute-store";
 import { listCategories } from "@/lib/admin/category-store";
 import { listRankingConditions } from "@/lib/admin/ranking-store";
+import { listDraftBosses, type AdminDraftBoss } from "@/lib/admin/draft-store";
 import { getCollection } from "@/lib/cards/store";
 import type { Character } from "@/data/roster/characters";
 import type { DraftCharacter } from "@/lib/games/draft/types";
@@ -63,6 +64,7 @@ export default async function AdminPage({
     roster = [];
   }
   let draftRoster: DraftCharacter[] = [];
+  let draftBosses: AdminDraftBoss[] = [];
   // Meme tolerance que le roster draft : une table vide ou absente ne doit pas
   // empecher l'admin de s'ouvrir.
   let towerItems: TowerItem[] = [];
@@ -75,6 +77,11 @@ export default async function AdminPage({
     draftRoster = await listDraftCharacters();
   } catch {
     draftRoster = [];
+  }
+  try {
+    draftBosses = await listDraftBosses();
+  } catch {
+    draftBosses = [];
   }
   const [categories, scores, users, attributeSchema, universes] =
     await Promise.all([
@@ -155,6 +162,7 @@ export default async function AdminPage({
       cardCollection={cardCollection}
       casino={casino}
       draftRoster={draftRoster}
+      draftBosses={draftBosses}
       towerItems={towerItems}
       categories={categories}
       scores={[

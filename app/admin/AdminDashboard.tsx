@@ -16,6 +16,7 @@ import { CharacterImage } from "@/components/CharacterImage";
 import type { AdminScore } from "@/lib/leaderboard/store";
 import type { AdminUser } from "@/lib/admin/users";
 import type { DraftCharacter } from "@/lib/games/draft/types";
+import type { AdminDraftBoss } from "@/lib/admin/draft-store";
 import { ImageDropzone } from "./ImageDropzone";
 import {
   saveCharacterAction,
@@ -107,6 +108,7 @@ interface FormState {
 interface AdminDashboardProps {
   roster: Character[];
   draftRoster: DraftCharacter[];
+  draftBosses: AdminDraftBoss[];
   /** Roster des objets maudits de l'univers administre (onglet Objets). */
   towerItems: TowerItem[];
   categories: CategoryConfig[];
@@ -175,6 +177,7 @@ function slugify(s: string): string {
 export function AdminDashboard({
   roster,
   draftRoster,
+  draftBosses,
   towerItems,
   categories,
   scores,
@@ -823,7 +826,12 @@ export function AdminDashboard({
       )}
 
       {tab === "draft" && (
-        <DraftRosterAdmin key={currentUniverse} roster={draftRoster} />
+        <DraftRosterAdmin
+          key={currentUniverse}
+          roster={draftRoster}
+          bosses={draftBosses}
+          builderRoster={roster}
+        />
       )}
 
       {tab === "items" && (

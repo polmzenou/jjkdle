@@ -6,12 +6,18 @@ import { useUniverseHref } from "@/components/universe/UniverseProvider";
 import { CharacterImage } from "@/components/CharacterImage";
 import { DRAFT_CATEGORIES, DRAFT_CATEGORY_BY_ID } from "@/lib/games/draft/categories";
 import { MIN_DRAFT_ROSTER } from "@/lib/games/draft/types";
+import { DRAFT_POOL_SIZE } from "@/lib/games/draft/generate";
 import type {
   DraftCharacter,
   DraftCategoryId,
   DraftTier,
 } from "@/lib/games/draft/types";
+import type { Character } from "@/data/roster/characters";
+import type { AdminDraftBoss } from "@/lib/admin/draft-store";
+import type { DraftImportReport } from "@/lib/admin/draft-import";
 import { ImageDropzone } from "./ImageDropzone";
+import { DraftBossAdmin } from "./DraftBossAdmin";
+import { importDraftRosterAction } from "./draft-actions";
 import {
   saveDraftCharacterAction,
   deleteDraftCharacterAction,
@@ -28,6 +34,10 @@ const TIER_COLOR: Record<DraftTier, string> = {
 
 interface DraftRosterAdminProps {
   roster: DraftCharacter[];
+  /** Boss de l'univers, dans l'ordre d'affrontement. */
+  bosses: AdminDraftBoss[];
+  /** Roster du builder : source de l'import et des visages de boss. */
+  builderRoster: Character[];
 }
 
 interface FormState {
@@ -63,7 +73,11 @@ const inputCls =
   "w-full rounded-lg border border-white/10 bg-void-900 px-3 py-2 text-sm text-white outline-none focus:border-domain";
 
 /** Onglet admin : roster du jeu « Jujutsu Draft » (catégorie, tier, coût, stat, image). */
-export function DraftRosterAdmin({ roster }: DraftRosterAdminProps) {
+export function DraftRosterAdmin({
+  roster,
+  bosses,
+  builderRoster,
+}: DraftRosterAdminProps) {
   const router = useRouter();
   // Idem AdminDashboard : l'API doit cibler l'univers administré.
   const withUniverse = useUniverseHref();
@@ -75,6 +89,7 @@ export function DraftRosterAdmin({ roster }: DraftRosterAdminProps) {
   const [feedback, setFeedback] = useState<{ ok: boolean; msg: string } | null>(
     null,
   );
+  const [report, setReport] = useState<DraftImportReport | null>(null);
 
   // Image : fichier en attente d'upload, ou retrait demandé (comme le Roster).
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -193,6 +208,19 @@ export function DraftRosterAdmin({ roster }: DraftRosterAdminProps) {
     });
   };
 
+  const runImport = () =>
+    startTransition(async () => {
+      setReport(null);
+      const res = await importDraftRosterAction();
+      if (!res.ok || !res.report) {
+        setFeedback({ ok: false, msg: res.error ?? "Échec." });
+        return;
+      }
+      setReport(res.report);
+      setFeedback(null);
+      router.refresh();
+    });
+
   const remove = (c: DraftCharacter) => {
     if (!window.confirm(`Supprimer « ${c.name} » du roster draft ?`)) return;
     startTransition(async () => {
@@ -241,6 +269,75 @@ export function DraftRosterAdmin({ roster }: DraftRosterAdminProps) {
           temporairement sur le roster par défaut pour rester jouable.
         </div>
       )}
+
+      {/* ── Import depuis le roster du builder ── */}
+      <div className="mb-5 flex flex-wrap items-center gap-3 rounded-2xl border border-domain/30 bg-domain/5 px-4 py-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold text-white">
+            Roster draft automatique
+          </p>
+          <p className="text-xs text-white/50">
+            Génère {DRAFT_POOL_SIZE} personnages par catégorie (2 S, 3 A, 5 B,
+            5 C) depuis les notes du roster, et pose les 6 boss par défaut de
+            l&apos;univers. Un personnage bien noté sur plusieurs axes alimente
+            plusieurs catégories — le tirage n&apos;en montre qu&apos;un
+            exemplaire par partie. Réappuyer met à jour les mêmes lignes au lieu
+            d&apos;en créer de nouvelles, et ne réécrit jamais les PV réglés
+            depuis.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={runImport}
+          disabled={pending}
+          className="rounded-xl bg-domain px-6 py-2.5 font-display font-black uppercase tracking-wide text-white shadow-glow transition-transform enabled:hover:scale-[1.03] disabled:opacity-40"
+        >
+          Tout importer
+        </button>
+      </div>
+
+      {report && (
+        <div className="mb-5 space-y-1.5 rounded-xl border border-white/10 bg-void-800/40 px-4 py-3 text-sm">
+          <p className="text-white/80">
+            <span className="font-bold text-emerald-400">
+              {report.created} perso(s) créé(s)
+            </span>{" "}
+            · {report.updated} mis à jour · {report.bossesCreated} boss
+            créé(s)
+          </p>
+          {report.linked > 0 && (
+            <p className="text-white/60">
+              {report.linked} ancienne(s) ligne(s) rattachée(s) à leur
+              personnage — le tirage ne les proposera plus en double.
+            </p>
+          )}
+          {report.thin.length > 0 && (
+            <p className="text-amber-300/90">
+              Pools incomplets (moins de {DRAFT_POOL_SIZE} personnages notés) :{" "}
+              {report.thin.map((t) => `${t.label} (${t.count})`).join(" · ")}
+            </p>
+          )}
+          {report.skipped.length > 0 && (
+            <div className="text-white/50">
+              <p className="text-xs uppercase tracking-wider text-white/30">
+                Catégories écartées
+              </p>
+              <ul className="mt-0.5 space-y-0.5">
+                {report.skipped.map((s) => (
+                  <li key={s.label} className="text-xs">
+                    <span className="text-white/70">{s.label}</span> — {s.reason}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Boss ── */}
+      <div className="mb-6">
+        <DraftBossAdmin bosses={bosses} roster={builderRoster} />
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,420px)_1fr]">
         {/* ── Formulaire ── */}

@@ -179,6 +179,22 @@ export const aot: UniverseConfig = {
     // Bataillon d'exploration), 心臓を捧げよ → 献身 (offrir son cœur).
     kanjiColumns: ["進撃巨人", "自由之翼", "調査兵団", "献身"],
   },
+  /**
+   * Draft : « Titan Shifter » est écarté (13 personnages notés) au profit de
+   * « Détermination », le seul axe assez large pour tenir un pool de 15.
+   */
+  draft: {
+    categorySources: {
+      "occult-energy": "determination",
+      "physical-strength": "menace",
+      speed: "agilite",
+      "battle-iq": "battle-iq",
+      "innate-technique": "man-uvre-tridimensionnel",
+      "domain-expansion": "mahr",
+      "black-flash": "bataillon-d-exploration",
+      teammate: "commandement",
+    },
+  },
   booru: {
     seriesTag: "shingeki_no_kyojin",
     // La clé de l'attribut de sexe est propre à l'univers (« gender » en JJK,

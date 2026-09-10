@@ -12,6 +12,7 @@ import { awardDraftExpAction } from "./actions";
 import { COMBAT_AVATAR_CATEGORY } from "@/lib/games/draft/categories";
 import { UniverseLink } from "@/components/universe/UniverseLink";
 import type {
+  Boss,
   CombatResult,
   DraftCategoryId,
   DraftCharacter,
@@ -24,6 +25,8 @@ interface JujutsuDraftGameProps {
   initialBest: number | null;
   /** Roster du draft (depuis la base, éditable en /admin). */
   roster: DraftCharacter[];
+  /** Boss de l'univers, dans l'ordre (depuis la base, éditables en /admin). */
+  bosses: Boss[];
 }
 
 type Phase = "draft" | "combat" | "result";
@@ -37,6 +40,7 @@ export function JujutsuDraftGame({
   isAuthed,
   initialBest,
   roster,
+  bosses,
 }: JujutsuDraftGameProps) {
   const rosterById = useMemo(
     () => Object.fromEntries(roster.map((c) => [c.id, c])),
@@ -76,9 +80,9 @@ export function JujutsuDraftGame({
   );
 
   const launchCombat = useCallback(() => {
-    setCombat(evaluateDraft(selection, rosterById));
+    setCombat(evaluateDraft(selection, rosterById, bosses));
     setPhase("combat");
-  }, [selection, rosterById]);
+  }, [selection, rosterById, bosses]);
 
   // Fin du combat → écran de résultat + octroi automatique de l'XP (connecté).
   // Le serveur recalcule le nombre de boss (anti-triche) à partir de la sélection.

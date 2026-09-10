@@ -1,11 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { getCachedImage } from "@/lib/admin/image-cache";
 import { getCurrentUniverse } from "@/lib/universes/current";
-import type { DraftCharacter, DraftCategoryId, DraftTier } from "./types";
+import type { Boss, DraftCharacter, DraftCategoryId, DraftTier } from "./types";
 import { DRAFT_ROSTER } from "./roster";
 import { DRAFT_CATEGORIES } from "./categories";
 import { DRAW_PER_CATEGORY } from "./draw";
 import { MIN_DRAFT_ROSTER, MIN_DRAFT_TIER_C } from "./types";
+import { defaultBossesFor } from "./bosses";
 
 /**
  * Lecture du roster « Jujutsu Draft » en base (source de vérité éditable depuis
@@ -29,6 +30,7 @@ type DraftRow = {
   tier: string;
   cost: number;
   statValue: number;
+  sourceCharacterId: string | null;
 };
 
 function toDraftCharacter(row: DraftRow): DraftCharacter {
@@ -42,6 +44,7 @@ function toDraftCharacter(row: DraftRow): DraftCharacter {
     tier: row.tier as DraftTier,
     cost: row.cost,
     statValue: row.statValue,
+    ...(row.sourceCharacterId ? { sourceId: row.sourceCharacterId } : {}),
   };
 }
 
@@ -63,6 +66,7 @@ export async function listDraftCharacters(
       tier: true,
       cost: true,
       statValue: true,
+      sourceCharacterId: true,
     },
   });
   return rows.map(toDraftCharacter);
@@ -98,4 +102,53 @@ export async function getDraftRosterMap(): Promise<
 > {
   const roster = await getDraftRoster();
   return Object.fromEntries(roster.map((c) => [c.id, c]));
+}
+
+/**
+ * Boss de l'univers courant, dans l'ordre d'affrontement.
+ *
+ * Repli sur la liste par défaut en code (`bosses.ts`) tant que la table est
+ * vide : sans boss, le combat n'a pas lieu et le joueur ne peut rien marquer.
+ * Contrairement au repli du roster, il vaut pour TOUS les univers — la liste
+ * par défaut est écrite pour chacun d'eux, il n'y a donc aucun risque de servir
+ * des personnages JJK ailleurs.
+ */
+export async function getDraftBosses(): Promise<Boss[]> {
+  const universe = await getCurrentUniverse();
+  const rows = await prisma.draftBoss.findMany({
+    where: { universeId: universe.id },
+    orderBy: { position: "asc" },
+    select: {
+      slug: true,
+      name: true,
+      threshold: true,
+      characterId: true,
+      image: true,
+    },
+  });
+  if (rows.length === 0) return defaultBossesFor(universe.slug);
+
+  // Image : la surcharge du boss prime, sinon celle de son personnage source
+  // (cache « OUAIS » compris, comme pour le roster).
+  const characterIds = rows.flatMap((r) => (r.characterId ? [r.characterId] : []));
+  const characters = characterIds.length
+    ? await prisma.character.findMany({
+        where: { id: { in: characterIds } },
+        select: { id: true, image: true },
+      })
+    : [];
+  const imageById = new Map(characters.map((c) => [c.id, c.image]));
+
+  return rows.map((row) => {
+    const fromCharacter = row.characterId
+      ? (getCachedImage(row.characterId) ?? imageById.get(row.characterId) ?? null)
+      : null;
+    const image = row.image ?? fromCharacter;
+    return {
+      id: row.slug,
+      name: row.name,
+      threshold: row.threshold,
+      ...(image ? { image } : {}),
+    };
+  });
 }

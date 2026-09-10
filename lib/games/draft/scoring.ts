@@ -6,8 +6,10 @@ import type {
   DraftSelection,
   DuelResult,
 } from "./types";
+import { personOf } from "./types";
 import { DRAFT_CATEGORIES } from "./categories";
 import { DRAFT_ROSTER_BY_ID } from "./roster";
+import { defaultBossesFor } from "./bosses";
 
 /**
  * Cœur du jeu « Jujutsu Draft » — 100 % pur et testable (aucune dépendance
@@ -27,9 +29,9 @@ export const COST_COEF = 0.4;
 export const CATEGORY_BONUS = 0.5;
 
 /**
- * Seuils cachés des boss — CALIBRÉS PAR SIMULATION sur le ROSTER RÉEL (base
- * Neon, éditable en /admin), via `scripts/calibrate.mjs` (brute-force des
- * ~85 M équipes légales). À RELANCER après une grosse retouche du roster.
+ * Boss JJK — CALIBRÉS PAR SIMULATION sur le ROSTER RÉEL (base Neon, éditable en
+ * /admin), via `scripts/calibrate.mjs` (brute-force des ~85 M équipes légales).
+ * À RELANCER après une grosse retouche du roster.
  *
  * Distribution mesurée (budget ≤ 100) : min **104**, médiane ≈ 205, max **240**.
  * Le « % battu » est la part d'équipes légales qui dépassent le seuil → mesure
@@ -44,15 +46,13 @@ export const CATEGORY_BONUS = 0.5;
  *
  * NB : le roster maître en code (`roster.ts`) n'est qu'un REPLI (max ≈ 223) ;
  * ces seuils visent le roster de prod. Cf. `scoring.test.ts` pour la courbe.
+ *
+ * DÉFAUT JJK uniquement : chaque univers a désormais ses propres boss, lus en
+ * base (`getDraftBosses`) et repliés sur `lib/games/draft/bosses.ts`. Ce
+ * tableau reste exporté pour les appelants qui n'ont besoin que du NOMBRE de
+ * boss (profil, tests).
  */
-export const BOSSES: Boss[] = [
-  { id: "panda", name: "Panda", threshold: 130, image: "/assets/characters/Panda_Portrait_Anime.webp" },
-  { id: "mahito", name: "Mahito", threshold: 178, image: "/assets/characters/Mahito_Portrait_Anime.webp" },
-  { id: "geto", name: "Suguru Geto", threshold: 197, image: "/assets/characters/Suguru_Portrait_Anime.webp" },
-  { id: "sukuna", name: "Ryomen Sukuna", threshold: 230, image: "/assets/characters/Sukuna_Portrait_Anime.webp" },
-  { id: "gojo", name: "Satoru Gojo", threshold: 235, image: "/assets/characters/Satoru_Portrait_Anime.webp" },
-  { id: "yuji", name: "Yuji Itadori", threshold: 240, image: "/assets/characters/Yuji_Portrait_Modulo.webp" },
-];
+export const BOSSES: Boss[] = defaultBossesFor("jjk");
 
 /** Contribution d'un perso placé dans `slotCategory`. */
 export function contribution(
@@ -125,8 +125,9 @@ export function resolveCombat(
 export function evaluateDraft(
   selection: DraftSelection,
   rosterById: Record<string, DraftCharacter> = DRAFT_ROSTER_BY_ID,
+  bosses: Boss[] = BOSSES,
 ): CombatResult {
-  return resolveCombat(computeGlobalScore(selection, rosterById));
+  return resolveCombat(computeGlobalScore(selection, rosterById), bosses);
 }
 
 /**
@@ -156,13 +157,18 @@ export function validateSelection(
     if (typeof value !== "string") {
       return { ok: false, error: `Catégorie non remplie : ${category.id}.` };
     }
-    if (!rosterById[value]) {
+    const character = rosterById[value];
+    if (!character) {
       return { ok: false, error: `Personnage inconnu : ${value}.` };
     }
-    if (seen.has(value)) {
+    // Doublon de PERSONNE et non de carte : un personnage importé alimente
+    // plusieurs catégories, donc porte un id différent par ligne. Le tirage les
+    // sépare déjà (cf. `pickDraw`) ; ceci est le filet côté serveur.
+    const person = personOf(character);
+    if (seen.has(person)) {
       return { ok: false, error: `Personnage en double : ${value}.` };
     }
-    seen.add(value);
+    seen.add(person);
     selection[category.id] = value;
   }
 

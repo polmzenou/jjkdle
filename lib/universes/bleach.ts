@@ -217,6 +217,23 @@ export const bleach: UniverseConfig = {
     // 死神 (shinigami), 斬魄刀 (zanpakutō), 卍解 (bankai), 尸魂界 (Soul Society).
     kanjiColumns: ["死神", "斬魄刀", "卍解", "尸魂界"],
   },
+  /**
+   * Draft : Bleach note tout le roster sur ses cinq axes de stat, les pools y
+   * seront donc toujours pleins. « Bankai » tient le rôle de l'ultime, « Kido »
+   * celui du coup d'éclat.
+   */
+  draft: {
+    categorySources: {
+      "occult-energy": "reiatsu",
+      "physical-strength": "force-physique",
+      speed: "vitesse",
+      "battle-iq": "battle-iq",
+      "innate-technique": "zanpakuto",
+      "domain-expansion": "bankai",
+      "black-flash": "kido",
+      teammate: "gotei-13",
+    },
+  },
   booru: {
     seriesTag: "bleach",
     // La clé de l'attribut de sexe est propre à l'univers (« gender » en JJK,

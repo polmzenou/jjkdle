@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { evaluateDraft, validateSelection } from "@/lib/games/draft/scoring";
-import { getDraftRosterMap } from "@/lib/games/draft/queries";
+import { getDraftBosses, getDraftRosterMap } from "@/lib/games/draft/queries";
 import { saveDraftScore } from "@/lib/games/draft/store";
 import { refreshLevelAndBadges } from "@/lib/progress/recompute";
 
@@ -11,9 +11,10 @@ import { refreshLevelAndBadges } from "@/lib/progress/recompute";
  * Body : { draft: { [categoryId]: characterId } }.
  *
  * Anti-triche : le score n'est jamais fourni par le client. Le serveur valide
- * la sélection (8 catégories, persos connus, distincts, budget ≤ 100) puis
- * RECALCULE `globalScore` + `enemiesKilled`, et n'enregistre que si c'est un
- * nouveau record perso. Exige une session authentifiée.
+ * la sélection (8 catégories, persos connus, personnes distinctes, budget ≤
+ * BUDGET) puis RECALCULE `globalScore` + `enemiesKilled` contre les boss de
+ * l'univers, et n'enregistre que si c'est un nouveau record perso. Exige une
+ * session authentifiée.
  */
 
 export const dynamic = "force-dynamic";
@@ -34,8 +35,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "Requête invalide." }, { status: 400 });
   }
 
-  // Roster autoritatif (base) : on recalcule tout avec les valeurs actuelles.
-  const rosterById = await getDraftRosterMap();
+  // Roster et boss autoritatifs (base) : on recalcule tout avec les valeurs
+  // actuelles, pas celles que le client croyait avoir.
+  const [rosterById, bosses] = await Promise.all([
+    getDraftRosterMap(),
+    getDraftBosses(),
+  ]);
 
   const draft = (body as { draft?: unknown } | null)?.draft;
   const validation = validateSelection(draft, rosterById);
@@ -43,7 +48,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: validation.error }, { status: 400 });
   }
 
-  const result = evaluateDraft(validation.selection, rosterById);
+  const result = evaluateDraft(validation.selection, rosterById, bosses);
   const { best, isNewRecord } = await saveDraftScore(user.id, {
     enemiesKilled: result.enemiesKilled,
     globalScore: result.globalScore,

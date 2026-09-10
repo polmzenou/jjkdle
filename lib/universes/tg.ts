@@ -197,6 +197,23 @@ export const tg: UniverseConfig = {
     // 二十区 (le 20e arrondissement).
     kanjiColumns: ["東京喰種", "赫子", "隻眼", "二十区"],
   },
+  /**
+   * Draft : « Aogiri » ne compte que 13 personnages notés, mais c'est le moins
+   * étroit des trois castings (Anteiku en a 8) — le pool sera juste un peu plus
+   * court, l'import le signale.
+   */
+  draft: {
+    categorySources: {
+      "occult-energy": "regeneration",
+      "physical-strength": "force-physique",
+      speed: "speed",
+      "battle-iq": "battle-iq",
+      "innate-technique": "kagune",
+      "domain-expansion": "ccg",
+      "black-flash": "mental",
+      teammate: "aogiri",
+    },
+  },
   booru: {
     seriesTag: "tokyo_ghoul",
     // La clé de l'attribut de sexe est propre à l'univers (« gender » en JJK,

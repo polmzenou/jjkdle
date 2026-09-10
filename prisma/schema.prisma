@@ -484,6 +484,7 @@ model Universe {
   categories        Category[]
   items             Item[]
   draftCharacters   DraftCharacter[]
+  draftBosses       DraftBoss[]
   rankingConditions RankingCondition[]
   userProfiles      UserUniverseProfile[]
   attributes        Attribute[]
@@ -657,6 +658,11 @@ model DraftCharacter {
   statValue          Int
   position           Int     @default(0)
 
+  /// Personnage du roster builder dont cette ligne est DÉRIVÉE (bouton « Tout
+  /// importer »). `null` = ligne écrite à la main. Sert à interdire de drafter
+  /// deux fois la même personne quand elle alimente plusieurs catégories.
+  sourceCharacterId  String?
+
   // Multi-univers (étape 2a). `id` reste la PK globale ; `slug` = clé lisible
   // unique PAR univers (JJK : slug = id).
   slug       String
@@ -666,6 +672,30 @@ model DraftCharacter {
   @@unique([universeId, slug])
   @@index([universeId, position])
   @@index([position])
+}
+
+/// Boss du jeu "Jujutsu Draft" — 6 par univers, affrontés dans l'ordre `position`.
+/// Éditables depuis /admin ; à défaut de lignes, le jeu retombe sur la liste par
+/// défaut en code (`lib/games/draft/bosses.ts`).
+model DraftBoss {
+  id          String   @id
+  name        String
+  /// Seuil de score global caché à dépasser pour le vaincre. Affiché « PV »
+  /// dans l'admin : c'est le seul nombre qui décide de l'issue du duel, les
+  /// barres de vie de l'animation étant purement cosmétiques.
+  threshold   Int
+  /// `Character.id` fournissant nom et image. `null` = boss libre (nom saisi).
+  characterId String?
+  /// Surcharge d'image (chemin /assets/… ou route API). Prime sur le personnage.
+  image       String?
+  position    Int      @default(0)
+
+  slug       String
+  universeId String
+  universe   Universe @relation(fields: [universeId], references: [id])
+
+  @@unique([universeId, slug])
+  @@index([universeId, position])
 }
 
 /// Consigne du jeu "JJK Pyramid" : `order` = 8 IDs de personnages, rang 1→8.

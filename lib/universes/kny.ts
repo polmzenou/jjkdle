@@ -193,6 +193,23 @@ export const kny: UniverseConfig = {
     // respiration), 柱 (les Piliers).
     kanjiColumns: ["鬼滅之刃", "全集中", "呼吸法", "柱"],
   },
+  /**
+   * Draft : les huit axes lus sur les catégories Demon Slayer. « Lunes » et
+   * « Piliers » plafonnent à 15 notés — c'est exactement la taille d'un pool,
+   * donc tout juste suffisant.
+   */
+  draft: {
+    categorySources: {
+      "occult-energy": "pouvoir-sanguinaire",
+      "physical-strength": "force-physique",
+      speed: "speed",
+      "battle-iq": "battle-iq",
+      "innate-technique": "souffle",
+      "domain-expansion": "lunes",
+      "black-flash": "piliers",
+      teammate: "corps-des-pourfendeurs",
+    },
+  },
   booru: {
     seriesTag: "kimetsu_no_yaiba",
     // La clé de l'attribut de sexe est propre à l'univers (« gender » en JJK,

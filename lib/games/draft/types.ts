@@ -42,6 +42,20 @@ export interface DraftCharacter {
   cost: number;
   /** Valeur de stat de base (contribue au score global caché). */
   statValue: number;
+  /**
+   * Personnage du roster dont cette carte est dérivée (import automatique).
+   *
+   * Un même personnage alimente PLUSIEURS catégories (une carte par catégorie
+   * où il est noté) : sans cette clé, rien n'empêcherait de le drafter deux
+   * fois dans la même équipe, une fois par ligne où il apparaît. Absent sur les
+   * cartes écrites à la main, dont l'`id` fait alors office d'identité.
+   */
+  sourceId?: string;
+}
+
+/** Identité de PERSONNE d'une carte : `sourceId` s'il existe, sinon son `id`. */
+export function personOf(character: DraftCharacter): string {
+  return character.sourceId ?? character.id;
 }
 
 /** Sélection du joueur : un id de perso par catégorie (8 quand complète). */

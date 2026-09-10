@@ -1,4 +1,5 @@
 import type { DraftCharacter, DraftPick, DraftTier } from "./types";
+import { personOf } from "./types";
 import { DRAFT_CATEGORIES } from "./categories";
 import { DRAFT_ROSTER } from "./roster";
 import { shuffle, type Rng } from "@/lib/draw/draw";
@@ -6,22 +7,22 @@ import { shuffle, type Rng } from "@/lib/draw/draw";
 /**
  * Tirage du draft — CLOISONNÉ PAR CATÉGORIE : chaque catégorie ne propose que
  * des persos dont c'est la catégorie d'excellence (`excellenceCategory`). On en
- * tire `DRAW_PER_CATEGORY` (5 sur les 6 du roster maître).
+ * tire `DRAW_PER_CATEGORY` (5).
  *
- * Comme chaque perso n'appartient qu'à une seule catégorie, les lignes sont
- * disjointes (jamais de doublon sur le plateau, sans logique « sans remise »).
+ * DÉDOUBLONNAGE PAR PERSONNE : le roster importé crée une carte par couple
+ * personnage × catégorie, si bien qu'un même personnage peut être éligible à
+ * plusieurs lignes sous des `id` différents. Les lignes sont donc tirées EN
+ * SÉQUENCE, chacune excluant les personnes déjà posées sur le plateau
+ * (`personOf`) — le joueur ne voit jamais deux fois le même visage, et ne peut
+ * donc pas le drafter deux fois. Il faut 8 × 5 = 40 personnes distinctes, ce
+ * que tous les rosters fournissent.
  *
- * QUOTAS DE TIER (par partie) : chaque ligne garantit une composition minimale
- * par tier, choisie aléatoirement parmi les membres de la catégorie :
- *   - défaut : 1 S, 1 A, 1 B, 2 C ;
- *   - black-flash : 1 S minimum, le reste au hasard (roster trop juste pour le
- *     quota complet) ;
- *   - domain-expansion (Extension du territoire) : 1 S, 2 A, 2 B.
- * Les quotas sont appliqués au mieux : si une catégorie n'a pas assez de membres
- * d'un tier, on prend ce qui existe et on complète au hasard.
+ * QUOTAS DE TIER (par ligne) : 1 S, 1 A, 1 B, 2 C, appliqués AU MIEUX — si la
+ * catégorie n'a pas assez de membres d'un tier une fois les exclusions faites,
+ * on prend ce qui existe et on complète au hasard.
  *
  * Affordabilité : la carte la MOINS chère de chaque catégorie est proposée dès
- * que le quota laisse une place libre → une équipe légale sous budget 100 reste
+ * que le quota laisse une place libre → une équipe légale sous budget reste
  * atteignable. RNG injectable.
  */
 
@@ -35,14 +36,6 @@ type TierQuota = Partial<Record<DraftTier, number>>;
 
 /** Quota par défaut : 1 S, 1 A, 1 B, 2 C (= DRAW_PER_CATEGORY). */
 const DEFAULT_TIER_QUOTA: TierQuota = { S: 1, A: 1, B: 1, C: 2 };
-
-/** Quotas spécifiques (sinon `DEFAULT_TIER_QUOTA`). */
-const TIER_QUOTA_BY_CATEGORY: Partial<Record<string, TierQuota>> = {
-  // Roster trop juste pour le quota complet : on garantit juste 1 S.
-  "black-flash": { S: 1 },
-  // Extension du territoire : 1 S, 2 A, 2 B.
-  "domain-expansion": { S: 1, A: 2, B: 2 },
-};
 
 /**
  * Tire une ligne de catégorie en respectant au mieux le quota de tier, puis en
@@ -104,11 +97,25 @@ export function pickDraw(
   roster: DraftCharacter[] = DRAFT_ROSTER,
 ): DraftPick {
   const draw = {} as DraftPick;
+  // Personnes déjà posées sur le plateau, toutes lignes confondues.
+  const placed = new Set<string>();
 
-  for (const cat of DRAFT_CATEGORIES) {
-    const members = roster.filter((c) => c.excellenceCategory === cat.id);
-    const quota = TIER_QUOTA_BY_CATEGORY[cat.id] ?? DEFAULT_TIER_QUOTA;
-    draw[cat.id] = drawForCategory(members, quota, rng);
+  // Les catégories les moins fournies d'abord : une ligne large se remplira
+  // encore après coup, l'inverse n'est pas vrai. Sans cet ordre, une catégorie
+  // étroite pourrait se retrouver vidée par les exclusions des précédentes.
+  const eligible = DRAFT_CATEGORIES.map((cat) => ({
+    cat,
+    members: roster.filter((c) => c.excellenceCategory === cat.id),
+  })).sort((a, b) => a.members.length - b.members.length);
+
+  for (const { cat, members } of eligible) {
+    const available = members.filter((c) => !placed.has(personOf(c)));
+    // Exclusions trop agressives (roster minuscule) : on rouvre la ligne plutôt
+    // que de la rendre vide — un doublon vaut mieux qu'une catégorie sans carte.
+    const pool = available.length > 0 ? available : members;
+    const row = drawForCategory(pool, DEFAULT_TIER_QUOTA, rng);
+    for (const c of row) placed.add(personOf(c));
+    draw[cat.id] = row;
   }
 
   return draw;

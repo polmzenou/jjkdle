@@ -12,6 +12,7 @@
 
 import type { UniverseGameCopy } from "@/lib/games/types";
 import type { TowerConfigOverride } from "@/lib/games/tower/config";
+import type { DraftConfigOverride } from "@/lib/games/draft/config";
 
 /** Palette de thème d'un univers. Sert à générer des variables CSS (cf. étape 4). */
 export interface UniverseTheme {
@@ -191,6 +192,17 @@ export interface UniverseConfig {
    * `lib/games/tower/` ne doit contenir aucun `if (universe === …)`.
    */
   tower?: TowerConfigOverride;
+  /**
+   * Réglages du draft : à quelle catégorie du builder correspond chaque axe du
+   * plateau. Sert au bouton « Tout importer » de l'admin, qui classe les
+   * personnages sur cette note avant de les découper en tiers.
+   *
+   * Absent = la config JJK, qui fait office de défaut (même convention que
+   * `gameCopy` et `tower`). Un univers dont les catégories ne portent pas les
+   * mêmes noms DOIT la fournir, sinon l'import n'a aucune note à lire et
+   * écarte toutes les catégories.
+   */
+  draft?: DraftConfigOverride;
   /** Synchro d'images automatique (bouton « OUAIS »). Absent = désactivée. */
   booru?: UniverseBooru;
 }

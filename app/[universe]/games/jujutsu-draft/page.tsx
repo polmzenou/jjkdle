@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getUserDraftBest } from "@/lib/games/draft/store";
-import { getDraftRoster } from "@/lib/games/draft/queries";
+import { getDraftBosses, getDraftRoster } from "@/lib/games/draft/queries";
 import { DraftLeaderboard } from "@/components/leaderboard/DraftLeaderboard";
 import { parseScope } from "@/lib/leaderboard/store";
 import { redirect } from "next/navigation";
@@ -31,10 +31,11 @@ export default async function JujutsuDraftPage({
   if (!(await isGameEnabled("jujutsu-draft")))
     redirect(await universeHref("/games"));
   const user = await getCurrentUser();
-  const [{ scope }, initialBest, roster] = await Promise.all([
+  const [{ scope }, initialBest, roster, bosses] = await Promise.all([
     searchParams,
     user ? getUserDraftBest(user.id) : Promise.resolve(null),
     getDraftRoster(),
+    getDraftBosses(),
   ]);
 
   return (
@@ -44,6 +45,7 @@ export default async function JujutsuDraftPage({
         isAuthed={Boolean(user)}
         initialBest={initialBest}
         roster={roster}
+        bosses={bosses}
       />
 
       <div className="mt-10">

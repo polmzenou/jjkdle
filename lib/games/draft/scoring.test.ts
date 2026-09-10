@@ -3,8 +3,12 @@ import {
   BOSSES,
   contribution,
   resolveCombat,
+  validateSelection,
 } from "./scoring";
 import { DRAFT_ROSTER_BY_ID } from "./roster";
+import { DRAFT_CATEGORIES } from "./categories";
+import { defaultBossesFor } from "./bosses";
+import type { DraftCharacter } from "./types";
 
 /**
  * Les seuils des boss sont calibrés sur le ROSTER DE PROD (base, cf.
@@ -74,5 +78,72 @@ describe("resolveCombat", () => {
       expect(killed).toBeGreaterThanOrEqual(prev);
       prev = killed;
     }
+  });
+});
+
+describe("validateSelection", () => {
+  /** Roster de test : un perso par catégorie, tous bon marché. */
+  const roster: Record<string, DraftCharacter> = Object.fromEntries(
+    DRAFT_CATEGORIES.map((cat, i) => [
+      `c${i}`,
+      {
+        id: `c${i}`,
+        name: `C${i}`,
+        excellenceCategory: cat.id,
+        tier: "C" as const,
+        cost: 5,
+        statValue: 8,
+      },
+    ]),
+  );
+  const full = Object.fromEntries(
+    DRAFT_CATEGORIES.map((cat, i) => [cat.id, `c${i}`]),
+  );
+
+  it("accepte une sélection complète sous budget", () => {
+    const res = validateSelection(full, roster);
+    expect(res.ok).toBe(true);
+  });
+
+  it("refuse deux cartes portant la même PERSONNE", () => {
+    // Cas du roster importé : deux cartes distinctes (une par catégorie) qui
+    // désignent le même personnage. Sans le contrôle sur `sourceId`, l'équipe
+    // passerait — c'est exactement ce que le tirage interdit côté client.
+    const withClone: Record<string, DraftCharacter> = {
+      ...roster,
+      c0: { ...roster.c0, sourceId: "gojo" },
+      c1: { ...roster.c1, sourceId: "gojo" },
+    };
+    const res = validateSelection(full, withClone);
+    expect(res.ok).toBe(false);
+    if (!res.ok) expect(res.error).toMatch(/double/i);
+  });
+
+  it("refuse deux fois la même carte", () => {
+    const duped = { ...full, [DRAFT_CATEGORIES[1].id]: "c0" };
+    expect(validateSelection(duped, roster).ok).toBe(false);
+  });
+});
+
+describe("boss par univers", () => {
+  it("chaque univers a 6 boss aux PV strictement croissants", () => {
+    for (const slug of ["jjk", "csm", "aot", "kny", "tg", "bleach"]) {
+      const bosses = defaultBossesFor(slug);
+      expect(bosses, slug).toHaveLength(6);
+      for (let i = 1; i < bosses.length; i++) {
+        expect(bosses[i].threshold, `${slug} ${bosses[i].id}`).toBeGreaterThan(
+          bosses[i - 1].threshold,
+        );
+      }
+    }
+  });
+
+  it("résout le combat contre les boss de l'univers, pas ceux de JJK", () => {
+    const bosses = defaultBossesFor("bleach");
+    const res = resolveCombat(bosses[1].threshold, bosses);
+    expect(res.enemiesKilled).toBe(2);
+    expect(res.duels[0].boss.id).toBe("ulquiorra-cifer");
+    // Dernier boss de Bleach : Ichibe, choisi comme mur final.
+    expect(bosses.at(-1)?.id).toBe("ichibe-hyosube");
   });
 });
