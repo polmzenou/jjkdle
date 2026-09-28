@@ -94,6 +94,21 @@ const config: Config = {
           "0%": { backgroundPosition: "0% 50%" },
           "100%": { backgroundPosition: "200% 50%" },
         },
+        // Reflet oblique qui balaie une carte révélée (ouverture de booster).
+        shine: {
+          "0%, 55%": { transform: "translateX(-160%) skewX(-20deg)" },
+          "100%": { transform: "translateX(260%) skewX(-20deg)" },
+        },
+        // Particules autour de la carte révélée.
+        twinkle: {
+          "0%, 100%": { opacity: "0", transform: "scale(0.4)" },
+          "50%": { opacity: "1", transform: "scale(1)" },
+        },
+        // Aura conique qui tourne lentement derrière la carte révélée.
+        "aura-spin": {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(360deg)" },
+        },
       },
       animation: {
         "glow-pulse": "glow-pulse 2.4s ease-in-out infinite",
@@ -102,6 +117,10 @@ const config: Config = {
         float: "float 6s ease-in-out infinite",
         rainbow: "rainbow 4s linear infinite",
         "rainbow-pan": "rainbow-pan 3s linear infinite",
+        shine: "shine 3.2s ease-in-out infinite",
+        twinkle: "twinkle 2.6s ease-in-out infinite",
+        "aura-spin": "aura-spin 9s linear infinite",
+        "float-slow": "float 4.5s ease-in-out infinite",
       },
     },
   },

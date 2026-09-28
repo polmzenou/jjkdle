@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { BADGES, getBadge, isBadgeKey } from "./definitions";
+import { BADGES, BADGE_GLYPHS, getBadge, isBadgeKey } from "./definitions";
 import type { UserStatsContext } from "@/lib/progress/context";
 
 function ctx(partial: Partial<UserStatsContext> = {}): UserStatsContext {
@@ -38,6 +38,13 @@ describe("règles de badges", () => {
   it("clés uniques", () => {
     const keys = BADGES.map((b) => b.key);
     expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  it("chaque badge a un pictogramme et un palier connus", () => {
+    for (const b of BADGES) {
+      expect(BADGE_GLYPHS, b.key).toContain(b.glyph);
+      expect(["bronze", "silver", "gold"], b.key).toContain(b.tier);
+    }
   });
 
   it("badges de première partie selon le jeu joué", () => {

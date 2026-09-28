@@ -1,4 +1,6 @@
 import type { BoosterKind } from "./boosters";
+import type { CollectionSummary, DeckMultipliers } from "./deck";
+import type { RarityOdds } from "./odds";
 import type { CardRarity } from "./rarity";
 
 /**
@@ -41,6 +43,16 @@ export interface OpenedBooster {
   coinsEarned: number;
 }
 
+/** Contenu de la boîte « Deck » (page compte + profil public). */
+export interface DeckShowcaseData {
+  /** Cartes équipées, dans l’ordre des slots. */
+  deck: CardView[];
+  multipliers: DeckMultipliers;
+  summary: CollectionSummary;
+  /** Meilleures cartes possédées, pour le carrousel. */
+  showcase: CardView[];
+}
+
 export interface PendingBooster {
   id: string;
   kind: BoosterKind;
@@ -60,6 +72,14 @@ export interface ShopBoosterOffer {
   price: number;
   /** Une ligne de teasing sur ce que le booster garantit (FR). */
   perk: string;
+  /** Taux de drop pour l’univers courant (raretés absentes du roster masquées). */
+  odds: RarityOdds[];
+  /** « 1 carte EPIC+ garantie », ou `null`. */
+  guarantee: string | null;
+  /** Illustration du jour (personnage de l’univers), `null` si roster sans image. */
+  cover: CardView | null;
+  /** Petits portraits sous l’illustration. */
+  previews: CardView[];
 }
 
 /** Une carte exotic de l'étal du jour. */

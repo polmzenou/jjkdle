@@ -12,9 +12,10 @@ import { LevelBar } from "@/components/LevelBar";
 import { VipBadge } from "@/components/VipBadge";
 import { TitleBadge } from "@/components/TitleBadge";
 import { BadgeShelf } from "@/components/badges/BadgeShelf";
-import { CardShelf } from "@/components/cards/CardShelf";
+import { DeckShowcase } from "@/components/cards/DeckShowcase";
+import { getCurrentUser } from "@/lib/auth/session";
 import { ScoreCards } from "@/components/profile/ScoreCards";
-import { getDeck } from "@/lib/cards/store";
+import { getDeckShowcase } from "@/lib/cards/store";
 import { getUserScores } from "@/lib/leaderboard/store";
 import { getUserDraftScore } from "@/lib/games/draft/store";
 import { getUserJjkdleScore } from "@/lib/games/jjkdle/leaderboard";
@@ -83,10 +84,12 @@ export default async function PublicProfilePage({
   params: Promise<{ username: string }>;
 }) {
   const { username } = await params;
-  const [profile, { slug: universeSlug }] = await Promise.all([
-    getPublicProfile(username),
-    getCurrentUniverse(),
-  ]);
+  const [profile, { id: universeId, slug: universeSlug }, viewer] =
+    await Promise.all([
+      getPublicProfile(username),
+      getCurrentUniverse(),
+      getCurrentUser(),
+    ]);
   if (!profile) notFound();
 
   // Loadout + streak de l'univers courant (0 ou 1 ligne).
@@ -126,7 +129,12 @@ export default async function PublicProfilePage({
 
   // Deck équipé de l'univers courant (non chargé si la section est masquée).
   const showCards = layout.sections.some((s) => s.key === "cards" && s.visible);
-  const deck = showCards ? await getDeck(profile.id) : null;
+  const deckShowcase = showCards
+    ? await getDeckShowcase(profile.id, universeId)
+    : null;
+  // Le propriétaire qui consulte son propre profil garde ses raccourcis vers
+  // /account/deck ; un visiteur ne voit que la vitrine.
+  const isOwner = viewer?.id === profile.id;
 
   /** Rend une section de corps selon son type (respecte l'ordre du layout). */
   const renderSection = (key: ProfileSectionKey) => {
@@ -134,9 +142,11 @@ export default async function PublicProfilePage({
       return (
         <section key="cards" className="mt-10">
           <h2 className="mb-4 font-display text-lg font-bold uppercase tracking-wider text-white/80">
-            🃏 Deck
+            Deck
           </h2>
-          <CardShelf cards={deck?.cards ?? []} />
+          {deckShowcase && (
+            <DeckShowcase data={deckShowcase} isOwner={isOwner} />
+          )}
         </section>
       );
     }
@@ -144,7 +154,7 @@ export default async function PublicProfilePage({
       return (
         <section key="badges" className="mt-10">
           <h2 className="mb-4 font-display text-lg font-bold uppercase tracking-wider text-white/80">
-            🎖️ Badges
+            Badges
           </h2>
           <BadgeShelf
             unlockedKeys={profile.badges.map((b) => b.badgeKey)}
@@ -156,7 +166,7 @@ export default async function PublicProfilePage({
     return (
       <section key="scores" className="mt-10">
         <h2 className="mb-4 font-display text-lg font-bold uppercase tracking-wider text-white/80">
-          🏆 Scores
+          Scores
         </h2>
         {!hasAnyScore ? (
           <div className="rounded-2xl border border-white/10 bg-void-800/60 px-6 py-10 text-center backdrop-blur">
@@ -174,11 +184,10 @@ export default async function PublicProfilePage({
                   className="absolute inset-x-0 top-0 h-px"
                   style={{
                     background:
-                      "linear-gradient(90deg, transparent, #7c3aed, transparent)",
+                      "linear-gradient(90deg, transparent, rgb(var(--color-domain)), transparent)",
                   }}
                 />
                 <p className="flex items-center gap-2 font-display font-bold text-white">
-                  <span aria-hidden>🕵️</span>
                   <span>Qui est-ce ?</span>
                 </p>
                 <p className="mt-1 text-xs uppercase tracking-wider text-white/45">
@@ -240,7 +249,7 @@ export default async function PublicProfilePage({
             )}
             {jjkdleStreak > 0 && (
               <p className="mt-1 text-sm font-bold text-white/85">
-                🔥 {jjkdleStreak} jour{jjkdleStreak > 1 ? "s" : ""} de streak{" "}
+                {jjkdleStreak} jour{jjkdleStreak > 1 ? "s" : ""} de streak{" "}
                 {dailyTitle}
               </p>
             )}

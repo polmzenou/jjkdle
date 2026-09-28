@@ -1,5 +1,6 @@
 "use client";
 
+import { PackIcon } from "@/components/cards/CardIcons";
 import { getBooster, type BoosterKind } from "@/lib/cards/boosters";
 
 /**
@@ -53,8 +54,8 @@ export function BoosterPack({
             background: `linear-gradient(90deg, transparent, ${def.accent}55, transparent)`,
           }}
         />
-        <span className="relative font-display text-4xl drop-shadow" aria-hidden>
-          🎴
+        <span className="relative drop-shadow" style={{ color: def.accent }}>
+          <PackIcon className="h-11 w-11" />
         </span>
         <span
           className="relative font-display text-xs font-black uppercase tracking-[0.2em]"

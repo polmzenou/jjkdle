@@ -27,6 +27,7 @@ import {
 } from "./actions";
 import { cardRarityStyle } from "@/lib/cards/rarity";
 import type { CollectionCard } from "@/lib/cards/types";
+import { BadgeMedal } from "@/components/badges/BadgeMedal";
 
 interface UserAdminProps {
   users: AdminUser[];
@@ -530,7 +531,7 @@ function ProgressionPanel({
                     : "border-white/10 text-white/45 hover:text-white"
                 }`}
               >
-                <span aria-hidden>{b.iconKey}</span>
+                <BadgeMedal glyph={b.glyph} tier={b.tier} color={b.color} locked={!has} size={16} />
                 {b.name}
                 <span className="text-[10px]">{has ? "✓" : "+"}</span>
               </button>

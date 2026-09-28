@@ -1,4 +1,4 @@
-import { cardRarityStyle, type CardRarity } from "./rarity";
+import { CARD_RARITIES, cardRarityStyle, rarityRank, type CardRarity } from "./rarity";
 
 /**
  * Deck équipé : jusqu'à 3 cartes, stockées par univers dans
@@ -77,4 +77,59 @@ export function sanitizeDeck(
   }
 
   return out;
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Résumé de collection (boîte « Deck » du profil, filtres de CardGrid)
+// ──────────────────────────────────────────────────────────────────────────
+
+export interface RarityCount {
+  rarity: CardRarity;
+  owned: number;
+  total: number;
+}
+
+export interface CollectionSummary {
+  /** Cartes UNIQUES possédées (les doublons n'existent pas en collection). */
+  owned: number;
+  total: number;
+  /** Une entrée par rareté, dans l'ordre de l'échelle (toutes, même vides). */
+  byRarity: RarityCount[];
+}
+
+/** Compte possédées / total, globalement et par rareté. */
+export function collectionSummary(
+  cards: { rarity: CardRarity; owned: boolean }[],
+): CollectionSummary {
+  const byRarity = new Map<CardRarity, RarityCount>(
+    CARD_RARITIES.map((rarity) => [rarity, { rarity, owned: 0, total: 0 }]),
+  );
+  let owned = 0;
+  for (const card of cards) {
+    const entry = byRarity.get(card.rarity);
+    if (!entry) continue;
+    entry.total += 1;
+    if (card.owned) {
+      entry.owned += 1;
+      owned += 1;
+    }
+  }
+  return { owned, total: cards.length, byRarity: [...byRarity.values()] };
+}
+
+/**
+ * Les cartes possédées à mettre en avant : les plus rares d'abord, puis par
+ * nom (ordre stable d'un rendu à l'autre), plafonnées à `limit`.
+ */
+export function showcaseCards<T extends { rarity: CardRarity; owned: boolean; name: string }>(
+  cards: T[],
+  limit: number,
+): T[] {
+  return cards
+    .filter((c) => c.owned)
+    .sort(
+      (a, b) =>
+        rarityRank(b.rarity) - rarityRank(a.rarity) || a.name.localeCompare(b.name),
+    )
+    .slice(0, limit);
 }

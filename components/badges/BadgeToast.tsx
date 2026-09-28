@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getBadge } from "@/lib/badges/definitions";
+import { BadgeMedal } from "@/components/badges/BadgeMedal";
 
 interface BadgeToastProps {
   /** Clés nouvellement débloquées (renvoyées par le hook de fin de partie). */
@@ -37,9 +38,13 @@ export function BadgeToast({ badgeKeys, duration = 5000 }: BadgeToastProps) {
             className="pointer-events-auto flex items-center gap-3 rounded-xl border bg-void-800/95 px-4 py-3 shadow-2xl backdrop-blur animate-float"
             style={{ borderColor: `${b.color}66` }}
           >
-            <span className="text-2xl" aria-hidden style={{ filter: `drop-shadow(0 0 6px ${b.color})` }}>
-              {b.iconKey}
-            </span>
+            <BadgeMedal
+              glyph={b.glyph}
+              tier={b.tier}
+              color={b.color}
+              size={36}
+              className="shrink-0"
+            />
             <div>
               <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">
                 Badge débloqué

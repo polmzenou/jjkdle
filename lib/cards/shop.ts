@@ -1,5 +1,6 @@
 import { dailyIndexes } from "@/lib/rotation";
 import type { BoosterKind } from "./boosters";
+import { rarityRank, type CardRarity } from "./rarity";
 
 /**
  * BOUTIQUE : barème des prix et rotation de l'étal exotic. Module PUR (aucune
@@ -63,4 +64,73 @@ export function pickDailyExotics<T extends { id: string }>(
   return dailyIndexes(dateKey, sorted.length, EXOTIC_SALT, count).map(
     (i) => sorted[i]!,
   );
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Illustrations des boosters en rayon
+// ──────────────────────────────────────────────────────────────────────────
+
+/**
+ * Rareté « vitrine » de chaque booster : l'illustration montre ce que le pack
+ * peut offrir de mieux sans mentir (le simple n'affiche pas une exotic).
+ */
+const COVER_RARITY: Record<BoosterKind, CardRarity> = {
+  simple: "rare",
+  bronze: "epic",
+  silver: "legendary",
+  gold: "exotic",
+};
+
+/** Nombre de petits portraits sous l'illustration. */
+export const PACK_PREVIEW_COUNT = 3;
+
+export interface PackArt<T> {
+  cover: T | null;
+  previews: T[];
+}
+
+/**
+ * Illustration + portraits d'un booster pour le jour `dateKey`, tirés du roster
+ * de l'univers courant (chaque univers montre donc ses propres personnages).
+ *
+ * Même rotation sans état que l'étal exotic : tout le monde voit la même
+ * affiche, qui change chaque jour. La couverture prend la rareté vitrine du
+ * pack, ou à défaut la plus proche EN DESSOUS (roster incomplet) ; les portraits
+ * viennent de la rareté vitrine et des deux crans inférieurs.
+ */
+export function pickPackArt<
+  T extends { characterId: string; rarity: CardRarity; image?: string },
+>(
+  kind: BoosterKind,
+  dateKey: string,
+  cards: T[],
+): PackArt<T> {
+  const illustrated = cards
+    .filter((c) => Boolean(c.image))
+    .sort((a, b) => a.characterId.localeCompare(b.characterId));
+  if (illustrated.length === 0) return { cover: null, previews: [] };
+
+  const top = rarityRank(COVER_RARITY[kind]);
+  let cover: T | null = null;
+  for (let rank = top; rank >= 0 && !cover; rank -= 1) {
+    const tier = illustrated.filter((c) => rarityRank(c.rarity) === rank);
+    const [i] = dailyIndexes(dateKey, tier.length, `shop-cover-${kind}`);
+    if (i != null) cover = tier[i]!;
+  }
+
+  const band = illustrated.filter((c) => {
+    const rank = rarityRank(c.rarity);
+    return c !== cover && rank <= top && rank >= top - 2;
+  });
+  const source = band.length >= PACK_PREVIEW_COUNT
+    ? band
+    : illustrated.filter((c) => c !== cover);
+  const previews = dailyIndexes(
+    dateKey,
+    source.length,
+    `shop-preview-${kind}`,
+    PACK_PREVIEW_COUNT,
+  ).map((i) => source[i]!);
+
+  return { cover, previews };
 }

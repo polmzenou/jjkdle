@@ -8,6 +8,7 @@ import {
   type CardRarity,
 } from "@/lib/cards/rarity";
 import type { CollectionCard } from "@/lib/cards/types";
+import { collectionSummary } from "@/lib/cards/deck";
 
 /**
  * Grille de cartes filtrable par rareté.
@@ -56,24 +57,18 @@ export function CardGrid({
   );
 
   // Comptes par rareté : possédées / total, affichés sur les puces de filtre.
-  const counts = useMemo(() => {
-    const out = new Map<CardRarity, { owned: number; total: number }>();
-    for (const rarity of CARD_RARITIES) out.set(rarity, { owned: 0, total: 0 });
-    for (const card of base) {
-      const entry = out.get(card.rarity);
-      if (!entry) continue;
-      entry.total += 1;
-      if (card.owned) entry.owned += 1;
-    }
-    return out;
-  }, [base]);
+  const summary = useMemo(() => collectionSummary(base), [base]);
+  const counts = useMemo(
+    () => new Map(summary.byRarity.map((r) => [r.rarity, r])),
+    [summary],
+  );
 
   const visible = useMemo(
     () => (filter === ALL ? base : base.filter((c) => c.rarity === filter)),
     [base, filter],
   );
 
-  const ownedTotal = base.filter((c) => c.owned).length;
+  const ownedTotal = summary.owned;
 
   return (
     <div>

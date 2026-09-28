@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { CardArt } from "@/components/cards/CardArt";
+import { CardArt, RAINBOW_GRADIENT } from "@/components/cards/CardArt";
+import { CloseIcon } from "@/components/cards/CardIcons";
 import { CoinIcon } from "@/components/progress/CoinWallet";
 import { getBooster } from "@/lib/cards/boosters";
 import { cardRarityStyle } from "@/lib/cards/rarity";
@@ -12,12 +13,16 @@ import type { OpenedBooster } from "@/lib/cards/types";
  * Overlay d'OUVERTURE d'un booster : défilement des cartes une par une, puis
  * récapitulatif.
  *
- * Réutilisé à l'identique par l'écran de fin de partie, l'onglet Deck et
- * l'admin (y compris pour l'octroi d'une carte unique) — c'est ce qui fait que
- * l'animation vérifiée dans l'admin est bien celle que voient les joueurs.
+ * Réutilisé à l'identique par l'écran de fin de partie, l'onglet Deck, la
+ * boutique et l'admin (y compris pour l'octroi d'une carte unique) — c'est ce
+ * qui fait que l'animation vérifiée dans l'admin est bien celle que voient les
+ * joueurs.
  *
  * Le composant est PUREMENT présentationnel : le parent lance la server action
  * et lui passe le résultat. Il ne sait rien de la base.
+ *
+ * Thème : le fond et l'aura mêlent la couleur de rareté (identique partout) à
+ * `--color-domain` (celle de l'univers courant).
  */
 
 interface BoosterOpeningProps {
@@ -64,27 +69,66 @@ export function BoosterOpening({
     setIndex((i) => i + 1);
   };
 
+  const revealing = result != null && !atRecap && !error && cards.length > 0;
+
+  // `!m-0` : l'overlay est monté DANS des conteneurs `space-y-12` (boutique,
+  // onglet Deck) qui lui donnaient une marge haute — le header passait devant.
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.18 }}
-      className="fixed inset-0 z-[110] flex items-center justify-center overflow-y-auto bg-void-900/92 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-[110] !m-0 flex items-center justify-center overflow-y-auto bg-void-900/95 p-4 backdrop-blur-md"
       role="dialog"
       aria-modal="true"
       aria-label="Ouverture d'un booster"
     >
+      {/* Halo d'ambiance aux couleurs de l'univers */}
+      <span
+        aria-hidden
+        className="pointer-events-none fixed inset-0"
+        style={{
+          background:
+            "radial-gradient(60% 50% at 50% 45%, rgb(var(--color-domain) / 0.16), transparent 70%)",
+        }}
+      />
+
+      {/* Repère de progression : une pastille par carte, la courante étirée. */}
+      {revealing && (
+        <div
+          className="fixed left-1/2 top-5 z-10 flex -translate-x-1/2 items-center gap-1.5"
+          role="progressbar"
+          aria-valuemin={1}
+          aria-valuemax={cards.length}
+          aria-valuenow={index + 1}
+          aria-label={`Carte ${index + 1} sur ${cards.length}`}
+        >
+          {cards.map((_, i) => (
+            <span
+              key={i}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                i === index
+                  ? "w-7 bg-white"
+                  : i < index
+                    ? "w-1.5 bg-white/50"
+                    : "w-1.5 bg-white/20"
+              }`}
+            />
+          ))}
+        </div>
+      )}
+
       <button
         type="button"
         onClick={onClose}
         aria-label="Fermer"
-        className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-void-800/80 text-white/60 transition-colors hover:border-white/25 hover:text-white"
+        className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-void-800/80 text-white/60 transition-colors hover:border-white/30 hover:text-white"
       >
-        ✕
+        <CloseIcon />
       </button>
 
-      <div className="my-auto w-full max-w-3xl text-center">
+      <div className="relative my-auto w-full max-w-3xl text-center">
         {error ? (
           <div className="rounded-3xl border border-cursed/40 bg-void-800/90 p-8">
             <p className="font-display text-lg font-bold text-cursed-light">
@@ -101,6 +145,7 @@ export function BoosterOpening({
         ) : (
           <Reveal
             card={current!}
+            kind={result.kind}
             index={index}
             total={cards.length}
             onAdvance={advance}
@@ -114,69 +159,159 @@ export function BoosterOpening({
 
 // ──────────────────────────────────────────────────────────────────────────
 
+/**
+ * Positions des particules autour de la carte (en % de la scène) et leur délai.
+ * Figées plutôt qu'aléatoires : rendu équilibré et aucun écart d'hydratation.
+ */
+const SPARKS = [
+  { x: 6, y: 18, d: 0 },
+  { x: 92, y: 12, d: 0.6 },
+  { x: 2, y: 62, d: 1.2 },
+  { x: 97, y: 55, d: 0.3 },
+  { x: 14, y: 92, d: 1.8 },
+  { x: 86, y: 90, d: 0.9 },
+  { x: 50, y: 2, d: 1.5 },
+  { x: 24, y: 6, d: 2.1 },
+  { x: 76, y: 97, d: 0.4 },
+  { x: 99, y: 32, d: 2.4 },
+  { x: 0, y: 40, d: 1.1 },
+  { x: 60, y: 99, d: 2.0 },
+];
+
 function Reveal({
   card,
+  kind,
   index,
   total,
   onAdvance,
   onSkip,
 }: {
   card: OpenedBooster["cards"][number];
+  kind: OpenedBooster["kind"];
   index: number;
   total: number;
   onAdvance: () => void;
   onSkip: () => void;
 }) {
   const style = cardRarityStyle(card.rarity);
+  const def = getBooster(kind);
   // Les hautes raretés méritent un flash plus long et plus large.
   const isHigh = card.rarity === "legendary" || card.rarity === "exotic";
+  const remaining = total - index - 1;
+  // Aura conique : arc-en-ciel pour l'EXOTIC, sinon la teinte de rareté qui
+  // alterne avec la couleur de l'univers — le halo reste « chez soi ».
+  const aura = style.rainbow
+    ? "conic-gradient(from 0deg, #f87171, #fbbf24, #4ade80, #38bdf8, #a78bfa, #f472b6, #f87171)"
+    : `conic-gradient(from 0deg, ${style.color}, rgb(var(--color-domain)), ${style.color}, transparent, ${style.color})`;
+  const cta = style.rainbow
+    ? RAINBOW_GRADIENT
+    : `linear-gradient(90deg, ${style.color}, ${style.color}cc)`;
 
   return (
-    <div className="flex flex-col items-center gap-6">
-      <p className="text-xs font-bold uppercase tracking-[0.3em] text-white/40">
-        Carte {index + 1} / {total}
-      </p>
-
-      {/* `key` sur l'index : remonte le composant à chaque carte, ce qui rejoue
-          le flip et le flash sans avoir à piloter l'animation à la main. */}
-      <AnimatePresence mode="wait">
-        <motion.button
-          key={index}
-          type="button"
-          onClick={onAdvance}
-          aria-label="Carte suivante"
-          initial={{ rotateY: 90, scale: 0.8, opacity: 0 }}
-          animate={{ rotateY: 0, scale: 1, opacity: 1 }}
-          exit={{ scale: 0.9, opacity: 0 }}
-          transition={{ type: "spring", stiffness: 200, damping: 18 }}
-          className="relative w-48 focus:outline-none sm:w-56"
+    <div className="flex flex-col items-center gap-7">
+      <div>
+        <p
+          className="text-[11px] font-black uppercase tracking-[0.35em]"
+          style={{ color: def.accent }}
         >
-          {/* Flash coloré à la rareté */}
-          <motion.span
-            aria-hidden
-            className="pointer-events-none absolute -inset-6 rounded-[2.5rem]"
-            style={{ background: `${style.color}55` }}
-            initial={{ opacity: 0.9, scale: 0.6 }}
-            animate={{ opacity: 0, scale: isHigh ? 2 : 1.5 }}
-            transition={{ duration: isHigh ? 1.1 : 0.7, ease: "easeOut" }}
-          />
-          <CardArt card={card} glow />
+          {def.label}
+        </p>
+        <p className="mt-1 text-sm font-semibold text-white/60">
+          Carte {index + 1} sur {total}
+        </p>
+      </div>
 
-          {card.duplicate && (
-            <span className="absolute -right-2 -top-2 z-30 rounded-full border border-amber-300/50 bg-void-900/95 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-amber-300">
-              Doublon +{card.coins} 🪙
-            </span>
-          )}
-        </motion.button>
-      </AnimatePresence>
+      {/* Scène : aura + particules + carte flottante */}
+      <div className="relative w-52 sm:w-64">
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -inset-12 rounded-full opacity-55 blur-3xl animate-aura-spin motion-reduce:animate-none sm:-inset-20"
+          style={{ background: aura }}
+        />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -inset-6 rounded-[2.5rem] blur-2xl"
+          style={{
+            background: `radial-gradient(circle, ${style.color}45, transparent 70%)`,
+          }}
+        />
+        {SPARKS.map((p, i) => (
+          <span
+            key={i}
+            aria-hidden
+            className="pointer-events-none absolute h-1.5 w-1.5 rounded-full opacity-0 animate-twinkle motion-reduce:hidden"
+            style={{
+              left: `calc(${p.x}% - 3px)`,
+              top: `calc(${p.y}% - 3px)`,
+              background: style.rainbow ? "#fff" : style.color,
+              boxShadow: `0 0 8px 2px ${style.rainbow ? "#f472b6" : style.color}`,
+              animationDelay: `${p.d}s`,
+            }}
+          />
+        ))}
+
+        <div className="animate-float-slow motion-reduce:animate-none">
+          {/* `key` sur l'index : remonte le composant à chaque carte, ce qui
+              rejoue le flip et le flash sans piloter l'animation à la main. */}
+          <AnimatePresence mode="wait">
+            <motion.button
+              key={index}
+              type="button"
+              onClick={onAdvance}
+              aria-label="Carte suivante"
+              initial={{ rotateY: 90, scale: 0.8, opacity: 0 }}
+              animate={{ rotateY: 0, scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 200, damping: 18 }}
+              className="relative block w-full focus:outline-none"
+            >
+              {/* Flash coloré à la rareté */}
+              <motion.span
+                aria-hidden
+                className="pointer-events-none absolute -inset-6 rounded-[2.5rem]"
+                style={{ background: `${style.color}55` }}
+                initial={{ opacity: 0.9, scale: 0.6 }}
+                animate={{ opacity: 0, scale: isHigh ? 2 : 1.5 }}
+                transition={{ duration: isHigh ? 1.1 : 0.7, ease: "easeOut" }}
+              />
+              <CardArt card={card} glow />
+
+              {/* Reflet qui balaie la carte en boucle */}
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 z-30 overflow-hidden rounded-2xl"
+              >
+                <span className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/35 to-transparent animate-shine motion-reduce:hidden" />
+              </span>
+
+              {card.duplicate ? (
+                <span className="absolute -right-2 -top-2 z-40 flex items-center gap-1 rounded-full border border-amber-300/50 bg-void-900/95 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-amber-300">
+                  Doublon +{card.coins}
+                  <CoinIcon className="h-3 w-3" />
+                </span>
+              ) : (
+                <span className="absolute left-2.5 top-2.5 z-40 rounded-full bg-domain px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white shadow-glow">
+                  Nouveau
+                </span>
+              )}
+            </motion.button>
+          </AnimatePresence>
+        </div>
+      </div>
 
       <div className="flex flex-col items-center gap-3">
         <button
           type="button"
           onClick={onAdvance}
-          className="rounded-full bg-domain px-7 py-2.5 font-display text-sm font-bold uppercase tracking-wider text-white shadow-glow transition-transform hover:scale-105"
+          className="min-w-[12rem] rounded-xl px-7 py-3 font-display text-sm font-black text-void-900 transition-transform hover:scale-105"
+          style={{
+            background: cta,
+            boxShadow: `0 10px 30px -10px ${style.color}`,
+          }}
         >
-          {index + 1 < total ? "Suivante →" : "Voir le récap →"}
+          {remaining > 0
+            ? `Suivante · ${remaining} restante${remaining > 1 ? "s" : ""}`
+            : "Voir le récap"}
         </button>
         <button
           type="button"
@@ -229,8 +364,8 @@ function Recap({
                 <CoinIcon className="h-3 w-3" />
               </span>
             ) : (
-              <span className="absolute -right-1.5 -top-1.5 z-30 rounded-full border border-emerald-400/50 bg-void-900/95 px-2 py-0.5 text-[10px] font-black uppercase text-emerald-300">
-                New
+              <span className="absolute -right-1.5 -top-1.5 z-30 rounded-full bg-domain px-2 py-0.5 text-[10px] font-black uppercase text-white">
+                Nouveau
               </span>
             )}
           </div>

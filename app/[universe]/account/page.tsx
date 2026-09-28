@@ -9,6 +9,8 @@ import { VipBadge } from "@/components/VipBadge";
 import { UserAvatar } from "@/components/UserAvatar";
 import { LevelBar } from "@/components/LevelBar";
 import { BadgeShelf } from "@/components/badges/BadgeShelf";
+import { DeckShowcase } from "@/components/cards/DeckShowcase";
+import { getDeckShowcase } from "@/lib/cards/store";
 import { ScoreCards } from "@/components/profile/ScoreCards";
 import { TitleBadge } from "@/components/TitleBadge";
 import { TitleSelector } from "@/components/profile/TitleSelector";
@@ -59,6 +61,7 @@ export default async function AccountPage() {
     unlockCtx,
     titleGrantKeys,
     frameGrantKeys,
+    deckShowcase,
   ] = await Promise.all([
     getUserScores(user.id),
     getUserDraftScore(user.id),
@@ -88,6 +91,7 @@ export default async function AccountPage() {
     buildUnlockContext(user.id),
     getTitleGrantKeys(user.id),
     getFrameGrantKeys(user.id),
+    getDeckShowcase(user.id, universe.id),
   ]);
 
   const isAdmin = user.role === "ADMIN";
@@ -203,7 +207,7 @@ export default async function AccountPage() {
       <section className="mb-12 grid gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border border-white/10 bg-void-800/60 p-5 backdrop-blur">
           <p className="text-xs font-bold uppercase tracking-wider text-white/45">
-            🔥 Streak {dailyTitle}
+            Streak {dailyTitle}
           </p>
           <p className="mt-3 font-display text-3xl font-black text-white">
             {streak}
@@ -216,7 +220,7 @@ export default async function AccountPage() {
 
         <div className="rounded-2xl border border-white/10 bg-void-800/60 p-5 backdrop-blur">
           <p className="text-xs font-bold uppercase tracking-wider text-white/45">
-            🎖️ Badges
+            Badges
           </p>
           <p className="mt-3 font-display text-3xl font-black text-white">
             {badgeCount}
@@ -229,7 +233,7 @@ export default async function AccountPage() {
 
         <div className="rounded-2xl border border-white/10 bg-void-800/60 p-5 backdrop-blur">
           <p className="text-xs font-bold uppercase tracking-wider text-white/45">
-            🏆 Meilleur rang
+            Meilleur rang
           </p>
           {bestRanked ? (
             <>
@@ -254,7 +258,7 @@ export default async function AccountPage() {
       {/* ── Récap des scores ── */}
       <section className="mb-12">
         <h2 className="mb-5 font-display text-xl font-bold uppercase tracking-wider text-white/85">
-          🏆 Mes scores
+          Mes scores
         </h2>
 
         {scores.length === 0 ? (
@@ -275,10 +279,18 @@ export default async function AccountPage() {
         )}
       </section>
 
+      {/* ── Deck ── */}
+      <section className="mb-12">
+        <h2 className="mb-5 font-display text-xl font-bold uppercase tracking-wider text-white/85">
+          Mon deck
+        </h2>
+        <DeckShowcase data={deckShowcase} isOwner />
+      </section>
+
       {/* ── Badges ── */}
       <section className="mb-12">
         <h2 className="mb-5 font-display text-xl font-bold uppercase tracking-wider text-white/85">
-          🎖️ Mes badges
+          Mes badges
         </h2>
         <BadgeShelf unlockedKeys={badgeKeys} universeSlug={universe.slug} />
       </section>
@@ -286,7 +298,7 @@ export default async function AccountPage() {
       {/* ── Personnalisation ── */}
       <section className="mb-12 space-y-4">
         <h2 className="mb-5 font-display text-xl font-bold uppercase tracking-wider text-white/85">
-          🎨 Personnalisation
+          Personnalisation
         </h2>
         <ProfileEditor
           username={user.username}
@@ -314,7 +326,7 @@ export default async function AccountPage() {
       {/* ── Infos & édition ── */}
       <section>
         <h2 className="mb-5 font-display text-xl font-bold uppercase tracking-wider text-white/85">
-          ⚙️ Mon compte
+          Mon compte
         </h2>
 
         <div className="mb-5 rounded-2xl border border-white/10 bg-void-800/60 p-5 backdrop-blur">

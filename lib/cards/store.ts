@@ -9,7 +9,9 @@ import {
 } from "./boosters";
 import {
   DECK_SIZE,
+  collectionSummary,
   deckMultipliers,
+  showcaseCards,
   sanitizeDeck,
   NO_DECK_BONUS,
   type DeckMultipliers,
@@ -19,6 +21,7 @@ import { rollBooster, sortByRarityAsc, type CardPool } from "./roll";
 import type {
   CardView,
   CollectionCard,
+  DeckShowcaseData,
   OpenedBooster,
   PendingBooster,
   RevealedCard,
@@ -126,6 +129,33 @@ export async function getDeck(
   });
 
   return { cards, multipliers: deckMultipliers(cards.map((c) => c.rarity)) };
+}
+
+/** Cartes affichées dans le carrousel de la boîte « Deck ». */
+export const SHOWCASE_LIMIT = 12;
+
+/**
+ * Tout ce qu'affiche la boîte « Deck » (compte + profil public) : deck équipé,
+ * compteurs par rareté et meilleures cartes. Ne renvoie au client que les
+ * cartes possédées, jamais le roster entier.
+ */
+export async function getDeckShowcase(
+  userId: string,
+  universeId?: string,
+): Promise<DeckShowcaseData> {
+  const uid = await resolveUniverseId(universeId);
+  const [deck, collection] = await Promise.all([
+    getDeck(userId, uid),
+    getCollection(userId, uid),
+  ]);
+  return {
+    deck: deck.cards,
+    multipliers: deck.multipliers,
+    summary: collectionSummary(collection),
+    showcase: showcaseCards(collection, SHOWCASE_LIMIT).map(
+      ({ owned: _owned, ...card }) => card,
+    ),
+  };
 }
 
 /**

@@ -3,9 +3,12 @@ import { BOOSTER_KINDS } from "./boosters";
 import {
   BOOSTER_PRICES,
   DAILY_EXOTIC_COUNT,
+  PACK_PREVIEW_COUNT,
   boosterPrice,
   pickDailyExotics,
+  pickPackArt,
 } from "./shop";
+import type { CardRarity } from "./rarity";
 
 /** Pool factice de 9 exotics (la taille du roster JJK au moment de l'écriture). */
 const pool = ["a", "b", "c", "d", "e", "f", "g", "h", "i"].map((id) => ({ id }));
@@ -79,5 +82,50 @@ describe("pickDailyExotics", () => {
 
   it("pool vide → étal vide (roster sans aucun tier s)", () => {
     expect(pickDailyExotics("2026-06-29", [])).toEqual([]);
+  });
+});
+
+describe("pickPackArt", () => {
+  const card = (characterId: string, rarity: CardRarity, image = true) => ({
+    characterId,
+    rarity,
+    ...(image ? { image: `/img/${characterId}.png` } : {}),
+  });
+  const roster = [
+    card("a", "common"),
+    card("b", "uncommon"),
+    card("c", "rare"),
+    card("d", "epic"),
+    card("e", "legendary"),
+    card("f", "exotic"),
+    card("g", "exotic", false),
+  ];
+
+  it("la couverture prend la rareté vitrine du booster", () => {
+    expect(pickPackArt("gold", "2026-09-28", roster).cover?.rarity).toBe("exotic");
+    expect(pickPackArt("simple", "2026-09-28", roster).cover?.rarity).toBe("rare");
+  });
+
+  it("retombe sur la rareté inférieure, et ignore les persos sans image", () => {
+    const noExoticArt = roster.filter((c) => c.rarity !== "exotic" || !c.image);
+    expect(pickPackArt("gold", "2026-09-28", noExoticArt).cover?.rarity).toBe(
+      "legendary",
+    );
+  });
+
+  it("portraits distincts, sans la couverture, déterministes", () => {
+    const art = pickPackArt("silver", "2026-09-28", roster);
+    const ids = art.previews.map((c) => c.characterId);
+    expect(ids).toHaveLength(PACK_PREVIEW_COUNT);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(ids).not.toContain(art.cover!.characterId);
+    expect(pickPackArt("silver", "2026-09-28", roster)).toEqual(art);
+  });
+
+  it("roster sans image → rien", () => {
+    expect(pickPackArt("gold", "2026-09-28", [card("x", "rare", false)])).toEqual({
+      cover: null,
+      previews: [],
+    });
   });
 });

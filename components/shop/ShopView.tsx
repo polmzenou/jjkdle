@@ -5,7 +5,8 @@ import { AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BoosterOpening } from "@/components/cards/BoosterOpening";
-import { BoosterPack } from "@/components/cards/BoosterPack";
+import { ArrowRightIcon, SpadeIcon } from "@/components/cards/CardIcons";
+import { BoosterOfferCard } from "@/components/shop/BoosterOfferCard";
 import { CardArt } from "@/components/cards/CardArt";
 import { Countdown } from "@/components/Countdown";
 import { CoinIcon } from "@/components/progress/CoinWallet";
@@ -133,9 +134,9 @@ export function ShopView({
         >
           <span
             aria-hidden
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-emerald-400/30 bg-emerald-400/10 text-xl text-emerald-300 transition-transform duration-300 group-hover:scale-110"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-emerald-400/30 bg-emerald-400/10 text-emerald-300 transition-transform duration-300 group-hover:scale-110"
           >
-            ♠
+            <SpadeIcon className="h-5 w-5" />
           </span>
           <span className="min-w-0 flex-1">
             <span className="block font-display text-base font-black text-white">
@@ -149,7 +150,7 @@ export function ShopView({
             aria-hidden
             className="text-white/40 transition-transform duration-300 group-hover:translate-x-1.5 group-hover:text-white"
           >
-            →
+            <ArrowRightIcon className="h-5 w-5" />
           </span>
         </Link>
       )}
@@ -175,44 +176,16 @@ export function ShopView({
           Ouverture immédiate. Les doublons sont convertis en coins.
         </p>
 
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {shop.boosters.map((offer) => {
-            const affordable = shop.coins >= offer.price;
-            return (
-              <div key={offer.kind} className="flex flex-col gap-3">
-                <BoosterPack
-                  kind={offer.kind}
-                  disabled={pending || opening || !affordable}
-                  onClick={() => buyBooster(offer)}
-                  className={affordable ? "" : "opacity-45 grayscale"}
-                />
-                <div className="text-center">
-                  <p className="min-h-[2.5rem] text-[11px] leading-tight text-white/40">
-                    {offer.perk}
-                  </p>
-                  <button
-                    type="button"
-                    disabled={pending || opening || !affordable}
-                    onClick={() => buyBooster(offer)}
-                    className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-full border px-3 py-2 text-xs font-black uppercase tracking-wider transition-colors disabled:cursor-not-allowed disabled:opacity-40"
-                    style={{
-                      borderColor: `${offer.accent}80`,
-                      color: offer.accent,
-                      background: `${offer.accent}18`,
-                    }}
-                  >
-                    {offer.price.toLocaleString("fr-FR")}
-                    <CoinIcon className="h-3.5 w-3.5" />
-                  </button>
-                  {!affordable && (
-                    <p className="mt-1 text-[10px] font-bold uppercase tracking-wider text-white/30">
-                      Solde insuffisant
-                    </p>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+        <div className="grid grid-cols-1 items-start gap-4 min-[420px]:grid-cols-2 lg:grid-cols-4">
+          {shop.boosters.map((offer) => (
+            <BoosterOfferCard
+              key={offer.kind}
+              offer={offer}
+              affordable={shop.coins >= offer.price}
+              disabled={pending || opening}
+              onBuy={() => buyBooster(offer)}
+            />
+          ))}
         </div>
       </section>
 

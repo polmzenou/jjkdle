@@ -17,7 +17,9 @@ import {
   EXOTIC_CARD_PRICE,
   boosterPrice,
   pickDailyExotics,
+  pickPackArt,
 } from "./shop";
+import { boosterOdds } from "./odds";
 import { createBooster, getOwnedCharacterIds, grantCard, toCardView } from "./store";
 import type { CardView, ShopExoticOffer, ShopWindow } from "./types";
 
@@ -72,11 +74,16 @@ export async function getShopWindow(
   universeId: string,
 ): Promise<ShopWindow> {
   const dateKey = todayKey();
-  const [user, exotics, owned] = await Promise.all([
+  const [user, exotics, owned, roster] = await Promise.all([
     prisma.user.findUnique({ where: { id: userId }, select: { coins: true } }),
     getDailyExotics(universeId, dateKey),
     getOwnedCharacterIds(userId, universeId),
+    getRoster(universeId),
   ]);
+  // Raretés réellement pourvues : les taux affichés sont ceux que le moteur
+  // appliquera dans CET univers (cf. `normalizeWeights`).
+  const cards = roster.map(toCardView);
+  const available = new Set(cards.map((c) => c.rarity));
 
   const offers: ShopExoticOffer[] = exotics.map((card) => ({
     ...card,
@@ -88,6 +95,8 @@ export async function getShopWindow(
     coins: user?.coins ?? 0,
     boosters: BOOSTER_KINDS.map((kind) => {
       const def = BOOSTERS[kind];
+      const { odds, guarantee } = boosterOdds(def, available);
+      const { cover, previews } = pickPackArt(kind, dateKey, cards);
       return {
         kind,
         label: def.label,
@@ -95,6 +104,10 @@ export async function getShopWindow(
         cardCount: def.cardCount,
         price: BOOSTER_PRICES[kind],
         perk: BOOSTER_PERKS[kind],
+        odds,
+        guarantee,
+        cover,
+        previews,
       };
     }),
     exotics: offers,
