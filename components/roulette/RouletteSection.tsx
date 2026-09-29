@@ -268,7 +268,7 @@ export function RouletteSection({
               </p>
             )}
 
-            {lastWin && !wonSlot && (
+            {lastWin && !wonSlot && !pending && !spinning && (
               <p className="mt-4 border-t border-white/10 pt-3 text-sm text-white/55">
                 Dernier gain : <span className="font-bold text-amber-300">{lastWin}</span>
               </p>

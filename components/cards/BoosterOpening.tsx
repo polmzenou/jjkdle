@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { CardArt, RAINBOW_GRADIENT } from "@/components/cards/CardArt";
 import { CloseIcon } from "@/components/cards/CardIcons";
 import { CoinIcon } from "@/components/progress/CoinWallet";
@@ -252,8 +252,10 @@ function Reveal({
 
         <div className="animate-float-slow motion-reduce:animate-none">
           {/* `key` sur l'index : remonte le composant à chaque carte, ce qui
-              rejoue le flip et le flash sans piloter l'animation à la main. */}
-          <AnimatePresence mode="wait">
+              rejoue le flip et le flash sans piloter l'animation à la main.
+              Pas d'AnimatePresence : l'animation de sortie laissait la carte
+              précédente réapparaître un instant avant la suivante. L'opacité
+              est en tween pour ne pas rebondir avec le ressort. */}
             <motion.button
               key={index}
               type="button"
@@ -261,8 +263,12 @@ function Reveal({
               aria-label="Carte suivante"
               initial={{ rotateY: 90, scale: 0.8, opacity: 0 }}
               animate={{ rotateY: 0, scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 200, damping: 18 }}
+              transition={{
+                type: "spring",
+                stiffness: 200,
+                damping: 18,
+                opacity: { duration: 0.2, ease: "easeOut" },
+              }}
               className="relative block w-full focus:outline-none"
             >
               {/* Flash coloré à la rareté */}
@@ -295,7 +301,6 @@ function Reveal({
                 </span>
               )}
             </motion.button>
-          </AnimatePresence>
         </div>
       </div>
 

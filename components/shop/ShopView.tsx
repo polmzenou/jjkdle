@@ -245,12 +245,16 @@ export function ShopView({
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          // Flex centré plutôt qu'une grille : un étal incomplet reste au milieu.
+          <div className="flex flex-wrap justify-center gap-4">
             {shop.exotics.map((offer) => {
               const affordable = shop.coins >= offer.price;
               const disabled = pending || opening || offer.owned || !affordable;
               return (
-                <div key={offer.characterId} className="flex flex-col gap-3">
+                <div
+                  key={offer.characterId}
+                  className="flex w-[calc(50%-0.5rem)] flex-col gap-3 sm:w-[calc(33.333%-0.667rem)] lg:w-[calc(25%-0.75rem)] xl:w-[calc(20%-0.8rem)]"
+                >
                   <div className="relative">
                     {/* Jamais grisée : en rayon, même une carte déjà possédée
                         doit s'afficher en pleine couleur. */}

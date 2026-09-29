@@ -67,6 +67,10 @@ export async function buyExoticCardAction(
  * payer 100 coins parce que son tour gratuit n'est pas rechargé. Le lot est
  * tiré ET livré côté serveur ; le client ne fait qu'animer la roue jusqu'à
  * `outcome.slotIndex`.
+ *
+ * Volontairement SANS revalidation : elle renverrait la page à jour avec la
+ * réponse (solde, « dernier gain ») et trahirait le lot pendant que la roue
+ * tourne. Le client fait `router.refresh()` une fois la roue arrêtée.
  */
 export async function spinRouletteAction(
   paid: boolean,
@@ -78,6 +82,5 @@ export async function spinRouletteAction(
   const res = await spinRoulette(user.id, universe.id, paid === true);
   if (!res.ok) return { ok: false, error: res.error };
 
-  await revalidateAfterPurchase(user.username);
   return { ok: true, outcome: res.outcome };
 }
