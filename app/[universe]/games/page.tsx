@@ -131,10 +131,6 @@ export default async function GamesPage() {
       <section className="mt-12">
         <MultiplayerPicker games={multiplayerGames} />
       </section>
-
-      <footer className="mt-auto pt-20 text-center text-xs text-white/30">
-        Fan-projet non officiel · aucun asset copyrighté.
-      </footer>
     </main>
   );
 }

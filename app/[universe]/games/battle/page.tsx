@@ -71,14 +71,14 @@ export default async function BattleHubPage() {
         )}
       </section>
 
-      <footer className="mt-auto pt-16 text-center text-xs text-white/30">
+      <nav className="mt-auto pt-16 text-center text-xs text-white/30">
         <UniverseLink
           href="/games"
           className="transition-colors hover:text-cursed-light"
         >
           ← Retour aux jeux
         </UniverseLink>
-      </footer>
+      </nav>
     </main>
   );
 }

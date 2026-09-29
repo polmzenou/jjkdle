@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { forbidden } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
 
 /**
@@ -43,12 +44,8 @@ export function accessDeniedFor(
       </AccessDenied>
     );
   }
-  return (
-    <AccessDenied title="Accès refusé">
-      Ton compte (<span className="text-white/80">{user.username}</span>) n
-      &apos;a pas le rôle administrateur.
-    </AccessDenied>
-  );
+  // Connecté mais sans le rôle : vraie 403 (app/forbidden.tsx).
+  forbidden();
 }
 
 /**

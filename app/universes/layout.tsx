@@ -1,4 +1,5 @@
 import { hubThemeCss } from "@/lib/universes/theme";
+import { SiteFooter } from "@/components/SiteFooter";
 
 /**
  * Layout du HUB (choix d'univers). Ne monte NI nav NI branding : tant qu'aucun
@@ -18,6 +19,7 @@ export default function HubLayout({
     <>
       <style>{hubThemeCss()}</style>
       {children}
+      <SiteFooter variant="neutral" />
     </>
   );
 }

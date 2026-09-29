@@ -184,6 +184,10 @@ export const csm: UniverseConfig = {
     // 電気鋸人 (l'homme-tronçonneuse), 悪魔 (démon), 公安 (Sécurité publique),
     // 契約 (contrat).
     kanjiColumns: ["電気鋸人", "悪魔", "公安", "契約"],
+    rouletteKicker: "Roulette du diable",
+    rouletteTitle: "Signe un pacte avec la roue",
+    rouletteLead:
+      "Un tour gratuit toutes les 5 heures. Coins et boosters attendent dans la roue — le booster doré, c'est le contrat que tout chasseur de démons rêve de signer.",
   },
   /**
    * Draft : huit des neuf catégories CSM. « Hybride » est écarté (8 personnages

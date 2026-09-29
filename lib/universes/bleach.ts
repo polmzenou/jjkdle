@@ -216,6 +216,10 @@ export const bleach: UniverseConfig = {
     heroKanji: "死",
     // 死神 (shinigami), 斬魄刀 (zanpakutō), 卍解 (bankai), 尸魂界 (Soul Society).
     kanjiColumns: ["死神", "斬魄刀", "卍解", "尸魂界"],
+    rouletteKicker: "Roulette du Seireitei",
+    rouletteTitle: "Fais tourner la roue des âmes",
+    rouletteLead:
+      "Un tour gratuit toutes les 5 heures. Coins et boosters sont scellés dans la roue — le booster doré, c'est le Bankai que tout shinigami rêve de libérer.",
   },
   /**
    * Draft : les huit axes de STAT de Bleach. Les trois castings (Hollows,

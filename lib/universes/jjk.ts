@@ -71,6 +71,10 @@ export const jjk: UniverseConfig = {
     gamesLead: "Choisis ton défi et libère ton énergie maudite.",
     heroKanji: "呪",
     kanjiColumns: ["呪術廻", "領域展開", "無量空処", "両面宿儺"],
+    rouletteKicker: "Roulette maudite",
+    rouletteTitle: "Fais tourner la roue maudite",
+    rouletteLead:
+      "Un tour gratuit toutes les 5 heures. Coins et boosters de tous grades sont scellés dans la roue — et le booster doré est celui que tout exorciste convoite.",
   },
   // L'ofuda et le sceau d'asservissement de la landing : dessinés pour JJK, ils
   // ne s'affichent donc que sur cet univers.

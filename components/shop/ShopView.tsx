@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { BoosterOpening } from "@/components/cards/BoosterOpening";
 import { ArrowRightIcon, SpadeIcon } from "@/components/cards/CardIcons";
 import { BoosterOfferCard } from "@/components/shop/BoosterOfferCard";
+import { RouletteSection } from "@/components/roulette/RouletteSection";
 import { CardArt } from "@/components/cards/CardArt";
 import { Countdown } from "@/components/Countdown";
 import { CoinIcon } from "@/components/progress/CoinWallet";
@@ -16,7 +17,10 @@ import {
   buyBoosterAction,
   buyExoticCardAction,
 } from "@/app/[universe]/shop/actions";
+import type { BoosterKind } from "@/lib/cards/boosters";
+import type { RouletteState } from "@/lib/roulette/types";
 import type {
+  CardView,
   OpenedBooster,
   ShopBoosterOffer,
   ShopExoticOffer,
@@ -37,9 +41,12 @@ import type {
  */
 export function ShopView({
   shop,
+  roulette,
   casinoEnabled,
 }: {
   shop: ShopWindow;
+  /** État de la roulette de l'univers courant (tour gratuit, dernier gain). */
+  roulette: RouletteState;
   /** Le casino est ouvert : on propose d'y aller dépenser autrement. */
   casinoEnabled: boolean;
 }) {
@@ -74,19 +81,37 @@ export function ShopView({
 
       // Le paiement est passé : on bascule sur la révélation. Une erreur ici ne
       // coûte rien au joueur, le booster reste en attente dans « Mon deck ».
-      setOpening(true);
-      setResult(null);
-      setError(null);
-      const opened = await openBoosterAction(bought.boosterId);
-      if (opened.ok && opened.result) setResult(opened.result);
-      else {
-        setError(
-          opened.error ??
-            "Booster acheté, mais l'ouverture a échoué. Retrouve-le dans « Mon deck ».",
-        );
-      }
+      await revealBooster(bought.boosterId);
     });
   };
+
+  /**
+   * Ouvre un booster déjà en base (acheté, ou gagné à la roulette) dans la
+   * modale de révélation.
+   */
+  const revealBooster = async (boosterId: string) => {
+    setOpening(true);
+    setResult(null);
+    setError(null);
+    const opened = await openBoosterAction(boosterId);
+    if (opened.ok && opened.result) setResult(opened.result);
+    else {
+      setError(
+        opened.error ??
+          "L'ouverture a échoué. Retrouve ton booster dans « Mon deck ».",
+      );
+    }
+  };
+
+  const openWonBooster = (boosterId: string) => {
+    if (pending || opening) return;
+    startTransition(() => revealBooster(boosterId));
+  };
+
+  // Affiches du jour des packs, réutilisées sur les cases booster de la roue.
+  const covers: Partial<Record<BoosterKind, CardView | null>> = Object.fromEntries(
+    shop.boosters.map((offer) => [offer.kind, offer.cover]),
+  );
 
   const buyExotic = (offer: ShopExoticOffer) => {
     if (pending || opening) return;
@@ -112,6 +137,15 @@ export function ShopView({
 
   return (
     <div className="space-y-12">
+      {/* ── Roulette ── */}
+      <RouletteSection
+        state={roulette}
+        coins={shop.coins}
+        covers={covers}
+        onOpenBooster={openWonBooster}
+        busy={pending || opening}
+      />
+
       {/* ── Solde ── */}
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-400/25 bg-amber-400/[0.07] px-5 py-4 backdrop-blur">
         <span className="flex items-center gap-2 text-sm font-medium text-white/60">
@@ -176,7 +210,7 @@ export function ShopView({
           Ouverture immédiate. Les doublons sont convertis en coins.
         </p>
 
-        <div className="grid grid-cols-1 items-start gap-4 min-[420px]:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 lg:grid-cols-4">
           {shop.boosters.map((offer) => (
             <BoosterOfferCard
               key={offer.kind}
@@ -211,7 +245,7 @@ export function ShopView({
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {shop.exotics.map((offer) => {
               const affordable = shop.coins >= offer.price;
               const disabled = pending || opening || offer.owned || !affordable;

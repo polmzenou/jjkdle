@@ -1,5 +1,6 @@
 import { CursedBackground } from "@/components/CursedBackground";
 import { SiteNav } from "@/components/SiteNav";
+import { SiteFooter } from "@/components/SiteFooter";
 import { TutorialButton } from "@/components/TutorialButton";
 import { MaintenanceScreen } from "@/components/MaintenanceScreen";
 import { SiteJsonLd } from "@/components/seo/JsonLd";
@@ -132,6 +133,7 @@ export async function UniverseChrome({
               universes={switcherUniverses}
             />
             {children}
+            <SiteFooter variant="universe" name={universe.config.name} />
             <TutorialButton />
           </>
         )}

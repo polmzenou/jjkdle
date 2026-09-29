@@ -50,7 +50,7 @@ export function BoosterOfferCard({
 
   return (
     <article
-      className="group relative flex flex-col overflow-hidden rounded-2xl border bg-void-900/90 transition-transform duration-300 hover:-translate-y-1"
+      className="group relative flex h-full flex-col overflow-hidden rounded-2xl border bg-void-900/90 transition-transform duration-300 hover:-translate-y-1"
       style={{
         borderColor: `${accent}55`,
         boxShadow: `0 18px 40px -24px ${accent}aa`,
@@ -128,12 +128,12 @@ export function BoosterOfferCard({
             </div>
           )}
           <h3
-            className="font-display text-2xl font-black uppercase leading-none tracking-wide drop-shadow"
+            className="line-clamp-2 font-display text-2xl font-black uppercase leading-none tracking-wide drop-shadow"
             style={{ color: offer.kind === "simple" ? "#fff" : accent }}
           >
             {offer.label}
           </h3>
-          <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white/70">
+          <p className="mt-1 truncate text-[10px] font-bold uppercase tracking-[0.18em] text-white/70">
             {subtitle}
           </p>
         </div>
@@ -141,9 +141,15 @@ export function BoosterOfferCard({
 
       {/* Promesse + taux */}
       <div className="flex flex-1 flex-col gap-3 px-4 pb-4 pt-2">
-        <p className="text-xs leading-snug text-white/55">{offer.perk}</p>
+        {/* Hauteur réservée à 2 lignes : toutes les cartes d'une rangée alignent
+            leur « Taux de drop » et leur bouton, quel que soit le texte. */}
+        <p className="line-clamp-2 min-h-[2lh] text-xs leading-snug text-white/55">
+          {offer.perk}
+        </p>
 
-        <details className="group/odds mt-auto">
+        {/* `relative` : le tableau s'ouvre EN SURIMPRESSION vers le haut. S'il
+            poussait la carte, la grille (étirée) agrandirait toute la rangée. */}
+        <details className="group/odds relative mt-auto">
           <summary className="flex cursor-pointer list-none items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-domain-light transition-colors hover:text-white [&::-webkit-details-marker]:hidden">
             <ChevronIcon className="h-3 w-3 -rotate-90 transition-transform group-open/odds:rotate-0" />
             Taux de drop
@@ -165,11 +171,16 @@ export function BoosterOfferCard({
           <CoinIcon className="h-4 w-4" />
           {offer.price.toLocaleString("fr-FR")}
         </button>
-        {!affordable && (
-          <p className="-mt-1.5 text-center text-[10px] font-bold uppercase tracking-wider text-white/30">
-            Solde insuffisant
-          </p>
-        )}
+        {/* Ligne toujours présente (invisible si inutile) : sinon la carte qu'on
+            peut s'offrir serait plus courte que ses voisines. */}
+        <p
+          aria-hidden={affordable}
+          className={`-mt-1.5 text-center text-[10px] font-bold uppercase tracking-wider text-white/30 ${
+            affordable ? "invisible" : ""
+          }`}
+        >
+          Solde insuffisant
+        </p>
       </div>
     </article>
   );
@@ -181,7 +192,7 @@ export function BoosterOfferCard({
  */
 function OddsTable({ offer }: { offer: ShopBoosterOffer }) {
   return (
-    <div className="mt-2.5 rounded-xl border border-white/10 bg-void-800/70 p-3">
+    <div className="absolute inset-x-0 bottom-full z-20 mb-2 rounded-xl border border-white/15 bg-void-800/95 p-3 shadow-2xl backdrop-blur">
       <div className="mb-1.5 grid grid-cols-[1fr_auto_auto] gap-x-3 text-[9px] font-bold uppercase tracking-wider text-white/35">
         <span>Rareté</span>
         <span className="text-right">Par carte</span>

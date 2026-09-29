@@ -67,6 +67,7 @@ model User {
   universeProfiles  UserUniverseProfile[]
   cards             UserCard[]
   boosters          UserBooster[]
+  rouletteSpins     RouletteSpin[]
   casinoSeats       CasinoSeat[]
   towerScores       TowerScore[]
 }
@@ -149,8 +150,37 @@ model UserUniverseProfile {
   jjkdleBestStreak   Int     @default(0)
   jjkdleLastPlayedAt String?
 
+  /// Dernier tour GRATUIT de la roulette de la boutique, PAR UNIVERS (un tour
+  /// gratuit toutes les 5 h dans chaque anime). Le claim est un `updateMany`
+  /// conditionné à cette date (cf. lib/roulette/store.ts) : deux clics
+  /// simultanés ne peuvent pas obtenir deux tours gratuits. null = jamais tourné.
+  lastFreeSpinAt DateTime?
+
   @@unique([userId, universeId])
   @@index([universeId])
+}
+
+/// Un tour de ROULETTE (boutique d'un univers). Journal append-only : sert à
+/// afficher le dernier gain et à tracer ce qui a été distribué. Le lot est tiré
+/// CÔTÉ SERVEUR (lib/roulette/prizes.ts) ; `slotId` réfère une case de
+/// ROULETTE_SLOTS. Scalaires sans FK, comme les tables de scores.
+model RouletteSpin {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  universeId  String
+  slotId      String
+  /// true = tour payé en coins, false = tour gratuit.
+  paid        Boolean
+  /// Coins crédités par ce tour (lot coins, ou carte en doublon convertie).
+  coinsWon    Int      @default(0)
+  /// Booster créé (non ouvert) si le lot était un booster.
+  boosterId   String?
+  /// Personnage tiré si le lot était une carte.
+  characterId String?
+  createdAt   DateTime @default(now())
+
+  @@index([userId, universeId, createdAt])
 }
 
 /// Déblocage d'un badge par un utilisateur. La métadonnée du badge (nom,
@@ -661,7 +691,7 @@ model DraftCharacter {
   /// Personnage du roster builder dont cette ligne est DÉRIVÉE (bouton « Tout
   /// importer »). `null` = ligne écrite à la main. Sert à interdire de drafter
   /// deux fois la même personne quand elle alimente plusieurs catégories.
-  sourceCharacterId  String?
+  sourceCharacterId String?
 
   // Multi-univers (étape 2a). `id` reste la PK globale ; `slug` = clé lisible
   // unique PAR univers (JJK : slug = id).
@@ -678,7 +708,7 @@ model DraftCharacter {
 /// Éditables depuis /admin ; à défaut de lignes, le jeu retombe sur la liste par
 /// défaut en code (`lib/games/draft/bosses.ts`).
 model DraftBoss {
-  id          String   @id
+  id          String  @id
   name        String
   /// Seuil de score global caché à dépasser pour le vaincre. Affiché « PV »
   /// dans l'admin : c'est le seul nombre qui décide de l'issue du duel, les
@@ -688,7 +718,7 @@ model DraftBoss {
   characterId String?
   /// Surcharge d'image (chemin /assets/… ou route API). Prime sur le personnage.
   image       String?
-  position    Int      @default(0)
+  position    Int     @default(0)
 
   slug       String
   universeId String

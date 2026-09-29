@@ -178,6 +178,10 @@ export const aot: UniverseConfig = {
     // 進撃之巨人 (le titre), 自由之翼 (les ailes de la liberté), 調査兵団 (le
     // Bataillon d'exploration), 心臓を捧げよ → 献身 (offrir son cœur).
     kanjiColumns: ["進撃巨人", "自由之翼", "調査兵団", "献身"],
+    rouletteKicker: "Roulette du Bataillon",
+    rouletteTitle: "Fais tourner la roue du Bataillon",
+    rouletteLead:
+      "Un tour gratuit toutes les 5 heures. Coins et boosters sont en jeu — le booster doré est la victoire que tout soldat espère ramener d'au-delà des Murs.",
   },
   /**
    * Draft : huit des neuf catégories AOT. « Titan » est écarté (13 personnages

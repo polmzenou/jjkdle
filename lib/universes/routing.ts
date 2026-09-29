@@ -32,6 +32,7 @@ const UNIVERSE_FREE_PREFIXES = [
   "/login",
   "/register",
   "/og", // image d'aperçu social
+  "/errors", // pages d'erreur sans convention Next (405)
   "/robots.txt",
   "/sitemap.xml",
   "/manifest.webmanifest",

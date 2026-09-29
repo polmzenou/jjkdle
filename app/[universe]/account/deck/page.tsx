@@ -42,7 +42,7 @@ export default async function DeckPage() {
       : 0;
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-5 py-10 sm:px-6 sm:py-16">
+    <main className="mx-auto w-full max-w-[1600px] lg:w-3/4 px-5 py-10 sm:px-6 sm:py-16">
       <header className="mb-8">
         <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.3em] text-domain-light/70">
           <span

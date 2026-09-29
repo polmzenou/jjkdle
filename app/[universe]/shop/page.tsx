@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { getCurrentUniverse } from "@/lib/universes/current";
 import { getCasinoConfig } from "@/lib/casino/config";
 import { getShopWindow } from "@/lib/cards/shop-store";
+import { getRouletteState } from "@/lib/roulette/store";
 import { ShopView } from "@/components/shop/ShopView";
 
 export const metadata: Metadata = {
@@ -25,13 +26,14 @@ export default async function ShopPage() {
   if (!user) redirect("/login");
 
   const universe = await getCurrentUniverse();
-  const [shop, casino] = await Promise.all([
+  const [shop, casino, roulette] = await Promise.all([
     getShopWindow(user.id, universe.id),
     getCasinoConfig(),
+    getRouletteState(user.id, universe.id),
   ]);
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-5 py-10 sm:px-6 sm:py-16">
+    <main className="mx-auto w-full max-w-[1600px] lg:w-3/4 px-5 py-10 sm:px-6 sm:py-16">
       <header className="mb-10">
         <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.3em] text-domain-light/70">
           <span
@@ -44,12 +46,12 @@ export default async function ShopPage() {
           Boutique {universe.config.name}
         </h1>
         <p className="mt-2 text-sm text-white/50">
-          Dépense tes coins en boosters, ou achète directement une carte exotic
-          de l&apos;étal du jour.
+          Tente ta chance à la roulette, dépense tes coins en boosters, ou
+          achète directement une carte exotic de l&apos;étal du jour.
         </p>
       </header>
 
-      <ShopView shop={shop} casinoEnabled={casino.enabled} />
+      <ShopView shop={shop} roulette={roulette} casinoEnabled={casino.enabled} />
     </main>
   );
 }

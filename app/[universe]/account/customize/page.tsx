@@ -27,7 +27,7 @@ export default async function CustomizeProfilePage() {
   const layout = normalizeProfileLayout(loadout.profileLayout);
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 py-12 sm:py-16">
+    <main className="mx-auto w-full max-w-[1600px] lg:w-3/4 px-6 py-12 sm:py-16">
       <header className="mb-8">
         <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.3em] text-domain-light/70">
           <span

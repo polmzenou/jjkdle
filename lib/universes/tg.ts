@@ -196,6 +196,10 @@ export const tg: UniverseConfig = {
     // 東京喰種 (le titre), 赫子 (kagune), 隻眼 (le Borgne / à un œil),
     // 二十区 (le 20e arrondissement).
     kanjiColumns: ["東京喰種", "赫子", "隻眼", "二十区"],
+    rouletteKicker: "Roulette d'Anteiku",
+    rouletteTitle: "Tente ta chance à la roue d'Anteiku",
+    rouletteLead:
+      "Un tour gratuit toutes les 5 heures. Coins et boosters sont servis dans la roue — le booster doré est la proie que chaque goule du 20e arrondissement traque.",
   },
   /**
    * Draft : huit des dix catégories TG. « Anteiku » (8 notés) et « Arbre

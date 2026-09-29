@@ -43,6 +43,12 @@ const LAST_UNIVERSE_COOKIE = "universe";
 
 const isKnownSlug = (slug: string) => Boolean(getUniverseBySlug(slug));
 
+/** Méthodes acceptées par une page (POST = Server Actions). */
+const ALLOWED_PAGE_METHODS = new Set(["GET", "HEAD", "POST", "OPTIONS"]);
+
+/** Page rendue pour une méthode refusée (cf. `app/errors/405`). */
+const METHOD_NOT_ALLOWED_ROUTE = "/errors/405";
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const headers = new Headers(request.headers);
@@ -51,6 +57,23 @@ export function middleware(request: NextRequest) {
   headers.delete("x-universe");
   headers.delete("x-hub");
   headers.delete("x-casino");
+
+  // ── 0. Méthode non autorisée sur une PAGE → 405 ──────────────────────────
+  // Une page ne répond qu'à GET/HEAD, et à POST pour les Server Actions. Les
+  // API (`/api/*`, `/<slug>/api/*`) gèrent leurs méthodes elles-mêmes.
+  if (
+    !ALLOWED_PAGE_METHODS.has(request.method) &&
+    !/^\/(?:[^/]+\/)?api\//.test(pathname)
+  ) {
+    headers.set("x-universe", fallbackSlug(request));
+    // La page est rendue en GET (une page ne sait pas répondre à un PUT) et le
+    // statut 405 est posé sur la réponse, avec l'en-tête `Allow` requis.
+    return NextResponse.rewrite(new URL(METHOD_NOT_ALLOWED_ROUTE, request.url), {
+      status: 405,
+      headers: { Allow: "GET, HEAD, POST" },
+      request: { headers },
+    });
+  }
 
   // ── 1. Administration : hors univers, sa cible vient d'un cookie ──────────
   // `?universe=<slug>` a la priorité et devient la nouvelle cible mémorisée :

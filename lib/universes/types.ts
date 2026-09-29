@@ -79,6 +79,12 @@ export interface UniverseLabels {
    * sur une landing Demon Slayer n'aurait aucun sens.
    */
   kanjiColumns: [string, string, string, string];
+  /** Sur-titre de la roulette de la boutique (2–3 mots, ex. « Roulette maudite »). */
+  rouletteKicker: string;
+  /** Titre de la roulette de la boutique. */
+  rouletteTitle: string;
+  /** Paragraphe sous le titre de la roulette — 1–2 phrases de lore. */
+  rouletteLead: string;
 }
 
 /**

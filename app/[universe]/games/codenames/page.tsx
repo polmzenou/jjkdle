@@ -74,14 +74,14 @@ export default async function CodenamesHubPage() {
         )}
       </section>
 
-      <footer className="mt-auto pt-16 text-center text-xs text-white/30">
+      <nav className="mt-auto pt-16 text-center text-xs text-white/30">
         <UniverseLink
           href="/games"
           className="transition-colors hover:text-domain-light"
         >
           ← Retour aux jeux
         </UniverseLink>
-      </footer>
+      </nav>
     </main>
   );
 }

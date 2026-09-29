@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { casinoThemeCss } from "@/lib/universes/theme";
 import { CasinoBackdrop } from "@/components/casino/CasinoBackdrop";
 import { CasinoNav } from "@/components/casino/CasinoNav";
+import { SiteFooter } from "@/components/SiteFooter";
 
 /**
  * Layout du CASINO. Ne monte PAS `UniverseChrome` : celui-ci impose la palette,
@@ -41,6 +42,7 @@ export default async function CasinoLayout({
           username={user?.username ?? null}
         />
         {children}
+        <SiteFooter variant="neutral" />
       </div>
     </>
   );

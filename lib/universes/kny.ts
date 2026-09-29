@@ -192,6 +192,10 @@ export const kny: UniverseConfig = {
     // 鬼滅之刃 (le titre), 全集中 (concentration totale), 呼吸法 (technique de
     // respiration), 柱 (les Piliers).
     kanjiColumns: ["鬼滅之刃", "全集中", "呼吸法", "柱"],
+    rouletteKicker: "Roulette du Corps",
+    rouletteTitle: "Fais tourner la roue du Pourfendeur",
+    rouletteLead:
+      "Un tour gratuit toutes les 5 heures. Coins et boosters sont gravés dans la roue — le booster doré, c'est la lame que tout pourfendeur rêve de forger.",
   },
   /**
    * Draft : huit des dix catégories KNY. « Nouvelle génération » (10 notés) et

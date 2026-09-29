@@ -7,6 +7,8 @@ import {
 } from "@/lib/universes/current";
 import { buyBooster, buyExoticCard } from "@/lib/cards/shop-store";
 import type { CardView } from "@/lib/cards/types";
+import { spinRoulette } from "@/lib/roulette/store";
+import type { SpinOutcome } from "@/lib/roulette/types";
 
 /**
  * Server actions de la BOUTIQUE.
@@ -58,4 +60,24 @@ export async function buyExoticCardAction(
 
   await revalidateAfterPurchase(user.username);
   return { ok: true, ...(res.card ? { card: res.card } : {}) };
+}
+
+/**
+ * Un tour de la roulette de l'univers courant. `paid` = le joueur accepte de
+ * payer 100 coins parce que son tour gratuit n'est pas rechargé. Le lot est
+ * tiré ET livré côté serveur ; le client ne fait qu'animer la roue jusqu'à
+ * `outcome.slotIndex`.
+ */
+export async function spinRouletteAction(
+  paid: boolean,
+): Promise<ShopActionResult & { outcome?: SpinOutcome }> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, error: "Connecte-toi pour tourner la roue." };
+
+  const universe = await getCurrentUniverse();
+  const res = await spinRoulette(user.id, universe.id, paid === true);
+  if (!res.ok) return { ok: false, error: res.error };
+
+  await revalidateAfterPurchase(user.username);
+  return { ok: true, outcome: res.outcome };
 }

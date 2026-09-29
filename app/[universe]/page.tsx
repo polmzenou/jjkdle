@@ -164,10 +164,6 @@ export default async function HomePage() {
           </UniverseLink>
         </div>
       </section>
-
-      <footer className="border-t border-white/5 py-8 text-center text-xs text-white/30">
-        Fan-projet non officiel · aucun asset copyrighté.
-      </footer>
     </main>
   );
 }

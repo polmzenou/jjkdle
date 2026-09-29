@@ -52,6 +52,11 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   // Garde le client Prisma (et son moteur natif) hors du bundle webpack serveur.
   serverExternalPackages: ["@prisma/client"],
+  // Active `forbidden()` / `unauthorized()` (next/navigation) et le fichier
+  // `app/forbidden.tsx` : la page 403 de l'admin.
+  experimental: {
+    authInterrupts: true,
+  },
   // Sert AVIF/WebP quand une image passe par next/image (LCP / Core Web Vitals).
   images: {
     formats: ["image/avif", "image/webp"],
