@@ -33,6 +33,8 @@ export interface LeaderboardEntry {
   titleKey: string | null;
   /** Clé du cadre équipé (ou null) — bordure autour de l'avatar. */
   frameKey: string | null;
+  /** Clé de la couleur de pseudo équipée (ou null = blanc par défaut). */
+  nameColorKey: string | null;
 }
 
 /**
@@ -51,6 +53,7 @@ export function userDecorSelect(universeId: string) {
       select: {
         equippedTitleKey: true,
         equippedFrameKey: true,
+        nameColorKey: true,
         avatarCharacter: { select: { image: true } },
       },
     },
@@ -65,6 +68,7 @@ export interface UserDecor {
   avatarImage: string | null;
   titleKey: string | null;
   frameKey: string | null;
+  nameColorKey: string | null;
 }
 
 /** Extrait le décor d'un `user` chargé via `userDecorSelect` (profil = 0 ou 1 ligne). */
@@ -75,6 +79,7 @@ export function userDecor(user: {
   universeProfiles: {
     equippedTitleKey: string | null;
     equippedFrameKey: string | null;
+    nameColorKey: string | null;
     avatarCharacter: { image: string | null } | null;
   }[];
 }): UserDecor {
@@ -86,6 +91,7 @@ export function userDecor(user: {
     avatarImage: p?.avatarCharacter?.image ?? null,
     titleKey: p?.equippedTitleKey ?? null,
     frameKey: p?.equippedFrameKey ?? null,
+    nameColorKey: p?.nameColorKey ?? null,
   };
 }
 

@@ -15,6 +15,7 @@ import { getCurrentUniverse } from "./current";
 export interface UniverseLoadout {
   equippedTitleKey: string | null;
   equippedFrameKey: string | null;
+  nameColorKey: string | null;
   bannerKey: string;
   avatarCharacterId: string | null;
   profileLayout: Prisma.JsonValue | null;
@@ -28,6 +29,7 @@ export interface UniverseLoadout {
 export const DEFAULT_LOADOUT: UniverseLoadout = {
   equippedTitleKey: null,
   equippedFrameKey: null,
+  nameColorKey: null,
   bannerKey: "default",
   avatarCharacterId: null,
   profileLayout: null,
@@ -39,6 +41,7 @@ export const DEFAULT_LOADOUT: UniverseLoadout = {
 const LOADOUT_SELECT = {
   equippedTitleKey: true,
   equippedFrameKey: true,
+  nameColorKey: true,
   bannerKey: true,
   avatarCharacterId: true,
   profileLayout: true,
@@ -67,6 +70,7 @@ export async function getUniverseLoadout(
 export type LoadoutPatch = {
   equippedTitleKey?: string | null;
   equippedFrameKey?: string | null;
+  nameColorKey?: string | null;
   bannerKey?: string;
   avatarCharacterId?: string | null;
   profileLayout?: Prisma.InputJsonValue | typeof Prisma.JsonNull;

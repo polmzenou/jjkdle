@@ -39,6 +39,7 @@ async function getPublicProfile(username: string) {
           jjkdleBestStreak: true,
           equippedTitleKey: true,
           equippedFrameKey: true,
+          nameColorKey: true,
           profileLayout: true,
           avatarCharacter: { select: { name: true, image: true } },
         },
@@ -137,6 +138,7 @@ export default async function PublicProfilePage({
         avatarImage={prof?.avatarCharacter?.image}
         frameKey={layout.showFrame ? (prof?.equippedFrameKey ?? null) : null}
         titleKey={layout.showTitle ? (prof?.equippedTitleKey ?? null) : null}
+        nameColorKey={prof?.nameColorKey ?? null}
         totalXp={profile.totalXp}
         bannerGradient={bannerStyle(prof?.bannerKey).gradient}
         stats={

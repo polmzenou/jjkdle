@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { UserAvatar } from "@/components/UserAvatar";
 import { VipBadge } from "@/components/VipBadge";
 import { TitleBadge } from "@/components/TitleBadge";
+import { PlayerName } from "@/components/PlayerName";
 import { XpStrip } from "@/components/LevelBar";
 import { xpToLevel } from "@/lib/progress/xp";
 
@@ -13,6 +14,8 @@ interface ProfileHeroProps {
   frameKey?: string | null;
   /** Titre à afficher sous le pseudo (null = aucun). */
   titleKey?: string | null;
+  /** Couleur de pseudo équipée (null = blanc par défaut). */
+  nameColorKey?: string | null;
   totalXp: number;
   /** Dégradé CSS de la bannière équipée (`bannerStyle(key).gradient`). */
   bannerGradient: string;
@@ -37,6 +40,7 @@ export function ProfileHero({
   avatarImage,
   frameKey,
   titleKey,
+  nameColorKey,
   totalXp,
   bannerGradient,
   actions,
@@ -59,7 +63,7 @@ export function ProfileHero({
           <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-end justify-between gap-x-4 gap-y-1 pb-3 pl-[9.5rem] pr-4 sm:pl-[10.5rem] sm:pr-6">
             <div className="min-w-0">
               <h1 className="flex flex-wrap items-center gap-x-2 font-display text-2xl font-black tracking-tight text-white drop-shadow sm:text-3xl">
-                <span className="truncate">{username}</span>
+                <PlayerName name={username} nameColorKey={nameColorKey} className="truncate" />
                 {role === "VIP" && <VipBadge className="text-sm" />}
               </h1>
               <p className="mt-0.5 flex flex-wrap items-center gap-2 font-display text-sm font-black uppercase tracking-wide text-white/85">

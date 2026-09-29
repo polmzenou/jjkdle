@@ -6,6 +6,7 @@ import {
 import type { LeaderboardScope } from "@/lib/leaderboard/store";
 import { VipBadge } from "@/components/VipBadge";
 import { TitleBadge } from "@/components/TitleBadge";
+import { PlayerName } from "@/components/PlayerName";
 import { UserAvatar } from "@/components/UserAvatar";
 import { ScopeToggle } from "./ScopeToggle";
 import { UniverseLink } from "@/components/universe/UniverseLink";
@@ -127,7 +128,7 @@ function JjkdleRow({
           href={`/u/${encodeURIComponent(entry.pseudo)}`}
           className="underline-offset-2 hover:underline"
         >
-          {entry.pseudo}
+          <PlayerName name={entry.pseudo} nameColorKey={entry.nameColorKey} />
         </UniverseLink>
         {entry.role === "VIP" && <VipBadge className="ml-1.5" />}
         {entry.titleKey && <TitleBadge titleKey={entry.titleKey} className="ml-1.5" />}

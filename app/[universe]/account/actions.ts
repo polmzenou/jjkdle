@@ -10,6 +10,12 @@ import {
   isFrameUnlocked,
 } from "@/lib/cosmetics/unlock";
 import { getTitleGrantKeys, getFrameGrantKeys } from "@/lib/cosmetics/grants";
+import { getCollectionCompletion } from "@/lib/cards/store";
+import {
+  getNameColor,
+  isNameColorKey,
+  isNameColorUnlocked,
+} from "@/lib/profile/name-colors";
 import {
   getCurrentUniverse,
   revalidateUniversePath,
@@ -93,6 +99,36 @@ export async function equipFrameAction(
     { equippedFrameKey: frameKey },
     universe.id,
   );
+  await revalidateUniversePath("/account");
+  await revalidateUniversePath(`/u/${encodeURIComponent(user.username)}`);
+  return { ok: true };
+}
+
+/**
+ * Équipe (ou retire avec `null`) une COULEUR DE PSEUDO dans l'univers courant.
+ * Le palier est RE-VÉRIFIÉ serveur sur la complétion réelle de la collection
+ * de cet univers (les admins ignorent les paliers).
+ */
+export async function equipNameColorAction(
+  colorKey: string | null,
+): Promise<ActionResult> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, error: "Connecte-toi pour changer ta couleur de pseudo." };
+
+  const universe = await getCurrentUniverse();
+
+  if (colorKey !== null) {
+    if (!isNameColorKey(colorKey)) return { ok: false, error: "Couleur inconnue." };
+    const pct = await getCollectionCompletion(user.id, universe.id);
+    if (!isNameColorUnlocked(colorKey, pct, user.role === "ADMIN")) {
+      return {
+        ok: false,
+        error: `Couleur verrouillée — ${getNameColor(colorKey)!.threshold} % de la collection requis.`,
+      };
+    }
+  }
+
+  await updateUniverseLoadout(user.id, { nameColorKey: colorKey }, universe.id);
   await revalidateUniversePath("/account");
   await revalidateUniversePath(`/u/${encodeURIComponent(user.username)}`);
   return { ok: true };

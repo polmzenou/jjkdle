@@ -33,6 +33,7 @@ export interface JjkdleLeaderboardEntry {
   titleKey: string | null;
   /** Clé du cadre équipé (ou null). */
   frameKey: string | null;
+  nameColorKey: string | null;
   /** Jours résolus cette semaine (présent seulement pour la portée weekly). */
   daysSolved?: number;
 }
@@ -124,6 +125,7 @@ export async function topJjkdleWeeklyEntries(
       level: d?.level ?? 1,
       titleKey: d?.titleKey ?? null,
       frameKey: d?.frameKey ?? null,
+      nameColorKey: d?.nameColorKey ?? null,
       daysSolved: agg.days,
     };
   });

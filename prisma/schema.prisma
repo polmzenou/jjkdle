@@ -137,6 +137,10 @@ model UserUniverseProfile {
   avatarCharacterId String?
   avatarCharacter   Character? @relation("UserUniverseAvatar", fields: [avatarCharacterId], references: [id], onDelete: SetNull)
   profileLayout     Json?
+  /// Couleur de pseudo équipée (clé de NAME_COLORS, lib/profile/name-colors.ts).
+  /// Débloquée par la complétion de la collection DE CET UNIVERS ; re-vérifiée
+  /// à l'équipement et retirée si une carte vendue fait repasser sous le palier.
+  nameColorKey      String?
 
   /// Deck de cartes équipé : jusqu'à 3 `Character.id`, dans l'ordre des slots.
   /// Par univers (comme le reste du loadout) alors que la POSSESSION des cartes

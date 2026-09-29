@@ -17,6 +17,10 @@ import {
   type DeckMultipliers,
 } from "./deck";
 import { rarityOfTier, sellValueOf } from "./rarity";
+import {
+  completionPercent,
+  isNameColorUnlocked,
+} from "@/lib/profile/name-colors";
 import { rollBooster, sortByRarityAsc, type CardPool } from "./roll";
 import type {
   CardView,
@@ -104,6 +108,23 @@ export async function getCollection(
     ...toCardView(character),
     owned: owned.has(character.id),
   }));
+}
+
+/**
+ * Pourcentage de complétion de la collection d'un univers (arrondi à
+ * l'inférieur, cf. `completionPercent`). Débloque les couleurs de pseudo.
+ */
+export async function getCollectionCompletion(
+  userId: string,
+  universeId?: string,
+): Promise<number> {
+  const uid = await resolveUniverseId(universeId);
+  const [roster, owned] = await Promise.all([
+    getRoster(uid),
+    getOwnedCharacterIds(userId, uid),
+  ]);
+  const ownedCount = roster.filter((c) => owned.has(c.id)).length;
+  return completionPercent(ownedCount, roster.length);
 }
 
 /** Le deck équipé d'un univers, nettoyé des ids fantômes (cartes vendues…). */
@@ -248,6 +269,27 @@ async function removeFromDecks(userId: string, characterId: string): Promise<voi
 }
 
 /**
+ * Déséquipe la couleur de pseudo d'un univers si la complétion est repassée
+ * sous son palier (carte vendue ou retirée). Sans ce garde-fou, le pseudo
+ * resterait coloré dans les classements alors que le palier n'est plus tenu.
+ */
+async function dropLockedNameColor(userId: string, universeId: string): Promise<void> {
+  const profile = await prisma.userUniverseProfile.findUnique({
+    where: { userId_universeId: { userId, universeId } },
+    select: { nameColorKey: true, user: { select: { role: true } } },
+  });
+  const key = profile?.nameColorKey;
+  if (!key || profile.user.role === "ADMIN") return;
+
+  const pct = await getCollectionCompletion(userId, universeId);
+  if (isNameColorUnlocked(key, pct)) return;
+  await prisma.userUniverseProfile.update({
+    where: { userId_universeId: { userId, universeId } },
+    data: { nameColorKey: null },
+  });
+}
+
+/**
  * Octroie une carte (idempotent). Renvoie `created: false` si elle était déjà
  * possédée — un octroi ADMIN ne crédite JAMAIS de coins sur doublon, c'est un
  * don, pas un tirage.
@@ -269,7 +311,16 @@ export async function revokeCard(
   characterId: string,
 ): Promise<{ removed: boolean }> {
   const res = await prisma.userCard.deleteMany({ where: { userId, characterId } });
-  if (res.count > 0) await removeFromDecks(userId, characterId);
+  if (res.count > 0) {
+    const character = await prisma.character.findUnique({
+      where: { id: characterId },
+      select: { universeId: true },
+    });
+    await Promise.all([
+      removeFromDecks(userId, characterId),
+      character ? dropLockedNameColor(userId, character.universeId) : null,
+    ]);
+  }
   return { removed: res.count > 0 };
 }
 
@@ -300,6 +351,7 @@ export async function sellCard(
       data: { coins: { increment: card.sellValue } },
     }),
     removeFromDecks(userId, characterId),
+    dropLockedNameColor(userId, uid),
   ]);
 
   return { ok: true, coins: card.sellValue };

@@ -15,12 +15,15 @@ import {
 } from "@/components/profile/BannerPicker";
 import { TitlePicker } from "@/components/profile/TitlePicker";
 import { FramePicker } from "@/components/profile/FramePicker";
+import { NameColorPicker } from "@/components/profile/NameColorPicker";
+import { PlayerName } from "@/components/PlayerName";
 import { VisibilityPanel } from "@/components/profile/VisibilityPanel";
 import { bannerStyle } from "@/lib/profile/banners";
 import type { ProfileLayout } from "@/lib/profile/layout";
 import { EDIT_TABS, type EditTab } from "@/lib/profile/edit-tabs";
 import {
   equipFrameAction,
+  equipNameColorAction,
   equipTitleAction,
   updateProfileLayoutAction,
   type ActionResult,
@@ -36,6 +39,9 @@ export interface ProfileEditData {
   avatarId: string | null;
   titleKey: string | null;
   frameKey: string | null;
+  nameColorKey: string | null;
+  /** Complétion de la collection de l'univers (débloque les couleurs de pseudo). */
+  collectionPct: number;
   unlockedTitleKeys: string[];
   unlockedFrameKeys: string[];
   layout: ProfileLayout;
@@ -120,6 +126,7 @@ function ProfileEditModal({
   const [avatarId, setAvatarId] = useState(data.avatarId);
   const [titleKey, setTitleKey] = useState(data.titleKey);
   const [frameKey, setFrameKey] = useState(data.frameKey);
+  const [nameColorKey, setNameColorKey] = useState(data.nameColorKey);
   const [layout, setLayout] = useState(data.layout);
   const [error, setError] = useState<string | null>(null);
 
@@ -258,7 +265,7 @@ function ProfileEditModal({
                   />
                   <div className="relative min-w-0">
                     <p className="truncate font-display text-base font-black text-white drop-shadow">
-                      {data.username}
+                      <PlayerName name={data.username} nameColorKey={nameColorKey} />
                     </p>
                     <p className="flex items-center gap-2 text-xs text-white/70">
                       {banner.label}
@@ -324,6 +331,20 @@ function ProfileEditModal({
                     disabled={pending}
                     onSelect={(key) =>
                       persist(key, frameKey, setFrameKey, () => equipFrameAction(key))
+                    }
+                  />
+                )}
+                {tab === "pseudo" && (
+                  <NameColorPicker
+                    username={data.username}
+                    collectionPct={data.collectionPct}
+                    isAdmin={data.isAdmin}
+                    value={nameColorKey}
+                    disabled={pending}
+                    onSelect={(key) =>
+                      persist(key, nameColorKey, setNameColorKey, () =>
+                        equipNameColorAction(key),
+                      )
                     }
                   />
                 )}

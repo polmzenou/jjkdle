@@ -39,6 +39,7 @@ export interface DraftLeaderboardEntry {
   titleKey: string | null;
   /** Clé du cadre équipé (ou null). */
   frameKey: string | null;
+  nameColorKey: string | null;
 }
 
 export interface SaveDraftInput {

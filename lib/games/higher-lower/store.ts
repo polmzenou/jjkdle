@@ -286,6 +286,7 @@ export interface HigherLowerLeaderboardEntry {
   titleKey: string | null;
   /** Clé du cadre équipé (ou null). */
   frameKey: string | null;
+  nameColorKey: string | null;
 }
 
 type BestRow = { id: string; userId: string; score: number; createdAt: Date };
@@ -342,6 +343,7 @@ export async function topHigherLowerEntries(
       level: d?.level ?? 1,
       titleKey: d?.titleKey ?? null,
       frameKey: d?.frameKey ?? null,
+      nameColorKey: d?.nameColorKey ?? null,
     };
   });
 }

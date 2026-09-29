@@ -5,6 +5,7 @@ import {
 import type { TowerScope } from "@/lib/games/tower/ranking";
 import { VipBadge } from "@/components/VipBadge";
 import { TitleBadge } from "@/components/TitleBadge";
+import { PlayerName } from "@/components/PlayerName";
 import { UserAvatar } from "@/components/UserAvatar";
 import { TowerScopeToggle } from "./TowerScopeToggle";
 import { UniverseLink } from "@/components/universe/UniverseLink";
@@ -128,7 +129,7 @@ function TowerRow({
           href={`/u/${encodeURIComponent(entry.pseudo)}`}
           className="underline-offset-2 hover:underline"
         >
-          {entry.pseudo}
+          <PlayerName name={entry.pseudo} nameColorKey={entry.nameColorKey} />
         </UniverseLink>
         {entry.role === "VIP" && <VipBadge className="ml-1.5" />}
         {entry.titleKey && (

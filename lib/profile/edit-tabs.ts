@@ -8,6 +8,7 @@ export const EDIT_TABS = [
   { key: "avatar", label: "Avatar" },
   { key: "titre", label: "Titre" },
   { key: "cadre", label: "Cadre" },
+  { key: "pseudo", label: "Pseudo" },
   { key: "visibilite", label: "Visibilité" },
 ] as const;
 

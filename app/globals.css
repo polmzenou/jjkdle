@@ -97,3 +97,100 @@
     }
   }
 }
+
+/*
+ * COULEURS DE PSEUDO (lib/profile/name-colors.ts) : débloquées par la
+ * complétion de la collection de l'univers. Texte en dégradé vertical (clair en
+ * haut → saturé → sombre en bas) découpé dans le fond, contour sombre + halo de
+ * la couleur via `drop-shadow` (un `text-shadow` passerait AU-DESSUS d'un texte
+ * transparent).
+ *
+ * HORS `@layer` volontairement : Tailwind purge les classes d'un layer qu'il ne
+ * trouve pas écrites en toutes lettres dans le code, or `name-color-<clé>` est
+ * construite dynamiquement par <PlayerName>.
+ */
+.name-color {
+  display: inline-block;
+  max-width: 100%;
+  font-weight: 900;
+  color: transparent !important;
+  background-image: linear-gradient(
+    180deg,
+    var(--nc-light) 0%,
+    var(--nc-base) 55%,
+    var(--nc-dark) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  text-shadow: none;
+  filter: drop-shadow(0 1px 0 rgb(0 0 0 / 0.55))
+    drop-shadow(0 0 6px color-mix(in srgb, var(--nc-base) 70%, transparent));
+}
+.name-color-lime {
+  --nc-light: #eaffb8;
+  --nc-base: #a3ff12;
+  --nc-dark: #5fb800;
+}
+.name-color-azure {
+  --nc-light: #b8ecff;
+  --nc-base: #38bdf8;
+  --nc-dark: #1d6fe0;
+}
+.name-color-turquoise {
+  --nc-light: #c4fff6;
+  --nc-base: #2de2d0;
+  --nc-dark: #0f9e94;
+}
+.name-color-incandescent {
+  --nc-light: #fff1a8;
+  --nc-base: #ff9a1f;
+  --nc-dark: #e0400a;
+  animation: name-color-ember 2.4s ease-in-out infinite;
+}
+.name-color-scarlet {
+  --nc-light: #ffc2c8;
+  --nc-base: #ff2d4a;
+  --nc-dark: #b0001c;
+}
+.name-color-rainbow {
+  --nc-base: #ffffff;
+  background-image: linear-gradient(
+    90deg,
+    #ff2d4a,
+    #ff9a1f,
+    #ffe600,
+    #a3ff12,
+    #2de2d0,
+    #38bdf8,
+    #b44dff,
+    #ff2d4a
+  );
+  background-size: 200% 100%;
+  filter: drop-shadow(0 1px 0 rgb(0 0 0 / 0.55))
+    drop-shadow(0 0 6px rgb(255 255 255 / 0.35));
+  animation: name-color-rainbow 4s linear infinite;
+}
+
+@keyframes name-color-ember {
+  0%,
+  100% {
+    filter: drop-shadow(0 1px 0 rgb(0 0 0 / 0.55))
+      drop-shadow(0 0 5px rgb(255 120 20 / 0.6));
+  }
+  50% {
+    filter: drop-shadow(0 1px 0 rgb(0 0 0 / 0.55))
+      drop-shadow(0 0 11px rgb(255 150 40 / 0.95));
+  }
+}
+@keyframes name-color-rainbow {
+  to {
+    background-position: 200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .name-color-incandescent,
+  .name-color-rainbow {
+    animation: none;
+  }
+}

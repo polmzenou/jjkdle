@@ -277,6 +277,7 @@ export interface TowerLeaderboardEntry {
   level: number;
   titleKey: string | null;
   frameKey: string | null;
+  nameColorKey: string | null;
   /** Étage atteint (20 = tour bouclée). */
   floor: number;
   score: number;
@@ -360,6 +361,7 @@ export async function topTowerEntries(
       level: d?.level ?? 1,
       titleKey: d?.titleKey ?? null,
       frameKey: d?.frameKey ?? null,
+      nameColorKey: d?.nameColorKey ?? null,
       floor: r.floor,
       score: r.score,
       cleared: r.cleared,

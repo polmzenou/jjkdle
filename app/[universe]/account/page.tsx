@@ -6,7 +6,7 @@ import { getUserDraftScore } from "@/lib/games/draft/store";
 import { getUserJjkdleScore } from "@/lib/games/jjkdle/leaderboard";
 import { getUserHigherLowerScore } from "@/lib/games/higher-lower/store";
 import { getUserGuessWhoStats } from "@/lib/games/guesswho/stats";
-import { getDeckShowcase } from "@/lib/cards/store";
+import { getCollectionCompletion, getDeckShowcase } from "@/lib/cards/store";
 import { bannerStyle } from "@/lib/profile/banners";
 import { normalizeProfileLayout } from "@/lib/profile/layout";
 import { isEditTab } from "@/lib/profile/edit-tabs";
@@ -67,6 +67,7 @@ export default async function AccountPage({
     titleGrantKeys,
     frameGrantKeys,
     deckShowcase,
+    collectionPct,
   ] = await Promise.all([
     getUserScores(user.id),
     getUserDraftScore(user.id),
@@ -87,6 +88,7 @@ export default async function AccountPage({
             jjkdleBestStreak: true,
             equippedTitleKey: true,
             equippedFrameKey: true,
+            nameColorKey: true,
             profileLayout: true,
             avatarCharacter: { select: { name: true, image: true } },
           },
@@ -99,6 +101,7 @@ export default async function AccountPage({
     getTitleGrantKeys(user.id),
     getFrameGrantKeys(user.id),
     getDeckShowcase(user.id, universe.id),
+    getCollectionCompletion(user.id, universe.id),
   ]);
 
   // Loadout + streak de l'univers courant (0 ou 1 ligne) ; totalXp/level restent globaux.
@@ -123,6 +126,7 @@ export default async function AccountPage({
         avatarImage={prof?.avatarCharacter?.image}
         frameKey={prof?.equippedFrameKey}
         titleKey={prof?.equippedTitleKey}
+        nameColorKey={prof?.nameColorKey}
         totalXp={profile?.totalXp ?? 0}
         bannerGradient={bannerStyle(prof?.bannerKey).gradient}
         actions={
@@ -139,6 +143,8 @@ export default async function AccountPage({
                 avatarId: prof?.avatarCharacterId ?? null,
                 titleKey: prof?.equippedTitleKey ?? null,
                 frameKey: prof?.equippedFrameKey ?? null,
+                nameColorKey: prof?.nameColorKey ?? null,
+                collectionPct,
                 unlockedTitleKeys: [...getUnlockedTitleKeys(unlockCtx, titleGrantKeys)],
                 unlockedFrameKeys: [...getUnlockedFrameKeys(unlockCtx, frameGrantKeys)],
                 layout: normalizeProfileLayout(prof?.profileLayout ?? null),
