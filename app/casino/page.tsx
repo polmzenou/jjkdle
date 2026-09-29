@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth/session";
 import { COINFLIP_MULTIPLIER } from "@/lib/casino/coinflip";
 import { getCasinoConfig } from "@/lib/casino/config";
+import { SLOTS_RTP_PCT } from "@/lib/casino/slots";
 import { prisma } from "@/lib/prisma";
 import { CasinoHome, type CasinoGameTile } from "@/components/casino/CasinoHome";
 
@@ -14,9 +15,8 @@ import { CasinoHome, type CasinoGameTile } from "@/components/casino/CasinoHome"
 export const dynamic = "force-dynamic";
 
 /**
- * Catalogue des jeux. En dur ici et non en base : il n'y en a qu'un de jouable,
- * et un registre en base ne se justifiera que le jour où l'admin devra en
- * ajouter sans déploiement. Les tuiles « bientôt » annoncent la suite.
+ * Catalogue des jeux. En dur ici et non en base : un registre en base ne se
+ * justifiera que le jour où l'admin devra en ajouter sans déploiement.
  */
 const GAMES: CasinoGameTile[] = [
   {
@@ -32,18 +32,19 @@ const GAMES: CasinoGameTile[] = [
   {
     id: "roulette",
     title: "Roulette",
-    description: "Rouge, noir, plein. La bille décide.",
+    description:
+      "Roulette européenne, vrai tapis : plein, cheval, carré, douzaines, rouge ou noir.",
     icon: "🎯",
-    href: null,
-    status: "coming-soon",
+    href: "/casino/roulette",
+    status: "live",
   },
   {
     id: "slots",
     title: "Machine à sous",
-    description: "Trois rouleaux, un levier, et beaucoup d'espoir.",
+    description: "Trois rouleaux, cinq lignes, un levier, et beaucoup d'espoir.",
     icon: "🎰",
-    href: null,
-    status: "coming-soon",
+    href: "/casino/slots",
+    status: "live",
   },
   {
     id: "coinflip",
@@ -78,6 +79,15 @@ export default async function CasinoPage() {
   const games = GAMES.map((game) => {
     if (game.id === "blackjack") {
       return { ...game, hint: `Mise min. ${config.minBet} · jusqu'à 5 joueurs` };
+    }
+    if (game.id === "roulette") {
+      return { ...game, hint: `Mise min. ${config.minBet} · plein 35:1` };
+    }
+    if (game.id === "slots") {
+      return {
+        ...game,
+        hint: `Mise min. ${config.minBet} · retour ${SLOTS_RTP_PCT.toLocaleString("fr-FR")} %`,
+      };
     }
     if (game.id === "coinflip") {
       return {
