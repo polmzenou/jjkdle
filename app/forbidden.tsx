@@ -15,14 +15,18 @@ export const metadata: Metadata = {
 export default function Forbidden() {
   return (
     <>
-      <ErrorScreen
-        code={403}
-        title="Accès refusé"
-        message="Ton compte n'a pas les droits nécessaires pour ouvrir cette page."
-        homeHref="/"
-        homeLabel="Tous les univers"
-      />
-      <SiteFooter variant="neutral" />
+      <div className="flex min-h-screen flex-col">
+        <div className="flex-1">
+          <ErrorScreen
+            code={403}
+            title="Accès refusé"
+            message="Ton compte n'a pas les droits nécessaires pour ouvrir cette page."
+            homeHref="/"
+            homeLabel="Tous les univers"
+          />
+        </div>
+        <SiteFooter variant="neutral" />
+      </div>
     </>
   );
 }

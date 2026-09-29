@@ -18,8 +18,11 @@ export default function HubLayout({
   return (
     <>
       <style>{hubThemeCss()}</style>
-      {children}
-      <SiteFooter variant="neutral" />
+      {/* Colonne pleine hauteur : le footer reste collé en bas de l'écran. */}
+      <div className="flex min-h-screen flex-col">
+        <div className="flex-1">{children}</div>
+        <SiteFooter variant="neutral" />
+      </div>
     </>
   );
 }

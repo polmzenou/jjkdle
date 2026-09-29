@@ -15,14 +15,18 @@ export const metadata: Metadata = {
 export default function NotFound() {
   return (
     <>
-      <ErrorScreen
-        code={404}
-        title="Page introuvable"
-        message="Cette page n'existe pas, ou plus. Vérifie l'adresse, ou reviens sur tes pas."
-        homeHref="/"
-        homeLabel="Tous les univers"
-      />
-      <SiteFooter variant="neutral" />
+      <div className="flex min-h-screen flex-col">
+        <div className="flex-1">
+          <ErrorScreen
+            code={404}
+            title="Page introuvable"
+            message="Cette page n'existe pas, ou plus. Vérifie l'adresse, ou reviens sur tes pas."
+            homeHref="/"
+            homeLabel="Tous les univers"
+          />
+        </div>
+        <SiteFooter variant="neutral" />
+      </div>
     </>
   );
 }

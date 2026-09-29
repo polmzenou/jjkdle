@@ -120,7 +120,9 @@ export async function UniverseChrome({
             message={maintenance.message}
           />
         ) : (
-          <>
+          // Colonne pleine hauteur : le contenu prend la place restante, le
+          // footer reste collé en bas de l'écran même sur une page courte.
+          <div className="flex min-h-screen flex-col">
             {/* Bandeau admin : la maintenance est active mais l'admin passe. */}
             {maintenance.enabled && isAdmin && (
               <div className="sticky top-0 z-50 bg-cursed px-4 py-1.5 text-center text-xs font-bold uppercase tracking-wide text-white">
@@ -132,10 +134,10 @@ export async function UniverseChrome({
               cachedImageCount={cachedImageCount}
               universes={switcherUniverses}
             />
-            {children}
+            <div className="flex-1">{children}</div>
             <SiteFooter variant="universe" name={universe.config.name} />
             <TutorialButton />
-          </>
+          </div>
         )}
       </UniverseProvider>
     </>

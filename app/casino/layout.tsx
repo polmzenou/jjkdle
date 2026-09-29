@@ -35,13 +35,14 @@ export default async function CasinoLayout({
           recouvrait purement et simplement le décor du casino. Le fond opaque
           vit sur <html> (cf. app/globals.css) exactement pour cette raison —
           même écueil que CursedBackground et MangaDecor. */}
-      <div className="relative min-h-screen">
+      <div className="relative flex min-h-screen flex-col">
         <CasinoBackdrop />
         <CasinoNav
           coins={profile?.coins ?? null}
           username={user?.username ?? null}
         />
-        {children}
+        {/* flex-1 : le footer reste collé en bas même sur une page courte. */}
+        <div className="flex-1">{children}</div>
         <SiteFooter variant="neutral" />
       </div>
     </>

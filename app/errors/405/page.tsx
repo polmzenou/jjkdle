@@ -16,14 +16,18 @@ export const metadata: Metadata = {
 export default function MethodNotAllowed() {
   return (
     <>
-      <ErrorScreen
-        code={405}
-        title="Méthode non autorisée"
-        message="Cette page ne peut pas être appelée de cette façon. Reviens en arrière ou repars de l'accueil."
-        homeHref="/"
-        homeLabel="Tous les univers"
-      />
-      <SiteFooter variant="neutral" />
+      <div className="flex min-h-screen flex-col">
+        <div className="flex-1">
+          <ErrorScreen
+            code={405}
+            title="Méthode non autorisée"
+            message="Cette page ne peut pas être appelée de cette façon. Reviens en arrière ou repars de l'accueil."
+            homeHref="/"
+            homeLabel="Tous les univers"
+          />
+        </div>
+        <SiteFooter variant="neutral" />
+      </div>
     </>
   );
 }
