@@ -50,12 +50,11 @@ export interface Game {
   /** Chemin vers la page du jeu. */
   route: string;
   /**
-   * Visuel de la vignette sur le hub. Chemin vers un asset SVG maison, ou un
-   * emoji de fallback si l'asset n'existe pas encore.
+   * Visuel de la vignette sur le hub : chemin vers un asset SVG maison. Absent,
+   * le hub affiche le logo du jeu (`GameIcon`).
    */
   thumbnail?: string;
-  /** Emoji/glyphe de secours affiché si `thumbnail` est absent. */
-  glyph?: string;
+  // Le logo du jeu est un SVG maison indexé par `id` (components/icons/GameIcon).
   tags?: string[];
   /** Couleur d'accent (hex) de la carte sur le hub. Défaut : violet "domain". */
   accent?: string;

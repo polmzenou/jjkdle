@@ -8,7 +8,7 @@ import {
   getPendingBoosters,
 } from "@/lib/cards/store";
 import { DeckManager } from "@/components/cards/DeckManager";
-import { AccountTabs } from "../AccountTabs";
+import { UniverseLink } from "@/components/universe/UniverseLink";
 
 export const metadata: Metadata = {
   title: "Mon deck",
@@ -43,6 +43,13 @@ export default async function DeckPage() {
 
   return (
     <main className="mx-auto w-full max-w-[1600px] lg:w-3/4 px-5 py-10 sm:px-6 sm:py-16">
+      <UniverseLink
+        href="/account"
+        className="mb-6 inline-flex items-center gap-1.5 text-sm text-white/50 transition-colors hover:text-white"
+      >
+        ← Mon compte
+      </UniverseLink>
+
       <header className="mb-8">
         <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.3em] text-domain-light/70">
           <span
@@ -60,7 +67,6 @@ export default async function DeckPage() {
         </p>
       </header>
 
-      <AccountTabs />
 
       <DeckManager
         pendingBoosters={pendingBoosters}

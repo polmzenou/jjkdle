@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Game } from "@/lib/games/types";
 import { UniverseLink } from "@/components/universe/UniverseLink";
+import { GameIcon } from "@/components/icons/GameIcon";
+import { VersusIcon } from "@/components/icons/UiIcons";
 
 interface MultiplayerPickerProps {
   /** Jeux disposant d'un mode multi (déjà filtrés côté serveur depuis le registre). */
@@ -39,7 +41,7 @@ export function MultiplayerPicker({ games }: MultiplayerPickerProps) {
         onClick={() => setOpen(true)}
         className="group flex w-full flex-col items-center gap-4 rounded-3xl border border-domain/30 bg-gradient-to-br from-domain/15 to-cursed/10 p-8 text-center transition-transform hover:scale-[1.01] sm:flex-row sm:text-left"
       >
-        <span className="text-4xl">⚔️</span>
+        <VersusIcon className="h-10 w-10 shrink-0 text-domain-light" />
         <div className="flex-1">
           <h3 className="font-display text-xl font-bold text-white">
             Mode multijoueur
@@ -103,7 +105,7 @@ export function MultiplayerPicker({ games }: MultiplayerPickerProps) {
 
                   const body = (
                     <>
-                      <span className="text-2xl">{game.glyph ?? "🎮"}</span>
+                      <GameIcon id={game.id} className="h-7 w-7 shrink-0" style={{ color: accent }} />
                       <div className="min-w-0 flex-1">
                         <p className="font-display text-base font-bold text-white">
                           {game.title}

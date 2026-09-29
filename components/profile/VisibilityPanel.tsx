@@ -1,20 +1,25 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import {
   SECTION_LABELS,
   type ProfileLayout,
-  type ProfileSectionPref,
+  type ProfileSectionKey,
 } from "@/lib/profile/layout";
-import { updateProfileLayoutAction } from "@/app/[universe]/account/actions";
+import { DeckIcon } from "@/components/cards/CardIcons";
+import {
+  FrameIcon,
+  MedalIcon,
+  TagIcon,
+  TrophyIcon,
+} from "@/components/icons/UiIcons";
 
-interface ProfileLayoutEditorProps {
-  username: string;
-  initialLayout: ProfileLayout;
-}
+const SECTION_ICONS: Record<ProfileSectionKey, React.ReactNode> = {
+  badges: <MedalIcon className="h-5 w-5" />,
+  scores: <TrophyIcon className="h-5 w-5" />,
+  cards: <DeckIcon className="h-5 w-5" />,
+};
 
-/** Interrupteur on/off accessible (réutilisé pour chaque option). */
+/** Interrupteur on/off accessible. */
 function Toggle({
   checked,
   disabled,
@@ -47,154 +52,92 @@ function Toggle({
   );
 }
 
+function Row({
+  icon,
+  title,
+  hint,
+  children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  hint: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center gap-3 py-3">
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-domain/10 text-domain-light">
+        {icon}
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-bold text-white">{title}</p>
+        <p className="text-xs text-white/45">{hint}</p>
+      </div>
+      {children}
+    </div>
+  );
+}
+
 /**
- * Éditeur de la mise en page du profil public. Toggles d'en-tête (titre, cadre),
- * puis les sections de corps (badges, scores, deck) avec visibilité + réordonnancement
- * (↑/↓). Chaque modification est persistée immédiatement via
- * `updateProfileLayoutAction`, puis `router.refresh()` propage l'aperçu.
+ * Ce que le joueur expose sur son profil PUBLIC : titre, cadre, et chacune des
+ * sections du palmarès. L'ordre des sections est fixe (badges, puis scores |
+ * deck) — seule la visibilité se règle. Composant contrôlé : la modale persiste
+ * via `updateProfileLayoutAction`.
  */
-export function ProfileLayoutEditor({
-  username,
-  initialLayout,
-}: ProfileLayoutEditorProps) {
-  const router = useRouter();
-  const [pending, startTransition] = useTransition();
-  const [layout, setLayout] = useState<ProfileLayout>(initialLayout);
-  const [feedback, setFeedback] = useState<{ ok: boolean; msg: string } | null>(null);
-
-  /** Applique un nouveau layout en local, persiste, et rollback si échec. */
-  const commit = (next: ProfileLayout) => {
-    const previous = layout;
-    setLayout(next);
-    setFeedback(null);
-    startTransition(async () => {
-      const res = await updateProfileLayoutAction(next);
-      if (res.ok) {
-        setFeedback({ ok: true, msg: "Profil mis à jour." });
-        router.refresh();
-      } else {
-        setLayout(previous); // rollback optimiste
-        setFeedback({ ok: false, msg: res.error ?? "Échec de la mise à jour." });
-      }
-    });
-  };
-
-  const setShowTitle = (visible: boolean) => commit({ ...layout, showTitle: visible });
-  const setShowFrame = (visible: boolean) => commit({ ...layout, showFrame: visible });
-
-  const setSectionVisible = (key: ProfileSectionPref["key"], visible: boolean) =>
-    commit({
+export function VisibilityPanel({
+  layout,
+  onChange,
+  disabled,
+}: {
+  layout: ProfileLayout;
+  onChange: (next: ProfileLayout) => void;
+  disabled?: boolean;
+}) {
+  const sectionVisible = (key: ProfileSectionKey) =>
+    layout.sections.find((s) => s.key === key)?.visible ?? true;
+  const setSection = (key: ProfileSectionKey, visible: boolean) =>
+    onChange({
       ...layout,
       sections: layout.sections.map((s) => (s.key === key ? { ...s, visible } : s)),
     });
 
-  const move = (index: number, delta: -1 | 1) => {
-    const target = index + delta;
-    if (target < 0 || target >= layout.sections.length) return;
-    const sections = [...layout.sections];
-    [sections[index], sections[target]] = [sections[target], sections[index]];
-    commit({ ...layout, sections });
-  };
-
   return (
-    <div className="space-y-6">
-      {feedback && (
-        <p className={`text-sm ${feedback.ok ? "text-emerald-400" : "text-cursed-light"}`}>
-          {feedback.msg}
-        </p>
-      )}
+    <div className="space-y-5">
+      <p className="text-sm text-white/55">
+        Choisis ce que les autres joueurs voient sur ton profil public. Le pseudo,
+        l'avatar, la bannière et le niveau restent toujours affichés.
+      </p>
 
-      {/* En-tête : titre + cadre (visibilité seule, ancrés sous le pseudo / autour de l'avatar) */}
-      <section className="rounded-2xl border border-white/10 bg-void-800/60 p-5 backdrop-blur">
-        <h2 className="mb-1 font-display text-lg font-bold uppercase tracking-wider text-white/80">
-          Sous le pseudo
-        </h2>
-        <p className="mb-4 text-xs text-white/45">
-          Le pseudo, l'avatar et la bannière de {username} restent toujours tout
-          en haut. Tu choisis seulement si le titre et le cadre s'affichent.
-        </p>
+      <div className="divide-y divide-white/5 rounded-2xl border border-white/10 bg-void-900/40 px-4">
+        <Row icon={<TagIcon className="h-5 w-5" />} title="Titre sous le pseudo" hint="Affiche ton titre équipé.">
+          <Toggle
+            checked={layout.showTitle}
+            disabled={disabled}
+            onChange={(v) => onChange({ ...layout, showTitle: v })}
+            label="Afficher le titre sous le pseudo"
+          />
+        </Row>
+        <Row icon={<FrameIcon className="h-5 w-5" />} title="Cadre autour de la photo" hint="Affiche le cadre équipé autour de ton avatar.">
+          <Toggle
+            checked={layout.showFrame}
+            disabled={disabled}
+            onChange={(v) => onChange({ ...layout, showFrame: v })}
+            label="Afficher le cadre autour de la photo de profil"
+          />
+        </Row>
+      </div>
 
-        <div className="divide-y divide-white/5">
-          <div className="flex items-center justify-between gap-4 py-3">
-            <div className="min-w-0">
-              <p className="text-sm font-bold text-white">Titre sous le pseudo</p>
-              <p className="text-xs text-white/45">Affiche ton titre équipé.</p>
-            </div>
+      <div className="divide-y divide-white/5 rounded-2xl border border-white/10 bg-void-900/40 px-4">
+        {(Object.keys(SECTION_LABELS) as ProfileSectionKey[]).map((key) => (
+          <Row key={key} icon={SECTION_ICONS[key]} title={SECTION_LABELS[key]} hint="Section du palmarès.">
             <Toggle
-              checked={layout.showTitle}
-              disabled={pending}
-              onChange={setShowTitle}
-              label="Afficher le titre sous le pseudo"
+              checked={sectionVisible(key)}
+              disabled={disabled}
+              onChange={(v) => setSection(key, v)}
+              label={`Afficher ${SECTION_LABELS[key]}`}
             />
-          </div>
-          <div className="flex items-center justify-between gap-4 py-3">
-            <div className="min-w-0">
-              <p className="text-sm font-bold text-white">Cadre autour de la photo</p>
-              <p className="text-xs text-white/45">Affiche le cadre équipé autour de ton avatar.</p>
-            </div>
-            <Toggle
-              checked={layout.showFrame}
-              disabled={pending}
-              onChange={setShowFrame}
-              label="Afficher le cadre autour de la photo de profil"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Sections de corps : badges + scores + deck (visibilité + ordre) */}
-      <section className="rounded-2xl border border-white/10 bg-void-800/60 p-5 backdrop-blur">
-        <h2 className="mb-1 font-display text-lg font-bold uppercase tracking-wider text-white/80">
-          Sections du profil
-        </h2>
-        <p className="mb-4 text-xs text-white/45">
-          Choisis ce que tu exposes et réordonne avec les flèches. L'ordre ici est
-          celui qui s'affiche sur ton profil public.
-        </p>
-
-        <ul className="space-y-2">
-          {layout.sections.map((s, i) => (
-            <li
-              key={s.key}
-              className={`flex items-center gap-3 rounded-xl border p-3 transition-colors ${
-                s.visible ? "border-white/10 bg-void-900/40" : "border-white/5 bg-void-900/20 opacity-70"
-              }`}
-            >
-              <div className="flex flex-col">
-                <button
-                  type="button"
-                  disabled={pending || i === 0}
-                  onClick={() => move(i, -1)}
-                  aria-label={`Monter ${SECTION_LABELS[s.key]}`}
-                  className="px-1 text-white/50 hover:text-white disabled:opacity-25"
-                >
-                  ▲
-                </button>
-                <button
-                  type="button"
-                  disabled={pending || i === layout.sections.length - 1}
-                  onClick={() => move(i, 1)}
-                  aria-label={`Descendre ${SECTION_LABELS[s.key]}`}
-                  className="px-1 text-white/50 hover:text-white disabled:opacity-25"
-                >
-                  ▼
-                </button>
-              </div>
-
-              <span className="min-w-0 flex-1 truncate text-sm font-bold text-white">
-                {SECTION_LABELS[s.key]}
-              </span>
-
-              <Toggle
-                checked={s.visible}
-                disabled={pending}
-                onChange={(v) => setSectionVisible(s.key, v)}
-                label={`Afficher ${SECTION_LABELS[s.key]}`}
-              />
-            </li>
-          ))}
-        </ul>
-      </section>
+          </Row>
+        ))}
+      </div>
     </div>
   );
 }

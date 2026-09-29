@@ -25,7 +25,7 @@ import type {
 /**
  * Onglet DECK : boosters en attente, deck équipé, collection.
  *
- * Suit le motif de mutation du repo (`components/profile/TitleSelector.tsx`) :
+ * Suit le motif de mutation du repo (`app/[universe]/account/ProfileEditModal.tsx`) :
  * `useTransition` + server action + `router.refresh()`, avec un bandeau de
  * feedback emerald/cursed. Pas d'optimisme ici — l'ouverture d'un booster et la
  * revente changent le solde de coins, mieux vaut afficher l'état confirmé.

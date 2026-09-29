@@ -2,6 +2,7 @@ import { MAX_SCORE, type LeaderboardGame, type UserScore } from "@/lib/leaderboa
 import { BOSSES } from "@/lib/games/draft/scoring";
 import { getGrade } from "@/lib/scoring/grades";
 import { universeGames } from "@/lib/games/universe";
+import { GameIcon } from "@/components/icons/GameIcon";
 
 /**
  * Grille des cartes de score d'un joueur (récap perso `/account` et profil
@@ -19,7 +20,6 @@ export async function ScoreCards({ scores }: { scores: UserScore[] }) {
       {scores.map((s) => {
         const meta = games.find((g) => g.id === s.gameId);
         const title = meta?.title ?? s.gameId;
-        const glyph = meta?.glyph ?? "🎮";
         const accent = meta?.accent ?? "#7c3aed";
         const max =
           s.gameId === "jujutsu-draft"
@@ -43,7 +43,7 @@ export async function ScoreCards({ scores }: { scores: UserScore[] }) {
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="flex items-center gap-2 font-display font-bold text-white">
-                  <span aria-hidden>{glyph}</span>
+                  <GameIcon id={s.gameId} className="h-5 w-5 shrink-0" style={{ color: accent }} />
                   <span className="truncate">{title}</span>
                 </p>
                 <p className="mt-1 text-xs uppercase tracking-wider text-white/45">

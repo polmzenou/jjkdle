@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import type { CSSProperties } from "react";
 import { useUniverseGames } from "@/components/universe/UniverseProvider";
 import { UniverseLink } from "@/components/universe/UniverseLink";
+import { GameIcon } from "@/components/icons/GameIcon";
 
 /**
  * Présentation des jeux sur la landing : pour chaque jeu en ligne, une rangée
@@ -57,8 +58,8 @@ export function GameShowcase({ disabledIds = [] }: { disabledIds?: string[] }) {
                     className="relative aspect-[2/1] w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                   />
                 ) : (
-                  <div className="relative grid aspect-[2/1] w-full place-items-center text-6xl">
-                    {game.glyph}
+                  <div className="relative grid aspect-[2/1] w-full place-items-center">
+                    <GameIcon id={game.id} className="h-24 w-24" style={{ color: "var(--accent)" }} />
                   </div>
                 )}
                 {/* Liseré d'accent en haut */}

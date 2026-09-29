@@ -2,6 +2,15 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { GameIcon } from "@/components/icons/GameIcon";
+import {
+  CalendarIcon,
+  FrameIcon,
+  GamepadIcon,
+  SparkleIcon,
+  TagIcon,
+  TrophyIcon,
+} from "@/components/icons/UiIcons";
 import {
   useGameTitle,
   useUniverse,
@@ -29,10 +38,13 @@ function GamesStep() {
         >
           <span
             aria-hidden
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-lg"
-            style={{ background: `${g.accent ?? "#7c3aed"}22` }}
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-lg"
+            style={{
+              background: `${g.accent ?? "#7c3aed"}22`,
+              color: g.accent ?? "#7c3aed",
+            }}
           >
-            {g.glyph}
+            <GameIcon id={g.id} className="h-5 w-5" />
           </span>
           <div className="min-w-0">
             <p className="font-display text-sm font-bold text-white">
@@ -113,15 +125,15 @@ function buildSteps(name: string, sourceWork: string): Step[] {
         </p>
         <ul className="space-y-2">
           <li className="flex items-center gap-2">
-            <span aria-hidden>🎮</span> Terminer une partie rapporte de l'XP de
+            <GamepadIcon className="h-4 w-4 shrink-0 text-domain-light" /> Terminer une partie rapporte de l'XP de
             base.
           </li>
           <li className="flex items-center gap-2">
-            <span aria-hidden>🏆</span> Battre ton record ou viser un grade élevé
+            <TrophyIcon className="h-4 w-4 shrink-0 text-domain-light" /> Battre ton record ou viser un grade élevé
             donne un bonus.
           </li>
           <li className="flex items-center gap-2">
-            <span aria-hidden>📅</span> Les défis quotidiens (comme{" "}
+            <CalendarIcon className="h-4 w-4 shrink-0 text-domain-light" /> Les défis quotidiens (comme{" "}
             <DailyGameName />)
             offrent un gain supplémentaire chaque jour.
           </li>
@@ -180,14 +192,14 @@ function buildSteps(name: string, sourceWork: string): Step[] {
         </p>
         <ul className="space-y-2">
           <li className="flex items-center gap-2">
-            <span aria-hidden>🎴</span> Bordures et thèmes de carte de joueur.
+            <FrameIcon className="h-4 w-4 shrink-0 text-domain-light" /> Bordures et thèmes de carte de joueur.
           </li>
           <li className="flex items-center gap-2">
-            <span aria-hidden>🏷️</span> Badges et titres affichés à côté de ton
+            <TagIcon className="h-4 w-4 shrink-0 text-domain-light" /> Badges et titres affichés à côté de ton
             pseudo.
           </li>
           <li className="flex items-center gap-2">
-            <span aria-hidden>✨</span> Effets visuels exclusifs aux grades les
+            <SparkleIcon className="h-4 w-4 shrink-0 text-domain-light" /> Effets visuels exclusifs aux grades les
             plus élevés.
           </li>
         </ul>

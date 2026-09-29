@@ -1,15 +1,18 @@
 /**
  * Mise en page du profil PUBLIC (`/u/[username]`).
  *
- * Le joueur choisit, depuis `/account/customize`, ce qu'il expose sur son profil
- * public et dans quel ordre. Le bloc d'en-tête (bannière + avatar + pseudo +
- * barre de niveau) est TOUJOURS affiché tout en haut et n'est pas configurable.
+ * Le joueur choisit, depuis l'onglet « Visibilité » de la modale EDIT de
+ * `/account`, ce qu'il expose sur son profil public. Le bloc d'en-tête
+ * (bannière + avatar + pseudo + barre de niveau) est TOUJOURS affiché tout en
+ * haut et n'est pas configurable.
  *
  * Deux familles d'options :
  *  - Toggles d'en-tête (`showTitle`, `showFrame`) : le titre sous le pseudo et le
  *    cadre autour de l'avatar sont ancrés à l'en-tête → visibilité seule.
- *  - Sections de corps (`sections`) : badges et scores. L'ORDRE du tableau = ordre
- *    d'affichage ; chaque entrée porte sa propre visibilité.
+ *  - Sections de corps (`sections`) : badges, scores, deck. Chaque entrée porte
+ *    sa visibilité. L'ordre d'affichage est FIXE depuis la refonte du profil
+ *    (badges, puis scores | deck) : l'ordre du tableau est conservé en base mais
+ *    n'est plus lu.
  *
  * La préférence est stockée en JSON libre sur `User.profileLayout` puis
  * normalisée à la lecture par `normalizeProfileLayout` (source de vérité = ce
@@ -20,11 +23,11 @@
 export const PROFILE_SECTIONS = ["badges", "scores", "cards"] as const;
 export type ProfileSectionKey = (typeof PROFILE_SECTIONS)[number];
 
-/** Libellé humain d'une section (UI de customisation). */
+/** Libellé humain d'une section (UI de customisation ; l'icône est posée par l'UI). */
 export const SECTION_LABELS: Record<ProfileSectionKey, string> = {
-  badges: "🎖️ Badges",
-  scores: "🏆 Scores leaderboards",
-  cards: "🃏 Deck de cartes",
+  badges: "Badges",
+  scores: "Scores leaderboards",
+  cards: "Deck de cartes",
 };
 
 /** Visibilité + position d'une section de corps. */

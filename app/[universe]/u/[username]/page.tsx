@@ -3,26 +3,18 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUniverse } from "@/lib/universes/current";
 import { bannerStyle } from "@/lib/profile/banners";
-import {
-  normalizeProfileLayout,
-  type ProfileSectionKey,
-} from "@/lib/profile/layout";
-import { UserAvatar } from "@/components/UserAvatar";
-import { LevelBar } from "@/components/LevelBar";
-import { VipBadge } from "@/components/VipBadge";
-import { TitleBadge } from "@/components/TitleBadge";
-import { BadgeShelf } from "@/components/badges/BadgeShelf";
-import { DeckShowcase } from "@/components/cards/DeckShowcase";
+import { normalizeProfileLayout } from "@/lib/profile/layout";
 import { getCurrentUser } from "@/lib/auth/session";
-import { ScoreCards } from "@/components/profile/ScoreCards";
 import { getDeckShowcase } from "@/lib/cards/store";
 import { getUserScores } from "@/lib/leaderboard/store";
 import { getUserDraftScore } from "@/lib/games/draft/store";
 import { getUserJjkdleScore } from "@/lib/games/jjkdle/leaderboard";
 import { getUserHigherLowerScore } from "@/lib/games/higher-lower/store";
 import { getUserGuessWhoStats } from "@/lib/games/guesswho/stats";
+import { ProfileHero } from "@/components/profile/ProfileHero";
+import { ProfileStats } from "@/components/profile/ProfileStats";
+import { PalmaresView } from "@/components/profile/PalmaresView";
 import { UniverseLink } from "@/components/universe/UniverseLink";
-import { universeGameTitle } from "@/lib/games/universe";
 
 export const dynamic = "force-dynamic";
 
@@ -36,14 +28,15 @@ async function getPublicProfile(username: string) {
       id: true,
       username: true,
       role: true,
-      level: true,
       totalXp: true,
+      level: true,
       badges: { select: { badgeKey: true } },
       universeProfiles: {
         where: { universeId },
         select: {
           bannerKey: true,
           jjkdleStreak: true,
+          jjkdleBestStreak: true,
           equippedTitleKey: true,
           equippedFrameKey: true,
           profileLayout: true,
@@ -70,13 +63,12 @@ export async function generateMetadata({
 }
 
 /**
- * Profil PUBLIC d'un joueur : bannière, avatar, pseudo, niveau et badges.
- * Aucune donnée sensible (ni email, ni édition) — accessible à tous via un clic
- * sur le pseudo dans un leaderboard ou depuis l'admin.
+ * Profil PUBLIC d'un joueur : le même hero et le même Palmarès que `/account`,
+ * sans le bouton EDIT ni la bascule Mon compte / Palmarès. Aucune donnée
+ * sensible (ni email, ni édition).
  *
- * Ce que le joueur expose (titre, cadre, badges, scores) et l'ordre des sections
- * suivent ses préférences (`profileLayout`, cf. /account/customize). L'en-tête
- * (bannière + avatar + pseudo + niveau) reste toujours en haut.
+ * Le joueur choisit ce qu'il expose (titre, cadre, badges, scores, deck) depuis
+ * l'onglet « Visibilité » de sa modale d'édition ; l'ordre des sections est fixe.
  */
 export default async function PublicProfilePage({
   params,
@@ -94,126 +86,44 @@ export default async function PublicProfilePage({
 
   // Loadout + streak de l'univers courant (0 ou 1 ligne).
   const prof = profile.universeProfiles[0];
-  const banner = bannerStyle(prof?.bannerKey);
   const layout = normalizeProfileLayout(prof?.profileLayout ?? null);
-  const jjkdleStreak = prof?.jjkdleStreak ?? 0;
-  // Le streak porte le nom du jeu du jour DANS CET UNIVERS.
-  const dailyTitle = await universeGameTitle("jjkdle");
+  const visible = (key: "badges" | "scores" | "cards") =>
+    layout.sections.find((s) => s.key === key)?.visible ?? true;
+  const visibility = {
+    badges: visible("badges"),
+    scores: visible("scores"),
+    cards: visible("cards"),
+  };
 
-  // Scores agrégés (un seul fetch ; non rendus si la section est masquée).
-  const showScores = layout.sections.some(
-    (s) => s.key === "scores" && s.visible,
-  );
+  // Les scores alimentent aussi la carte « Meilleur rang » : toujours chargés.
   const [
     classicScores,
     draftScore,
     jjkdleScore,
     higherLowerScore,
     guessWhoStats,
-  ] = showScores
-    ? await Promise.all([
-        getUserScores(profile.id),
-        getUserDraftScore(profile.id),
-        getUserJjkdleScore(profile.id),
-        getUserHigherLowerScore(profile.id),
-        getUserGuessWhoStats(profile.id),
-      ])
-    : [[], null, null, null, null];
+    deckShowcase,
+  ] = await Promise.all([
+    getUserScores(profile.id),
+    getUserDraftScore(profile.id),
+    getUserJjkdleScore(profile.id),
+    getUserHigherLowerScore(profile.id),
+    visibility.scores ? getUserGuessWhoStats(profile.id) : null,
+    visibility.cards ? getDeckShowcase(profile.id, universeId) : null,
+  ]);
   const scores = [
     ...classicScores,
     ...(draftScore ? [draftScore] : []),
     ...(jjkdleScore ? [jjkdleScore] : []),
     ...(higherLowerScore ? [higherLowerScore] : []),
   ];
-  const hasAnyScore = scores.length > 0 || Boolean(guessWhoStats);
-
-  // Deck équipé de l'univers courant (non chargé si la section est masquée).
-  const showCards = layout.sections.some((s) => s.key === "cards" && s.visible);
-  const deckShowcase = showCards
-    ? await getDeckShowcase(profile.id, universeId)
-    : null;
+  const badgeKeys = profile.badges.map((b) => b.badgeKey);
   // Le propriétaire qui consulte son propre profil garde ses raccourcis vers
   // /account/deck ; un visiteur ne voit que la vitrine.
   const isOwner = viewer?.id === profile.id;
 
-  /** Rend une section de corps selon son type (respecte l'ordre du layout). */
-  const renderSection = (key: ProfileSectionKey) => {
-    if (key === "cards") {
-      return (
-        <section key="cards" className="mt-10">
-          <h2 className="mb-4 font-display text-lg font-bold uppercase tracking-wider text-white/80">
-            Deck
-          </h2>
-          {deckShowcase && (
-            <DeckShowcase data={deckShowcase} isOwner={isOwner} />
-          )}
-        </section>
-      );
-    }
-    if (key === "badges") {
-      return (
-        <section key="badges" className="mt-10">
-          <h2 className="mb-4 font-display text-lg font-bold uppercase tracking-wider text-white/80">
-            Badges
-          </h2>
-          <BadgeShelf
-            unlockedKeys={profile.badges.map((b) => b.badgeKey)}
-            universeSlug={universeSlug}
-          />
-        </section>
-      );
-    }
-    return (
-      <section key="scores" className="mt-10">
-        <h2 className="mb-4 font-display text-lg font-bold uppercase tracking-wider text-white/80">
-          Scores
-        </h2>
-        {!hasAnyScore ? (
-          <div className="rounded-2xl border border-white/10 bg-void-800/60 px-6 py-10 text-center backdrop-blur">
-            <p className="text-white/55">
-              Aucun score enregistré pour le moment.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {scores.length > 0 && <ScoreCards scores={scores} />}
-            {guessWhoStats && (
-              <article className="relative overflow-hidden rounded-2xl border border-white/10 bg-void-800/60 p-5 backdrop-blur">
-                <span
-                  aria-hidden
-                  className="absolute inset-x-0 top-0 h-px"
-                  style={{
-                    background:
-                      "linear-gradient(90deg, transparent, rgb(var(--color-domain)), transparent)",
-                  }}
-                />
-                <p className="flex items-center gap-2 font-display font-bold text-white">
-                  <span>Qui est-ce ?</span>
-                </p>
-                <p className="mt-1 text-xs uppercase tracking-wider text-white/45">
-                  {guessWhoStats.total} partie
-                  {guessWhoStats.total > 1 ? "s" : ""} jouée
-                  {guessWhoStats.total > 1 ? "s" : ""}
-                </p>
-                <p className="mt-4 font-display text-3xl font-black text-domain-light">
-                  {guessWhoStats.wins}
-                  <span className="text-white/35"> V</span>
-                  <span className="mx-2 align-middle text-lg text-white/25">
-                    /
-                  </span>
-                  {guessWhoStats.losses}
-                  <span className="text-white/35"> D</span>
-                </p>
-              </article>
-            )}
-          </div>
-        )}
-      </section>
-    );
-  };
-
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 py-12 sm:py-16">
+    <main className="mx-auto w-full max-w-[1600px] px-5 py-10 sm:px-6 sm:py-14 lg:w-3/4">
       <UniverseLink
         href="/games"
         className="mb-6 inline-flex items-center gap-1.5 text-sm text-white/50 transition-colors hover:text-white"
@@ -221,50 +131,36 @@ export default async function PublicProfilePage({
         ← Retour aux jeux
       </UniverseLink>
 
-      {/* Bannière + avatar + niveau (toujours en haut) */}
-      <div
-        className="relative overflow-hidden rounded-2xl border border-white/10 p-5"
-        style={{ background: banner.gradient }}
-      >
-        <div className="flex flex-wrap items-center gap-4">
-          <UserAvatar
-            username={profile.username}
-            image={prof?.avatarCharacter?.image}
-            level={profile.level}
-            frameKey={
-              layout.showFrame ? (prof?.equippedFrameKey ?? null) : null
-            }
-            size={72}
+      <ProfileHero
+        username={profile.username}
+        role={profile.role}
+        avatarImage={prof?.avatarCharacter?.image}
+        frameKey={layout.showFrame ? (prof?.equippedFrameKey ?? null) : null}
+        titleKey={layout.showTitle ? (prof?.equippedTitleKey ?? null) : null}
+        totalXp={profile.totalXp}
+        bannerGradient={bannerStyle(prof?.bannerKey).gradient}
+        stats={
+          <ProfileStats
+            streak={prof?.jjkdleStreak ?? 0}
+            bestStreak={prof?.jjkdleBestStreak ?? 0}
+            badgeKeys={badgeKeys}
+            universeSlug={universeSlug}
+            scores={scores}
           />
-          <div className="min-w-0">
-            <h1 className="font-display text-3xl font-black tracking-tight text-white drop-shadow sm:text-4xl">
-              {profile.username}
-              {profile.role === "VIP" && <VipBadge className="ml-2 text-sm" />}
-            </h1>
-            {layout.showTitle && prof?.equippedTitleKey && (
-              <TitleBadge
-                titleKey={prof.equippedTitleKey}
-                className="mt-1.5 text-sm"
-              />
-            )}
-            {jjkdleStreak > 0 && (
-              <p className="mt-1 text-sm font-bold text-white/85">
-                {jjkdleStreak} jour{jjkdleStreak > 1 ? "s" : ""} de streak{" "}
-                {dailyTitle}
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
+        }
+      />
 
-      <div className="mt-4 rounded-2xl border border-white/10 bg-void-800/60 p-5 backdrop-blur">
-        <LevelBar totalXp={profile.totalXp} />
+      <div className="mt-10">
+        <PalmaresView
+          badgeKeys={badgeKeys}
+          universeSlug={universeSlug}
+          scores={scores}
+          guessWhoStats={guessWhoStats}
+          deckShowcase={deckShowcase}
+          isOwner={isOwner}
+          visibility={visibility}
+        />
       </div>
-
-      {/* Sections de corps dans l'ordre choisi par le joueur */}
-      {layout.sections
-        .filter((s) => s.visible)
-        .map((s) => renderSection(s.key))}
     </main>
   );
 }

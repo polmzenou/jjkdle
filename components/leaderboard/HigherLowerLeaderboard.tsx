@@ -8,6 +8,8 @@ import { TitleBadge } from "@/components/TitleBadge";
 import { UserAvatar } from "@/components/UserAvatar";
 import { ScopeToggle } from "./ScopeToggle";
 import { UniverseLink } from "@/components/universe/UniverseLink";
+import { GameIcon } from "@/components/icons/GameIcon";
+import { TrophyIcon } from "@/components/icons/UiIcons";
 
 /** Couleurs des médailles : 1er Or, 2e Argent, 3e Bronze. */
 const MEDALS = [
@@ -38,8 +40,9 @@ export async function HigherLowerLeaderboard({
       className="rounded-2xl border border-white/10 bg-void-800/40 p-5 backdrop-blur"
     >
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <h2 className="font-display text-sm font-bold uppercase tracking-[0.2em] text-domain-light">
-          🏆 Leaderboard 📊 Higher/Lower
+        <h2 className="flex items-center gap-2 font-display text-sm font-bold uppercase tracking-[0.2em] text-domain-light">
+          <TrophyIcon className="h-4 w-4 shrink-0" /> Leaderboard{" "}
+          <GameIcon id="higher-lower" className="h-4 w-4 shrink-0" /> Higher/Lower
         </h2>
         <span className="h-px flex-1 bg-gradient-to-r from-domain/40 to-transparent" />
         <ScopeToggle scope={scope} />

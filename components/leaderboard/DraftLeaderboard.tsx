@@ -8,6 +8,8 @@ import { TitleBadge } from "@/components/TitleBadge";
 import { UserAvatar } from "@/components/UserAvatar";
 import { ScopeToggle } from "./ScopeToggle";
 import { UniverseLink } from "@/components/universe/UniverseLink";
+import { GameIcon } from "@/components/icons/GameIcon";
+import { TrophyIcon } from "@/components/icons/UiIcons";
 import { universeGameTitle } from "@/lib/games/universe";
 
 /** Couleurs des médailles : 1er Or, 2e Argent, 3e Bronze. */
@@ -41,8 +43,9 @@ export async function DraftLeaderboard({
       className="rounded-2xl border border-white/10 bg-void-800/40 p-5 backdrop-blur"
     >
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <h2 className="font-display text-sm font-bold uppercase tracking-[0.2em] text-amber-200">
-          🏆 Leaderboard ⚔️ {title}
+        <h2 className="flex items-center gap-2 font-display text-sm font-bold uppercase tracking-[0.2em] text-amber-200">
+          <TrophyIcon className="h-4 w-4 shrink-0" /> Leaderboard{" "}
+          <GameIcon id="jujutsu-draft" className="h-4 w-4 shrink-0" /> {title}
         </h2>
         <span className="h-px flex-1 bg-gradient-to-r from-amber-300/30 to-transparent" />
         <ScopeToggle scope={scope} />

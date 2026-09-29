@@ -100,7 +100,7 @@ export async function equipFrameAction(
 
 /**
  * Enregistre la mise en page du profil PUBLIC (visibilité titre/cadre/badges/
- * scores + ordre des sections). Le client envoie un layout potentiellement
+ * scores/deck). Le client envoie un layout potentiellement
  * partiel ; on le NORMALISE serveur (source de vérité = lib/profile/layout) avant
  * persistance, donc aucune validation de clé n'est nécessaire ici.
  */
@@ -116,7 +116,7 @@ export async function updateProfileLayoutAction(
   await updateUniverseLoadout(user.id, {
     profileLayout: normalized as unknown as Prisma.InputJsonValue,
   });
-  await revalidateUniversePath("/account/customize");
+  await revalidateUniversePath("/account");
   await revalidateUniversePath(`/u/${encodeURIComponent(user.username)}`);
   return { ok: true };
 }

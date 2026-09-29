@@ -33,3 +33,29 @@ export function LevelBar({ totalXp, className = "" }: LevelBarProps) {
     </div>
   );
 }
+
+/**
+ * Variante « bord à bord » de la barre d'XP : pleine largeur, sans libellé ni
+ * arrondi, collée sous une bannière (hero de profil). Les chiffres sont affichés
+ * par le parent, qui dispose d'`xpToLevel` s'il en a besoin.
+ */
+export function XpStrip({ totalXp, className = "" }: LevelBarProps) {
+  const { current, needed } = xpToLevel(totalXp);
+  const pct = needed > 0 ? Math.min(100, Math.round((current / needed) * 100)) : 0;
+
+  return (
+    <div
+      role="progressbar"
+      aria-label="Progression vers le niveau suivant"
+      aria-valuemin={0}
+      aria-valuemax={needed}
+      aria-valuenow={current}
+      className={`h-2.5 w-full bg-void-900 ${className}`}
+    >
+      <div
+        className="h-full bg-gradient-to-r from-domain-dark via-domain to-domain-light shadow-glow transition-[width] duration-500"
+        style={{ width: `${pct}%` }}
+      />
+    </div>
+  );
+}

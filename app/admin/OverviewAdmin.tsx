@@ -16,6 +16,12 @@ import {
 } from "recharts";
 import type { OverviewStats } from "@/lib/admin/analytics";
 import { useGameTitle } from "@/components/universe/UniverseProvider";
+import {
+  AlertIcon,
+  GamepadIcon,
+  ImageIcon,
+  UsersIcon,
+} from "@/components/icons/UiIcons";
 
 /**
  * Onglet « Vue d'ensemble » : cartes KPI + graphes recharts, themés avec les
@@ -61,14 +67,14 @@ export function OverviewAdmin({
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
           title="Joueurs"
-          glyph="👥"
+          icon={<UsersIcon className="h-5 w-5" />}
           value={players.total}
           accent={DOMAIN_LIGHT}
           sub={`+${players.new7d} sur 7j · +${players.new30d} sur 30j`}
         />
         <KpiCard
           title="Parties (tous jeux)"
-          glyph="🎮"
+          icon={<GamepadIcon className="h-5 w-5" />}
           value={gamesPlayed.reduce((s, g) => s + (g.count ?? 0), 0)}
           accent="#38bdf8"
           sub="scores enregistrés"
@@ -81,7 +87,7 @@ export function OverviewAdmin({
         >
           <KpiCard
             title="Persos incomplets"
-            glyph="⚠️"
+            icon={<AlertIcon className="h-5 w-5" />}
             value={content.incomplete}
             accent={content.incomplete > 0 ? "#f87171" : "#34d399"}
             sub={`sur ${content.total} · exclus du pool ${dailyTitle} →`}
@@ -95,7 +101,7 @@ export function OverviewAdmin({
         >
           <KpiCard
             title="Persos sans image"
-            glyph="🖼️"
+            icon={<ImageIcon className="h-5 w-5" />}
             value={content.missingImage}
             accent={content.missingImage > 0 ? "#fbbf24" : "#34d399"}
             sub={`sur ${content.total} →`}
@@ -207,7 +213,7 @@ export function OverviewAdmin({
           </h2>
           {dailyWord.forcedActive && (
             <span className="rounded-full border border-amber-400/40 bg-amber-400/10 px-2.5 py-0.5 text-[11px] font-bold text-amber-300">
-              ⚠ Override actif
+              <AlertIcon className="-mt-px mr-1 inline h-3.5 w-3.5 align-middle" />Override actif
             </span>
           )}
         </div>
@@ -240,13 +246,13 @@ export function OverviewAdmin({
 
 function KpiCard({
   title,
-  glyph,
+  icon,
   value,
   accent,
   sub,
 }: {
   title: string;
-  glyph: string;
+  icon: React.ReactNode;
   value: number;
   accent: string;
   sub?: string;
@@ -259,7 +265,9 @@ function KpiCard({
         style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }}
       />
       <p className="flex items-center gap-2 font-display font-bold text-white">
-        <span aria-hidden>{glyph}</span>
+        <span className="shrink-0" style={{ color: accent }}>
+          {icon}
+        </span>
         <span>{title}</span>
       </p>
       <p className="mt-3 font-display text-3xl font-black" style={{ color: accent }}>

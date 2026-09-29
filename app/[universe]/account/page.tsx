@@ -5,17 +5,11 @@ import { getUserScores } from "@/lib/leaderboard/store";
 import { getUserDraftScore } from "@/lib/games/draft/store";
 import { getUserJjkdleScore } from "@/lib/games/jjkdle/leaderboard";
 import { getUserHigherLowerScore } from "@/lib/games/higher-lower/store";
-import { VipBadge } from "@/components/VipBadge";
-import { UserAvatar } from "@/components/UserAvatar";
-import { LevelBar } from "@/components/LevelBar";
-import { BadgeShelf } from "@/components/badges/BadgeShelf";
-import { DeckShowcase } from "@/components/cards/DeckShowcase";
+import { getUserGuessWhoStats } from "@/lib/games/guesswho/stats";
 import { getDeckShowcase } from "@/lib/cards/store";
-import { ScoreCards } from "@/components/profile/ScoreCards";
-import { TitleBadge } from "@/components/TitleBadge";
-import { TitleSelector } from "@/components/profile/TitleSelector";
-import { FrameSelector } from "@/components/profile/FrameSelector";
 import { bannerStyle } from "@/lib/profile/banners";
+import { normalizeProfileLayout } from "@/lib/profile/layout";
+import { isEditTab } from "@/lib/profile/edit-tabs";
 import { getUserBadgeKeys } from "@/lib/badges/evaluate";
 import {
   buildUnlockContext,
@@ -25,13 +19,15 @@ import {
 import { getTitleGrantKeys, getFrameGrantKeys } from "@/lib/cosmetics/grants";
 import { getRoster } from "@/lib/content/queries";
 import { getCurrentUniverse } from "@/lib/universes/current";
-import { badgesForUniverse } from "@/lib/badges/definitions";
-import { universeGameTitle } from "@/lib/games/universe";
 import { prisma } from "@/lib/prisma";
-import { AccountForms } from "./AccountForms";
-import { AccountTabs } from "./AccountTabs";
-import { ProfileEditor, type AvatarChoice } from "./ProfileEditor";
+import { ProfileHero } from "@/components/profile/ProfileHero";
+import { ProfileStats } from "@/components/profile/ProfileStats";
+import { PalmaresView } from "@/components/profile/PalmaresView";
+import type { AvatarChoice } from "@/components/profile/BannerPicker";
 import { UniverseLink } from "@/components/universe/UniverseLink";
+import { AccountForms } from "./AccountForms";
+import { AccountView } from "./AccountView";
+import { ProfileEditLauncher } from "./ProfileEditModal";
 
 export const metadata: Metadata = {
   title: "Mon compte",
@@ -40,21 +36,30 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function AccountPage() {
+/**
+ * Espace « Mon compte » : hero de profil (bannière, avatar, niveau, EDIT, stats)
+ * puis la bascule MON COMPTE | PALMARÈS. Le palmarès est exactement la vue du
+ * profil public (`/u/[username]`). La personnalisation se fait dans la modale
+ * ouverte par EDIT (`?edit=<onglet>` l'ouvre directement).
+ */
+export default async function AccountPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string; edit?: string }>;
+}) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
   // Univers courant : filtre le loadout/streak lus et les catalogues de
   // cosmétiques proposés (résolu une fois pour toute la page).
-  const universe = await getCurrentUniverse();
+  const [universe, params] = await Promise.all([getCurrentUniverse(), searchParams]);
 
-  // Scores classiques (table Score) + scores des jeux à table dédiée
-  // (Draft, et JJKdle = score du jour). + profil/progression + badges + roster.
   const [
     classicScores,
     draftScore,
     jjkdleScore,
     higherLowerScore,
+    guessWhoStats,
     profile,
     badgeKeys,
     roster,
@@ -67,6 +72,7 @@ export default async function AccountPage() {
     getUserDraftScore(user.id),
     getUserJjkdleScore(user.id),
     getUserHigherLowerScore(user.id),
+    getUserGuessWhoStats(user.id),
     prisma.user.findUnique({
       where: { id: user.id },
       select: {
@@ -81,6 +87,7 @@ export default async function AccountPage() {
             jjkdleBestStreak: true,
             equippedTitleKey: true,
             equippedFrameKey: true,
+            profileLayout: true,
             avatarCharacter: { select: { name: true, image: true } },
           },
         },
@@ -94,253 +101,98 @@ export default async function AccountPage() {
     getDeckShowcase(user.id, universe.id),
   ]);
 
-  const isAdmin = user.role === "ADMIN";
-  const unlockedTitleKeys = [
-    ...getUnlockedTitleKeys(unlockCtx, titleGrantKeys),
-  ];
-  const unlockedFrameKeys = [
-    ...getUnlockedFrameKeys(unlockCtx, frameGrantKeys),
-  ];
-
-  const avatarChoices: AvatarChoice[] = roster.map((c) => ({
-    id: c.id,
-    name: c.name,
-    ...(c.image ? { image: c.image } : {}),
-  }));
   // Loadout + streak de l'univers courant (0 ou 1 ligne) ; totalXp/level restent globaux.
   const prof = profile?.universeProfiles[0];
-  const banner = bannerStyle(prof?.bannerKey);
   const scores = [
     ...classicScores,
     ...(draftScore ? [draftScore] : []),
     ...(jjkdleScore ? [jjkdleScore] : []),
     ...(higherLowerScore ? [higherLowerScore] : []),
   ];
-
-  // ── Stats résumées (dérivées de données déjà chargées, aucune requête en plus) ──
-  const streak = prof?.jjkdleStreak ?? 0;
-  const dailyTitle = await universeGameTitle("jjkdle");
-  const bestStreak = prof?.jjkdleBestStreak ?? 0;
-  // Progression badges : sur le catalogue de l'univers courant (la possession
-  // reste globale, mais on ne compte que ce qui est gagnable ici).
-  const badgeTotal = badgesForUniverse(universe.slug).length;
-  const badgeCount = badgeKeys.length;
-  const badgePct =
-    badgeTotal > 0 ? Math.round((badgeCount / badgeTotal) * 100) : 0;
-  const bestRanked = scores.length
-    ? scores.reduce((best, s) => (s.rank < best.rank ? s : best))
-    : null;
-  const bestRankGame = bestRanked
-    ? await universeGameTitle(bestRanked.gameId)
-    : null;
+  const avatarChoices: AvatarChoice[] = roster.map((c) => ({
+    id: c.id,
+    name: c.name,
+    ...(c.image ? { image: c.image } : {}),
+  }));
 
   return (
-    <main className="mx-auto w-full max-w-[1600px] lg:w-3/4 px-5 py-10 sm:px-6 sm:py-16">
-      <header className="mb-12">
-        <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.3em] text-domain-light/70">
-          <span
-            aria-hidden
-            className="h-px w-6 bg-gradient-to-r from-transparent to-domain-light/60"
-          />
-          管理 · Mon compte
-        </span>
-
-        {/* Carte hero : bannière + avatar en débordement + identité + niveau */}
-        <div className="mt-4 overflow-hidden rounded-3xl border border-white/10 bg-void-800/40 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.6)] backdrop-blur">
-          {/* Bande bannière */}
-          <div
-            className="relative h-28 sm:h-36"
-            style={{ background: banner.gradient }}
-          >
-            <span
-              aria-hidden
-              className="absolute inset-0 bg-gradient-to-t from-void-800/80 via-transparent to-transparent"
+    <main className="mx-auto w-full max-w-[1600px] px-5 py-10 sm:px-6 sm:py-14 lg:w-3/4">
+      <ProfileHero
+        username={user.username}
+        role={user.role}
+        avatarImage={prof?.avatarCharacter?.image}
+        frameKey={prof?.equippedFrameKey}
+        titleKey={prof?.equippedTitleKey}
+        totalXp={profile?.totalXp ?? 0}
+        bannerGradient={bannerStyle(prof?.bannerKey).gradient}
+        actions={
+          <>
+            <ProfileEditLauncher
+              initialTab={isEditTab(params.edit) ? params.edit : null}
+              data={{
+                username: user.username,
+                level: profile?.level ?? 1,
+                isAdmin: user.role === "ADMIN",
+                universeSlug: universe.slug,
+                roster: avatarChoices,
+                bannerKey: prof?.bannerKey ?? "default",
+                avatarId: prof?.avatarCharacterId ?? null,
+                titleKey: prof?.equippedTitleKey ?? null,
+                frameKey: prof?.equippedFrameKey ?? null,
+                unlockedTitleKeys: [...getUnlockedTitleKeys(unlockCtx, titleGrantKeys)],
+                unlockedFrameKeys: [...getUnlockedFrameKeys(unlockCtx, frameGrantKeys)],
+                layout: normalizeProfileLayout(prof?.profileLayout ?? null),
+              }}
             />
-          </div>
-
-          {/* Identité (avatar chevauche la bannière) */}
-          <div className="px-5 pb-6 sm:px-8">
-            <div className="-mt-12 flex flex-wrap items-end gap-4 sm:-mt-14 sm:gap-5">
-              <UserAvatar
-                username={user.username}
-                image={prof?.avatarCharacter?.image}
-                level={profile?.level ?? 1}
-                frameKey={prof?.equippedFrameKey}
-                size={104}
-                className="rounded-full ring-4 ring-void-800"
-              />
-              <div className="min-w-0 pb-1">
-                <h1 className="flex flex-wrap items-center gap-x-2 font-display text-3xl font-black tracking-tight text-white drop-shadow sm:text-4xl">
-                  {user.username}
-                  {user.role === "VIP" && <VipBadge className="text-sm" />}
-                </h1>
-                {prof?.equippedTitleKey && (
-                  <TitleBadge
-                    titleKey={prof.equippedTitleKey}
-                    className="mt-2 text-sm"
-                  />
-                )}
-              </div>
-            </div>
-
-            {/* Barre de niveau intégrée */}
-            <div className="mt-6">
-              <LevelBar totalXp={profile?.totalXp ?? 0} />
-            </div>
-          </div>
-        </div>
-
-        {/* Action profil (la customisation et le deck sont des onglets) */}
-        <div className="mt-4 flex flex-wrap gap-3">
-          <UniverseLink
-            href={`/u/${encodeURIComponent(user.username)}`}
-            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-void-800/60 px-4 py-2 text-sm font-medium text-white/80 backdrop-blur transition-colors hover:border-domain/50 hover:text-white"
-          >
-            Voir mon profil public <span aria-hidden>↗</span>
-          </UniverseLink>
-        </div>
-      </header>
-
-      <AccountTabs />
-
-      {/* ── Cartes statistiques ── */}
-      <section className="mb-12 grid gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl border border-white/10 bg-void-800/60 p-5 backdrop-blur">
-          <p className="text-xs font-bold uppercase tracking-wider text-white/45">
-            Streak {dailyTitle}
-          </p>
-          <p className="mt-3 font-display text-3xl font-black text-white">
-            {streak}
-            <span className="ml-1.5 align-baseline text-base font-bold text-white/45">
-              jour{streak > 1 ? "s" : ""}
-            </span>
-          </p>
-          <p className="mt-1 text-xs text-white/40">record : {bestStreak}</p>
-        </div>
-
-        <div className="rounded-2xl border border-white/10 bg-void-800/60 p-5 backdrop-blur">
-          <p className="text-xs font-bold uppercase tracking-wider text-white/45">
-            Badges
-          </p>
-          <p className="mt-3 font-display text-3xl font-black text-white">
-            {badgeCount}
-            <span className="ml-1.5 align-baseline text-base font-bold text-white/45">
-              / {badgeTotal}
-            </span>
-          </p>
-          <p className="mt-1 text-xs text-white/40">{badgePct} % débloqués</p>
-        </div>
-
-        <div className="rounded-2xl border border-white/10 bg-void-800/60 p-5 backdrop-blur">
-          <p className="text-xs font-bold uppercase tracking-wider text-white/45">
-            Meilleur rang
-          </p>
-          {bestRanked ? (
-            <>
-              <p className="mt-3 font-display text-3xl font-black text-white">
-                #{bestRanked.rank}
-              </p>
-              <p className="mt-1 truncate text-xs text-white/40">
-                {bestRankGame}
-              </p>
-            </>
-          ) : (
-            <>
-              <p className="mt-3 font-display text-3xl font-black text-white/30">
-                —
-              </p>
-              <p className="mt-1 text-xs text-white/40">Pas encore classé</p>
-            </>
-          )}
-        </div>
-      </section>
-
-      {/* ── Récap des scores ── */}
-      <section className="mb-12">
-        <h2 className="mb-5 font-display text-xl font-bold uppercase tracking-wider text-white/85">
-          Mes scores
-        </h2>
-
-        {scores.length === 0 ? (
-          <div className="rounded-2xl border border-white/10 bg-void-800/60 px-6 py-12 text-center backdrop-blur">
-            <p className="text-white/55">
-              Tu n'as pas encore de score enregistré.
-            </p>
             <UniverseLink
-              href="/games"
-              className="mt-5 inline-flex items-center gap-2 rounded-full bg-domain px-6 py-2.5 font-display text-sm font-bold uppercase tracking-wider text-white shadow-glow transition-transform hover:scale-105"
+              href={`/u/${encodeURIComponent(user.username)}`}
+              className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-void-900/60 px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:border-domain/50 hover:text-white"
             >
-              Jouer maintenant
-              <span aria-hidden>→</span>
+              Voir mon profil public <span aria-hidden>↗</span>
             </UniverseLink>
-          </div>
-        ) : (
-          <ScoreCards scores={scores} />
-        )}
-      </section>
+          </>
+        }
+        stats={
+          <ProfileStats
+            streak={prof?.jjkdleStreak ?? 0}
+            bestStreak={prof?.jjkdleBestStreak ?? 0}
+            badgeKeys={badgeKeys}
+            universeSlug={universe.slug}
+            scores={scores}
+          />
+        }
+      />
 
-      {/* ── Deck ── */}
-      <section className="mb-12">
-        <h2 className="mb-5 font-display text-xl font-bold uppercase tracking-wider text-white/85">
-          Mon deck
-        </h2>
-        <DeckShowcase data={deckShowcase} isOwner />
-      </section>
-
-      {/* ── Badges ── */}
-      <section className="mb-12">
-        <h2 className="mb-5 font-display text-xl font-bold uppercase tracking-wider text-white/85">
-          Mes badges
-        </h2>
-        <BadgeShelf unlockedKeys={badgeKeys} universeSlug={universe.slug} />
-      </section>
-
-      {/* ── Personnalisation ── */}
-      <section className="mb-12 space-y-4">
-        <h2 className="mb-5 font-display text-xl font-bold uppercase tracking-wider text-white/85">
-          Personnalisation
-        </h2>
-        <ProfileEditor
-          username={user.username}
-          roster={avatarChoices}
-          initialBannerKey={prof?.bannerKey ?? "default"}
-          initialAvatarId={prof?.avatarCharacterId ?? null}
-          level={profile?.level ?? 1}
-          isAdmin={isAdmin}
-          universeSlug={universe.slug}
-        />
-        <TitleSelector
-          unlockedKeys={unlockedTitleKeys}
-          equippedKey={prof?.equippedTitleKey ?? null}
-          universeSlug={universe.slug}
-        />
-        <FrameSelector
-          username={user.username}
-          avatarImage={prof?.avatarCharacter?.image}
-          unlockedKeys={unlockedFrameKeys}
-          equippedKey={prof?.equippedFrameKey ?? null}
-          universeSlug={universe.slug}
-        />
-      </section>
-
-      {/* ── Infos & édition ── */}
-      <section>
-        <h2 className="mb-5 font-display text-xl font-bold uppercase tracking-wider text-white/85">
-          Mon compte
-        </h2>
-
-        <div className="mb-5 rounded-2xl border border-white/10 bg-void-800/60 p-5 backdrop-blur">
-          <p className="text-xs uppercase tracking-wider text-white/45">
-            Adresse email
-          </p>
-          <p className="mt-1 font-medium text-white">{user.email}</p>
-          <p className="mt-1 text-xs text-white/35">
-            L'email n'est pas modifiable.
-          </p>
-        </div>
-
-        <AccountForms currentUsername={user.username} />
-      </section>
+      <AccountView
+        initialTab={params.tab === "compte" ? "compte" : "palmares"}
+        palmares={
+          <PalmaresView
+            badgeKeys={badgeKeys}
+            universeSlug={universe.slug}
+            scores={scores}
+            guessWhoStats={guessWhoStats}
+            deckShowcase={deckShowcase}
+            isOwner
+          />
+        }
+        account={
+          <section className="rounded-3xl border border-white/10 bg-void-800/40 p-5 backdrop-blur sm:p-6">
+            <h2 className="mb-5 font-display text-lg font-bold uppercase tracking-wider text-white/85">
+              Mon compte
+            </h2>
+            <div className="mb-5 rounded-2xl border border-white/10 bg-void-800/60 p-5">
+              <p className="text-xs uppercase tracking-wider text-white/45">
+                Adresse email
+              </p>
+              <p className="mt-1 font-medium text-white">{user.email}</p>
+              <p className="mt-1 text-xs text-white/35">
+                L'email n'est pas modifiable.
+              </p>
+            </div>
+            <AccountForms currentUsername={user.username} />
+          </section>
+        }
+      />
     </main>
   );
 }

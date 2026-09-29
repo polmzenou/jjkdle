@@ -2,6 +2,8 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { GameIcon } from "@/components/icons/GameIcon";
+import { AlertIcon } from "@/components/icons/UiIcons";
 import type { Character } from "@/data/roster/characters";
 import {
   buildAttributeSchema,
@@ -128,7 +130,7 @@ export function ConfigAdmin({
                 key={g.id}
                 className="flex items-center gap-3 rounded-xl bg-void-700/40 px-3 py-2.5"
               >
-                <span aria-hidden className="text-lg">{g.glyph ?? "🎮"}</span>
+                <GameIcon id={g.id} className="h-5 w-5 shrink-0" style={{ color: g.accent ?? "rgb(var(--color-domain))" }} />
                 <span className="flex-1 text-sm font-semibold text-white">
                   {g.title}
                 </span>
@@ -223,7 +225,7 @@ export function ConfigAdmin({
           </h2>
           {forcedTarget && (
             <span className="rounded-full border border-amber-400/40 bg-amber-400/10 px-2.5 py-0.5 text-[11px] font-bold text-amber-300">
-              ⚠ Override actif : {forcedName}
+              <AlertIcon className="-mt-px mr-1 inline h-3.5 w-3.5 align-middle" />Override actif : {forcedName}
             </span>
           )}
         </div>
