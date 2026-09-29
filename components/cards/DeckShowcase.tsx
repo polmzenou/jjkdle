@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { CardArt, RAINBOW_GRADIENT } from "@/components/cards/CardArt";
 import {
@@ -172,45 +172,111 @@ function FeaturedFan({ cards }: { cards: CardView[] }) {
   );
 }
 
+/** Écart horizontal (px) entre deux cartes du coverflow. */
+const CARD_STEP = 92;
+/** Distance (px) avant qu'un appui devienne un glisser (en deçà : simple clic). */
+const DRAG_THRESHOLD = 5;
+
 /**
  * Carrousel en « coverflow » : la carte centrale devant, les voisines plus
- * petites, inclinées et atténuées. Clic sur une voisine ou flèches pour tourner.
+ * petites, inclinées et atténuées. Clic sur une voisine, flèches, ou glisser
+ * à la souris / au doigt pour tourner.
  */
 function CoverFlow({ cards }: { cards: CardView[] }) {
   const [center, setCenter] = useState(Math.min(1, cards.length - 1));
-  const go = (delta: number) =>
-    setCenter((c) => Math.max(0, Math.min(cards.length - 1, c + delta)));
+  // Position fractionnaire pendant un glisser-déposer (null hors drag).
+  const [dragPos, setDragPos] = useState<number | null>(null);
+  const drag = useRef<{
+    startX: number;
+    startCenter: number;
+    moved: boolean;
+    pos: number;
+  } | null>(null);
+  const suppressClick = useRef(false);
+
+  const last = cards.length - 1;
+  const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v));
+  const go = (delta: number) => setCenter((c) => clamp(c + delta, 0, last));
+
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0 || cards.length < 2) return;
+    drag.current = { startX: e.clientX, startCenter: center, moved: false, pos: center };
+  };
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const d = drag.current;
+    if (!d) return;
+    const dx = e.clientX - d.startX;
+    if (!d.moved) {
+      if (Math.abs(dx) < DRAG_THRESHOLD) return;
+      d.moved = true;
+      e.currentTarget.setPointerCapture(e.pointerId);
+    }
+    // Léger dépassement élastique aux extrémités.
+    d.pos = clamp(d.startCenter - dx / CARD_STEP, -0.4, last + 0.4);
+    setDragPos(d.pos);
+  };
+  const endDrag = () => {
+    const d = drag.current;
+    drag.current = null;
+    if (!d?.moved) return;
+    suppressClick.current = true;
+    setCenter(clamp(Math.round(d.pos), 0, last));
+    setDragPos(null);
+  };
+
+  const pos = dragPos ?? center;
+  const dragging = dragPos !== null;
 
   return (
     <div className="relative mt-5 -mx-2">
       <div
-        className="relative mx-auto h-52 overflow-hidden sm:h-60"
+        className={`relative mx-auto h-52 touch-pan-y select-none overflow-hidden sm:h-60 ${
+          cards.length > 1 ? (dragging ? "cursor-grabbing" : "cursor-grab") : ""
+        }`}
         style={{ perspective: 900 }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        onDragStart={(e) => e.preventDefault()}
+        onClickCapture={(e) => {
+          if (suppressClick.current) {
+            suppressClick.current = false;
+            e.stopPropagation();
+            e.preventDefault();
+          }
+        }}
       >
         {cards.map((card, i) => {
-          const offset = i - center;
+          const offset = i - pos;
           const dist = Math.abs(offset);
           const hidden = dist > 3;
+          const isCenter = Math.round(pos) === i;
           return (
             <motion.button
               key={card.characterId}
               type="button"
               aria-label={card.name}
-              tabIndex={offset === 0 ? -1 : 0}
+              tabIndex={isCenter ? -1 : 0}
               onClick={() => setCenter(i)}
               className="absolute left-[calc(50%-4rem)] top-1/2 w-32 focus:outline-none sm:left-[calc(50%-4.5rem)] sm:w-36"
               initial={false}
               animate={{
-                x: offset * 92,
+                x: offset * CARD_STEP,
                 y: "-50%",
                 scale: 1 - dist * 0.14,
                 rotateY: -offset * 22,
-                opacity: hidden ? 0 : 1 - dist * 0.22,
+                opacity: hidden ? 0 : Math.max(0, 1 - dist * 0.22),
               }}
-              transition={{ type: "spring", stiffness: 260, damping: 28 }}
-              style={{ zIndex: 10 - dist, pointerEvents: hidden ? "none" : "auto" }}
+              transition={
+                dragging ? { duration: 0 } : { type: "spring", stiffness: 260, damping: 28 }
+              }
+              style={{
+                zIndex: 100 - Math.round(dist * 10),
+                pointerEvents: hidden ? "none" : "auto",
+              }}
             >
-              <CardArt card={card} glow={offset === 0} />
+              <CardArt card={card} glow={isCenter} />
             </motion.button>
           );
         })}
