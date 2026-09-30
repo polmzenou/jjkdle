@@ -51,7 +51,8 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   // Garde le client Prisma (et son moteur natif) hors du bundle webpack serveur.
-  serverExternalPackages: ["@prisma/client"],
+  // nodemailer : chargé tel quel par Node (il importe des modules `node:*`).
+  serverExternalPackages: ["@prisma/client", "nodemailer"],
   // Active `forbidden()` / `unauthorized()` (next/navigation) et le fichier
   // `app/forbidden.tsx` : la page 403 de l'admin.
   experimental: {

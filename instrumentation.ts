@@ -5,15 +5,20 @@ import type { Instrumentation } from "next";
  * page, Route Handler, Server Action, middleware). On alerte l'administration
  * par mail, avec anti-flood (cf. lib/mail/error-throttle.ts).
  *
- * Le middleware tourne sur l'Edge runtime, où nodemailer et Prisma ne sont pas
- * disponibles : l'import dynamique n'a lieu que sur le runtime Node.
+ * Ce fichier est AUSSI compilé pour l'Edge runtime (middleware), où nodemailer
+ * et Prisma n'existent pas. L'import doit rester DANS le bloc
+ * `if (NEXT_RUNTIME === "nodejs")` : webpack remplace la variable par une
+ * constante et élimine le bloc du bundle Edge. Un `return` anticipé ne suffit
+ * pas — le code qui suit reste analysé, et l'import de `node:https` casse le
+ * build (« UnhandledSchemeError »).
  */
 export const onRequestError: Instrumentation.onRequestError = async (
   error,
   request,
   context,
 ) => {
-  if (process.env.NEXT_RUNTIME !== "nodejs") return;
-  const { reportServerError } = await import("@/lib/mail/report-error");
-  await reportServerError(error, request, context);
+  if (process.env.NEXT_RUNTIME === "nodejs") {
+    const { reportServerError } = await import("@/lib/mail/report-error");
+    await reportServerError(error, request, context);
+  }
 };
