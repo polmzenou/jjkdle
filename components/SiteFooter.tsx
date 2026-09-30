@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { UniverseLink } from "@/components/universe/UniverseLink";
+import { ContactButton } from "@/components/contact/ContactButton";
+import { CookieSettingsButton } from "@/components/CookieConsent";
+import { getCurrentUser } from "@/lib/auth/session";
 
 /**
  * FOOTER COMMUN à toutes les pages.
@@ -10,6 +13,9 @@ import { UniverseLink } from "@/components/universe/UniverseLink";
  *
  * - `universe` : liens préfixés par l'univers courant (`UniverseLink`) ;
  * - `neutral` : hub et casino, qui n'appartiennent à aucun anime — liens nus.
+ *
+ * Porte aussi le bouton « Contact » (modale — seul accès au formulaire) et
+ * « Gérer les cookies » (réaffiche le bandeau de consentement).
  */
 
 type Variant =
@@ -26,8 +32,11 @@ const UNIVERSE_LINKS = [
 
 const linkClass = "transition-colors hover:text-domain-light";
 
-export function SiteFooter(props: Variant) {
+export async function SiteFooter(props: Variant) {
   const year = new Date().getFullYear();
+  // Pré-remplit (et verrouille) nom + email du formulaire de contact.
+  const user = await getCurrentUser();
+  const sender = user ? { username: user.username, email: user.email } : null;
 
   return (
     <footer className="relative mt-16 border-t border-white/5 bg-void-900/60 backdrop-blur">
@@ -61,6 +70,18 @@ export function SiteFooter(props: Variant) {
               <Link href="/casino" className={linkClass}>
                 Casino
               </Link>
+            </li>
+            {/* Seul point d'entrée du formulaire de contact (modale). */}
+            <li>
+              <ContactButton
+                sender={sender}
+                className={`uppercase tracking-wider ${linkClass}`}
+              />
+            </li>
+            <li>
+              <CookieSettingsButton
+                className={`uppercase tracking-wider ${linkClass}`}
+              />
             </li>
           </ul>
         </nav>

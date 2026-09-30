@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { hashPassword, verifyPassword } from "./password";
 import { createSession, destroySession, getCurrentUser } from "./session";
 import { isAdminEmail } from "./admin-emails";
+import { notifyAdmin } from "@/lib/mail/notify";
 
 export type AuthResult = { ok: boolean; error?: string };
 
@@ -63,6 +64,13 @@ export async function registerAction(input: {
       data: { username, email, passwordHash, role },
     });
     await createSession(user.id);
+    notifyAdmin({
+      kind: "user.registered",
+      username: user.username,
+      email: user.email,
+      role,
+      totalUsers: await prisma.user.count(),
+    });
   } catch (e) {
     // Garde-fou en cas de course sur la contrainte d'unicité.
     if (

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
-import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { AnalyticsGate } from "@/components/AnalyticsGate";
+import { CookieConsent } from "@/components/CookieConsent";
 import {
   getCurrentUniverseConfig,
   isCasinoRequest,
@@ -139,7 +140,8 @@ export default async function RootLayout({
       </head>
       <body className="min-h-screen">
         {children}
-        <Analytics />
+        <CookieConsent />
+        <AnalyticsGate />
         <SpeedInsights />
       </body>
     </html>

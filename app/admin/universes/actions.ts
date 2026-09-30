@@ -10,6 +10,7 @@ import {
   validateUniverseName,
   validateUniverseSlug,
 } from "@/lib/admin/universe-store";
+import { notifyAdmin } from "@/lib/mail/notify";
 
 /**
  * Server Actions de la gestion des UNIVERS (`/admin/universes`).
@@ -38,7 +39,8 @@ export async function createUniverseAction(input: {
   slug: string;
   name: string;
 }): Promise<ActionResult & { slug?: string }> {
-  if (!(await getAdminUser())) {
+  const admin = await getAdminUser();
+  if (!admin) {
     return { ok: false, error: "Accès réservé aux administrateurs." };
   }
   const slug = validateUniverseSlug(input.slug ?? "");
@@ -51,6 +53,12 @@ export async function createUniverseAction(input: {
   } catch (e) {
     return { ok: false, error: (e as Error).message };
   }
+  notifyAdmin({
+    kind: "universe.created",
+    slug: slug.slug,
+    name: name.name,
+    by: admin.username,
+  });
   revalidateUniverseLists();
   return { ok: true, slug: slug.slug };
 }
@@ -60,14 +68,25 @@ export async function renameUniverseAction(
   id: string,
   rawName: string,
 ): Promise<ActionResult> {
-  if (!(await getAdminUser())) {
+  const admin = await getAdminUser();
+  if (!admin) {
     return { ok: false, error: "Accès réservé aux administrateurs." };
   }
   const name = validateUniverseName(rawName ?? "");
   if (!name.ok) return { ok: false, error: name.error };
 
   try {
+    const before = (await listAdminUniverses()).find((u) => u.id === id);
     await renameUniverse(id, name.name);
+    if (before && before.name !== name.name) {
+      notifyAdmin({
+        kind: "universe.renamed",
+        slug: before.slug,
+        from: before.name,
+        to: name.name,
+        by: admin.username,
+      });
+    }
   } catch (e) {
     return { ok: false, error: `Échec : ${(e as Error).message}` };
   }
@@ -83,7 +102,8 @@ export async function deleteUniverseAction(
   id: string,
   confirmSlug: string,
 ): Promise<ActionResult> {
-  if (!(await getAdminUser())) {
+  const admin = await getAdminUser();
+  if (!admin) {
     return { ok: false, error: "Accès réservé aux administrateurs." };
   }
   try {
@@ -96,6 +116,12 @@ export async function deleteUniverseAction(
       };
     }
     await deleteUniverse(id);
+    notifyAdmin({
+      kind: "universe.deleted",
+      slug: universe.slug,
+      name: universe.name,
+      by: admin.username,
+    });
   } catch (e) {
     return { ok: false, error: (e as Error).message };
   }

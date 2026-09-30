@@ -333,6 +333,35 @@ model AppConfig {
   value Json
 }
 
+/// Type d'un message envoyé via le formulaire de contact (modale du footer).
+enum ContactType {
+  GENERAL // message à l'équipe d'administration
+  BUG // signalement de bug
+  IDEA // proposition d'amélioration
+}
+
+/// Message envoyé via le formulaire de contact. Archivé AVANT l'envoi du mail :
+/// sert à la limite d'envoi (N messages/heure par compte ou IP) et garde une
+/// trace si Gmail est indisponible (`mailed` = false). `userId` est une colonne
+/// scalaire (pas de FK) : supprimer un compte ne doit pas effacer ses messages.
+model ContactMessage {
+  id        String      @id @default(cuid())
+  type      ContactType
+  name      String
+  email     String
+  userId    String?
+  message   String
+  /// Champs guidés (bug : page + étapes ; idée : accord de crédit), en JSON.
+  details   Json?
+  ip        String?
+  mailed    Boolean     @default(false)
+  createdAt DateTime    @default(now())
+
+  @@index([createdAt])
+  @@index([ip, createdAt])
+  @@index([userId, createdAt])
+}
+
 /// Score d'une partie de « JJK Higher/Lower » — une ligne PAR PARTIE terminée
 /// (append, pas d'upsert). `score` = nombre de bonnes réponses ; `xpEarned` = XP
 /// octroyée pour cette partie (persistée pour l'affichage ; l'XP totale reste

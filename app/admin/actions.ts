@@ -23,6 +23,7 @@ import {
   setCasinoCardBack,
   setCasinoEnabled,
   setCasinoMinBet,
+  getCasinoConfig,
 } from "@/lib/casino/config";
 import { closeTable } from "@/lib/casino/store";
 import { resetCasinoStats } from "@/lib/admin/casino";
@@ -112,12 +113,17 @@ import {
   ADMIN_UNIVERSE_COOKIE,
   adminUniverseCookieOptions,
 } from "@/lib/universes/admin-scope";
-import { getGame } from "@/lib/games/registry";
+import { getGame, gameTitleForUniverse } from "@/lib/games/registry";
+import { getUniverseBySlug } from "@/lib/universes/registry";
+import { notifyAdmin } from "@/lib/mail/notify";
+import { prisma } from "@/lib/prisma";
 import {
   setConfig,
   gameEnabledKey,
   maintenanceKey,
   forcedTargetKey,
+  isGameEnabled,
+  getMaintenance,
   type MaintenanceConfig,
 } from "@/lib/config/app-config";
 
@@ -672,7 +678,8 @@ export async function setUserRoleAction(
   role: Role,
 ): Promise<ActionResult> {
   const superAdmin = await getSuperAdminUser();
-  if (!(await getAdminUser()) && !superAdmin) {
+  const admin = await getAdminUser();
+  if (!admin && !superAdmin) {
     return { ok: false, error: "Accès réservé aux administrateurs." };
   }
   if (role !== "ADMIN" && role !== "PLAYER" && role !== "VIP") {
@@ -705,6 +712,20 @@ export async function setUserRoleAction(
   } catch (e) {
     return { ok: false, error: `Échec : ${(e as Error).message}` };
   }
+  const target = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { username: true, email: true },
+  });
+  if (target) {
+    notifyAdmin({
+      kind: "user.role",
+      username: target.username,
+      email: target.email,
+      from: current,
+      to: role,
+      by: (superAdmin ?? admin)!.username,
+    });
+  }
   revalidatePath("/admin");
   return { ok: true };
 }
@@ -719,7 +740,8 @@ export async function setUsernameAction(
   userId: string,
   newUsername: string,
 ): Promise<ActionResult> {
-  if (!(await getSuperAdminUser())) {
+  const superAdmin = await getSuperAdminUser();
+  if (!superAdmin) {
     return { ok: false, error: "Réservé au super-admin." };
   }
 
@@ -747,6 +769,14 @@ export async function setUsernameAction(
     return { ok: false, error: `Échec : ${(e as Error).message}` };
   }
 
+  if (previous && previous !== username) {
+    notifyAdmin({
+      kind: "user.renamed",
+      from: previous,
+      to: username,
+      by: superAdmin.username,
+    });
+  }
   revalidatePath("/admin");
   if (previous) await revalidateUniversePath(`/u/${previous}`);
   await revalidateUniversePath(`/u/${username}`);
@@ -758,7 +788,8 @@ export async function setUsernameAction(
  * (comme pour la rétrogradation). Cascade DB : sessions + scores.
  */
 export async function deleteUserAction(userId: string): Promise<ActionResult> {
-  if (!(await getAdminUser())) {
+  const admin = await getAdminUser();
+  if (!admin) {
     return { ok: false, error: "Accès réservé aux administrateurs." };
   }
 
@@ -773,10 +804,23 @@ export async function deleteUserAction(userId: string): Promise<ActionResult> {
     };
   }
 
+  // Lu AVANT la suppression : après, il n'y a plus rien à citer dans le mail.
+  const target = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { username: true, email: true },
+  });
   try {
     await deleteUser(userId);
   } catch (e) {
     return { ok: false, error: `Échec de suppression : ${(e as Error).message}` };
+  }
+  if (target) {
+    notifyAdmin({
+      kind: "user.deleted",
+      username: target.username,
+      email: target.email,
+      by: admin.username,
+    });
   }
   revalidatePath("/admin");
   return { ok: true };
@@ -1002,6 +1046,12 @@ function revalidateGlobalConfig(): void {
   revalidatePath("/admin");
 }
 
+/** Libellé d'un univers pour les mails de notification (« Jujutsu Kaisen (jjk) »). */
+function universeLabel(slug: string): string {
+  const name = getUniverseBySlug(slug)?.name;
+  return name ? `${name} (${slug})` : slug;
+}
+
 // ── Attributs de l'univers (étape 5) ──────────────────────────────────────
 // C'est cette section qui permet d'ajouter un anime SANS CODE : on définit ses
 // attributs de personnage et leurs valeurs possibles, et JJKdle en découle.
@@ -1152,7 +1202,8 @@ export async function setGameEnabledAction(
   gameId: string,
   enabled: boolean,
 ): Promise<ActionResult> {
-  if (!(await getAdminUser())) {
+  const admin = await getAdminUser();
+  if (!admin) {
     return { ok: false, error: "Accès réservé aux administrateurs." };
   }
   if (!getGame(gameId)) {
@@ -1160,7 +1211,18 @@ export async function setGameEnabledAction(
   }
   try {
     const slug = await getCurrentUniverseSlug();
+    const before = await isGameEnabled(gameId, slug);
     await setConfig(gameEnabledKey(slug, gameId), Boolean(enabled));
+    // Notification seulement sur un VRAI changement (pas sur un double clic).
+    if (before !== Boolean(enabled)) {
+      notifyAdmin({
+        kind: "game.toggled",
+        game: gameTitleForUniverse(gameId, getUniverseBySlug(slug)?.gameCopy),
+        universe: universeLabel(slug),
+        enabled: Boolean(enabled),
+        by: admin.username,
+      });
+    }
   } catch (e) {
     return { ok: false, error: `Échec : ${(e as Error).message}` };
   }
@@ -1173,7 +1235,8 @@ export async function setMaintenanceAction(
   enabled: boolean,
   message?: string,
 ): Promise<ActionResult> {
-  if (!(await getAdminUser())) {
+  const admin = await getAdminUser();
+  if (!admin) {
     return { ok: false, error: "Accès réservé aux administrateurs." };
   }
   const trimmed = (message ?? "").trim();
@@ -1186,7 +1249,17 @@ export async function setMaintenanceAction(
   };
   try {
     const slug = await getCurrentUniverseSlug();
+    const before = await getMaintenance(slug);
     await setConfig(maintenanceKey(slug), value);
+    if (before.enabled !== value.enabled) {
+      notifyAdmin({
+        kind: "maintenance.toggled",
+        universe: universeLabel(slug),
+        enabled: value.enabled,
+        message: value.message,
+        by: admin.username,
+      });
+    }
   } catch (e) {
     return { ok: false, error: `Échec : ${(e as Error).message}` };
   }
@@ -1334,11 +1407,20 @@ export async function adminRevokeCardAction(
 export async function setCasinoEnabledAction(
   enabled: boolean,
 ): Promise<ActionResult> {
-  if (!(await getAdminUser())) {
+  const admin = await getAdminUser();
+  if (!admin) {
     return { ok: false, error: "Accès réservé aux administrateurs." };
   }
   try {
+    const before = (await getCasinoConfig()).enabled;
     await setCasinoEnabled(Boolean(enabled));
+    if (before !== Boolean(enabled)) {
+      notifyAdmin({
+        kind: "casino.toggled",
+        enabled: Boolean(enabled),
+        by: admin.username,
+      });
+    }
   } catch (e) {
     return { ok: false, error: `Échec : ${(e as Error).message}` };
   }
