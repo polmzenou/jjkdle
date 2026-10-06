@@ -2,11 +2,12 @@ import "server-only";
 import { prisma } from "@/lib/prisma";
 import { getRoster } from "@/lib/content/queries";
 import { areFriends } from "@/lib/social/friends";
-import type { SpareCard, TradeLine, TradeView } from "@/lib/social/types";
+import type { TradableCard, TradeLine, TradeView } from "@/lib/social/types";
 import {
   addCopies,
   getOwnedCounts,
-  removeSpareCopies,
+  removeCopies,
+  syncAfterCardsLost,
   toCardView,
 } from "./store";
 import {
@@ -17,7 +18,8 @@ import {
 } from "./trade";
 
 /**
- * Couche d'accès aux OFFRES D'ÉCHANGE. Les règles pures vivent dans
+ * Couche d'accès aux OFFRES D'ÉCHANGE (toute carte possédée s'échange, y
+ * compris le dernier exemplaire). Les règles pures vivent dans
  * `./trade.ts` ; ici on les applique à l'état en base — à la création ET à
  * l'acceptation, car les compteurs ont pu bouger entre les deux.
  */
@@ -27,28 +29,28 @@ type Result<T = object> = ({ ok: true } & T) | { ok: false; error: string };
 /** Levée dans la transaction d'acceptation pour forcer le rollback. */
 class StaleTradeError extends Error {}
 
-/** Doublons échangeables d'un joueur dans un univers, du plus rare au plus commun. */
-export async function getSpareCards(
+/** Cartes échangeables d'un joueur dans un univers : TOUTES ses cartes possédées. */
+export async function getTradableCards(
   userId: string,
   universeId: string,
-): Promise<SpareCard[]> {
+): Promise<TradableCard[]> {
   const [roster, counts] = await Promise.all([
     getRoster(universeId),
     getOwnedCounts(userId, universeId),
   ]);
   return roster
-    .filter((c) => (counts.get(c.id) ?? 0) > 1)
-    .map((c) => ({ ...toCardView(c), spare: counts.get(c.id)! - 1 }));
+    .filter((c) => (counts.get(c.id) ?? 0) > 0)
+    .map((c) => ({ ...toCardView(c), copies: counts.get(c.id)! }));
 }
 
-/** Doublons d'un AMI (refusé si les deux comptes ne sont pas amis). */
-export async function getFriendSpareCards(
+/** Cartes d'un AMI (refusé si les deux comptes ne sont pas amis). */
+export async function getFriendTradableCards(
   me: string,
   friendId: string,
   universeId: string,
-): Promise<SpareCard[] | null> {
+): Promise<TradableCard[] | null> {
   if (!(await areFriends(me, friendId))) return null;
-  return getSpareCards(friendId, universeId);
+  return getTradableCards(friendId, universeId);
 }
 
 /** Crée une offre : je donne `give`, je demande `take` à `toUserId`. */
@@ -112,9 +114,10 @@ export async function createTrade(
  *
  * Tout se passe dans UNE transaction : réclamation de l'offre (`PENDING →
  * ACCEPTED`, gardée — un double clic ne l'exécute qu'une fois), retrait gardé
- * des doublons des deux côtés, puis ajout croisé. Si un doublon a disparu
- * entre-temps (vendu, fusionné, échangé ailleurs), tout est annulé et l'offre
- * passe en FAILED.
+ * des cartes des deux côtés (le dernier exemplaire peut partir), puis ajout
+ * croisé. Si une carte a disparu entre-temps (vendue, fusionnée, échangée
+ * ailleurs), tout est annulé et l'offre passe en FAILED. Après coup, les
+ * cartes perdues quittent les decks des deux joueurs.
  */
 export async function acceptTrade(
   me: string,
@@ -139,7 +142,7 @@ export async function acceptTrade(
 
       for (const item of offer.items) {
         const owner = item.side === "GIVE" ? offer.fromUserId : me;
-        if (!(await removeSpareCopies(tx, owner, item.characterId, item.quantity))) {
+        if (!(await removeCopies(tx, owner, item.characterId, item.quantity))) {
           throw new StaleTradeError("copies");
         }
       }
@@ -159,9 +162,16 @@ export async function acceptTrade(
     });
     return {
       ok: false,
-      error: "L'offre n'est plus valide : un des doublons n'est plus disponible.",
+      error: "L'offre n'est plus valide : une des cartes n'est plus disponible.",
     };
   }
+
+  const ids = (side: "GIVE" | "TAKE") =>
+    offer.items.filter((i) => i.side === side).map((i) => i.characterId);
+  await Promise.all([
+    syncAfterCardsLost(offer.fromUserId, ids("GIVE")),
+    syncAfterCardsLost(me, ids("TAKE")),
+  ]);
 
   return { ok: true, fromUserId: offer.fromUserId };
 }

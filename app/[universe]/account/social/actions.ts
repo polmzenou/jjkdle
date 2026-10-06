@@ -23,11 +23,11 @@ import {
   cancelTrade,
   createTrade,
   declineTrade,
-  getFriendSpareCards,
-  getSpareCards,
+  getFriendTradableCards,
+  getTradableCards,
 } from "@/lib/cards/trade-store";
 import type { TradeLineInput } from "@/lib/cards/trade";
-import type { MessageView, SpareCard } from "@/lib/social/types";
+import type { MessageView, TradableCard } from "@/lib/social/types";
 
 /**
  * Server actions du SOCIAL (amis, échanges, messages).
@@ -108,16 +108,16 @@ export async function removeFriendAction(friendId: string): Promise<ActionResult
 
 // ── Échanges ──────────────────────────────────────────────────────────────
 
-/** Mes doublons et ceux de l'ami, dans l'univers courant (composeur d'offre). */
-export async function loadTradeSparesAction(
+/** Mes cartes et celles de l'ami, dans l'univers courant (composeur d'offre). */
+export async function loadTradeCardsAction(
   friendId: string,
-): Promise<{ ok: boolean; error?: string; mine?: SpareCard[]; theirs?: SpareCard[] }> {
+): Promise<{ ok: boolean; error?: string; mine?: TradableCard[]; theirs?: TradableCard[] }> {
   const user = await getCurrentUser();
   if (!user) return NOT_LOGGED;
   const universe = await getCurrentUniverse();
   const [mine, theirs] = await Promise.all([
-    getSpareCards(user.id, universe.id),
-    getFriendSpareCards(user.id, String(friendId), universe.id),
+    getTradableCards(user.id, universe.id),
+    getFriendTradableCards(user.id, String(friendId), universe.id),
   ]);
   if (!theirs) return { ok: false, error: "Ce joueur n'est pas ton ami." };
   return { ok: true, mine, theirs };
@@ -153,6 +153,7 @@ export async function acceptTradeAction(offerId: string): Promise<ActionResult> 
   await triggerUser(res.fromUserId, SOCIAL_EVENTS.trade, { from: user.username });
   await revalidateSocial();
   await revalidateUniversePath("/account/deck");
+  await revalidateUniversePath(`/u/${encodeURIComponent(user.username)}`);
   return { ok: true, message: "Échange effectué ! Les cartes sont dans ta collection." };
 }
 

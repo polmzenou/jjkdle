@@ -2,7 +2,8 @@
  * ÉCHANGES de cartes entre amis — règles PURES (aucun accès base), partagées
  * par le serveur (création ET acceptation d'une offre) et le composeur client.
  *
- * - seuls des DOUBLONS circulent : `quantity ≤ count - 1` pour chaque carte ;
+ * - n'importe quel exemplaire peut circuler, y compris le dernier :
+ *   `quantity ≤ count` pour chaque carte ;
  * - 1 à `MAX_TRADE_CARDS` exemplaires de chaque côté (échange, pas un don) ;
  * - toutes les cartes appartiennent à l'univers de l'offre ;
  * - jamais de coins (pas de blanchiment de coins entre comptes).
@@ -61,10 +62,10 @@ export function validateTradeLines(
   }
 
   for (const [id, quantity] of merged) {
-    if (quantity > (counts.get(id) ?? 0) - 1) {
+    if (quantity > (counts.get(id) ?? 0)) {
       return {
         ok: false,
-        error: `${who} n'${who === "Tu" ? "as" : "a"} pas assez de doublons pour cet échange.`,
+        error: `${who} n'${who === "Tu" ? "as" : "a"} pas assez d'exemplaires pour cet échange.`,
       };
     }
   }

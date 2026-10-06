@@ -120,9 +120,19 @@ export function DeckManager({
   );
   const isDuplicate = useCallback((c: CollectionCard) => c.count > 1, []);
 
-  // Sélection relue contre les compteurs : une carte qui n'est plus en doublon
-  // (vendue, échangée…) sort d'elle-même de la fusion.
-  const validPicks = picks.filter((id) => (counts.get(id) ?? 0) > 1);
+  // Sélection relue contre les compteurs : un exemplaire qui n'existe plus
+  // (vendu, échangé…) sort de lui-même de la fusion.
+  const validPicks = picks.filter(
+    (id, i) => picks.slice(0, i + 1).filter((p) => p === id).length <= (counts.get(id) ?? 0),
+  );
+  /** Index des emplacements qui consomment le DERNIER exemplaire d'une carte. */
+  const lastCopySlots = new Set(
+    validPicks.flatMap((id, i) =>
+      validPicks.slice(0, i + 1).filter((p) => p === id).length === (counts.get(id) ?? 0)
+        ? [i]
+        : [],
+    ),
+  );
   const pickRarity: CardRarity | null = validPicks[0]
     ? (rarityById.get(validPicks[0]) ?? null)
     : null;
@@ -136,11 +146,19 @@ export function DeckManager({
     if (pickRarity && card.rarity !== pickRarity) return false;
     if (!nextRarity(card.rarity)) return false;
     const used = validPicks.filter((id) => id === card.characterId).length;
-    return used < card.count - 1;
+    return used < card.count;
   };
 
   const fuse = async () => {
     if (!fusionCheck?.ok) return;
+    const lost = [...lastCopySlots].map((i) => byId.get(validPicks[i]!)?.name);
+    if (
+      lost.length > 0 &&
+      !window.confirm(
+        `Tu vas perdre ta dernière carte : ${lost.join(", ")}. Elle quittera ta collection (et ton deck). Continuer ?`,
+      )
+    )
+      return;
     setFusing(true);
     setFusionResult(null);
     setFusionError(null);
@@ -152,6 +170,30 @@ export function DeckManager({
       setFusionError(res.error ?? "Fusion impossible.");
     }
   };
+
+  /** Pastille « N » d'une carte sélectionnée pour la fusion. */
+  const fusionBadge = (card: CollectionCard) => {
+    const n = validPicks.filter((id) => id === card.characterId).length;
+    return n > 0 ? (
+      <span
+        title="Sélectionnée pour la fusion"
+        className="flex h-6 min-w-6 items-center justify-center rounded-full border border-domain/60 bg-domain px-1.5 text-xs font-black text-white shadow-glow"
+      >
+        {n}
+      </span>
+    ) : null;
+  };
+
+  const fusionButton = (card: CollectionCard) => (
+    <button
+      type="button"
+      disabled={!canPick(card) || fusing}
+      onClick={() => setPicks([...validPicks, card.characterId])}
+      className="rounded-full border border-white/10 bg-void-800/80 px-2 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white/60 transition-colors hover:border-domain/50 hover:text-white disabled:opacity-40"
+    >
+      {nextRarity(card.rarity) ? "+ Fusion" : "Rareté max"}
+    </button>
+  );
 
   return (
     <div className="space-y-12">
@@ -239,12 +281,28 @@ export function DeckManager({
           />
         </div>
 
+        <div className="mb-6">
+          <FusionPanel
+            picks={validPicks}
+            lastCopySlots={lastCopySlots}
+            byId={byId}
+            rarity={pickRarity}
+            error={fusionCheck && !fusionCheck.ok ? fusionCheck.error : null}
+            ready={Boolean(fusionCheck?.ok)}
+            disabled={fusing || pending}
+            onRemove={(i) => setPicks(validPicks.filter((_, j) => j !== i))}
+            onClear={() => setPicks([])}
+            onFuse={() => void fuse()}
+          />
+        </div>
+
         {tab === "collection" ? (
           <CardGrid
             cards={collection}
             emptyLabel="Aucune carte dans cette rareté."
             renderBadge={(card) =>
-              card.owned && deckIds.has(card.characterId) ? <EquippedBadge /> : null
+              fusionBadge(card) ??
+              (card.owned && deckIds.has(card.characterId) ? <EquippedBadge /> : null)
             }
             renderActions={(card) => {
               if (!card.owned) return null;
@@ -271,56 +329,26 @@ export function DeckManager({
                   >
                     {equipped ? "Retirer" : deckFull ? "Deck plein" : "Équiper"}
                   </button>
+                  {fusionButton(card)}
                   <SellButton card={card} pending={pending} run={run} />
                 </>
               );
             }}
           />
         ) : (
-          <div className="space-y-6">
-            <FusionPanel
-              picks={validPicks}
-              byId={byId}
-              rarity={pickRarity}
-              error={fusionCheck && !fusionCheck.ok ? fusionCheck.error : null}
-              ready={Boolean(fusionCheck?.ok)}
-              disabled={fusing || pending}
-              onRemove={(i) => setPicks(validPicks.filter((_, j) => j !== i))}
-              onClear={() => setPicks([])}
-              onFuse={() => void fuse()}
-            />
-
-            <CardGrid
-              cards={collection}
-              ownedOnly
-              filter={isDuplicate}
-              emptyLabel="Aucun doublon pour l'instant. Ouvre des boosters !"
-              renderBadge={(card) => {
-                const n = validPicks.filter((id) => id === card.characterId).length;
-                return n > 0 ? (
-                  <span
-                    title="Sélectionnée pour la fusion"
-                    className="flex h-6 min-w-6 items-center justify-center rounded-full border border-domain/60 bg-domain px-1.5 text-xs font-black text-white shadow-glow"
-                  >
-                    {n}
-                  </span>
-                ) : null;
-              }}
-              renderActions={(card) => (
-                <>
-                  <button
-                    type="button"
-                    disabled={!canPick(card) || fusing}
-                    onClick={() => setPicks([...validPicks, card.characterId])}
-                    className="rounded-full border border-white/10 bg-void-800/80 px-2 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white/60 transition-colors hover:border-domain/50 hover:text-white disabled:opacity-40"
-                  >
-                    {nextRarity(card.rarity) ? "+ Fusion" : "Rareté max"}
-                  </button>
-                  <SellButton card={card} pending={pending} run={run} />
-                </>
-              )}
-            />
-          </div>
+          <CardGrid
+            cards={collection}
+            ownedOnly
+            filter={isDuplicate}
+            emptyLabel="Aucun doublon pour l'instant. Ouvre des boosters !"
+            renderBadge={fusionBadge}
+            renderActions={(card) => (
+              <>
+                {fusionButton(card)}
+                <SellButton card={card} pending={pending} run={run} />
+              </>
+            )}
+          />
         )}
       </section>
 
@@ -444,6 +472,7 @@ function SellButton({
 /** Les 3 emplacements de fusion + la rareté visée. */
 function FusionPanel({
   picks,
+  lastCopySlots,
   byId,
   rarity,
   error,
@@ -454,6 +483,7 @@ function FusionPanel({
   onFuse,
 }: {
   picks: string[];
+  lastCopySlots: Set<number>;
   byId: Map<string, CollectionCard>;
   rarity: CardRarity | null;
   error: string | null;
@@ -481,7 +511,7 @@ function FusionPanel({
                 <span style={{ color: to.color }}>{to.label}</span> aléatoire
               </>
             ) : (
-              "Choisis 3 doublons de même rareté pour obtenir une carte de la rareté au-dessus."
+              "Choisis 3 cartes de même rareté (« + Fusion ») pour obtenir une carte de la rareté au-dessus."
             )}
           </p>
         </div>
@@ -518,9 +548,14 @@ function FusionPanel({
               onClick={() => onRemove(i)}
               disabled={disabled}
               aria-label={`Retirer ${card.name} de la fusion`}
-              className="rounded-2xl transition-transform hover:scale-[1.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-domain"
+              className="relative rounded-2xl transition-transform hover:scale-[1.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-domain"
             >
               <CardArt card={card} />
+              {lastCopySlots.has(i) && (
+                <span className="absolute inset-x-1 top-1 z-30 rounded-full bg-cursed/90 px-1.5 py-0.5 text-center text-[9px] font-black uppercase tracking-wider text-white">
+                  Dernier exemplaire
+                </span>
+              )}
             </button>
           ) : (
             <div

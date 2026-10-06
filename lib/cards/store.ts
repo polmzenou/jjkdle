@@ -284,22 +284,62 @@ export async function addCopies(
 }
 
 /**
- * Retire `n` DOUBLONS d'une carte. Échoue (renvoie `false`, rien n'est
- * modifié) si le joueur n'en a pas au moins `n + 1` : le dernier exemplaire
- * n'est jamais consommé par cette voie (fusion, échange, revente d'un doublon).
- * La garde est dans le `WHERE`, donc atomique.
+ * Retire `n` exemplaires d'une carte (fusion, échange, revente). Peut consommer
+ * le DERNIER exemplaire : la ligne est alors supprimée.
+ *
+ * Gardes atomiques dans le `WHERE` : décrément si `count > n`, sinon
+ * suppression si `count = n`, sinon échec (`false`, rien n'est modifié).
+ * Si la carte quitte la collection, l'appelant doit ensuite appeler
+ * `syncAfterCardsLost` (deck + couleur de pseudo) — hors transaction.
  */
-export async function removeSpareCopies(
+export async function removeCopies(
   db: CardDb,
   userId: string,
   characterId: string,
   n = 1,
 ): Promise<boolean> {
-  const res = await db.userCard.updateMany({
+  const dec = await db.userCard.updateMany({
     where: { userId, characterId, count: { gt: n } },
     data: { count: { decrement: n } },
   });
-  return res.count === 1;
+  if (dec.count === 1) return true;
+  const del = await db.userCard.deleteMany({
+    where: { userId, characterId, count: n },
+  });
+  return del.count === 1;
+}
+
+/**
+ * Après une perte possible de cartes (fusion, échange) : celles qui ne sont
+ * plus possédées du tout quittent les decks, et la couleur de pseudo des
+ * univers concernés est revérifiée (la complétion a pu baisser).
+ */
+export async function syncAfterCardsLost(
+  userId: string,
+  characterIds: readonly string[],
+): Promise<void> {
+  const ids = [...new Set(characterIds)];
+  if (ids.length === 0) return;
+  const [stillOwned, characters] = await Promise.all([
+    prisma.userCard.findMany({
+      where: { userId, characterId: { in: ids } },
+      select: { characterId: true },
+    }),
+    prisma.character.findMany({
+      where: { id: { in: ids } },
+      select: { id: true, universeId: true },
+    }),
+  ]);
+  const owned = new Set(stillOwned.map((r) => r.characterId));
+  const lost = characters.filter((c) => !owned.has(c.id));
+  if (lost.length === 0) return;
+
+  for (const c of lost) await removeFromDecks(userId, c.id);
+  await Promise.all(
+    [...new Set(lost.map((c) => c.universeId))].map((uid) =>
+      dropLockedNameColor(userId, uid),
+    ),
+  );
 }
 
 /**
@@ -406,7 +446,11 @@ export async function sellCard(
       data: { coins: { increment: card.sellValue } },
     });
 
-  if (await removeSpareCopies(prisma, userId, characterId, 1)) {
+  const spare = await prisma.userCard.updateMany({
+    where: { userId, characterId, count: { gt: 1 } },
+    data: { count: { decrement: 1 } },
+  });
+  if (spare.count === 1) {
     await credit();
     return { ok: true, coins: card.sellValue, lastCopy: false };
   }
@@ -515,13 +559,14 @@ export async function openBooster(
 class StaleCopiesError extends Error {}
 
 /**
- * Fusionne 3 doublons de même rareté en 1 carte aléatoire de la rareté
- * au-dessus (cf. `lib/cards/fusion.ts`).
+ * Fusionne 3 cartes de même rareté en 1 carte aléatoire de la rareté
+ * au-dessus (cf. `lib/cards/fusion.ts`). Le dernier exemplaire d'une carte
+ * peut être consommé : elle quitte alors la collection (et le deck).
  *
  * La validation est REFAITE ici sur l'état en base, puis le retrait des
- * doublons et l'ajout du résultat se font dans UNE transaction : chaque
- * retrait est gardé (`count > n`), un échec annule tout — un double clic ne
- * peut ni consommer deux fois ni créer une carte sans payer.
+ * cartes et l'ajout du résultat se font dans UNE transaction : chaque retrait
+ * est gardé (`removeCopies`), un échec annule tout — un double clic ne peut ni
+ * consommer deux fois ni créer une carte sans payer.
  */
 export async function fuseCards(
   userId: string,
@@ -547,19 +592,20 @@ export async function fuseCards(
   try {
     const copies = await prisma.$transaction(async (tx) => {
       for (const [characterId, n] of check.needed) {
-        if (!(await removeSpareCopies(tx, userId, characterId, n))) {
+        if (!(await removeCopies(tx, userId, characterId, n))) {
           throw new StaleCopiesError();
         }
       }
       return addCopies(tx, userId, character.id, 1);
     });
+    await syncAfterCardsLost(userId, [...check.needed.keys()]);
     return {
       ok: true,
       card: { ...toCardView(character), duplicate: copies > 1, copies },
     };
   } catch (err) {
     if (err instanceof StaleCopiesError) {
-      return { ok: false, error: "Ces doublons ne sont plus disponibles." };
+      return { ok: false, error: "Ces cartes ne sont plus disponibles." };
     }
     throw err;
   }

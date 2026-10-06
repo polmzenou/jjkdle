@@ -91,9 +91,10 @@ model User {
 /// personnage.
 ///
 /// `count` = nombre d'exemplaires (≥ 1, une ligne n'existe que si possédée).
-/// Les exemplaires au-delà du premier sont les DOUBLONS : seuls eux peuvent
-/// être fusionnés ou échangés (garde `count > n` en base, cf.
-/// `removeSpareCopies`), la collection ne régresse donc jamais par ces voies.
+/// Les exemplaires au-delà du premier sont les DOUBLONS. Tout exemplaire, même
+/// le dernier, peut être fusionné, échangé ou revendu (`removeCopies` : garde
+/// atomique en base) ; perdre le dernier retire la carte des decks
+/// (`syncAfterCardsLost`).
 model UserCard {
   id          String    @id @default(cuid())
   userId      String
@@ -1142,7 +1143,7 @@ enum TradeStatus {
   ACCEPTED
   DECLINED
   CANCELLED
-  /// L'acceptation a échoué : un des doublons n'existait plus.
+  /// L'acceptation a échoué : une des cartes n'était plus possédée.
   FAILED
 }
 
@@ -1151,9 +1152,9 @@ enum TradeSide {
   TAKE // du destinataire vers l'auteur de l'offre
 }
 
-/// Offre d'échange de cartes entre deux amis, scopée à UN univers. Seuls des
-/// doublons circulent (re-vérifié à l'acceptation, en transaction) et jamais
-/// de coins.
+/// Offre d'échange de cartes entre deux amis, scopée à UN univers. Toute carte
+/// possédée peut circuler, y compris le dernier exemplaire (re-vérifié à
+/// l'acceptation, en transaction), et jamais de coins.
 model TradeOffer {
   id         String           @id @default(cuid())
   fromUserId String

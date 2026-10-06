@@ -154,8 +154,8 @@ export async function sellCardAction(
 }
 
 /**
- * Fusionne 3 doublons de même rareté en une carte de la rareté au-dessus.
- * Toute la validation (possession, doublons, rareté, univers) est refaite
+ * Fusionne 3 cartes de même rareté en une carte de la rareté au-dessus.
+ * Toute la validation (possession, exemplaires, rareté, univers) est refaite
  * côté serveur par `fuseCards`.
  */
 export async function fuseCardsAction(

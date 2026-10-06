@@ -23,7 +23,7 @@ describe("nextRarity", () => {
 });
 
 describe("validateFusion", () => {
-  it("3 doublons de même rareté → rareté supérieure", () => {
+  it("3 cartes de même rareté → rareté supérieure", () => {
     const counts = new Map([["r1", 2], ["r2", 2], ["r3", 2]]);
     const res = validateFusion(["r1", "r2", "r3"], counts, rarityById, pool);
     expect(res.ok).toBe(true);
@@ -34,13 +34,18 @@ describe("validateFusion", () => {
     }
   });
 
-  it("3× le même perso s'il a au moins 4 exemplaires", () => {
-    expect(validateFusion(["r1", "r1", "r1"], new Map([["r1", 4]]), rarityById, pool).ok).toBe(true);
-    expect(validateFusion(["r1", "r1", "r1"], new Map([["r1", 3]]), rarityById, pool).ok).toBe(false);
+  it("3× le même perso s'il a au moins 3 exemplaires", () => {
+    expect(validateFusion(["r1", "r1", "r1"], new Map([["r1", 3]]), rarityById, pool).ok).toBe(true);
+    expect(validateFusion(["r1", "r1", "r1"], new Map([["r1", 2]]), rarityById, pool).ok).toBe(false);
   });
 
-  it("refuse de consommer le dernier exemplaire", () => {
-    const counts = new Map([["r1", 1], ["r2", 2], ["r3", 2]]);
+  it("peut consommer le dernier exemplaire", () => {
+    const counts = new Map([["r1", 1], ["r2", 1], ["r3", 1]]);
+    expect(validateFusion(["r1", "r2", "r3"], counts, rarityById, pool).ok).toBe(true);
+  });
+
+  it("refuse une carte non possédée", () => {
+    const counts = new Map([["r1", 1], ["r2", 1]]);
     expect(validateFusion(["r1", "r2", "r3"], counts, rarityById, pool).ok).toBe(false);
   });
 

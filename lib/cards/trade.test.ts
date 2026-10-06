@@ -10,7 +10,7 @@ const universe = new Set(["a", "b", "c"]);
 const counts = new Map([["a", 3], ["b", 2], ["c", 1]]);
 
 describe("validateTradeLines", () => {
-  it("accepte des doublons et fusionne les lignes d'un même perso", () => {
+  it("accepte des cartes possédées et fusionne les lignes d'un même perso", () => {
     const res = validateTradeLines(
       [{ characterId: "a", quantity: 1 }, { characterId: "a", quantity: 1 }, { characterId: "b", quantity: 1 }],
       counts,
@@ -21,9 +21,10 @@ describe("validateTradeLines", () => {
     if (res.ok) expect(res.lines.get("a")).toBe(2);
   });
 
-  it("refuse le dernier exemplaire", () => {
-    expect(validateTradeLines([{ characterId: "c", quantity: 1 }], counts, universe, "Tu").ok).toBe(false);
-    expect(validateTradeLines([{ characterId: "a", quantity: 3 }], counts, universe, "Tu").ok).toBe(false);
+  it("accepte le dernier exemplaire, refuse au-delà", () => {
+    expect(validateTradeLines([{ characterId: "c", quantity: 1 }], counts, universe, "Tu").ok).toBe(true);
+    expect(validateTradeLines([{ characterId: "a", quantity: 3 }], counts, universe, "Tu").ok).toBe(true);
+    expect(validateTradeLines([{ characterId: "a", quantity: 4 }], counts, universe, "Tu").ok).toBe(false);
   });
 
   it("refuse un côté vide", () => {

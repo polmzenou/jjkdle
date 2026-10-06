@@ -7,13 +7,13 @@ import {
   cancelTradeAction,
   createTradeAction,
   declineTradeAction,
-  loadTradeSparesAction,
+  loadTradeCardsAction,
 } from "@/app/[universe]/account/social/actions";
 import { MAX_TRADE_CARDS, TRADE_MESSAGE_MAX } from "@/lib/cards/trade";
 import { rarityRank } from "@/lib/cards/rarity";
 import type {
   FriendView,
-  SpareCard,
+  TradableCard,
   TradeLine,
   TradeStatusView,
   TradeView,
@@ -248,7 +248,7 @@ function TradeComposer({
     message: string,
   ) => void;
 }) {
-  const [data, setData] = useState<{ mine: SpareCard[]; theirs: SpareCard[] } | null>(null);
+  const [data, setData] = useState<{ mine: TradableCard[]; theirs: TradableCard[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [give, setGive] = useState<Picks>({});
   const [take, setTake] = useState<Picks>({});
@@ -257,7 +257,7 @@ function TradeComposer({
   useEffect(() => {
     if (!friend) return;
     let alive = true;
-    void loadTradeSparesAction(friend.userId).then((res) => {
+    void loadTradeCardsAction(friend.userId).then((res) => {
       if (!alive) return;
       if (res.ok && res.mine && res.theirs) setData({ mine: res.mine, theirs: res.theirs });
       else setError(res.error ?? "Chargement impossible.");
@@ -277,14 +277,15 @@ function TradeComposer({
         Échange avec {friend.username}
       </h3>
       <p className="mt-1 text-sm text-white/45">
-        Seuls les doublons s&apos;échangent ({MAX_TRADE_CARDS} cartes max de chaque côté).
+        {MAX_TRADE_CARDS} cartes max de chaque côté. Donner ton dernier
+        exemplaire d&apos;une carte la retire de ta collection (et de ton deck).
         Les cartes sont vérifiées à nouveau quand ton ami accepte.
       </p>
 
       {error ? (
         <p className="mt-4 text-sm text-cursed-light">{error}</p>
       ) : !data ? (
-        <p className="mt-6 animate-pulse text-sm text-white/45">Chargement des doublons…</p>
+        <p className="mt-6 animate-pulse text-sm text-white/45">Chargement des cartes…</p>
       ) : (
         <>
           <div className="mt-6 grid gap-8 lg:grid-cols-2">
@@ -293,14 +294,15 @@ function TradeComposer({
               cards={data.mine}
               picks={give}
               onChange={setGive}
-              empty="Tu n'as aucun doublon dans cet univers."
+              empty="Tu n'as aucune carte dans cet univers."
+              warnLast
             />
             <SparePicker
               title={`Tu demandes à ${friend.username}`}
               cards={data.theirs}
               picks={take}
               onChange={setTake}
-              empty={`${friend.username} n'a aucun doublon dans cet univers.`}
+              empty={`${friend.username} n'a aucune carte dans cet univers.`}
             />
           </div>
 
@@ -342,12 +344,15 @@ function SparePicker({
   picks,
   onChange,
   empty,
+  warnLast = false,
 }: {
   title: string;
-  cards: SpareCard[];
+  cards: TradableCard[];
   picks: Picks;
   onChange: (picks: Picks) => void;
   empty: string;
+  /** Signale quand la sélection emporte le dernier exemplaire (mes cartes). */
+  warnLast?: boolean;
 }) {
   const used = total(picks);
   const sorted = [...cards].sort(
@@ -370,8 +375,13 @@ function SparePicker({
             const q = picks[card.characterId] ?? 0;
             return (
               <div key={card.characterId} className="flex flex-col gap-1.5">
-                <div className={`rounded-2xl ${q > 0 ? "ring-2 ring-domain" : ""}`}>
-                  <CardArt card={card} />
+                <div className={`relative rounded-2xl ${q > 0 ? "ring-2 ring-domain" : ""}`}>
+                  <CardArt card={card} count={card.copies} />
+                  {warnLast && q > 0 && q >= card.copies && (
+                    <span className="absolute inset-x-1 bottom-1 z-30 rounded-full bg-cursed/90 px-1.5 py-0.5 text-center text-[9px] font-black uppercase tracking-wider text-white">
+                      Dernier exemplaire
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center justify-between rounded-full border border-white/10 bg-void-900/70 text-xs">
                   <button
@@ -384,12 +394,12 @@ function SparePicker({
                     −
                   </button>
                   <span className="font-bold text-white/80">
-                    {q}/{card.spare}
+                    {q}/{card.copies}
                   </span>
                   <button
                     type="button"
                     aria-label={`Ajouter un ${card.name}`}
-                    disabled={q >= card.spare || used >= MAX_TRADE_CARDS}
+                    disabled={q >= card.copies || used >= MAX_TRADE_CARDS}
                     onClick={() => set(card.characterId, q + 1)}
                     className="px-2.5 py-1 text-white/60 hover:text-white disabled:opacity-30"
                   >

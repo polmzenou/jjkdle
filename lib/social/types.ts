@@ -52,9 +52,9 @@ export interface TradeView {
   resolvedAt: string | null;
 }
 
-/** Un doublon échangeable : la carte + combien d'exemplaires sont en trop. */
-export interface SpareCard extends CardView {
-  spare: number;
+/** Une carte échangeable : la carte + le nombre d'exemplaires possédés. */
+export interface TradableCard extends CardView {
+  copies: number;
 }
 
 export interface MessageView {

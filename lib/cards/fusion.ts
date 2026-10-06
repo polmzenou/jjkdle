@@ -2,15 +2,16 @@ import { CARD_RARITIES, rarityRank, type CardRarity } from "./rarity";
 import type { CardPool } from "./roll";
 
 /**
- * FUSION de cartes : 3 doublons d'une même rareté → 1 carte aléatoire de la
+ * FUSION de cartes : 3 cartes d'une même rareté → 1 carte aléatoire de la
  * rareté juste au-dessus, dans le même univers.
  *
  * Module PUR (aucun accès base) : la validation est partagée entre le serveur
  * (`fuseCards`, qui la refait toujours) et le client (activation du bouton).
  *
- * Seuls des DOUBLONS sont consommés : pour chaque personnage, le nombre de
- * fois où il est choisi doit rester ≤ `count - 1`. On peut donc fusionner
- * 3 fois le même personnage s'il en a au moins 4 exemplaires.
+ * N'importe quel exemplaire peut être consommé, y compris le DERNIER (la carte
+ * quitte alors la collection) : pour chaque personnage, le nombre de fois où
+ * il est choisi doit rester ≤ `count`. On peut donc fusionner 3 fois le même
+ * personnage s'il en a au moins 3 exemplaires.
  */
 
 export const FUSION_SIZE = 3;
@@ -65,11 +66,8 @@ export function validateFusion(
   const rarity = [...rarities][0]!;
 
   for (const [id, n] of needed) {
-    if (n > (counts.get(id) ?? 0) - 1) {
-      return {
-        ok: false,
-        error: "Seuls les doublons peuvent être fusionnés (garde au moins 1 exemplaire).",
-      };
+    if (n > (counts.get(id) ?? 0)) {
+      return { ok: false, error: "Tu ne possèdes pas assez d'exemplaires de ces cartes." };
     }
   }
 
