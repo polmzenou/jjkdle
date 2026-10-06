@@ -19,6 +19,7 @@ import {
   chipStyleFor,
   formatChip,
 } from "./roulette/RouletteBoard";
+import { RigToggle } from "./roulette/RigToggle";
 import { RouletteWheelEU, SLICE, type WheelSpin } from "./roulette/RouletteWheelEU";
 
 /**
@@ -56,9 +57,12 @@ interface SessionStats {
 export function RouletteGame({
   initialCoins,
   minBet,
+  rigged,
 }: {
   initialCoins: number;
   minBet: number;
+  /** Défini pour un ADMIN seulement : état du truquage. */
+  rigged?: boolean;
 }) {
   const router = useRouter();
   const reduceMotion = useReducedMotion();
@@ -247,11 +251,13 @@ export function RouletteGame({
       {/* ── Roue + panneau ── */}
       <div className="mt-8 grid items-center gap-8 md:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
         <div className="relative mx-auto w-full max-w-[420px]">
-          <RouletteWheelEU
-            spin={wheel}
-            highlight={spinning ? null : result?.pocket ?? null}
-            onSpinEnd={onSpinEnd}
-          />
+          <RigToggle rigged={rigged}>
+            <RouletteWheelEU
+              spin={wheel}
+              highlight={spinning ? null : result?.pocket ?? null}
+              onSpinEnd={onSpinEnd}
+            />
+          </RigToggle>
         </div>
 
         <div className="flex flex-col gap-4">

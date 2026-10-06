@@ -16,6 +16,7 @@ import { DEFAULT_MIN_BET } from "./rules";
 const KEY_ENABLED = "casino.enabled";
 const KEY_MIN_BET = "casino.minBet";
 const KEY_CARD_BACK = "casino.cardBack";
+const KEY_ROULETTE_RIGGED = "casino.rouletteRigged";
 
 /** Bornes de la mise minimale réglable en admin (garde-fous de saisie). */
 export const MIN_BET_FLOOR = 1;
@@ -66,4 +67,16 @@ export async function setCasinoMinBet(value: number): Promise<void> {
 
 export async function setCasinoCardBack(id: string): Promise<void> {
   await setConfig(KEY_CARD_BACK, resolveCardBack(id).id);
+}
+
+/**
+ * Roulette truquée : la bille ne tombe que sur un numéro rouge. Basculé par un
+ * ADMIN en cliquant sur la roue ; vrai par défaut.
+ */
+export async function isRouletteRigged(): Promise<boolean> {
+  return Boolean(await getConfig<boolean>(KEY_ROULETTE_RIGGED, true));
+}
+
+export async function setRouletteRigged(rigged: boolean): Promise<void> {
+  await setConfig(KEY_ROULETTE_RIGGED, Boolean(rigged));
 }

@@ -30,6 +30,7 @@ import {
   formatChip,
   type OtherBets,
 } from "./roulette/RouletteBoard";
+import { RigToggle } from "./roulette/RigToggle";
 import { RouletteWheelEU, SLICE, type WheelSpin } from "./roulette/RouletteWheelEU";
 
 /**
@@ -65,9 +66,12 @@ const sameBets = (a: Bets, b: Bets) =>
 export function RouletteTable({
   initialTable,
   pusherReady,
+  rigged,
 }: {
   initialTable: RouletteTableView;
   pusherReady: boolean;
+  /** Défini pour un ADMIN seulement : état du truquage. */
+  rigged?: boolean;
 }) {
   const router = useRouter();
   const reduceMotion = useReducedMotion();
@@ -419,7 +423,9 @@ export function RouletteTable({
       {/* ── Roue + joueurs ── */}
       <div className="grid items-center gap-8 md:grid-cols-[minmax(0,380px)_minmax(0,1fr)]">
         <div className="relative mx-auto w-full max-w-[380px]">
-          <RouletteWheelEU spin={wheel} highlight={showResult ? pocket : null} onSpinEnd={onSpinEnd} />
+          <RigToggle rigged={rigged}>
+            <RouletteWheelEU spin={wheel} highlight={showResult ? pocket : null} onSpinEnd={onSpinEnd} />
+          </RigToggle>
         </div>
 
         <div className="flex flex-col gap-4">

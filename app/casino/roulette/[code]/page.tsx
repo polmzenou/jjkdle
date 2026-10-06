@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
+import { isRouletteRigged } from "@/lib/casino/config";
 import { rouletteViewFor } from "@/lib/casino/roulette-engine";
 import { seatOf } from "@/lib/casino/state";
 import { findTableByCode } from "@/lib/casino/store";
@@ -34,6 +35,7 @@ export default async function RouletteTablePage({
     <RouletteTable
       initialTable={await rouletteViewFor(table, user.id)}
       pusherReady={isPusherConfigured()}
+      rigged={user.role === "ADMIN" ? await isRouletteRigged() : undefined}
     />
   );
 }

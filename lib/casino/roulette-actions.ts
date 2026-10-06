@@ -2,11 +2,12 @@
 
 import { randomInt } from "node:crypto";
 import { creditCoins, debitCoins, getCoins } from "@/lib/coins";
+import { getCurrentUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { getCasinoConfig } from "./config";
+import { getCasinoConfig, isRouletteRigged, setRouletteRigged } from "./config";
 import { casinoAccess } from "./guard";
 import {
-  RED_NUMBERS,
+  drawPocket,
   normalizeBets,
   resolveRoulette,
   type RouletteSpinResult,
@@ -47,9 +48,9 @@ export async function spinRouletteAction(bets: unknown): Promise<RouletteActionR
     return { ok: false, error: "Tu n'as pas assez de coins." };
   }
 
-  // 4. La bille : un numéro uniforme parmi 37, cryptographique.
-  // Truqué : la bille tombe toujours sur un numéro rouge.
-  const spin = resolveRoulette(clean, RED_NUMBERS[randomInt(RED_NUMBERS.length)]);
+  // 4. La bille : un numéro uniforme parmi 37, cryptographique — ou un rouge
+  //    si un ADMIN a truqué la roue.
+  const spin = resolveRoulette(clean, drawPocket(await isRouletteRigged(), randomInt));
 
   // 5. Crédit des gains (mises gagnantes incluses).
   if (spin.payout > 0) await creditCoins(access.userId, spin.payout);
@@ -66,4 +67,13 @@ export async function spinRouletteAction(bets: unknown): Promise<RouletteActionR
   });
 
   return { ok: true, spin, coins: await getCoins(access.userId) };
+}
+
+/** ADMIN : clic sur la roue → bascule roulette truquée (que du rouge) / normale. */
+export async function toggleRouletteRiggedAction(): Promise<{ ok: true; rigged: boolean } | { ok: false }> {
+  const user = await getCurrentUser();
+  if (user?.role !== "ADMIN") return { ok: false };
+  const rigged = !(await isRouletteRigged());
+  await setRouletteRigged(rigged);
+  return { ok: true, rigged };
 }

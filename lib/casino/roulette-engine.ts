@@ -4,7 +4,8 @@ import { creditCoins } from "@/lib/coins";
 import { prisma } from "@/lib/prisma";
 import { isPusherConfigured, triggerCasino } from "@/lib/pusher/server";
 import { CASINO_EVENTS, type TableSyncPayload } from "./events";
-import { RED_NUMBERS, resolveRoulette } from "./roulette";
+import { isRouletteRigged } from "./config";
+import { drawPocket, resolveRoulette } from "./roulette";
 import {
   ROULETTE_AFK_MAX,
   ROULETTE_BETTING_MS,
@@ -229,8 +230,8 @@ async function settleRound(table: TableWithSeats): Promise<void> {
   //    soit : un rejeu après crash retrouve le même.
   let wheel: WheelState = readWheelState(table.dealerCards);
   if (wheel.round !== round || wheel.pocket === null) {
-    // Truqué : la bille tombe toujours sur un numéro rouge.
-    const pocket = RED_NUMBERS[randomInt(RED_NUMBERS.length)];
+    // Truquée par un ADMIN : la bille ne tombe que sur un rouge.
+    const pocket = drawPocket(await isRouletteRigged(), randomInt);
     wheel = {
       round,
       pocket,

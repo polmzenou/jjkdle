@@ -33,6 +33,11 @@ export const RED_NUMBERS: readonly number[] = [
 
 const RED = new Set(RED_NUMBERS);
 
+/** Tire un numéro : uniforme parmi 37, ou parmi les rouges si truqué. */
+export function drawPocket(rigged: boolean, rand: (max: number) => number): number {
+  return rigged ? RED_NUMBERS[rand(RED_NUMBERS.length)] : rand(POCKET_COUNT);
+}
+
 export type PocketColor = "green" | "red" | "black";
 
 export function pocketColor(n: number): PocketColor {

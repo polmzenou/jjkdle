@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
-import { getCasinoConfig } from "@/lib/casino/config";
+import { getCasinoConfig, isRouletteRigged } from "@/lib/casino/config";
 import { prisma } from "@/lib/prisma";
 import { RouletteGame } from "@/components/casino/RouletteGame";
 
@@ -29,5 +29,11 @@ export default async function RouletteSoloPage() {
     select: { coins: true },
   });
 
-  return <RouletteGame initialCoins={profile?.coins ?? 0} minBet={config.minBet} />;
+  return (
+    <RouletteGame
+      initialCoins={profile?.coins ?? 0}
+      minBet={config.minBet}
+      rigged={user.role === "ADMIN" ? await isRouletteRigged() : undefined}
+    />
+  );
 }
