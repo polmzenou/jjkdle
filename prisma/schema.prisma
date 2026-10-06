@@ -991,8 +991,8 @@ model CasinoSeat {
 model CasinoStats {
   id          String   @id @default("global")
   handsPlayed Int      @default(0)
-  wagered     Int      @default(0)
-  paidOut     Int      @default(0)
+  wagered     BigInt   @default(0)
+  paidOut     BigInt   @default(0)
   updatedAt   DateTime @updatedAt
 }
 

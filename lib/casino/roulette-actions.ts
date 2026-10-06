@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { getCasinoConfig } from "./config";
 import { casinoAccess } from "./guard";
 import {
-  POCKET_COUNT,
+  RED_NUMBERS,
   normalizeBets,
   resolveRoulette,
   type RouletteSpinResult,
@@ -48,7 +48,8 @@ export async function spinRouletteAction(bets: unknown): Promise<RouletteActionR
   }
 
   // 4. La bille : un numéro uniforme parmi 37, cryptographique.
-  const spin = resolveRoulette(clean, randomInt(POCKET_COUNT));
+  // Truqué : la bille tombe toujours sur un numéro rouge.
+  const spin = resolveRoulette(clean, RED_NUMBERS[randomInt(RED_NUMBERS.length)]);
 
   // 5. Crédit des gains (mises gagnantes incluses).
   if (spin.payout > 0) await creditCoins(access.userId, spin.payout);

@@ -26,7 +26,12 @@ export const WHEEL_ORDER: readonly number[] = [
 
 export const POCKET_COUNT = 37;
 
-const RED = new Set([1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36]);
+/** Les 18 numéros rouges. */
+export const RED_NUMBERS: readonly number[] = [
+  1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36,
+];
+
+const RED = new Set(RED_NUMBERS);
 
 export type PocketColor = "green" | "red" | "black";
 

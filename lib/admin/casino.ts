@@ -57,8 +57,8 @@ export async function getCasinoAdminData(): Promise<CasinoAdminData> {
     }),
   ]);
 
-  const wagered = stats?.wagered ?? 0;
-  const paidOut = stats?.paidOut ?? 0;
+  const wagered = Number(stats?.wagered ?? 0);
+  const paidOut = Number(stats?.paidOut ?? 0);
 
   return {
     config,
