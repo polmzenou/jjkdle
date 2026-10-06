@@ -136,13 +136,13 @@ export const csm: UniverseConfig = {
   /**
    * Tour de Chainsaw Man.
    *
-   * L'ultime se lit sur `csmspecies`, et sur les seuls HYBRIDES et FIENDS :
-   * ceux qui ont une SECONDE FORME à déchaîner. Un démon, lui, est déjà
-   * pleinement lui-même — il n'a rien à révéler.
+   * L'ultime se lit sur la PUISSANCE : seuls les deux derniers paliers,
+   * « Extrême » (`EXTREME`) et « Surpuissant » (`CATASTROPHIC`), l'ouvrent.
+   * ⚠️ Les clés ne suivent pas les libellés : « Surpuissant » est `CATASTROPHIC`,
+   * et `VERY_HIGH` n'est que « Très puissant ».
    *
-   * Y ajouter `DEVIL` aurait donné l'ultime à 49 personnages sur 67 : la
-   * mécanique aurait cessé d'être un évènement pour devenir la norme. À 18 sur
-   * 67, cet univers tombe dans la même fourchette que les quatre autres.
+   * (L'ancienne règle — hybrides et fiends, sur `csmspecies` — donnait l'ultime
+   * selon la nature du personnage plutôt que selon sa force.)
    *
    * ⚠️ `csmpower` est ORDINAL dans cet univers, pas NUMERIC. Le Flux retombe
    * donc sur sa valeur par défaut et tout le monde régénère à la même vitesse.
@@ -151,10 +151,11 @@ export const csm: UniverseConfig = {
    */
   tower: {
     arcAttributeKey: "csmAppearanceArc",
-    ultimateAttributeKey: "csmspecies",
-    ultimateAttributeValues: ["HYBRID", "FIEND"],
+    ultimateAttributeKey: "csmpower",
+    ultimateAttributeValues: ["EXTREME", "CATASTROPHIC"],
     energyAttributeKey: "csmpower",
-    ultimateName: "Forme Démoniaque",
+    ultimateName: "Surpuissance",
+    ultimateBadge: "覚醒",
     // Chainsaw Man n'a pas de catégorie « battle IQ » : ses catégories sont
     // pour moitié des CASTINGS (Division 4, Antagonistes, Coéquipier) et non
     // des statistiques. C'est précisément le cas que `categoryArchetypes`

@@ -153,6 +153,7 @@ export const aot: UniverseConfig = {
     ultimateAttributeKey: "aottitan",
     energyAttributeKey: "aotpower",
     ultimateName: "Transformation en Titan",
+    ultimateBadge: "巨人",
     categoryArchetypes: {
       "aot-titan-shifter": "technique",
       "aot-agilite": "swift",

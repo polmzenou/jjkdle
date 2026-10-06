@@ -128,7 +128,7 @@ export function CharacterTip({
       )}
 
       {card.hasDomain && (
-        <Block label="Ultime" title={ultimateName} accent="cursed">
+        <Block label="Ultime" title={card.ultimateName ?? ultimateName} accent="cursed">
           {ULTIMATE.description} La jauge se remplit avec les dégâts subis.
         </Block>
       )}

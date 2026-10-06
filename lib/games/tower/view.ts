@@ -1,7 +1,12 @@
 import type { Character } from "@/data/roster/characters";
-import { archetypeOf, passiveOf, techniqueOf } from "./abilities";
+import { passiveOf, techniqueOf } from "./abilities";
 import type { TowerConfig } from "./config";
-import { booleanAttribute, deriveStats, toEnemySpec } from "./stats";
+import {
+  deriveStats,
+  toEnemySpec,
+  towerArchetypeOf,
+  ultimateNameOf,
+} from "./stats";
 import { recruitChoices, runScore, type TowerRunState } from "./run";
 import { describeItem, itemRarityStyle, resolveItems, type TowerItem } from "./items";
 import { eventFor, type TowerEvent } from "./events";
@@ -42,6 +47,14 @@ export interface TowerCardView {
   image?: string;
   archetype: Archetype;
   hasDomain: boolean;
+  /**
+   * Nom de SON ultime (`null` sans ultime). Propre au personnage et non à
+   * l'univers : sur Bleach, un capitaine a un « Bankai », un Espada une
+   * « Resurrección ».
+   */
+  ultimateName: string | null;
+  /** Marque de coin de portrait (`領域` en JJK), cf. `TowerConfig.ultimateBadge`. */
+  ultimateBadge: string;
   stats: FighterStats;
   passive: { name: string; description: string };
   technique: { name: string; description: string; cost: number } | null;
@@ -188,13 +201,20 @@ export function toCardView(
   const archetype = archetypeOfCharacter(character, config);
   const passive = passiveOf(archetype);
   const technique = techniqueOf(archetype);
+  const ultimateName = ultimateNameOf(character, config);
 
   return {
     id: character.id,
     name: character.name,
     image: character.image ?? undefined,
     archetype,
-    hasDomain: hasDomainOf(character, config),
+    // ⚠️ Même lecture que `toFighterSpec` côté serveur, impérativement : le
+    // client rejoue le combat depuis CETTE fiche. Une lecture booléenne ici
+    // (comme avant) privait d'ultime, à l'écran seulement, tous les univers qui
+    // l'ouvrent sur une liste de valeurs — l'animation divergeait du résultat.
+    hasDomain: ultimateName !== null,
+    ultimateName,
+    ultimateBadge: config.ultimateBadge,
     stats: resolved,
     passive: { name: passive.name, description: passive.description },
     technique: technique
@@ -353,11 +373,7 @@ function archetypeOfCharacter(
   character: Character,
   config: TowerConfig,
 ): Archetype {
-  return archetypeOf(character, config.categoryArchetypes);
-}
-
-function hasDomainOf(character: Character, config: TowerConfig): boolean {
-  return booleanAttribute(character, config.ultimateAttributeKey);
+  return towerArchetypeOf(character, config);
 }
 
 /** Fiche affichable d'un objet. */

@@ -1,8 +1,9 @@
 import type { Character } from "@/data/roster/characters";
 import { battleValueOf } from "@/lib/games/battle/battleValues";
 import { mulberry32 } from "@/lib/games/battle/rng";
-import { passiveOf, archetypeOf } from "./abilities";
+import { passiveOf } from "./abilities";
 import type { TowerConfig } from "./config";
+import { towerArchetypeOf } from "./stats";
 import {
   FLOORS_PER_STRATE,
   STRATE_COUNT,
@@ -196,7 +197,7 @@ export function buildTowerRoster(
 
     const value = battleValueOf(character);
     const strate = strateOf(arcIndex, arcOrder.length, value);
-    const passive = passiveOf(archetypeOf(character, config.categoryArchetypes));
+    const passive = passiveOf(towerArchetypeOf(character, config));
 
     entries[character.id] = {
       id: character.id,

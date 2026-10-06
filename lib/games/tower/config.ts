@@ -1,6 +1,15 @@
 import type { Archetype } from "./types";
 
 /**
+ * Une condition d'accès à l'ultime : un attribut, et les valeurs qui l'ouvrent.
+ * `values` absent ⇒ l'attribut est lu comme un BOOLEAN (`"true"`).
+ */
+export interface UltimateRule {
+  attributeKey: string;
+  values?: readonly string[];
+}
+
+/**
  * Configuration d'univers de « The Culling Tower » — module PUR.
  *
  * Le jeu sort sur JJK, mais aucune règle n'est écrite pour JJK : tout ce qui
@@ -43,6 +52,26 @@ export interface TowerConfig {
    * Attack on Titan, à l'écran de combat comme dans les bulles d'info.
    */
   ultimateName: string;
+  /**
+   * Nom de l'ultime PAR VALEUR de `ultimateAttributeKey`, quand l'univers en a
+   * plusieurs sortes. Bleach : un capitaine déclenche son « Bankai », un Espada
+   * sa « Resurrección », un Quincy son « Vollständig ». Une valeur absente de
+   * la table — ou un ultime ouvert par `ultimateExtraRules` — prend
+   * `ultimateName`.
+   */
+  ultimateNamesByValue?: Readonly<Record<string, string>>;
+  /**
+   * Conditions SUPPLÉMENTAIRES ouvrant l'ultime, en OU avec l'attribut
+   * principal. Demon Slayer en a besoin : ses Piliers se lisent sur le GRADE,
+   * mais ses Lunes démoniaques sur l'AFFILIATION — deux hiérarchies que l'œuvre
+   * ne mélange jamais, donc deux attributs distincts.
+   */
+  ultimateExtraRules?: readonly UltimateRule[];
+  /**
+   * Marque affichée sur la carte d'un personnage qui a l'ultime (`領域` en JJK).
+   * Un ou deux caractères : elle tient dans le coin d'un portrait.
+   */
+  ultimateBadge: string;
   /** Attribut NUMERIC alimentant le Flux (énergie occulte par tick). */
   energyAttributeKey: string;
   /**
@@ -64,6 +93,7 @@ export interface TowerConfig {
 export const JJK_TOWER_CONFIG: TowerConfig = {
   arcAttributeKey: "appearanceArc",
   ultimateName: "Extension de Territoire",
+  ultimateBadge: "領域",
   ultimateAttributeKey: "hasDomain",
   energyAttributeKey: "cursedEnergy",
   categoryArchetypes: {
@@ -110,6 +140,21 @@ export function resolveTowerConfig(
     categoryArchetypes:
       override.categoryArchetypes ?? JJK_TOWER_CONFIG.categoryArchetypes,
     ultimateName: override.ultimateName ?? JJK_TOWER_CONFIG.ultimateName,
+    ultimateBadge: override.ultimateBadge ?? JJK_TOWER_CONFIG.ultimateBadge,
+    // Même règle que les valeurs : ces deux clés décrivent l'attribut d'ultime,
+    // elles ne s'héritent pas d'un univers à l'autre une fois celui-ci redéfini.
+    ...(override.ultimateAttributeKey
+      ? {
+          ultimateNamesByValue: override.ultimateNamesByValue,
+          ultimateExtraRules: override.ultimateExtraRules,
+        }
+      : {
+          ultimateNamesByValue:
+            override.ultimateNamesByValue ??
+            JJK_TOWER_CONFIG.ultimateNamesByValue,
+          ultimateExtraRules:
+            override.ultimateExtraRules ?? JJK_TOWER_CONFIG.ultimateExtraRules,
+        }),
   };
 }
 

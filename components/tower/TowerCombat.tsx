@@ -59,6 +59,8 @@ export function TowerCombat({
 
   /** Personnage dont l'ultime est en train d'être joué à l'écran. */
   const [casting, setCasting] = useState<string | null>(null);
+  /** Nom de SON ultime — propre au lanceur (Bleach : Bankai, Resurrección…). */
+  const [castName, setCastName] = useState(view.ultimateName);
   /** Dernier tick d'ultime déjà mis en scène — la re-simulation rejoue le
    *  journal, et sans ce garde-fou la même cinématique repartirait en boucle. */
   const shown = useRef(-1);
@@ -79,12 +81,14 @@ export function TowerCombat({
     if (!ultimate || shown.current === snap.tick) return;
 
     shown.current = snap.tick;
-    const who = snap.squad.find((f) => f.uid === ultimate.from);
+    const slot = snap.squad.findIndex((f) => f.uid === ultimate.from);
+    const who = snap.squad[slot];
+    setCastName(view.squad[slot]?.ultimateName ?? view.ultimateName);
     setCasting(who?.name ?? "");
 
     const id = window.setTimeout(() => setCasting(null), CINEMATIC_MS);
     return () => window.clearTimeout(id);
-  }, [snap.events, snap.tick, snap.squad]);
+  }, [snap.events, snap.tick, snap.squad, view.squad, view.ultimateName]);
 
   // Horloge du combat. `TICK_MS` est le tick du moteur : l'animation tourne
   // donc à la même cadence que la simulation, pas à une cadence approchée.
@@ -163,7 +167,7 @@ export function TowerCombat({
     <div className="relative flex flex-col gap-4">
       <DomainCinematic
         caster={casting}
-        ultimateName={view.ultimateName}
+        ultimateName={castName}
         onDone={() => undefined}
       />
 

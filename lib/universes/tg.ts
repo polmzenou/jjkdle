@@ -162,14 +162,17 @@ export const tg: UniverseConfig = {
    *
    * `tgrank` (le grade CCG) était l'autre candidat, et il a d'abord été retenu
    * à tort : il ne décrit que les enquêteurs, si bien que pas une seule goule
-   * n'aurait eu d'ultime dans Tokyo Ghoul. Le taux est aussi le bon nom — le
-   * Kakuja est précisément ce que débloquent les goules SS et SSS.
+   * n'aurait eu d'ultime dans Tokyo Ghoul.
+   *
+   * Nom : « Surpuissance » plutôt que « Kakuja » — tous les SS/SSS n'ont pas de
+   * kakuja, et le nom doit valoir pour chacun de ceux qui l'ouvrent.
    */
   tower: {
     arcAttributeKey: "tgAppearanceArc",
     ultimateAttributeKey: "tgrate",
     ultimateAttributeValues: ["SS", "SSS"],
-    ultimateName: "Kakuja",
+    ultimateName: "Surpuissance",
+    ultimateBadge: "覚醒",
     energyAttributeKey: "tgpower",
     categoryArchetypes: {
       "tg-kagune": "technique",

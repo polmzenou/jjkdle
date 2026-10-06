@@ -1,12 +1,11 @@
-import type { EffectKind } from "@/lib/games/tower/effects";
-import type { ItemRarity } from "@/lib/games/tower/items";
+import type { ItemSeed } from "./item-seed";
 
 /**
  * Objets maudits de JJK — données d'AMORÇAGE de « The Culling Tower ».
  *
  * Même statut que `lib/universes/jjk-attributes.ts` : la source de vérité au
  * runtime est la base (table `Item`, éditable depuis /admin, onglet Objets).
- * Ce fichier ne sert qu'au seed initial et aux tests.
+ * Ce fichier ne sert qu'au seed initial (`scripts/seed-items.ts`) et aux tests.
  *
  * Aucune image n'est renseignée : elles se téléversent depuis l'admin, qui les
  * stocke en base et les sert via `/api/items/[id]/image`. Un objet sans visuel
@@ -14,18 +13,14 @@ import type { ItemRarity } from "@/lib/games/tower/items";
  *
  * Répartition : 12 communs, 8 rares, 4 épiques. Les épiques ne tombent que sur
  * les élites et les boss (cf. `rewards.ts`).
+ *
+ * ⚠️ C'est le GABARIT des autres univers : chacun reprend ces 24 objets dans le
+ * même ordre, avec les mêmes raretés et les mêmes effets (seuls le nom, la
+ * description et l'image changent). `rewards.test.ts` le vérifie — toucher un
+ * effet ici impose de le reporter dans les cinq autres fichiers.
  */
 
-export interface ItemSeed {
-  slug: string;
-  name: string;
-  description: string;
-  rarity: ItemRarity;
-  effectKind: EffectKind;
-  effectValue: number;
-  effectKind2?: EffectKind;
-  effectValue2?: number;
-}
+export type { ItemSeed } from "./item-seed";
 
 export const JJK_ITEMS: ItemSeed[] = [
   // ── Communs ────────────────────────────────────────────────────────────

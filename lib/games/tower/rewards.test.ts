@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { JJK_ITEMS } from "@/lib/universes/jjk-items";
+import { CSM_ITEMS } from "@/lib/universes/csm-items";
+import { AOT_ITEMS } from "@/lib/universes/aot-items";
+import { KNY_ITEMS } from "@/lib/universes/kny-items";
+import { TG_ITEMS } from "@/lib/universes/tg-items";
+import { BLEACH_ITEMS } from "@/lib/universes/bleach-items";
 import { EFFECT_SPECS, NO_MODIFIERS } from "./effects";
 import {
   MIN_ITEMS,
@@ -270,9 +275,18 @@ describe("étal du marchand", () => {
   });
 });
 
-describe("les 24 objets de lancement", () => {
+const CATALOGS = [
+  ["jjk", JJK_ITEMS],
+  ["csm", CSM_ITEMS],
+  ["aot", AOT_ITEMS],
+  ["kny", KNY_ITEMS],
+  ["tg", TG_ITEMS],
+  ["bleach", BLEACH_ITEMS],
+] as const;
+
+describe.each(CATALOGS)("les 24 objets de lancement (%s)", (_slug, items) => {
   it("respectent tous les bornes du catalogue d'effets", () => {
-    for (const seed of JJK_ITEMS) {
+    for (const seed of items) {
       expect(validateEffect(seed.effectKind, seed.effectValue)).not.toBeNull();
       if (seed.effectKind2) {
         expect(validateEffect(seed.effectKind2, seed.effectValue2)).not.toBeNull();
@@ -281,15 +295,28 @@ describe("les 24 objets de lancement", () => {
   });
 
   it("ont des slugs uniques (clé du seed idempotent)", () => {
-    const slugs = JJK_ITEMS.map((i) => i.slug);
+    const slugs = items.map((i) => i.slug);
     expect(new Set(slugs).size).toBe(slugs.length);
   });
 
   it("suivent la répartition 12 / 8 / 4 et dépassent le seuil de viabilité", () => {
-    const count = (r: string) => JJK_ITEMS.filter((i) => i.rarity === r).length;
+    const count = (r: string) => items.filter((i) => i.rarity === r).length;
     expect(count("COMMON")).toBe(12);
     expect(count("RARE")).toBe(8);
     expect(count("EPIC")).toBe(4);
-    expect(JJK_ITEMS.length).toBeGreaterThanOrEqual(MIN_ITEMS);
+    expect(items.length).toBeGreaterThanOrEqual(MIN_ITEMS);
+  });
+
+  // Les univers ne diffèrent que par l'habillage : un écart d'effet ou de rareté
+  // rendrait la Tour plus facile sur un anime que sur un autre.
+  it("reprennent, emplacement par emplacement, la rareté et les effets de JJK", () => {
+    const signature = (i: (typeof items)[number]) => [
+      i.rarity,
+      i.effectKind,
+      i.effectValue,
+      i.effectKind2 ?? null,
+      i.effectValue2 ?? null,
+    ];
+    expect(items.map(signature)).toEqual(JJK_ITEMS.map(signature));
   });
 });

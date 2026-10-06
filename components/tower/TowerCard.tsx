@@ -59,8 +59,11 @@ export function TowerCard({
         <div className="relative aspect-[4/5] w-full">
           <CharacterImage character={{ name: card.name, image: card.image }} />
           {card.hasDomain && (
-            <span className="absolute right-1.5 top-1.5 rounded bg-cursed/90 px-1.5 py-0.5 font-display text-[10px] font-bold tracking-wider text-white">
-              領域
+            <span
+              title={card.ultimateName ?? undefined}
+              className="absolute right-1.5 top-1.5 rounded bg-cursed/90 px-1.5 py-0.5 font-display text-[10px] font-bold tracking-wider text-white"
+            >
+              {card.ultimateBadge}
             </span>
           )}
         </div>
@@ -98,7 +101,7 @@ export function TowerCard({
             </p>
           ) : (
             <p className="text-[11px] leading-tight text-cursed">
-              Extension de Territoire uniquement
+              {card.ultimateName ?? "Ultime"} uniquement
             </p>
           )}
 

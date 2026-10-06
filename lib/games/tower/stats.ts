@@ -1,8 +1,12 @@
 import type { Character } from "@/data/roster/characters";
 import { battleValueOf } from "@/lib/games/battle/battleValues";
 import { archetypeOf } from "./abilities";
-import { categoryForArchetype, type TowerConfig } from "./config";
-import type { FighterSpec, FighterStats, Side } from "./types";
+import {
+  categoryForArchetype,
+  type TowerConfig,
+  type UltimateRule,
+} from "./config";
+import type { Archetype, FighterSpec, FighterStats, Side } from "./types";
 
 /**
  * Dérivation des statistiques de combat — module PUR.
@@ -153,11 +157,11 @@ export function booleanAttribute(character: Character, key: string): boolean {
 }
 
 /**
- * Ce personnage peut-il déclencher l'ultime ?
+ * Valeur d'une règle d'ultime qui qualifie ce personnage, ou `null`.
  *
  * Deux lectures, selon ce que l'univers a sous la main : un attribut BOOLEAN
  * dédié (JJK `hasDomain`, AOT `aottitan`), ou une LISTE de valeurs qualifiantes
- * sur n'importe quel attribut fermé (`ultimateAttributeValues`).
+ * sur n'importe quel attribut fermé (`values`).
  *
  * Le second cas n'est pas un raffinement : Demon Slayer et Tokyo Ghoul n'ont
  * aucun attribut booléen, et sans lui leur ultime — jauge, bouton, cinématique
@@ -165,20 +169,83 @@ export function booleanAttribute(character: Character, key: string): boolean {
  *
  * La comparaison ignore la casse : ces valeurs sont saisies en admin, et un
  * `Hashira` au lieu de `HASHIRA` ne doit pas priver la moitié d'un roster de sa
- * mécanique.
+ * mécanique. La valeur rendue est celle de la CONFIG (casse canonique), pour
+ * indexer `ultimateNamesByValue`.
  */
-export function hasUltimate(character: Character, config: TowerConfig): boolean {
-  const allowed = config.ultimateAttributeValues;
-  if (!allowed || allowed.length === 0) {
-    return booleanAttribute(character, config.ultimateAttributeKey);
+function matchUltimateRule(
+  character: Character,
+  rule: UltimateRule,
+): string | null {
+  if (!rule.values || rule.values.length === 0) {
+    return booleanAttribute(character, rule.attributeKey) ? "true" : null;
   }
 
-  const raw = String(character.attributes?.[config.ultimateAttributeKey] ?? "")
+  const raw = String(character.attributes?.[rule.attributeKey] ?? "")
     .trim()
     .toLowerCase();
-  if (!raw) return false;
+  if (!raw) return null;
 
-  return allowed.some((value) => value.trim().toLowerCase() === raw);
+  return rule.values.find((value) => value.trim().toLowerCase() === raw) ?? null;
+}
+
+/**
+ * Nom de l'ultime de ce personnage, ou `null` s'il n'en a pas.
+ *
+ * L'attribut principal passe en premier : c'est lui qui porte les noms par
+ * valeur (Bleach : Bankai, Resurrección…). Les règles supplémentaires ne font
+ * qu'OUVRIR l'ultime, sous le nom générique de l'univers.
+ */
+export function ultimateNameOf(
+  character: Character,
+  config: TowerConfig,
+): string | null {
+  const primary = matchUltimateRule(character, {
+    attributeKey: config.ultimateAttributeKey,
+    values: config.ultimateAttributeValues,
+  });
+  if (primary !== null) {
+    return config.ultimateNamesByValue?.[primary] ?? config.ultimateName;
+  }
+
+  for (const rule of config.ultimateExtraRules ?? []) {
+    if (matchUltimateRule(character, rule) !== null) return config.ultimateName;
+  }
+  return null;
+}
+
+/** Ce personnage peut-il déclencher l'ultime ? */
+export function hasUltimate(character: Character, config: TowerConfig): boolean {
+  return ultimateNameOf(character, config) !== null;
+}
+
+/**
+ * Archétype d'un personnage DANS LA TOUR — seule lecture autorisée : serveur
+ * (`toFighterSpec`), fiche client (`toCardView`) et génération des étages
+ * passent tous par ici, sans quoi la re-simulation client diverge.
+ *
+ * L'archétype `domain` n'a PAS de technique : il mise tout sur l'ultime. Il
+ * n'est donc accordé qu'à un personnage qui A l'ultime. Sans ce garde-fou, un
+ * personnage dont la meilleure note tombe dans la catégorie mappée sur `domain`
+ * mais qui n'ouvre pas l'ultime (Tsuneyoshi Washuu : n°1 en « CCG », humain
+ * donc sans Menace SS) n'avait ni technique ni ultime — un bouton grisé tout le
+ * combat. La catégorie de l'univers n'est pas l'attribut d'ultime, et rien ne
+ * garantit qu'ils coïncident.
+ *
+ * Il retombe alors sur sa meilleure catégorie SUIVANTE.
+ */
+export function towerArchetypeOf(
+  character: Character,
+  config: TowerConfig,
+): Archetype {
+  const map = config.categoryArchetypes;
+  if (hasUltimate(character, config)) return archetypeOf(character, map);
+
+  const ratings = Object.fromEntries(
+    Object.entries(character.ratings ?? {}).filter(
+      ([category]) => map[category] !== "domain",
+    ),
+  );
+  return archetypeOf({ ...character, ratings }, map);
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -225,7 +292,7 @@ export function toFighterSpec(
     name: character.name,
     side,
     stats: deriveStats(character, config),
-    archetype: archetypeOf(character, config.categoryArchetypes),
+    archetype: towerArchetypeOf(character, config),
     hasDomain: hasUltimate(character, config),
   };
 }

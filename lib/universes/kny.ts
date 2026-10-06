@@ -158,15 +158,23 @@ export const kny: UniverseConfig = {
    *
    * Demon Slayer n'a AUCUN attribut booléen : l'ultime s'ouvre donc sur le
    * GRADE, et le palier est le rang de Pilier — le seuil que l'œuvre elle-même
-   * traite comme un changement de nature, pas de degré. Les Lunes Supérieures
-   * le franchissent côté démons.
+   * traite comme un changement de nature, pas de degré.
+   *
+   * Côté démons, ce sont les Douze Lunes démoniaques. Elles ne figurent PAS
+   * sur l'échelle des grades (deux hiérarchies incomparables, cf.
+   * `kny-attributes.ts`) mais dans l'AFFILIATION : d'où une règle
+   * supplémentaire, en OU, plutôt qu'une valeur de plus dans la liste.
    */
   tower: {
     arcAttributeKey: "knyAppearanceArc",
     ultimateAttributeKey: "knyrank",
     ultimateAttributeValues: ["HASHIRA"],
     energyAttributeKey: "knypower",
-    ultimateName: "Marque du Pourfendeur",
+    ultimateExtraRules: [
+      { attributeKey: "knyaffiliation", values: ["TWELVE_KIZUKI"] },
+    ],
+    ultimateName: "Surpuissance",
+    ultimateBadge: "覚醒",
     categoryArchetypes: {
       "kny-souffle": "technique",
       "kny-speed": "swift",

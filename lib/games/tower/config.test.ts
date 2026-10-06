@@ -124,6 +124,48 @@ describe("config de la Tour, tous univers", () => {
   );
 });
 
+describe("noms et règles d'ultime", () => {
+  it.each(UNIVERSES.map((u) => [u.slug, u] as const))(
+    "%s : chaque nom par valeur vise une valeur qui OUVRE l'ultime",
+    (_slug, universe) => {
+      const config = resolveTowerConfig(universe.tower);
+      // Un nom posé sur une valeur absente de la liste ne s'afficherait jamais.
+      for (const value of Object.keys(config.ultimateNamesByValue ?? {})) {
+        expect(config.ultimateAttributeValues ?? []).toContain(value);
+      }
+    },
+  );
+
+  it.each(UNIVERSES.map((u) => [u.slug, u] as const))(
+    "%s : les règles supplémentaires visent des valeurs existantes",
+    (slug, universe) => {
+      const specs = SOURCES[slug]?.attributes;
+      if (!specs) return;
+
+      const config = resolveTowerConfig(universe.tower);
+      for (const rule of config.ultimateExtraRules ?? []) {
+        const spec = specs.find((a) => a.key === rule.attributeKey);
+        expect(spec, `attribut inconnu : ${rule.attributeKey}`).toBeDefined();
+        const values = new Set((spec?.options ?? []).map((o) => o.value));
+        for (const value of rule.values ?? []) {
+          expect(values, `valeur inconnue : ${value}`).toContain(value);
+        }
+      }
+    },
+  );
+
+  it("seul JJK s'appelle « Extension de Territoire »", () => {
+    for (const universe of UNIVERSES) {
+      const { ultimateName } = resolveTowerConfig(universe.tower);
+      if (universe.slug === "jjk") {
+        expect(ultimateName).toBe("Extension de Territoire");
+      } else {
+        expect(ultimateName).not.toBe("Extension de Territoire");
+      }
+    }
+  });
+});
+
 describe("résolution des surcharges", () => {
   it("un univers sans surcharge hérite entièrement de JJK", () => {
     expect(resolveTowerConfig(undefined)).toEqual(JJK_TOWER_CONFIG);

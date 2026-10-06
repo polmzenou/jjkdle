@@ -177,9 +177,10 @@ export const bleach: UniverseConfig = {
    * priverait d'ultime TOUS les Espada — c'est la faute symétrique de celle
    * corrigée sur Tokyo Ghoul, où le grade CCG ne décrivait aucune goule.
    *
-   * `ultimateName` est « Bankai » : c'est le mot que le public associe à l'idée
-   * même de libération ultime dans Bleach, y compris devant un arrancar. Même
-   * arbitrage que « Kakuja » côté TG.
+   * Chaque libération donne son NOM à l'ultime (`ultimateNamesByValue`) : un
+   * capitaine déclenche son Bankai, un Espada sa Resurrección, un Quincy son
+   * Vollständig. `ultimateName` (« Bankai ») ne sert que de libellé générique,
+   * là où aucun personnage précis n'est en jeu.
    */
   tower: {
     arcAttributeKey: "bleachAppearanceArc",
@@ -191,6 +192,13 @@ export const bleach: UniverseConfig = {
       "VOLLSTANDIG",
     ],
     ultimateName: "Bankai",
+    ultimateNamesByValue: {
+      BANKAI: "Bankai",
+      RESURRECCION: "Resurrección",
+      SEGUNDA_ETAPA: "Segunda Etapa",
+      VOLLSTANDIG: "Vollständig",
+    },
+    ultimateBadge: "解放",
     energyAttributeKey: "bleachpower",
     categoryArchetypes: {
       "bleach-zanpakuto": "technique",
