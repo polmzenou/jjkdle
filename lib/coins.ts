@@ -20,6 +20,13 @@ import { prisma } from "@/lib/prisma";
  */
 
 /**
+ * Solde maximal. La colonne est un double : exacte jusqu'à 2^53 ≈ 9e15. On
+ * plafonne à 1e15 (un million de milliards) pour garder une marge confortable :
+ * au-delà, un crédit est simplement écrêté au lieu de perdre en précision.
+ */
+export const MAX_COINS = 1_000_000_000_000_000;
+
+/**
  * Débite le compte, ATOMIQUEMENT.
  *
  * La condition `coins >= amount` fait partie du `WHERE` de l'écriture : deux
@@ -34,7 +41,7 @@ export async function debitCoins(
   userId: string,
   amount: number,
 ): Promise<boolean> {
-  if (!Number.isFinite(amount) || amount <= 0) return false;
+  if (!Number.isSafeInteger(amount) || amount <= 0) return false;
   const res = await prisma.user.updateMany({
     where: { id: userId, coins: { gte: amount } },
     data: { coins: { decrement: amount } },
@@ -56,9 +63,15 @@ export async function creditCoins(
   amount: number,
 ): Promise<void> {
   if (!Number.isFinite(amount) || amount <= 0) return;
+  const credit = Math.min(Math.round(amount), MAX_COINS);
   await prisma.user.update({
     where: { id: userId },
-    data: { coins: { increment: Math.round(amount) } },
+    data: { coins: { increment: credit } },
+  });
+  // Écrêtage au plafond (rare : ne coûte une requête que s'il y a dépassement).
+  await prisma.user.updateMany({
+    where: { id: userId, coins: { gt: MAX_COINS } },
+    data: { coins: MAX_COINS },
   });
 }
 

@@ -50,7 +50,13 @@ model User {
   // shop-store) et mises au casino (lib/casino). Tout mouvement passe par
   // lib/coins.ts — le débit y est ATOMIQUE (`updateMany` + `coins >= montant`),
   // jamais un read-then-write.
-  coins Int @default(0)
+  //
+  // `Float` (double précision) et non `Int` : un `Int` Postgres plafonne à
+  // 2 147 483 647 et faisait planter les gains au casino. Un double représente
+  // EXACTEMENT tout entier jusqu'à 2^53 et reste un `number` côté JS (zéro
+  // conversion, contrairement à `BigInt`). lib/coins.ts n'y écrit que des
+  // entiers et plafonne le solde à `MAX_COINS` (1e15), bien en deçà.
+  coins Float @default(0)
 
   sessions          Session[]
   scores            Score[]
@@ -962,7 +968,9 @@ model CasinoSeat {
   hands      Json @default("[]")
   activeHand Int  @default(0)
 
-  bet               Int @default(0)
+  /// `Float` pour suivre `User.coins` (cf. son commentaire) : une mise peut
+  /// dépasser la limite d'un `Int`.
+  bet               Float @default(0)
   /// Main pour laquelle `bet` a été misé. Garde d'idempotence de la MISE :
   /// un double-clic sur « Miser » ne peut pas débiter deux fois.
   betHandNumber     Int @default(-1)

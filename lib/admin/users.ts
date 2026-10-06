@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { MAX_COINS } from "@/lib/coins";
 import type { Role } from "@prisma/client";
 import { buildUnlockContext, getUnlockedTitleKeys, getUnlockedFrameKeys } from "@/lib/cosmetics/unlock";
 import { getCurrentUniverse } from "@/lib/universes/current";
@@ -158,7 +159,7 @@ export async function setUserTotalXp(id: string, totalXp: number): Promise<void>
 export async function setUserCoins(id: string, coins: number): Promise<void> {
   await prisma.user.update({
     where: { id },
-    data: { coins: Math.max(0, Math.round(coins)) },
+    data: { coins: Math.min(MAX_COINS, Math.max(0, Math.round(coins))) },
   });
 }
 
