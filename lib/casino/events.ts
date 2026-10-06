@@ -16,7 +16,17 @@ export const CASINO_EVENTS = {
   tableState: "table-state",
   /** Cue d'animation. */
   tableCue: "table-cue",
+  /**
+   * « La table a changé, relis-la. » Envoyé à la place de `tableState` quand le
+   * snapshot dépasse la limite de taille d'un message Pusher (10 ko) — ce qui
+   * arrive à une roulette chargée de jetons.
+   */
+  tableSync: "table-sync",
 } as const;
+
+export interface TableSyncPayload {
+  version: number;
+}
 
 export interface TableStatePayload {
   table: CasinoTableView;

@@ -16,6 +16,7 @@ import type { CasinoPhaseValue } from "@/lib/casino/types";
 
 export interface LiveTable {
   code: string;
+  game: string;
   mode: string;
   phase: CasinoPhaseValue;
   handNumber: number;
@@ -69,6 +70,7 @@ export async function getCasinoAdminData(): Promise<CasinoAdminData> {
     },
     tables: tables.map((table) => ({
       code: table.code,
+      game: table.game,
       mode: table.mode,
       phase: table.phase as CasinoPhaseValue,
       handNumber: table.handNumber,

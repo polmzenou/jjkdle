@@ -144,7 +144,9 @@ const OUTSIDE_LABEL: Record<string, string> = {
 // Jetons
 // ──────────────────────────────────────────────────────────────────────────
 
-export const CHIP_VALUES = [1, 5, 25, 100, 500, 1_000, 5_000, 25_000] as const;
+export const CHIP_VALUES = [
+  1, 5, 25, 100, 500, 1_000, 5_000, 25_000, 50_000, 75_000, 100_000, 150_000,
+] as const;
 
 const CHIP_STYLE: Record<number, { base: string; edge: string; text: string }> = {
   1: { base: "#f4f4f5", edge: "#2563eb", text: "#1e3a8a" },
@@ -155,6 +157,10 @@ const CHIP_STYLE: Record<number, { base: string; edge: string; text: string }> =
   1000: { base: "#eab308", edge: "#1f2937", text: "#1f2937" },
   5000: { base: "#c2410c", edge: "#fff7ed", text: "#fff" },
   25000: { base: "#0891b2", edge: "#fdf4ff", text: "#fff" },
+  50000: { base: "#db2777", edge: "#fce7f3", text: "#fff" },
+  75000: { base: "#4338ca", edge: "#fbbf24", text: "#fff" },
+  100000: { base: "#0f766e", edge: "#fde68a", text: "#fff" },
+  150000: { base: "#b45309", edge: "#111827", text: "#fff" },
 };
 
 /** Style du jeton pour un montant quelconque : le plus gros jeton qu'il contient. */
@@ -177,6 +183,7 @@ export function ChipSvg({
   amount,
   dim = false,
   glow = false,
+  opacity,
 }: {
   cx: number;
   cy: number;
@@ -184,12 +191,13 @@ export function ChipSvg({
   amount: number;
   dim?: boolean;
   glow?: boolean;
+  opacity?: number;
 }) {
   const style = chipStyleFor(amount);
   const label = formatChip(amount);
   return (
     <g
-      opacity={dim ? 0.35 : 1}
+      opacity={opacity ?? (dim ? 0.35 : 1)}
       style={glow ? { filter: "drop-shadow(0 0 6px #ffd23f)" } : { filter: "drop-shadow(0 2px 2px rgb(0 0 0 / 0.6))" }}
       pointerEvents="none"
     >
@@ -225,8 +233,15 @@ export function ChipSvg({
 // Tapis
 // ──────────────────────────────────────────────────────────────────────────
 
+/** Jetons d'un AUTRE joueur de la table, affichés en transparence. */
+export interface OtherBets {
+  username: string;
+  bets: Record<string, number>;
+}
+
 export function RouletteBoard({
   bets,
+  others = [],
   settled,
   winning,
   disabled,
@@ -235,6 +250,8 @@ export function RouletteBoard({
   onHover,
 }: {
   bets: Record<string, number>;
+  /** Table à plusieurs : les jetons des autres joueurs. */
+  others?: OtherBets[];
   /** Mises du tour qui vient d'être réglé (affichées tant qu'on n'a rien reposé). */
   settled: RouletteBetOutcome[] | null;
   /** Numéro sorti (marqué par la « dame »). */
@@ -254,6 +271,20 @@ export function RouletteBoard({
     setHover(key);
     onHover(key);
   };
+
+  // Jetons des autres, regroupés par emplacement : plusieurs joueurs sur la
+  // même case sont décalés en éventail pour que chaque pseudo reste lisible.
+  const othersBySpot = useMemo(() => {
+    const bySpot = new Map<string, { username: string; amount: number }[]>();
+    for (const player of others) {
+      for (const [key, amount] of Object.entries(player.bets)) {
+        const list = bySpot.get(key) ?? [];
+        list.push({ username: player.username, amount });
+        bySpot.set(key, list);
+      }
+    }
+    return bySpot;
+  }, [others]);
 
   const zeroPath = `M${X0} ${PAD} L${PAD + 22} ${PAD} Q${PAD} ${PAD + GRID_H / 2} ${PAD + 22} ${PAD + GRID_H} L${X0} ${PAD + GRID_H} Z`;
 
@@ -385,6 +416,39 @@ export function RouletteBoard({
           })()}
         </g>
       )}
+
+      {/* ── Jetons des autres joueurs (transparents, pseudo dessous) ── */}
+      {[...othersBySpot].map(([key, list]) => {
+        const s = SPOT_BY_KEY.get(key);
+        if (!s) return null;
+        const r = s.layer === 0 ? 13 : 11;
+        return list.map((other, i) => {
+          const dx = (i - (list.length - 1) / 2) * (r + 2);
+          const dy = i % 2 === 0 ? 0 : -4;
+          const name = other.username.length > 9 ? `${other.username.slice(0, 8)}…` : other.username;
+          return (
+            <g key={`o-${key}-${other.username}`} pointerEvents="none">
+              <ChipSvg cx={s.cx + dx} cy={s.cy + dy} r={r} amount={other.amount} opacity={0.45} />
+              <text
+                x={s.cx + dx}
+                y={s.cy + dy + r + 6}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fontSize="7.5"
+                fontWeight="700"
+                fontFamily="ui-sans-serif, system-ui, sans-serif"
+                fill="#fff"
+                opacity="0.75"
+                stroke="rgb(0 0 0 / 0.55)"
+                strokeWidth="2"
+                paintOrder="stroke"
+              >
+                {name}
+              </text>
+            </g>
+          );
+        });
+      })}
 
       {/* ── Jetons posés ── */}
       {Object.entries(bets).map(([key, amount]) => {

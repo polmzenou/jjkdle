@@ -218,7 +218,7 @@ export function RouletteGame({
     <main className="mx-auto w-full max-w-6xl px-4 pb-24 pt-6 sm:px-6 sm:pt-10">
       <div className="mb-4 flex justify-end">
         <Link
-          href="/casino"
+          href="/casino/roulette"
           className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-white/55 transition hover:border-cursed/40 hover:text-cursed-light"
         >
           Quitter la table

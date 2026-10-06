@@ -30,11 +30,12 @@ export function randomCode(): string {
 }
 
 /**
- * Clé de matchmaking de la table publique ouverte. Une seule valeur : il n'y a
- * qu'un jeu et qu'un casino, donc au plus UNE table publique ouverte à la fois
- * (`CasinoTable.matchKey` est `@unique`).
+ * Jeux qui ont des tables. La clé de matchmaking de la table publique ouverte
+ * d'un jeu est le NOM du jeu : au plus UNE table publique ouverte par jeu
+ * (`CasinoTable.matchKey` est `@unique`), et la roulette ne tombe jamais sur
+ * une table de blackjack.
  */
-const MATCH_KEY = "blackjack";
+export type TableGame = "blackjack" | "roulette";
 
 export const tableInclude = {
   seats: {
@@ -49,24 +50,31 @@ export type TableWithSeats = Prisma.CasinoTableGetPayload<{
   include: typeof tableInclude;
 }>;
 
-/** Table par code, sièges inclus. `null` si le code n'existe pas. */
+/**
+ * Table par code, sièges inclus. `null` si le code n'existe pas OU s'il désigne
+ * une table d'un autre jeu : le moteur du blackjack ne doit jamais faire avancer
+ * une table de roulette (et inversement) parce qu'on lui a passé son code.
+ */
 export async function findTableByCode(
   code: string,
+  game: TableGame = "blackjack",
 ): Promise<TableWithSeats | null> {
   const normalized = code.trim().toUpperCase();
   if (!normalized) return null;
-  return prisma.casinoTable.findUnique({
+  const table = await prisma.casinoTable.findUnique({
     where: { code: normalized },
     include: tableInclude,
   });
+  return table && table.game === game ? table : null;
 }
 
-/** Table où ce joueur est actuellement assis, s'il y en a une. */
+/** Table de ce jeu où ce joueur est actuellement assis, s'il y en a une. */
 export async function findTableForUser(
   userId: string,
+  game: TableGame = "blackjack",
 ): Promise<TableWithSeats | null> {
   const seat = await prisma.casinoSeat.findFirst({
-    where: { userId },
+    where: { userId, table: { game } },
     select: { table: { include: tableInclude } },
     orderBy: { joinedAt: "desc" },
   });
@@ -124,7 +132,7 @@ export async function createSoloTable(userId: string): Promise<TableWithSeats> {
  * Les trois garanties, chacune tenue par la base :
  *
  *  1. **Pas deux tables à moitié vides** — `matchKey` est `@unique` et vaut
- *     `MATCH_KEY` sur la seule table ouverte. Deux créations concurrentes : la
+ *     le nom du jeu sur sa seule table ouverte. Deux créations concurrentes : la
  *     seconde prend un P2002 et rejoint la table de la première. (Postgres
  *     autorise autant de `NULL` qu'on veut sur une colonne unique, donc toutes
  *     les tables fermées et solo coexistent sans se gêner.)
@@ -140,17 +148,25 @@ export async function createSoloTable(userId: string): Promise<TableWithSeats> {
  */
 export async function claimPublicSeat(
   userId: string,
+  options: {
+    game?: TableGame;
+    maxSeats?: number;
+    /** Échéance posée à la création (la roulette tourne dès le 1er joueur). */
+    firstDeadlineMs?: number;
+  } = {},
 ): Promise<TableWithSeats | null> {
+  const game = options.game ?? "blackjack";
+  const maxSeats = options.maxSeats ?? MAX_SEATS;
   await sweepStaleTables();
   const { minBet } = await getCasinoConfig();
 
   // Déjà assis quelque part ? On l'y ramène plutôt que d'ouvrir un second siège.
-  const existing = await findTableForUser(userId);
+  const existing = await findTableForUser(userId, game);
   if (existing) return existing;
 
   for (let attempt = 0; attempt < 6; attempt++) {
     const open = await prisma.casinoTable.findFirst({
-      where: { matchKey: MATCH_KEY },
+      where: { matchKey: game },
       include: tableInclude,
     });
 
@@ -160,12 +176,18 @@ export async function claimPublicSeat(
         return await prisma.casinoTable.create({
           data: {
             code: randomCode(),
+            game,
             mode: "PUBLIC",
-            matchKey: MATCH_KEY,
-            maxSeats: MAX_SEATS,
+            matchKey: game,
+            maxSeats,
             seatCount: 1,
             minBet,
-            shoe: newShoe(),
+            // Le sabot n'a de sens qu'au blackjack.
+            shoe: game === "blackjack" ? newShoe() : [],
+            phaseDeadline:
+              options.firstDeadlineMs === undefined
+                ? undefined
+                : new Date(Date.now() + options.firstDeadlineMs),
             seats: { create: { userId, seat: 0 } },
           },
           include: tableInclude,
@@ -255,19 +277,23 @@ async function closeToMatchmaking(tableId: string): Promise<void> {
  * Rouvre une table publique au matchmaking si elle a de la place. Appelé après
  * un départ : sans ça, une table qui s'est vidée resterait fermée à vie.
  *
- * Le `P2002` possible (une autre table est déjà ouverte) est un no-op voulu :
- * il n'y a qu'un `matchKey` disponible, celle-ci attendra son tour.
+ * Le `P2002` possible (une autre table du même jeu est déjà ouverte) est un
+ * no-op voulu : il n'y a qu'un `matchKey` par jeu, celle-ci attendra son tour.
  */
-export async function reopenToMatchmaking(tableId: string): Promise<void> {
+export async function reopenToMatchmaking(
+  tableId: string,
+  game: string,
+  maxSeats: number,
+): Promise<void> {
   try {
     await prisma.casinoTable.updateMany({
       where: {
         id: tableId,
         mode: "PUBLIC",
         matchKey: null,
-        seatCount: { gt: 0, lt: MAX_SEATS },
+        seatCount: { gt: 0, lt: maxSeats },
       },
-      data: { matchKey: MATCH_KEY },
+      data: { matchKey: game },
     });
   } catch (error) {
     if (!isUniqueViolation(error)) throw error;
@@ -282,9 +308,19 @@ export async function reopenToMatchmaking(tableId: string): Promise<void> {
 export async function releaseSeat(
   tableId: string,
   userId: string,
+  /**
+   * N'évince que si le siège n'a pas bougé depuis sa lecture (`activeHand` sert
+   * de révision à la roulette) : un joueur qui pose un jeton à l'instant où on
+   * le juge AFK garde sa place — et ses coins.
+   */
+  onlyIfRevision?: number,
 ): Promise<void> {
   const deleted = await prisma.casinoSeat.deleteMany({
-    where: { tableId, userId },
+    where: {
+      tableId,
+      userId,
+      ...(onlyIfRevision === undefined ? {} : { activeHand: onlyIfRevision }),
+    },
   });
   if (deleted.count === 0) return;
 
@@ -295,14 +331,16 @@ export async function releaseSeat(
       version: { increment: 1 },
       lastActivityAt: new Date(),
     },
-    select: { seatCount: true, mode: true },
+    select: { seatCount: true, mode: true, game: true, maxSeats: true },
   });
 
   if (table.seatCount <= 0) {
     await prisma.casinoTable.deleteMany({ where: { id: tableId } });
     return;
   }
-  if (table.mode === "PUBLIC") await reopenToMatchmaking(tableId);
+  if (table.mode === "PUBLIC") {
+    await reopenToMatchmaking(tableId, table.game, table.maxSeats);
+  }
 }
 
 /** Supprime une table de force (bouton admin). */

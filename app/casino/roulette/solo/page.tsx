@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { RouletteGame } from "@/components/casino/RouletteGame";
 
 export const metadata: Metadata = {
-  title: "Roulette",
+  title: "Roulette solo",
   robots: { index: false, follow: false },
 };
 
@@ -17,7 +17,7 @@ export const dynamic = "force-dynamic";
  * un tour naît et meurt dans un seul appel. Le solde passé ici n'est qu'un état
  * initial.
  */
-export default async function RoulettePage() {
+export default async function RouletteSoloPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 

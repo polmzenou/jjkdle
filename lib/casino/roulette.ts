@@ -183,11 +183,15 @@ export interface RouletteSpinResult {
  * Nettoie des mises reçues du client : clés inconnues rejetées, montants
  * entiers strictement positifs, doublons fusionnés. Renvoie `null` si quoi que
  * ce soit est invalide — on ne « corrige » pas une mise, on la refuse.
+ *
+ * `allowEmpty` : à une table, envoyer une liste vide veut dire « je retire tout ».
  */
-export function normalizeBets(input: unknown): RouletteBet[] | null {
-  if (!Array.isArray(input) || input.length === 0 || input.length > MAX_BET_SPOTS) {
-    return null;
-  }
+export function normalizeBets(
+  input: unknown,
+  { allowEmpty = false }: { allowEmpty?: boolean } = {},
+): RouletteBet[] | null {
+  if (!Array.isArray(input) || input.length > MAX_BET_SPOTS) return null;
+  if (input.length === 0 && !allowEmpty) return null;
   const merged = new Map<string, number>();
   for (const raw of input) {
     if (!raw || typeof raw !== "object") return null;

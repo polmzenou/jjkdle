@@ -229,7 +229,9 @@ export function CasinoAdmin({ casino }: { casino: CasinoAdminData }) {
                         </span>
                       )}
                     </td>
-                    <td className="py-2.5 pr-3 text-xs">{t.mode}</td>
+                    <td className="py-2.5 pr-3 text-xs">
+                      {t.game} · {t.mode}
+                    </td>
                     <td className="py-2.5 pr-3 text-xs">{t.phase}</td>
                     <td className="py-2.5 pr-3 tabular-nums">#{t.handNumber + 1}</td>
                     <td className="py-2.5 pr-3 text-xs">
