@@ -61,7 +61,6 @@ export function RouletteGame({
 }: {
   initialCoins: number;
   minBet: number;
-  /** Défini pour un ADMIN seulement : état du truquage. */
   rigged?: boolean;
 }) {
   const router = useRouter();
@@ -75,6 +74,8 @@ export function RouletteGame({
   const [undoStack, setUndoStack] = useState<Bets[]>([]);
   const [lastBets, setLastBets] = useState<Bets | null>(null);
   const [eraser, setEraser] = useState(false);
+  /** Jeton « tapis » : chaque pose met tout ce qui reste à miser. */
+  const [allIn, setAllIn] = useState(false);
   const [hoverKey, setHoverKey] = useState<string | null>(null);
 
   const [wheel, setWheel] = useState<WheelSpin>({ id: 0, wheel: 0, ball: 0, duration: 0 });
@@ -106,22 +107,23 @@ export function RouletteGame({
 
   const place = (key: string) => {
     if (eraser) return remove(key);
-    if (total + chip > coins) {
-      setNotice(`Il ne te reste que ${(coins - total).toLocaleString("fr-FR")} coins à miser.`);
+    const amount = allIn ? Math.floor(coins - total) : chip;
+    if (amount <= 0 || total + amount > coins) {
+      setNotice(`Il ne te reste que ${Math.max(0, coins - total).toLocaleString("fr-FR")} coins à miser.`);
       return;
     }
     if (!(key in bets) && Object.keys(bets).length >= MAX_BET_SPOTS) {
       setNotice(`${MAX_BET_SPOTS} emplacements maximum par tour.`);
       return;
     }
-    commit({ ...bets, [key]: (bets[key] ?? 0) + chip });
+    commit({ ...bets, [key]: (bets[key] ?? 0) + amount });
   };
 
   const remove = (key: string) => {
     const current = bets[key];
     if (!current) return;
     const next = { ...bets };
-    const left = current - chip;
+    const left = allIn ? 0 : current - chip;
     if (left > 0) next[key] = left;
     else delete next[key];
     commit(next);
@@ -393,11 +395,12 @@ export function RouletteGame({
                 onClick={() => {
                   setChip(value);
                   setEraser(false);
+                  setAllIn(false);
                 }}
                 aria-pressed={selected}
                 aria-label={`Jeton de ${value}`}
                 className={`grid h-12 w-12 place-items-center rounded-full text-xs font-black transition disabled:cursor-not-allowed disabled:opacity-30 ${
-                  selected && !eraser ? "-translate-y-1.5 ring-2 ring-amber-300 ring-offset-2 ring-offset-void-900" : "hover:-translate-y-0.5"
+                  selected && !eraser && !allIn ? "-translate-y-1.5 ring-2 ring-amber-300 ring-offset-2 ring-offset-void-900" : "hover:-translate-y-0.5"
                 }`}
                 style={{
                   background: style.base,
@@ -411,7 +414,26 @@ export function RouletteGame({
           })}
           <button
             type="button"
-            onClick={() => setEraser((v) => !v)}
+            disabled={locked || coins - total <= 0}
+            onClick={() => {
+              setAllIn((v) => !v);
+              setEraser(false);
+            }}
+            aria-pressed={allIn}
+            aria-label="Jeton tapis : mise tout ce qui reste"
+            className={`grid h-12 w-12 place-items-center rounded-full bg-gradient-to-br from-amber-200 via-amber-400 to-amber-700 text-[9px] font-black uppercase tracking-wide text-black transition disabled:cursor-not-allowed disabled:opacity-30 ${
+              allIn && !eraser ? "-translate-y-1.5 ring-2 ring-amber-300 ring-offset-2 ring-offset-void-900" : "hover:-translate-y-0.5"
+            }`}
+            style={{ boxShadow: "inset 0 0 0 4px #f59e0b, inset 0 0 0 7px #fff7d6, 0 6px 12px -4px rgb(0 0 0 / 0.7)" }}
+          >
+            Tapis
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setEraser((v) => !v);
+              setAllIn(false);
+            }}
             disabled={locked}
             aria-pressed={eraser}
             className={`rounded-full border px-3 py-2 text-[11px] font-black uppercase tracking-wider transition disabled:opacity-40 ${
