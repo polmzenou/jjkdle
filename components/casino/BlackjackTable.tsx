@@ -215,10 +215,10 @@ export function BlackjackTable({
     });
   };
 
-  const leave = () => {
+  const leave = (to = "/casino/blackjack") => {
     startTransition(async () => {
       await leaveTableAction(table.code);
-      router.push("/casino/blackjack");
+      router.push(to);
       router.refresh();
     });
   };
@@ -250,7 +250,14 @@ export function BlackjackTable({
           </span>
           <button
             type="button"
-            onClick={leave}
+            onClick={() => leave("/casino")}
+            className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-white/55 transition hover:border-cursed/40 hover:text-cursed-light"
+          >
+            ← Casino
+          </button>
+          <button
+            type="button"
+            onClick={() => leave()}
             className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-white/55 transition hover:border-cursed/40 hover:text-cursed-light"
           >
             Quitter
