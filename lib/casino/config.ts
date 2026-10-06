@@ -71,10 +71,11 @@ export async function setCasinoCardBack(id: string): Promise<void> {
 
 /**
  * Roulette truquée : la bille ne tombe que sur un numéro rouge. Basculé par un
- * ADMIN en cliquant sur la roue ; vrai par défaut.
+ * ADMIN en cliquant sur la roue ; faux par défaut, et remis à faux quand un ADMIN
+ * arrive sur une table à plusieurs.
  */
 export async function isRouletteRigged(): Promise<boolean> {
-  return Boolean(await getConfig<boolean>(KEY_ROULETTE_RIGGED, true));
+  return Boolean(await getConfig<boolean>(KEY_ROULETTE_RIGGED, false));
 }
 
 export async function setRouletteRigged(rigged: boolean): Promise<void> {
