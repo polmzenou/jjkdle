@@ -25,9 +25,6 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-/** Nombre de titres de jeux mis en avant sur une carte (le reste tient en « +N »). */
-const HIGHLIGHT_COUNT = 3;
-
 export default async function UniversesHubPage() {
   const [universes, casino] = await Promise.all([
     listAvailableUniverses(),
@@ -68,7 +65,11 @@ export default async function UniversesHubPage() {
         vars: themeCssVars(config.theme),
         gameCount: games.length,
         rosterCount: rosterByUniverse.get(id) ?? 0,
-        highlights: games.slice(0, HIGHLIGHT_COUNT).map((game) => game.title),
+        games: games.map(({ id, title, description }) => ({
+          id,
+          title,
+          description,
+        })),
         maintenance: maintenance.enabled,
       };
     }),

@@ -96,6 +96,32 @@
       animation-duration: 0.01s;
     }
   }
+
+  /*
+   * Flottement des univers du hub (app/universes/UniverseHub.tsx). En CSS pour
+   * tourner sur le compositeur : piloté en JavaScript, il occupait le thread
+   * principal à chaque image et faisait saccader le zoom. Durée et délai sont
+   * posés en style inline, propres à chaque univers.
+   */
+  .hub-float {
+    animation: hub-float 6s ease-in-out infinite;
+  }
+
+  @keyframes hub-float {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0) rotate(0deg);
+    }
+    50% {
+      transform: translate3d(0, -12px, 0) rotate(1.2deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hub-float {
+      animation: none;
+    }
+  }
 }
 
 /*
