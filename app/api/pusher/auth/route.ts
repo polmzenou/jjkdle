@@ -12,6 +12,9 @@ import { findLobby } from "@/lib/multiplayer/store";
  *  - `presence-lobby-<code>`  : jeux à lobby, appartenance via `findLobby` ;
  *  - `presence-casino-<code>` : tables de casino, appartenance via `CasinoSeat`.
  *
+ * Plus un canal PRIVÉ par joueur, `private-user-<id>` (notifications sociales :
+ * messages, amis, échanges) : seul le titulaire peut s'y abonner.
+ *
  * Le casino ne peut PAS passer par `findLobby` : cette fonction filtre par
  * univers (garde multi-univers centrale), or le casino est hors univers. Aucune
  * table ne serait jamais autorisée.
@@ -29,6 +32,14 @@ export async function POST(req: Request) {
   const form = await req.formData();
   const socketId = String(form.get("socket_id") ?? "");
   const channel = String(form.get("channel_name") ?? "");
+
+  const userMatch = /^private-user-([A-Za-z0-9_-]+)$/.exec(channel);
+  if (socketId && userMatch) {
+    if (userMatch[1] !== user.id) {
+      return NextResponse.json({ error: "Accès refusé." }, { status: 403 });
+    }
+    return NextResponse.json(getPusherServer().authorizeChannel(socketId, channel));
+  }
 
   const lobbyMatch = /^presence-lobby-([A-Z0-9]+)$/.exec(channel);
   const casinoMatch = /^presence-casino-([A-Z0-9]+)$/.exec(channel);

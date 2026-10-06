@@ -2,7 +2,7 @@ import "server-only";
 import { prisma } from "@/lib/prisma";
 import { creditCoins, debitCoins } from "@/lib/coins";
 import { getRoster } from "@/lib/content/queries";
-import { createBooster, grantCard, toCardView } from "@/lib/cards/store";
+import { addCopies, createBooster, toCardView } from "@/lib/cards/store";
 import {
   FREE_SPIN_COOLDOWN_MS,
   PAID_SPIN_PRICE,
@@ -130,7 +130,7 @@ async function deliver(
 
     case "card": {
       // N'IMPORTE quelle carte de l'univers, possédée ou non, toutes raretés
-      // confondues à probabilité égale. Doublon → valeur de revente, comme un
+      // confondues à probabilité égale. Doublon → exemplaire stocké, comme un
       // booster.
       const roster = await getRoster(universeId);
       if (roster.length === 0) {
@@ -140,10 +140,8 @@ async function deliver(
       }
       const character = roster[Math.floor(Math.random() * roster.length)]!;
       const view = toCardView(character);
-      const { created } = await grantCard(userId, character.id);
-      const coins = created ? 0 : view.sellValue;
-      if (coins > 0) await creditCoins(userId, coins);
-      return { coinsWon: coins, card: { ...view, duplicate: !created } };
+      const copies = await addCopies(prisma, userId, character.id, 1);
+      return { coinsWon: 0, card: { ...view, duplicate: copies > 1 } };
     }
   }
 }

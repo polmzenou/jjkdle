@@ -1,20 +1,25 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useCallback, useMemo, useState, useTransition } from "react";
 import { AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { BoosterPack } from "@/components/cards/BoosterPack";
 import { BoosterOpening } from "@/components/cards/BoosterOpening";
+import { CardArt } from "@/components/cards/CardArt";
 import { CardGrid } from "@/components/cards/CardGrid";
 import { DeckSlots } from "@/components/cards/DeckSlots";
 import { CoinIcon } from "@/components/progress/CoinWallet";
 import {
   equipCardAction,
+  fuseCardsAction,
   openBoosterAction,
   sellCardAction,
   unequipCardAction,
 } from "@/app/[universe]/account/card-actions";
 import { DECK_SIZE } from "@/lib/cards/deck";
+import { FUSION_SIZE, nextRarity, validateFusion } from "@/lib/cards/fusion";
+import { cardRarityStyle, type CardRarity } from "@/lib/cards/rarity";
+import type { CardPool } from "@/lib/cards/roll";
 import type {
   CardView,
   CollectionCard,
@@ -23,7 +28,8 @@ import type {
 } from "@/lib/cards/types";
 
 /**
- * Onglet DECK : boosters en attente, deck équipé, collection.
+ * Onglet DECK : boosters en attente, deck équipé, collection et doublons
+ * (fusion 3 → 1, cf. lib/cards/fusion.ts).
  *
  * Suit le motif de mutation du repo (`app/[universe]/account/ProfileEditModal.tsx`) :
  * `useTransition` + server action + `router.refresh()`, avec un bandeau de
@@ -36,6 +42,11 @@ interface DeckManagerProps {
   deck: CardView[];
   collection: CollectionCard[];
 }
+
+type RunAction = (
+  action: () => Promise<{ ok: boolean; error?: string }>,
+  successMsg: string,
+) => void;
 
 export function DeckManager({
   pendingBoosters,
@@ -53,10 +64,13 @@ export function DeckManager({
   const [error, setError] = useState<string | null>(null);
   const [skip, setSkip] = useState(false);
 
-  const run = (
-    action: () => Promise<{ ok: boolean; error?: string }>,
-    successMsg: string,
-  ) => {
+  const [tab, setTab] = useState<"collection" | "duplicates">("collection");
+  const [picks, setPicks] = useState<string[]>([]);
+  const [fusing, setFusing] = useState(false);
+  const [fusionResult, setFusionResult] = useState<OpenedBooster | null>(null);
+  const [fusionError, setFusionError] = useState<string | null>(null);
+
+  const run: RunAction = (action, successMsg) => {
     setFeedback(null);
     startTransition(async () => {
       const res = await action();
@@ -81,6 +95,63 @@ export function DeckManager({
 
   const deckIds = new Set(deck.map((c) => c.characterId));
   const deckFull = deck.length >= DECK_SIZE;
+
+  // ── Doublons & fusion ──
+  const byId = useMemo(
+    () => new Map(collection.map((c) => [c.characterId, c])),
+    [collection],
+  );
+  const counts = useMemo(
+    () => new Map(collection.map((c) => [c.characterId, c.count])),
+    [collection],
+  );
+  const rarityById = useMemo(
+    () => new Map(collection.map((c) => [c.characterId, c.rarity])),
+    [collection],
+  );
+  const pool = useMemo(() => {
+    const out: CardPool = {};
+    for (const c of collection) (out[c.rarity] ??= []).push(c.characterId);
+    return out;
+  }, [collection]);
+  const duplicateCount = collection.reduce(
+    (sum, c) => sum + Math.max(0, c.count - 1),
+    0,
+  );
+  const isDuplicate = useCallback((c: CollectionCard) => c.count > 1, []);
+
+  // Sélection relue contre les compteurs : une carte qui n'est plus en doublon
+  // (vendue, échangée…) sort d'elle-même de la fusion.
+  const validPicks = picks.filter((id) => (counts.get(id) ?? 0) > 1);
+  const pickRarity: CardRarity | null = validPicks[0]
+    ? (rarityById.get(validPicks[0]) ?? null)
+    : null;
+  const fusionCheck =
+    validPicks.length === FUSION_SIZE
+      ? validateFusion(validPicks, counts, rarityById, pool)
+      : null;
+
+  const canPick = (card: CollectionCard) => {
+    if (validPicks.length >= FUSION_SIZE) return false;
+    if (pickRarity && card.rarity !== pickRarity) return false;
+    if (!nextRarity(card.rarity)) return false;
+    const used = validPicks.filter((id) => id === card.characterId).length;
+    return used < card.count - 1;
+  };
+
+  const fuse = async () => {
+    if (!fusionCheck?.ok) return;
+    setFusing(true);
+    setFusionResult(null);
+    setFusionError(null);
+    const res = await fuseCardsAction(validPicks);
+    if (res.ok && res.card) {
+      setFusionResult({ boosterId: "fusion", kind: "simple", cards: [res.card] });
+      setPicks([]);
+    } else {
+      setFusionError(res.error ?? "Fusion impossible.");
+    }
+  };
 
   return (
     <div className="space-y-12">
@@ -152,74 +223,105 @@ export function DeckManager({
         />
       </section>
 
-      {/* ── Collection ── */}
+      {/* ── Collection / Doublons ── */}
       <section>
-        <h2 className="mb-5 font-display text-xl font-bold uppercase tracking-wider text-white/85">
-          Ma collection
-        </h2>
-        <CardGrid
-          cards={collection}
-          emptyLabel="Aucune carte dans cette rareté."
-          renderBadge={(card) =>
-            card.owned && deckIds.has(card.characterId) ? (
-              <span
-                title="Équipée dans ton deck"
-                className="flex h-6 w-6 items-center justify-center rounded-full border border-domain/60 bg-void-900/90 text-xs text-domain-light shadow-glow"
-              >
-                <span aria-hidden>★</span>
-                <span className="sr-only">Équipée</span>
-              </span>
-            ) : null
-          }
-          renderActions={(card) => {
-            if (!card.owned) return null;
-            const equipped = deckIds.has(card.characterId);
-            return (
-              <>
-                <button
-                  type="button"
-                  disabled={pending || (!equipped && deckFull)}
-                  onClick={() =>
-                    run(
-                      () =>
-                        equipped
-                          ? unequipCardAction(card.characterId)
-                          : equipCardAction(card.characterId),
-                      equipped ? "Carte retirée du deck." : "Carte équipée !",
-                    )
-                  }
-                  className={`rounded-full border px-2 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-colors disabled:opacity-40 ${
-                    equipped
-                      ? "border-domain/60 bg-domain/15 text-domain-light hover:border-cursed/50 hover:text-cursed-light"
-                      : "border-white/10 bg-void-800/80 text-white/60 hover:border-domain/50 hover:text-white"
-                  }`}
-                >
-                  {equipped ? "Retirer" : deckFull ? "Deck plein" : "Équiper"}
-                </button>
-                <button
-                  type="button"
-                  disabled={pending}
-                  onClick={() => {
-                    if (
-                      !window.confirm(
-                        `Vendre ${card.name} pour ${card.sellValue} coins ? Tu perdras la carte.`,
+        <div className="mb-5 flex flex-wrap items-center gap-x-6 gap-y-2" role="tablist">
+          <TabButton
+            active={tab === "collection"}
+            onClick={() => setTab("collection")}
+            label="Ma collection"
+          />
+          <TabButton
+            active={tab === "duplicates"}
+            onClick={() => setTab("duplicates")}
+            label="Doublons"
+            badge={duplicateCount}
+          />
+        </div>
+
+        {tab === "collection" ? (
+          <CardGrid
+            cards={collection}
+            emptyLabel="Aucune carte dans cette rareté."
+            renderBadge={(card) =>
+              card.owned && deckIds.has(card.characterId) ? <EquippedBadge /> : null
+            }
+            renderActions={(card) => {
+              if (!card.owned) return null;
+              const equipped = deckIds.has(card.characterId);
+              return (
+                <>
+                  <button
+                    type="button"
+                    disabled={pending || (!equipped && deckFull)}
+                    onClick={() =>
+                      run(
+                        () =>
+                          equipped
+                            ? unequipCardAction(card.characterId)
+                            : equipCardAction(card.characterId),
+                        equipped ? "Carte retirée du deck." : "Carte équipée !",
                       )
-                    )
-                      return;
-                    run(
-                      () => sellCardAction(card.characterId),
-                      `${card.name} vendue pour ${card.sellValue} coins.`,
-                    );
-                  }}
-                  className="flex items-center justify-center gap-1 rounded-full border border-white/10 bg-void-800/80 px-2 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white/50 transition-colors hover:border-amber-300/50 hover:text-amber-300 disabled:opacity-40"
-                >
-                  Vendre {card.sellValue}
-                  <CoinIcon className="h-3 w-3" />
-                </button>
-              </>
-            );
-          }}
-        />
+                    }
+                    className={`rounded-full border px-2 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-colors disabled:opacity-40 ${
+                      equipped
+                        ? "border-domain/60 bg-domain/15 text-domain-light hover:border-cursed/50 hover:text-cursed-light"
+                        : "border-white/10 bg-void-800/80 text-white/60 hover:border-domain/50 hover:text-white"
+                    }`}
+                  >
+                    {equipped ? "Retirer" : deckFull ? "Deck plein" : "Équiper"}
+                  </button>
+                  <SellButton card={card} pending={pending} run={run} />
+                </>
+              );
+            }}
+          />
+        ) : (
+          <div className="space-y-6">
+            <FusionPanel
+              picks={validPicks}
+              byId={byId}
+              rarity={pickRarity}
+              error={fusionCheck && !fusionCheck.ok ? fusionCheck.error : null}
+              ready={Boolean(fusionCheck?.ok)}
+              disabled={fusing || pending}
+              onRemove={(i) => setPicks(validPicks.filter((_, j) => j !== i))}
+              onClear={() => setPicks([])}
+              onFuse={() => void fuse()}
+            />
+
+            <CardGrid
+              cards={collection}
+              ownedOnly
+              filter={isDuplicate}
+              emptyLabel="Aucun doublon pour l'instant. Ouvre des boosters !"
+              renderBadge={(card) => {
+                const n = validPicks.filter((id) => id === card.characterId).length;
+                return n > 0 ? (
+                  <span
+                    title="Sélectionnée pour la fusion"
+                    className="flex h-6 min-w-6 items-center justify-center rounded-full border border-domain/60 bg-domain px-1.5 text-xs font-black text-white shadow-glow"
+                  >
+                    {n}
+                  </span>
+                ) : null;
+              }}
+              renderActions={(card) => (
+                <>
+                  <button
+                    type="button"
+                    disabled={!canPick(card) || fusing}
+                    onClick={() => setPicks([...validPicks, card.characterId])}
+                    className="rounded-full border border-white/10 bg-void-800/80 px-2 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white/60 transition-colors hover:border-domain/50 hover:text-white disabled:opacity-40"
+                  >
+                    {nextRarity(card.rarity) ? "+ Fusion" : "Rareté max"}
+                  </button>
+                  <SellButton card={card} pending={pending} run={run} />
+                </>
+              )}
+            />
+          </div>
+        )}
       </section>
 
       <AnimatePresence>
@@ -236,7 +338,204 @@ export function DeckManager({
             }}
           />
         )}
+        {fusing && (
+          <BoosterOpening
+            result={fusionResult}
+            loading={!fusionResult && !fusionError}
+            error={fusionError}
+            label="Fusion"
+            onClose={() => {
+              setFusing(false);
+              if (fusionResult) router.refresh();
+            }}
+          />
+        )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+function TabButton({
+  active,
+  onClick,
+  label,
+  badge,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  badge?: number;
+}) {
+  return (
+    <button
+      type="button"
+      role="tab"
+      aria-selected={active}
+      onClick={onClick}
+      className={`border-b-2 pb-1 font-display text-xl font-bold uppercase tracking-wider transition-colors ${
+        active
+          ? "border-domain text-white/90"
+          : "border-transparent text-white/35 hover:text-white/65"
+      }`}
+    >
+      {label}
+      {badge != null && badge > 0 && (
+        <span className="ml-2 rounded-full bg-amber-300/15 px-2.5 py-0.5 align-middle text-sm text-amber-300">
+          {badge}
+        </span>
+      )}
+    </button>
+  );
+}
+
+function EquippedBadge() {
+  return (
+    <span
+      title="Équipée dans ton deck"
+      className="flex h-6 w-6 items-center justify-center rounded-full border border-domain/60 bg-void-900/90 text-xs text-domain-light shadow-glow"
+    >
+      <span aria-hidden>★</span>
+      <span className="sr-only">Équipée</span>
+    </span>
+  );
+}
+
+/**
+ * Revente d'UN exemplaire. Un doublon part sans confirmation (la collection ne
+ * bouge pas) ; le dernier exemplaire demande confirmation.
+ */
+function SellButton({
+  card,
+  pending,
+  run,
+}: {
+  card: CollectionCard;
+  pending: boolean;
+  run: RunAction;
+}) {
+  const spare = card.count > 1;
+  return (
+    <button
+      type="button"
+      disabled={pending}
+      onClick={() => {
+        if (
+          !spare &&
+          !window.confirm(
+            `Vendre ${card.name} pour ${card.sellValue} coins ? Tu perdras la carte.`,
+          )
+        )
+          return;
+        run(
+          () => sellCardAction(card.characterId),
+          spare
+            ? `Doublon de ${card.name} vendu pour ${card.sellValue} coins.`
+            : `${card.name} vendue pour ${card.sellValue} coins.`,
+        );
+      }}
+      className="flex items-center justify-center gap-1 rounded-full border border-white/10 bg-void-800/80 px-2 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white/50 transition-colors hover:border-amber-300/50 hover:text-amber-300 disabled:opacity-40"
+    >
+      {spare ? "Vendre 1 ·" : "Vendre"} {card.sellValue}
+      <CoinIcon className="h-3 w-3" />
+    </button>
+  );
+}
+
+/** Les 3 emplacements de fusion + la rareté visée. */
+function FusionPanel({
+  picks,
+  byId,
+  rarity,
+  error,
+  ready,
+  disabled,
+  onRemove,
+  onClear,
+  onFuse,
+}: {
+  picks: string[];
+  byId: Map<string, CollectionCard>;
+  rarity: CardRarity | null;
+  error: string | null;
+  ready: boolean;
+  disabled: boolean;
+  onRemove: (index: number) => void;
+  onClear: () => void;
+  onFuse: () => void;
+}) {
+  const target = rarity ? nextRarity(rarity) : null;
+  const from = rarity ? cardRarityStyle(rarity) : null;
+  const to = target ? cardRarityStyle(target) : null;
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-void-800/60 p-4 backdrop-blur sm:p-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h3 className="font-display text-lg font-black uppercase tracking-wider text-white/85">
+            Fusion
+          </h3>
+          <p className="text-sm text-white/50">
+            {from && to ? (
+              <>
+                3 <span style={{ color: from.color }}>{from.label}</span> → 1{" "}
+                <span style={{ color: to.color }}>{to.label}</span> aléatoire
+              </>
+            ) : (
+              "Choisis 3 doublons de même rareté pour obtenir une carte de la rareté au-dessus."
+            )}
+          </p>
+        </div>
+        <div className="flex gap-2">
+          {picks.length > 0 && (
+            <button
+              type="button"
+              onClick={onClear}
+              disabled={disabled}
+              className="rounded-full border border-white/10 px-4 py-2 text-xs font-bold uppercase tracking-wider text-white/50 transition-colors hover:text-white disabled:opacity-40"
+            >
+              Vider
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={onFuse}
+            disabled={!ready || disabled}
+            className="rounded-full bg-domain px-5 py-2 text-xs font-black uppercase tracking-wider text-white shadow-glow transition-transform hover:scale-105 disabled:scale-100 disabled:opacity-40"
+          >
+            Fusionner
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-4 grid max-w-sm grid-cols-3 gap-3">
+        {Array.from({ length: FUSION_SIZE }, (_, i) => {
+          const id = picks[i];
+          const card = id ? byId.get(id) : undefined;
+          return card ? (
+            <button
+              key={i}
+              type="button"
+              onClick={() => onRemove(i)}
+              disabled={disabled}
+              aria-label={`Retirer ${card.name} de la fusion`}
+              className="rounded-2xl transition-transform hover:scale-[1.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-domain"
+            >
+              <CardArt card={card} />
+            </button>
+          ) : (
+            <div
+              key={i}
+              className="flex aspect-[3/4] items-center justify-center rounded-2xl border-2 border-dashed border-white/10 text-2xl text-white/20"
+            >
+              +
+            </div>
+          );
+        })}
+      </div>
+
+      {error && picks.length === FUSION_SIZE && (
+        <p className="mt-3 text-sm text-cursed-light">{error}</p>
+      )}
     </div>
   );
 }

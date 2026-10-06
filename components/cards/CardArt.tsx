@@ -23,6 +23,8 @@ interface CardArtProps {
   owned?: boolean;
   /** Halo coloré autour de la carte (révélation d'un booster). */
   glow?: boolean;
+  /** Exemplaires possédés : pastille « ×N » en haut à gauche dès 2. */
+  count?: number;
   className?: string;
 }
 
@@ -30,6 +32,7 @@ export function CardArt({
   card,
   owned = true,
   glow = false,
+  count = 0,
   className = "",
 }: CardArtProps) {
   const style = cardRarityStyle(card.rarity);
@@ -69,6 +72,15 @@ export function CardArt({
               }
         }
       />
+
+      {count > 1 && (
+        <span
+          title={`${count} exemplaires (${count - 1} doublon${count > 2 ? "s" : ""})`}
+          className="absolute left-1.5 top-1.5 z-30 rounded-full border border-amber-300/50 bg-void-900/90 px-2 py-0.5 font-display text-xs font-black text-amber-300 shadow"
+        >
+          ×{count}
+        </span>
+      )}
 
       <CharacterImage character={{ name: card.name, ...(card.image ? { image: card.image } : {}) }} />
 

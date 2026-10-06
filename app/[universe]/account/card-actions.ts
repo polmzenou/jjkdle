@@ -8,11 +8,13 @@ import {
 import { prisma } from "@/lib/prisma";
 import { DECK_SIZE, sanitizeDeck } from "@/lib/cards/deck";
 import {
+  fuseCards,
   getOwnedCharacterIds,
   openBooster,
   sellCard,
 } from "@/lib/cards/store";
-import type { OpenedBooster } from "@/lib/cards/types";
+import { FUSION_SIZE } from "@/lib/cards/fusion";
+import type { OpenedBooster, RevealedCard } from "@/lib/cards/types";
 
 /**
  * Server actions du joueur sur ses CARTES (ouverture de booster, deck, revente).
@@ -134,8 +136,8 @@ export async function unequipCardAction(
 }
 
 /**
- * Revend une carte contre les coins de sa rareté. La carte est PERDUE, même si
- * elle n'était pas en doublon — et retirée du deck au passage (`sellCard`).
+ * Revend UN exemplaire contre les coins de sa rareté. S'il s'agissait du
+ * dernier, la carte est PERDUE et retirée du deck au passage (`sellCard`).
  */
 export async function sellCardAction(
   characterId: string,
@@ -149,4 +151,30 @@ export async function sellCardAction(
 
   await revalidateDeck(user.username);
   return { ok: true, coins: res.coins };
+}
+
+/**
+ * Fusionne 3 doublons de même rareté en une carte de la rareté au-dessus.
+ * Toute la validation (possession, doublons, rareté, univers) est refaite
+ * côté serveur par `fuseCards`.
+ */
+export async function fuseCardsAction(
+  picks: string[],
+): Promise<ActionResult & { card?: RevealedCard }> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, error: "Connecte-toi pour fusionner des cartes." };
+  if (
+    !Array.isArray(picks) ||
+    picks.length !== FUSION_SIZE ||
+    !picks.every((id) => typeof id === "string" && id)
+  ) {
+    return { ok: false, error: `Choisis exactement ${FUSION_SIZE} cartes.` };
+  }
+
+  const universe = await getCurrentUniverse();
+  const res = await fuseCards(user.id, picks, universe.id);
+  if (!res.ok) return res;
+
+  await revalidateDeck(user.username);
+  return { ok: true, card: res.card };
 }

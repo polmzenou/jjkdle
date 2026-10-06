@@ -36,6 +36,10 @@ export default async function DeckPage() {
   ]);
 
   const ownedCount = collection.filter((c) => c.owned).length;
+  const spareCount = collection.reduce(
+    (sum, c) => sum + Math.max(0, c.count - 1),
+    0,
+  );
   const pct =
     collection.length > 0
       ? Math.round((ownedCount / collection.length) * 100)
@@ -62,8 +66,8 @@ export default async function DeckPage() {
           Collection {universe.config.name}
         </h1>
         <p className="mt-2 text-sm text-white/50">
-          {ownedCount} / {collection.length} cartes ({pct} %) · les doublons sont
-          convertis en coins automatiquement.
+          {ownedCount} / {collection.length} cartes ({pct} %) · {spareCount}{" "}
+          doublon{spareCount > 1 ? "s" : ""} à fusionner, échanger ou revendre.
         </p>
       </header>
 

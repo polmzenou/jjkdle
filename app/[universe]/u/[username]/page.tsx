@@ -15,6 +15,8 @@ import { ProfileHero } from "@/components/profile/ProfileHero";
 import { ProfileStats } from "@/components/profile/ProfileStats";
 import { PalmaresView } from "@/components/profile/PalmaresView";
 import { UniverseLink } from "@/components/universe/UniverseLink";
+import { FriendButton } from "@/components/social/FriendButton";
+import { friendshipState } from "@/lib/social/friends";
 
 export const dynamic = "force-dynamic";
 
@@ -122,6 +124,8 @@ export default async function PublicProfilePage({
   // Le propriétaire qui consulte son propre profil garde ses raccourcis vers
   // /account/deck ; un visiteur ne voit que la vitrine.
   const isOwner = viewer?.id === profile.id;
+  const friendship =
+    viewer && !isOwner ? await friendshipState(viewer.id, profile.id) : null;
 
   return (
     <main className="mx-auto w-full max-w-[1600px] px-5 py-10 sm:px-6 sm:py-14 lg:w-3/4">
@@ -151,6 +155,16 @@ export default async function PublicProfilePage({
           />
         }
       />
+
+      {friendship && (
+        <div className="mt-4 flex justify-end">
+          <FriendButton
+            username={profile.username}
+            userId={profile.id}
+            state={friendship}
+          />
+        </div>
+      )}
 
       <div className="mt-10">
         <PalmaresView

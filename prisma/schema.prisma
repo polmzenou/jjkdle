@@ -70,6 +70,14 @@ model User {
   rouletteSpins     RouletteSpin[]
   casinoSeats       CasinoSeat[]
   towerScores       TowerScore[]
+
+  // ── Social (amis, échanges, messages) ──
+  friendRequestsSent     Friendship[]    @relation("FriendshipRequester")
+  friendRequestsReceived Friendship[]    @relation("FriendshipAddressee")
+  tradesSent             TradeOffer[]    @relation("TradeFrom")
+  tradesReceived         TradeOffer[]    @relation("TradeTo")
+  messagesSent           DirectMessage[] @relation("MessageSender")
+  messagesReceived       DirectMessage[] @relation("MessageRecipient")
 }
 
 /// Une carte POSSÉDÉE (système de collection, cf. lib/cards/).
@@ -80,14 +88,19 @@ model User {
 ///
 /// Possession GLOBALE et à vie (même règle que les cosmétiques, cf.
 /// lib/cosmetics/universe.ts) ; l'univers de la carte est celui de son
-/// personnage. Pas de compteur d'exemplaires : un doublon est converti en coins
-/// à l'ouverture du booster, jamais stocké.
+/// personnage.
+///
+/// `count` = nombre d'exemplaires (≥ 1, une ligne n'existe que si possédée).
+/// Les exemplaires au-delà du premier sont les DOUBLONS : seuls eux peuvent
+/// être fusionnés ou échangés (garde `count > n` en base, cf.
+/// `removeSpareCopies`), la collection ne régresse donc jamais par ces voies.
 model UserCard {
   id          String    @id @default(cuid())
   userId      String
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   characterId String
   character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  count       Int       @default(1)
   obtainedAt  DateTime  @default(now())
 
   @@unique([userId, characterId])
@@ -1096,4 +1109,90 @@ model Item {
   @@unique([universeId, slug])
   @@index([universeId, position])
   @@index([universeId, enabled])
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Social : amis, échanges de cartes, messagerie privée (lib/social, lib/cards/trade*)
+// ──────────────────────────────────────────────────────────────────────────
+
+enum FriendshipStatus {
+  PENDING // demande envoyée, en attente de réponse
+  ACCEPTED
+}
+
+/// Lien d'amitié entre deux comptes. GLOBAL (comme le compte) : un ami l'est
+/// dans tous les univers. Une seule ligne par paire, dans le sens de la
+/// demande ; refuser ou retirer un ami SUPPRIME la ligne.
+model Friendship {
+  id          String           @id @default(cuid())
+  requesterId String
+  requester   User             @relation("FriendshipRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  addresseeId String
+  addressee   User             @relation("FriendshipAddressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+  status      FriendshipStatus @default(PENDING)
+  createdAt   DateTime         @default(now())
+  acceptedAt  DateTime?
+
+  @@unique([requesterId, addresseeId])
+  @@index([addresseeId, status])
+}
+
+enum TradeStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  CANCELLED
+  /// L'acceptation a échoué : un des doublons n'existait plus.
+  FAILED
+}
+
+enum TradeSide {
+  GIVE // de l'auteur de l'offre vers le destinataire
+  TAKE // du destinataire vers l'auteur de l'offre
+}
+
+/// Offre d'échange de cartes entre deux amis, scopée à UN univers. Seuls des
+/// doublons circulent (re-vérifié à l'acceptation, en transaction) et jamais
+/// de coins.
+model TradeOffer {
+  id         String           @id @default(cuid())
+  fromUserId String
+  fromUser   User             @relation("TradeFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUserId   String
+  toUser     User             @relation("TradeTo", fields: [toUserId], references: [id], onDelete: Cascade)
+  universeId String
+  status     TradeStatus      @default(PENDING)
+  message    String?
+  createdAt  DateTime         @default(now())
+  resolvedAt DateTime?
+  items      TradeOfferItem[]
+
+  @@index([toUserId, status])
+  @@index([fromUserId, status])
+}
+
+model TradeOfferItem {
+  id          String     @id @default(cuid())
+  offerId     String
+  offer       TradeOffer @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  side        TradeSide
+  characterId String
+  quantity    Int
+
+  @@index([offerId])
+}
+
+/// Message privé entre deux amis. Texte brut, 500 caractères max.
+model DirectMessage {
+  id          String    @id @default(cuid())
+  senderId    String
+  sender      User      @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  recipientId String
+  recipient   User      @relation("MessageRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  body        String
+  createdAt   DateTime  @default(now())
+  readAt      DateTime?
+
+  @@index([recipientId, readAt])
+  @@index([senderId, recipientId, createdAt])
 }

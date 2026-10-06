@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getRoster } from "@/lib/content/queries";
 import { getCurrentUniverse } from "@/lib/universes/current";
@@ -22,6 +24,7 @@ import {
   isNameColorUnlocked,
 } from "@/lib/profile/name-colors";
 import { rollBooster, sortByRarityAsc, type CardPool } from "./roll";
+import { rollFusion, validateFusion } from "./fusion";
 import type {
   CardView,
   CollectionCard,
@@ -71,20 +74,28 @@ async function resolveUniverseId(universeId?: string): Promise<string> {
 // ──────────────────────────────────────────────────────────────────────────
 
 /**
- * Ids des personnages dont l'utilisateur possède la carte, restreints à un
- * univers. La possession est globale, mais on ne l'expose que par univers :
- * une carte JJK n'a rien à faire dans une grille CSM.
+ * Nombre d'exemplaires possédés par personnage, restreint à un univers. La
+ * possession est globale, mais on ne l'expose que par univers : une carte JJK
+ * n'a rien à faire dans une grille CSM.
  */
+export async function getOwnedCounts(
+  userId: string,
+  universeId?: string,
+): Promise<Map<string, number>> {
+  const uid = await resolveUniverseId(universeId);
+  const rows = await prisma.userCard.findMany({
+    where: { userId, character: { universeId: uid } },
+    select: { characterId: true, count: true },
+  });
+  return new Map(rows.map((r) => [r.characterId, r.count]));
+}
+
+/** Ids des personnages dont l'utilisateur possède la carte, dans un univers. */
 export async function getOwnedCharacterIds(
   userId: string,
   universeId?: string,
 ): Promise<Set<string>> {
-  const uid = await resolveUniverseId(universeId);
-  const rows = await prisma.userCard.findMany({
-    where: { userId, character: { universeId: uid } },
-    select: { characterId: true },
-  });
-  return new Set(rows.map((r) => r.characterId));
+  return new Set((await getOwnedCounts(userId, universeId)).keys());
 }
 
 /**
@@ -100,14 +111,16 @@ export async function getCollection(
   universeId?: string,
 ): Promise<CollectionCard[]> {
   const uid = await resolveUniverseId(universeId);
-  const [roster, owned] = await Promise.all([
+  const [roster, counts] = await Promise.all([
     getRoster(uid),
-    userId ? getOwnedCharacterIds(userId, uid) : Promise.resolve(new Set<string>()),
+    userId
+      ? getOwnedCounts(userId, uid)
+      : Promise.resolve(new Map<string, number>()),
   ]);
-  return roster.map((character) => ({
-    ...toCardView(character),
-    owned: owned.has(character.id),
-  }));
+  return roster.map((character) => {
+    const count = counts.get(character.id) ?? 0;
+    return { ...toCardView(character), owned: count > 0, count };
+  });
 }
 
 /**
@@ -245,6 +258,50 @@ export async function resolveCard(
 // Écriture — collection
 // ──────────────────────────────────────────────────────────────────────────
 
+/** Client Prisma OU transaction interactive : les helpers d'exemplaires servent aux deux. */
+export type CardDb = Prisma.TransactionClient;
+
+/**
+ * Ajoute `n` exemplaires d'une carte et renvoie le NOUVEAU total.
+ *
+ * Un seul `INSERT … ON CONFLICT DO UPDATE` : l'unicité (userId, characterId)
+ * arbitre en base, deux ouvertures concurrentes ne peuvent ni perdre un
+ * exemplaire ni lever une violation d'unicité.
+ */
+export async function addCopies(
+  db: CardDb,
+  userId: string,
+  characterId: string,
+  n = 1,
+): Promise<number> {
+  const rows = await db.$queryRaw<{ count: number }[]>`
+    INSERT INTO "UserCard" ("id", "userId", "characterId", "count", "obtainedAt")
+    VALUES (${randomUUID()}, ${userId}, ${characterId}, ${n}, NOW())
+    ON CONFLICT ("userId", "characterId")
+    DO UPDATE SET "count" = "UserCard"."count" + ${n}
+    RETURNING "count"`;
+  return Number(rows[0]?.count ?? n);
+}
+
+/**
+ * Retire `n` DOUBLONS d'une carte. Échoue (renvoie `false`, rien n'est
+ * modifié) si le joueur n'en a pas au moins `n + 1` : le dernier exemplaire
+ * n'est jamais consommé par cette voie (fusion, échange, revente d'un doublon).
+ * La garde est dans le `WHERE`, donc atomique.
+ */
+export async function removeSpareCopies(
+  db: CardDb,
+  userId: string,
+  characterId: string,
+  n = 1,
+): Promise<boolean> {
+  const res = await db.userCard.updateMany({
+    where: { userId, characterId, count: { gt: n } },
+    data: { count: { decrement: n } },
+  });
+  return res.count === 1;
+}
+
 /**
  * Retire un personnage des decks de l'utilisateur (tous univers confondus).
  * Appelé quand la carte quitte la collection : une carte vendue ou retirée par
@@ -325,36 +382,49 @@ export async function revokeCard(
 }
 
 /**
- * Revend une carte : le joueur récupère les coins de sa rareté et PERD la carte
- * (y compris si elle n'était pas en doublon — c'est le prix affiché).
+ * Revend UN exemplaire d'une carte contre les coins de sa rareté.
  *
- * Le `deleteMany` gardé sur `count === 1` rend l'opération idempotente : deux
- * clics rapides ne créditent qu'une fois.
+ * - doublon (≥ 2 exemplaires) : on en retire un, la collection est intacte ;
+ * - dernier exemplaire : la carte est PERDUE (c'est le prix affiché), retirée
+ *   des decks, et la couleur de pseudo est re-vérifiée.
+ *
+ * Les deux écritures sont gardées en base (`count > 1` / `count: 1`) : deux
+ * clics rapides ne créditent jamais plus que les exemplaires réellement retirés.
  */
 export async function sellCard(
   userId: string,
   characterId: string,
   universeId?: string,
-): Promise<{ ok: boolean; coins: number; error?: string }> {
+): Promise<{ ok: boolean; coins: number; lastCopy?: boolean; error?: string }> {
   const uid = await resolveUniverseId(universeId);
   const card = await resolveCard(characterId, uid);
   if (!card) return { ok: false, coins: 0, error: "Carte inconnue." };
 
-  const deleted = await prisma.userCard.deleteMany({ where: { userId, characterId } });
+  const credit = () =>
+    prisma.user.update({
+      where: { id: userId },
+      data: { coins: { increment: card.sellValue } },
+    });
+
+  if (await removeSpareCopies(prisma, userId, characterId, 1)) {
+    await credit();
+    return { ok: true, coins: card.sellValue, lastCopy: false };
+  }
+
+  const deleted = await prisma.userCard.deleteMany({
+    where: { userId, characterId, count: 1 },
+  });
   if (deleted.count !== 1) {
     return { ok: false, coins: 0, error: "Tu ne possèdes pas cette carte." };
   }
 
   await Promise.all([
-    prisma.user.update({
-      where: { id: userId },
-      data: { coins: { increment: card.sellValue } },
-    }),
+    credit(),
     removeFromDecks(userId, characterId),
     dropLockedNameColor(userId, uid),
   ]);
 
-  return { ok: true, coins: card.sellValue };
+  return { ok: true, coins: card.sellValue, lastCopy: true };
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -419,31 +489,14 @@ export async function openBooster(
   const drawnIds = rollBooster(getBooster(kind), pool);
 
   const revealed: RevealedCard[] = [];
-  let coinsEarned = 0;
 
   for (const characterId of drawnIds) {
     const character = byId.get(characterId);
     if (!character) continue;
 
-    // `createMany + skipDuplicates` par carte : l'unicité (userId, characterId)
-    // arbitre en base, donc pas de fenêtre de course entre lecture et écriture.
-    const inserted = await prisma.userCard.createMany({
-      data: [{ userId, characterId }],
-      skipDuplicates: true,
-    });
-    const duplicate = inserted.count === 0;
-
-    const view = toCardView(character);
-    const coins = duplicate ? view.sellValue : 0;
-    coinsEarned += coins;
-    revealed.push({ ...view, duplicate, coins });
-  }
-
-  if (coinsEarned > 0) {
-    await prisma.user.update({
-      where: { id: userId },
-      data: { coins: { increment: coinsEarned } },
-    });
+    // Un doublon est un exemplaire de plus, STOCKÉ (fusion, échange, revente).
+    const copies = await addCopies(prisma, userId, characterId, 1);
+    revealed.push({ ...toCardView(character), duplicate: copies > 1, copies });
   }
 
   return {
@@ -451,6 +504,63 @@ export async function openBooster(
     kind,
     // Révélation en rareté croissante : le booster finit sur sa meilleure carte.
     cards: sortByRarityAsc(revealed),
-    coinsEarned,
   };
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Écriture — fusion
+// ──────────────────────────────────────────────────────────────────────────
+
+/** Levée dans une transaction pour la faire échouer (rollback) proprement. */
+class StaleCopiesError extends Error {}
+
+/**
+ * Fusionne 3 doublons de même rareté en 1 carte aléatoire de la rareté
+ * au-dessus (cf. `lib/cards/fusion.ts`).
+ *
+ * La validation est REFAITE ici sur l'état en base, puis le retrait des
+ * doublons et l'ajout du résultat se font dans UNE transaction : chaque
+ * retrait est gardé (`count > n`), un échec annule tout — un double clic ne
+ * peut ni consommer deux fois ni créer une carte sans payer.
+ */
+export async function fuseCards(
+  userId: string,
+  picks: readonly string[],
+  universeId?: string,
+): Promise<{ ok: true; card: RevealedCard } | { ok: false; error: string }> {
+  const uid = await resolveUniverseId(universeId);
+  const [{ pool, byId }, counts] = await Promise.all([
+    buildPool(uid),
+    getOwnedCounts(userId, uid),
+  ]);
+  const rarityById = new Map(
+    [...byId.values()].map((c) => [c.id, rarityOfTier(c.tier)]),
+  );
+
+  const check = validateFusion(picks, counts, rarityById, pool);
+  if (!check.ok) return check;
+
+  const resultId = rollFusion(pool, check.target);
+  const character = resultId ? byId.get(resultId) : undefined;
+  if (!character) return { ok: false, error: "Tirage impossible." };
+
+  try {
+    const copies = await prisma.$transaction(async (tx) => {
+      for (const [characterId, n] of check.needed) {
+        if (!(await removeSpareCopies(tx, userId, characterId, n))) {
+          throw new StaleCopiesError();
+        }
+      }
+      return addCopies(tx, userId, character.id, 1);
+    });
+    return {
+      ok: true,
+      card: { ...toCardView(character), duplicate: copies > 1, copies },
+    };
+  } catch (err) {
+    if (err instanceof StaleCopiesError) {
+      return { ok: false, error: "Ces doublons ne sont plus disponibles." };
+    }
+    throw err;
+  }
 }

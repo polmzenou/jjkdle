@@ -28,6 +28,7 @@ const UNIVERSE_LINKS = [
   { href: "/shop", label: "Boutique" },
   { href: "/account", label: "Mon compte" },
   { href: "/account/deck", label: "Mon deck" },
+  { href: "/account/social", label: "Amis & échanges" },
 ];
 
 const linkClass = "transition-colors hover:text-domain-light";

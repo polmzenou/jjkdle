@@ -7,6 +7,7 @@ import { VipBadge } from "@/components/VipBadge";
 import { UserAvatar } from "@/components/UserAvatar";
 import { CoinWallet } from "@/components/progress/CoinWallet";
 import { ShopLink } from "@/components/shop/ShopLink";
+import { SocialLink } from "@/components/social/SocialLink";
 import { logoutAction } from "@/lib/auth/actions";
 import { UniverseLink } from "@/components/universe/UniverseLink";
 import { HubLink } from "@/components/universe/HubLink";
@@ -39,6 +40,10 @@ export type NavUser = {
   frameKey: string | null;
   /** Solde de coins (global au compte) — pastille du portemonnaie. */
   coins: number;
+  /** Id du compte : canal Pusher privé des notifications sociales. */
+  id: string;
+  /** Demandes d'ami + offres reçues + messages non lus (pastille Amis). */
+  socialCount: number;
 };
 
 /**
@@ -208,6 +213,7 @@ function UserMenu({
           Admin
         </UniverseLink>
       )}
+      <SocialLink userId={user.id} count={user.socialCount} />
       <ShopLink />
       <CoinWallet coins={user.coins} />
       {/* Volontairement SANS le titre équipé : il reste visible sur la page

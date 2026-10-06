@@ -36,6 +36,8 @@ interface CardGridProps {
   onCardClick?: (card: CollectionCard) => void;
   /** Masquer les cartes non possédées (par défaut : grisées et visibles). */
   ownedOnly?: boolean;
+  /** Filtre supplémentaire (ex. onglet Doublons : `count > 1`). */
+  filter?: (card: CollectionCard) => boolean;
   emptyLabel?: string;
 }
 
@@ -47,13 +49,17 @@ export function CardGrid({
   renderBadge,
   onCardClick,
   ownedOnly = false,
+  filter: extraFilter,
   emptyLabel = "Aucune carte pour l'instant.",
 }: CardGridProps) {
   const [filter, setFilter] = useState<CardRarity | typeof ALL>(ALL);
 
   const base = useMemo(
-    () => (ownedOnly ? cards.filter((c) => c.owned) : cards),
-    [cards, ownedOnly],
+    () =>
+      cards.filter(
+        (c) => (!ownedOnly || c.owned) && (!extraFilter || extraFilter(c)),
+      ),
+    [cards, ownedOnly, extraFilter],
   );
 
   // Comptes par rareté : possédées / total, affichés sur les puces de filtre.
@@ -112,10 +118,10 @@ export function CardGrid({
                     className="block w-full rounded-2xl transition-transform hover:scale-[1.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-domain"
                     aria-label={`${card.owned ? "Retirer" : "Donner"} la carte ${card.name}`}
                   >
-                    <CardArt card={card} owned={card.owned} />
+                    <CardArt card={card} owned={card.owned} count={card.count} />
                   </button>
                 ) : (
-                  <CardArt card={card} owned={card.owned} />
+                  <CardArt card={card} owned={card.owned} count={card.count} />
                 )}
 
                 {renderBadge && (

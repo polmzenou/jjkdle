@@ -2,6 +2,7 @@ import "server-only";
 import Pusher from "pusher";
 import { casinoChannel } from "@/lib/casino/events";
 import { lobbyChannel } from "@/lib/multiplayer/events";
+import { userChannel } from "@/lib/social/events";
 
 /**
  * Instance Pusher côté serveur (clés secrètes). Utilisée par les Server Actions
@@ -49,6 +50,24 @@ export async function triggerLobby(
   data: unknown,
 ): Promise<void> {
   await getPusherServer().trigger(lobbyChannel(code), event, data);
+}
+
+/**
+ * Notifie UN joueur sur son canal privé (social : messages, amis, échanges).
+ * Best-effort : sans Pusher, ou si l'envoi échoue, l'action qui l'appelle
+ * reste valide — le destinataire verra la nouveauté au prochain chargement.
+ */
+export async function triggerUser(
+  userId: string,
+  event: string,
+  data: unknown,
+): Promise<void> {
+  if (!isPusherConfigured()) return;
+  try {
+    await getPusherServer().trigger(userChannel(userId), event, data);
+  } catch (err) {
+    console.error("[pusher] triggerUser", err);
+  }
 }
 
 /** Diffuse un événement à tous les joueurs assis à une table de casino. */

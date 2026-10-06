@@ -24,14 +24,16 @@ export interface CardView {
 /** Une carte de la collection : la `CardView` + son statut de possession. */
 export interface CollectionCard extends CardView {
   owned: boolean;
+  /** Exemplaires possédés (0 si non possédée). Au-delà de 1 : des doublons. */
+  count: number;
 }
 
 /** Une carte révélée à l'ouverture d'un booster. */
 export interface RevealedCard extends CardView {
-  /** Déjà possédée → convertie en coins au lieu d'entrer en collection. */
+  /** Déjà possédée → exemplaire supplémentaire stocké (doublon). */
   duplicate: boolean;
-  /** Coins effectivement crédités par cette carte (0 si nouvelle). */
-  coins: number;
+  /** Exemplaires possédés APRÈS ce tirage. */
+  copies: number;
 }
 
 export interface OpenedBooster {
@@ -39,8 +41,6 @@ export interface OpenedBooster {
   kind: BoosterKind;
   /** Cartes dans l'ordre de RÉVÉLATION (rareté croissante). */
   cards: RevealedCard[];
-  /** Total des coins gagnés par les doublons. */
-  coinsEarned: number;
 }
 
 /** Contenu de la boîte « Deck » (page compte + profil public). */

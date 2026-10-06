@@ -207,7 +207,7 @@ export function ShopView({
           Boosters
         </h2>
         <p className="mb-5 text-sm text-white/45">
-          Ouverture immédiate. Les doublons sont convertis en coins.
+          Ouverture immédiate. Les doublons sont gardés pour la fusion et les échanges.
         </p>
 
         <div className="grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 lg:grid-cols-4">

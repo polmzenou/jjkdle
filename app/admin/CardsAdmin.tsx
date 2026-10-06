@@ -84,8 +84,7 @@ export function CardsAdmin({ collection, universeName }: CardsAdminProps) {
         setResult({
           boosterId: "admin",
           kind: "simple",
-          cards: [{ ...res.card, duplicate: Boolean(res.alreadyOwned), coins: 0 }],
-          coinsEarned: 0,
+          cards: [{ ...res.card, duplicate: Boolean(res.alreadyOwned), copies: 1 }],
         });
       } else {
         setError(res.error ?? "Échec de l'octroi.");

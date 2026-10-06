@@ -90,7 +90,7 @@ export interface RarityCount {
 }
 
 export interface CollectionSummary {
-  /** Cartes UNIQUES possédées (les doublons n'existent pas en collection). */
+  /** Cartes UNIQUES possédées (les doublons ne comptent pas pour la complétion). */
   owned: number;
   total: number;
   /** Une entrée par rareté, dans l'ordre de l'échelle (toutes, même vides). */

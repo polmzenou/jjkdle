@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { CardArt, RAINBOW_GRADIENT } from "@/components/cards/CardArt";
 import { CloseIcon } from "@/components/cards/CardIcons";
-import { CoinIcon } from "@/components/progress/CoinWallet";
 import { getBooster } from "@/lib/cards/boosters";
 import { cardRarityStyle } from "@/lib/cards/rarity";
 import type { OpenedBooster } from "@/lib/cards/types";
@@ -32,6 +31,8 @@ interface BoosterOpeningProps {
   error?: string | null;
   /** Démarrer directement sur le récap (bouton « passer l'animation »). */
   initialSkip?: boolean;
+  /** Titre du récap à la place du nom du booster (ex. « Fusion »). */
+  label?: string;
   onClose: () => void;
 }
 
@@ -40,6 +41,7 @@ export function BoosterOpening({
   loading = false,
   error = null,
   initialSkip = false,
+  label,
   onClose,
 }: BoosterOpeningProps) {
   // `index` parcourt les cartes ; une fois égal à `cards.length`, on est au récap.
@@ -141,7 +143,7 @@ export function BoosterOpening({
             Ouverture…
           </p>
         ) : atRecap ? (
-          <Recap result={result} onClose={onClose} />
+          <Recap result={result} label={label} onClose={onClose} />
         ) : (
           <Reveal
             card={current!}
@@ -291,9 +293,8 @@ function Reveal({
               </span>
 
               {card.duplicate ? (
-                <span className="absolute -right-2 -top-2 z-40 flex items-center gap-1 rounded-full border border-amber-300/50 bg-void-900/95 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-amber-300">
-                  Doublon +{card.coins}
-                  <CoinIcon className="h-3 w-3" />
+                <span className="absolute -right-2 -top-2 z-40 rounded-full border border-amber-300/50 bg-void-900/95 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-amber-300">
+                  Doublon ×{card.copies}
                 </span>
               ) : (
                 <span className="absolute left-2.5 top-2.5 z-40 rounded-full bg-domain px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white shadow-glow">
@@ -332,9 +333,11 @@ function Reveal({
 
 function Recap({
   result,
+  label,
   onClose,
 }: {
   result: OpenedBooster;
+  label?: string | undefined;
   onClose: () => void;
 }) {
   const def = getBooster(result.kind);
@@ -351,7 +354,7 @@ function Recap({
         className="text-xs font-black uppercase tracking-[0.3em]"
         style={{ color: def.accent }}
       >
-        {def.label}
+        {label ?? def.label}
       </p>
       <h2 className="mt-2 font-display text-2xl font-black text-white sm:text-3xl">
         {newCards > 0
@@ -364,9 +367,8 @@ function Recap({
           <div key={`${card.characterId}-${i}`} className="relative">
             <CardArt card={card} />
             {card.duplicate ? (
-              <span className="absolute -right-1.5 -top-1.5 z-30 flex items-center gap-1 rounded-full border border-amber-300/50 bg-void-900/95 px-2 py-0.5 text-[10px] font-black text-amber-300">
-                +{card.coins}
-                <CoinIcon className="h-3 w-3" />
+              <span className="absolute -right-1.5 -top-1.5 z-30 rounded-full border border-amber-300/50 bg-void-900/95 px-2 py-0.5 text-[10px] font-black text-amber-300">
+                ×{card.copies}
               </span>
             ) : (
               <span className="absolute -right-1.5 -top-1.5 z-30 rounded-full bg-domain px-2 py-0.5 text-[10px] font-black uppercase text-white">
@@ -377,13 +379,10 @@ function Recap({
         ))}
       </div>
 
-      {result.coinsEarned > 0 && (
-        <p className="mt-6 flex items-center justify-center gap-2 font-display text-xl font-black text-amber-300">
-          +{result.coinsEarned}
-          <CoinIcon className="h-5 w-5" />
-          <span className="text-sm font-medium normal-case text-white/45">
-            convertis depuis les doublons
-          </span>
+      {result.cards.length > newCards && (
+        <p className="mt-6 text-center text-sm text-white/45">
+          Les doublons sont rangés dans l&apos;onglet Doublons : fusionne-les,
+          échange-les ou revends-les.
         </p>
       )}
 

@@ -8,6 +8,7 @@ import { UniverseProvider } from "@/components/universe/UniverseProvider";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getCachedImageCount } from "@/lib/admin/image-cache";
 import { getMaintenance } from "@/lib/config/app-config";
+import { getSocialCounts } from "@/lib/social/messages";
 import { prisma } from "@/lib/prisma";
 import {
   getCurrentUniverse,
@@ -52,6 +53,8 @@ export async function UniverseChrome({
   // Profil (avatar + niveau + coins) pour la barre de nav. Niveau et coins =
   // globaux (User) ; loadout équipé (avatar/cadre) = univers courant
   // (UserUniverseProfile). Le titre équipé n'est plus affiché dans la nav.
+  // Pastille « Amis » : lancée en parallèle de la lecture du profil.
+  const socialPromise = user ? getSocialCounts(user.id) : Promise.resolve(null);
   const profile = user
     ? await prisma.user.findUnique({
         where: { id: user.id },
@@ -69,6 +72,7 @@ export async function UniverseChrome({
       })
     : null;
   const navProfile = profile?.universeProfiles[0];
+  const social = await socialPromise;
   const navUser = user
     ? {
         username: user.username,
@@ -80,6 +84,10 @@ export async function UniverseChrome({
         level: profile?.level ?? 1,
         frameKey: navProfile?.equippedFrameKey ?? null,
         coins: profile?.coins ?? 0,
+        id: user.id,
+        socialCount: social
+          ? social.friendRequests + social.trades + social.messages
+          : 0,
       }
     : null;
   // Le sélecteur d'arcade ne reçoit que du sérialisable : la palette part en

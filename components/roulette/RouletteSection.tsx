@@ -342,7 +342,7 @@ function WinPanel({
           Tu gagnes <span className="font-bold text-white">{card.name}</span> !
           {card.duplicate ? (
             <span className="mt-1 block text-amber-300">
-              Déjà dans ta collection → +{outcome.coinsWon.toLocaleString("fr-FR")} coins
+              Déjà dans ta collection → doublon ajouté (fusion, échange ou revente).
             </span>
           ) : (
             <span className="mt-1 block text-emerald-300">Nouvelle carte ajoutée à ta collection.</span>
