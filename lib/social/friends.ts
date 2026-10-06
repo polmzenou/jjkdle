@@ -1,5 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
+import { userDecor, userDecorSelect } from "@/lib/leaderboard/store";
 import type { FriendRequestView, FriendView } from "./types";
 
 /**
@@ -15,6 +16,9 @@ export const MAX_FRIENDS = 100;
 export const MAX_PENDING_SENT = 20;
 
 type Result = { ok: true; message: string } | { ok: false; error: string };
+type AcceptResult =
+  | { ok: true; message: string; requesterId?: string }
+  | { ok: false; error: string };
 
 /** La ligne liant deux comptes, quel que soit le sens de la demande. */
 function findLink(a: string, b: string) {
@@ -50,7 +54,7 @@ function countFriends(userId: string) {
 export async function sendFriendRequest(
   me: string,
   username: string,
-): Promise<Result & { targetId?: string }> {
+): Promise<Result & { targetId?: string; accepted?: boolean }> {
   const name = username.trim();
   if (!name) return { ok: false, error: "Indique un pseudo." };
 
@@ -71,7 +75,7 @@ export async function sendFriendRequest(
   if (link) {
     // Demande croisée : l'autre nous avait déjà demandé → on accepte.
     const res = await respondToRequest(me, link.id, true);
-    return res.ok ? { ...res, targetId: target.id } : res;
+    return res.ok ? { ...res, targetId: target.id, accepted: true } : res;
   }
 
   const [friends, pendingSent] = await Promise.all([
@@ -98,7 +102,7 @@ export async function respondToRequest(
   me: string,
   requestId: string,
   accept: boolean,
-): Promise<Result> {
+): Promise<AcceptResult> {
   if (!accept) {
     const res = await prisma.friendship.deleteMany({
       where: { id: requestId, addresseeId: me, status: "PENDING" },
@@ -115,9 +119,16 @@ export async function respondToRequest(
     where: { id: requestId, addresseeId: me, status: "PENDING" },
     data: { status: "ACCEPTED", acceptedAt: new Date() },
   });
-  return res.count === 1
-    ? { ok: true, message: "Vous êtes maintenant amis !" }
-    : { ok: false, error: "Demande introuvable." };
+  if (res.count !== 1) return { ok: false, error: "Demande introuvable." };
+  const link = await prisma.friendship.findUnique({
+    where: { id: requestId },
+    select: { requesterId: true },
+  });
+  return {
+    ok: true,
+    message: "Vous êtes maintenant amis !",
+    requesterId: link?.requesterId,
+  };
 }
 
 /** Annule une demande ENVOYÉE et pas encore acceptée. */
@@ -159,8 +170,8 @@ export async function removeFriend(me: string, friendId: string): Promise<Result
   return { ok: true, message: "Ami retiré." };
 }
 
-/** Amis acceptés, triés par pseudo. */
-export async function listFriends(me: string): Promise<FriendView[]> {
+/** Amis acceptés, triés par pseudo (décor de l'univers `universeId`). */
+export async function listFriends(me: string, universeId: string): Promise<FriendView[]> {
   const rows = await prisma.friendship.findMany({
     where: {
       status: "ACCEPTED",
@@ -168,8 +179,8 @@ export async function listFriends(me: string): Promise<FriendView[]> {
     },
     select: {
       acceptedAt: true,
-      requester: { select: { id: true, username: true } },
-      addressee: { select: { id: true, username: true } },
+      requester: { select: { id: true, ...userDecorSelect(universeId) } },
+      addressee: { select: { id: true, ...userDecorSelect(universeId) } },
     },
   });
   return rows
@@ -178,14 +189,18 @@ export async function listFriends(me: string): Promise<FriendView[]> {
       return {
         userId: other.id,
         username: other.username,
+        decor: userDecor(other),
         since: (r.acceptedAt ?? new Date()).toISOString(),
       };
     })
     .sort((a, b) => a.username.localeCompare(b.username, "fr"));
 }
 
-/** Demandes en attente, reçues et envoyées. */
-export async function listPendingRequests(me: string): Promise<{
+/** Demandes en attente, reçues et envoyées (décor de l'univers `universeId`). */
+export async function listPendingRequests(
+  me: string,
+  universeId: string,
+): Promise<{
   received: FriendRequestView[];
   sent: FriendRequestView[];
 }> {
@@ -198,8 +213,8 @@ export async function listPendingRequests(me: string): Promise<{
     select: {
       id: true,
       createdAt: true,
-      requester: { select: { id: true, username: true } },
-      addressee: { select: { id: true, username: true } },
+      requester: { select: { id: true, ...userDecorSelect(universeId) } },
+      addressee: { select: { id: true, ...userDecorSelect(universeId) } },
     },
   });
   const received: FriendRequestView[] = [];
@@ -211,6 +226,7 @@ export async function listPendingRequests(me: string): Promise<{
       id: r.id,
       userId: other.id,
       username: other.username,
+      decor: userDecor(other),
       createdAt: r.createdAt.toISOString(),
     });
   }

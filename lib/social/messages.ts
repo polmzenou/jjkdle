@@ -108,8 +108,11 @@ export async function markConversationRead(me: string, friendId: string): Promis
  * Une conversation par ami (même sans message), triées par activité récente
  * puis par pseudo.
  */
-export async function listConversations(me: string): Promise<ConversationView[]> {
-  const friends = await listFriends(me);
+export async function listConversations(
+  me: string,
+  universeId: string,
+): Promise<ConversationView[]> {
+  const friends = await listFriends(me, universeId);
   if (friends.length === 0) return [];
   const ids = friends.map((f) => f.userId);
 
@@ -143,6 +146,7 @@ export async function listConversations(me: string): Promise<ConversationView[]>
       return {
         friendId: f.userId,
         username: f.username,
+        decor: f.decor,
         lastMessage: last ? toView(last) : null,
         unread: unreadBy.get(f.userId) ?? 0,
       };

@@ -8,6 +8,7 @@ import {
 import { SOCIAL_EVENTS } from "@/lib/social/events";
 import type { ConversationView, MessageView } from "@/lib/social/types";
 import { useUserChannel } from "./useUserChannel";
+import { PlayerChip } from "./PlayerChip";
 
 const MESSAGE_MAX = 500;
 
@@ -122,11 +123,9 @@ export function MessagesPanel({
                 }`}
               >
                 <span className="min-w-0">
-                  <span className="block truncate font-display font-bold text-white/90">
-                    {c.username}
-                  </span>
+                  <PlayerChip decor={c.decor} size={30} showTitle={false} link={false} />
                   {c.lastMessage && (
-                    <span className="block truncate text-xs text-white/40">
+                    <span className="mt-1 block truncate pl-[42px] text-xs text-white/40">
                       {c.lastMessage.senderId === me.id ? "Toi : " : ""}
                       {c.lastMessage.body}
                     </span>
@@ -150,9 +149,9 @@ export function MessagesPanel({
           </p>
         ) : (
           <>
-            <p className="border-b border-white/5 px-4 py-3 font-display font-bold text-white/90">
-              {activeConv.username}
-            </p>
+            <div className="border-b border-white/5 px-4 py-3">
+              <PlayerChip decor={activeConv.decor} size={32} />
+            </div>
             <div className="max-h-[26rem] flex-1 space-y-2 overflow-y-auto px-4 py-4">
               {thread === null ? (
                 <p className="animate-pulse text-sm text-white/40">Chargement…</p>

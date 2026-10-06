@@ -5,12 +5,15 @@ import { useRouter } from "next/navigation";
 import { FriendsPanel } from "@/components/social/FriendsPanel";
 import { TradesPanel } from "@/components/social/TradesPanel";
 import { MessagesPanel } from "@/components/social/MessagesPanel";
+import { NotificationsPanel } from "@/components/social/NotificationsPanel";
+import { showSocialToast } from "@/components/social/SocialToaster";
 import { useUserChannel } from "@/components/social/useUserChannel";
 import { SOCIAL_EVENTS } from "@/lib/social/events";
 import type {
   ConversationView,
   FriendRequestView,
   FriendView,
+  NotificationView,
   TradeView,
 } from "@/lib/social/types";
 
@@ -30,11 +33,15 @@ interface SocialHubProps {
   requests: { received: FriendRequestView[]; sent: FriendRequestView[] };
   trades: TradeView[];
   conversations: ConversationView[];
+  notifications: NotificationView[];
+  /** Solde de coins du joueur (pour l'envoi de coins). */
+  coins: number;
   universeId: string;
 }
 
 /**
- * Hub social : onglets Amis / Échanges / Messages.
+ * Hub social : bloc Notifications (masqué s'il est vide) puis onglets
+ * Amis / Échanges / Messages.
  *
  * Même motif de mutation que `DeckManager` (useTransition + server action +
  * `router.refresh()` + bandeau de feedback). Le canal Pusher privé rafraîchit
@@ -49,6 +56,8 @@ export function SocialHub({
   requests,
   trades,
   conversations,
+  notifications,
+  coins,
   universeId,
 }: SocialHubProps) {
   const router = useRouter();
@@ -77,6 +86,8 @@ export function SocialHub({
     {
       [SOCIAL_EVENTS.friend]: () => router.refresh(),
       [SOCIAL_EVENTS.trade]: () => router.refresh(),
+      [SOCIAL_EVENTS.coins]: () => router.refresh(),
+      [SOCIAL_EVENTS.notification]: () => router.refresh(),
     },
     { ms: 20_000, poll: () => router.refresh() },
   );
@@ -92,6 +103,8 @@ export function SocialHub({
 
   return (
     <div className="space-y-8">
+      <NotificationsPanel notifications={notifications} />
+
       <div className="flex flex-wrap items-center gap-x-6 gap-y-2" role="tablist">
         {tabs.map((t) => (
           <button
@@ -132,8 +145,12 @@ export function SocialHub({
         <FriendsPanel
           friends={friends}
           requests={requests}
+          coins={coins}
           pending={pending}
           run={run}
+          onCoinsSent={(player, amount) =>
+            showSocialToast({ kind: "coins-sent", player, amount })
+          }
           onTrade={(id) => {
             setTradeWith(id);
             setTab("trades");

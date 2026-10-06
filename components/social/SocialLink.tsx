@@ -47,6 +47,7 @@ export function SocialLink({ userId, count }: { userId: string; count: number })
     [SOCIAL_EVENTS.message]: bump,
     [SOCIAL_EVENTS.friend]: bump,
     [SOCIAL_EVENTS.trade]: bump,
+    [SOCIAL_EVENTS.coins]: bump,
   });
 
   return (

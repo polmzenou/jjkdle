@@ -2,6 +2,7 @@ import "server-only";
 import { prisma } from "@/lib/prisma";
 import { getRoster } from "@/lib/content/queries";
 import { areFriends } from "@/lib/social/friends";
+import { userDecor, userDecorSelect } from "@/lib/leaderboard/store";
 import type { TradableCard, TradeLine, TradeView } from "@/lib/social/types";
 import {
   addCopies,
@@ -212,8 +213,12 @@ export async function cancelTrade(
     : { ok: false, error: "Cette offre n'est plus disponible." };
 }
 
-/** Offres en attente + les 20 dernières résolues, du point de vue de `me`. */
-export async function listTrades(me: string): Promise<TradeView[]> {
+/**
+ * Offres en attente + les 20 dernières résolues, du point de vue de `me`. Le
+ * décor de l'autre joueur est celui de l'univers COURANT (`universeId`), pas de
+ * l'univers de l'offre : c'est celui de la page qu'on regarde.
+ */
+export async function listTrades(me: string, universeId: string): Promise<TradeView[]> {
   const select = {
     id: true,
     fromUserId: true,
@@ -224,8 +229,8 @@ export async function listTrades(me: string): Promise<TradeView[]> {
     createdAt: true,
     resolvedAt: true,
     items: { select: { side: true, characterId: true, quantity: true } },
-    fromUser: { select: { username: true } },
-    toUser: { select: { username: true } },
+    fromUser: { select: userDecorSelect(universeId) },
+    toUser: { select: userDecorSelect(universeId) },
   } as const;
   const mine = { OR: [{ fromUserId: me }, { toUserId: me }] };
 
@@ -270,6 +275,7 @@ export async function listTrades(me: string): Promise<TradeView[]> {
       outgoing,
       otherId: outgoing ? r.toUserId : r.fromUserId,
       otherUsername: outgoing ? r.toUser.username : r.fromUser.username,
+      otherDecor: userDecor(outgoing ? r.toUser : r.fromUser),
       status: r.status,
       universeId: r.universeId,
       universeName: nameById.get(r.universeId) ?? "",

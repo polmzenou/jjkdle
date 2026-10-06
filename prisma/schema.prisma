@@ -84,6 +84,8 @@ model User {
   tradesReceived         TradeOffer[]    @relation("TradeTo")
   messagesSent           DirectMessage[] @relation("MessageSender")
   messagesReceived       DirectMessage[] @relation("MessageRecipient")
+  notifications          Notification[]  @relation("NotificationOwner")
+  notificationsActed     Notification[]  @relation("NotificationActor")
 }
 
 /// Une carte POSSÉDÉE (système de collection, cf. lib/cards/).
@@ -1162,7 +1164,8 @@ enum TradeSide {
 
 /// Offre d'échange de cartes entre deux amis, scopée à UN univers. Toute carte
 /// possédée peut circuler, y compris le dernier exemplaire (re-vérifié à
-/// l'acceptation, en transaction), et jamais de coins.
+/// l'acceptation, en transaction), et jamais de coins (les coins passent par
+/// l'envoi direct entre amis, cf. `transferCoins` dans lib/coins.ts).
 model TradeOffer {
   id         String           @id @default(cuid())
   fromUserId String
@@ -1204,4 +1207,32 @@ model DirectMessage {
 
   @@index([recipientId, readAt])
   @@index([senderId, recipientId, createdAt])
+}
+
+enum NotificationKind {
+  COINS_RECEIVED
+  COINS_SENT
+  FRIEND_ACCEPTED
+  TRADE_RECEIVED
+  TRADE_ACCEPTED
+  TRADE_DECLINED
+}
+
+/// Notification du hub social (bloc « Notifications », supprimable à la croix).
+/// Le texte n'est PAS stocké : il est composé au rendu à partir de `kind` et du
+/// décor de l'acteur. Élaguée à 50 par joueur (cf. lib/social/notifications.ts).
+model Notification {
+  id        String           @id @default(cuid())
+  /// Destinataire de la notification.
+  userId    String
+  user      User             @relation("NotificationOwner", fields: [userId], references: [id], onDelete: Cascade)
+  kind      NotificationKind
+  /// L'autre joueur (donneur, ami, auteur de l'offre…).
+  actorId   String?
+  actor     User?            @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+  /// Montant en coins (`Float` pour suivre `User.coins`).
+  amount    Float?
+  createdAt DateTime         @default(now())
+
+  @@index([userId, createdAt])
 }

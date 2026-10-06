@@ -19,4 +19,15 @@ export const SOCIAL_EVENTS = {
   friend: "friend-update",
   /** Offre d'échange reçue ou résolue. */
   trade: "trade-update",
+  /** Coins reçus d'un ami (payload : `CoinsReceivedPayload`) → toast global. */
+  coins: "coins-received",
+  /** Nouvelle notification dans le bloc « Notifications » du hub. */
+  notification: "notification-new",
 } as const;
+
+/**
+ * Événement NAVIGATEUR (window) pour afficher un toast social depuis n'importe
+ * quel composant client — ex. la confirmation d'envoi de coins côté donneur.
+ * Écouté par `SocialToaster`.
+ */
+export const SOCIAL_TOAST_EVENT = "social-toast";

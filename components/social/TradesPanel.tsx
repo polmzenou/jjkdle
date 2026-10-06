@@ -19,6 +19,7 @@ import type {
   TradeView,
 } from "@/lib/social/types";
 import type { SocialRun } from "./SocialHub";
+import { PlayerChip } from "./PlayerChip";
 
 const STATUS_LABEL: Record<TradeStatusView, { label: string; className: string }> = {
   PENDING: { label: "En attente", className: "text-amber-300" },
@@ -164,15 +165,15 @@ function TradeList({
                 className="rounded-2xl border border-white/10 bg-void-800/60 p-4 backdrop-blur"
               >
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-sm">
-                  <p className="text-white/70">
-                    {t.outgoing ? "À " : "De "}
-                    <span className="font-display font-bold text-white">{t.otherUsername}</span>
+                  <div className="flex min-w-0 items-center gap-2 text-white/70">
+                    <span className="shrink-0">{t.outgoing ? "À" : "De"}</span>
+                    <PlayerChip decor={t.otherDecor} size={30} showTitle={false} />
                     {t.universeId !== universeId && (
-                      <span className="ml-2 rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-white/45">
+                      <span className="shrink-0 rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-white/45">
                         {t.universeName}
                       </span>
                     )}
-                  </p>
+                  </div>
                   <span className={`text-xs font-bold uppercase tracking-wider ${status.className}`}>
                     {status.label}
                   </span>
@@ -273,8 +274,8 @@ function TradeComposer({
 
   return (
     <div className="rounded-2xl border border-domain/30 bg-void-800/70 p-4 backdrop-blur sm:p-6">
-      <h3 className="font-display text-lg font-black uppercase tracking-wider text-white/85">
-        Échange avec {friend.username}
+      <h3 className="flex flex-wrap items-center gap-3 font-display text-lg font-black uppercase tracking-wider text-white/85">
+        Échange avec <PlayerChip decor={friend.decor} size={32} showTitle={false} />
       </h3>
       <p className="mt-1 text-sm text-white/45">
         {MAX_TRADE_CARDS} cartes max de chaque côté. Donner ton dernier

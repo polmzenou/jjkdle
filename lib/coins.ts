@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
  * partie (`awardExp`, lib/progress/recompute.ts), à l'ouverture d'un booster et
  * à la revente d'une carte (lib/cards/store.ts), et au casino ; il se dépense à
  * la boutique (lib/cards/shop-store.ts) et en mise au casino (lib/casino/).
+ * Il circule aussi entre amis (`transferCoins`, envoi direct sans contrepartie).
  *
  * Ces deux fonctions vivaient en privé dans lib/cards/shop-store.ts. Elles en
  * sont sorties quand le casino est arrivé : deux implémentations du débit
@@ -72,6 +73,45 @@ export async function creditCoins(
   await prisma.user.updateMany({
     where: { id: userId, coins: { gt: MAX_COINS } },
     data: { coins: MAX_COINS },
+  });
+}
+
+/**
+ * Envoi de coins d'un joueur à un autre (don entre amis, cf.
+ * lib/social/coins-transfer.ts), en UNE transaction : débit atomique (même
+ * règle que `debitCoins`), crédit écrêté à `MAX_COINS`, et les deux
+ * notifications du hub social (`COINS_SENT` / `COINS_RECEIVED`). Si le débit
+ * échoue, rien n'est écrit.
+ *
+ * @returns true si le transfert a eu lieu, false si le solde ne suffisait pas.
+ */
+export async function transferCoins(
+  fromId: string,
+  toId: string,
+  amount: number,
+): Promise<boolean> {
+  if (!Number.isSafeInteger(amount) || amount <= 0 || fromId === toId) return false;
+  return prisma.$transaction(async (tx) => {
+    const debit = await tx.user.updateMany({
+      where: { id: fromId, coins: { gte: amount } },
+      data: { coins: { decrement: amount } },
+    });
+    if (debit.count !== 1) return false;
+    await tx.user.update({
+      where: { id: toId },
+      data: { coins: { increment: Math.min(amount, MAX_COINS) } },
+    });
+    await tx.user.updateMany({
+      where: { id: toId, coins: { gt: MAX_COINS } },
+      data: { coins: MAX_COINS },
+    });
+    await tx.notification.createMany({
+      data: [
+        { userId: fromId, kind: "COINS_SENT", actorId: toId, amount },
+        { userId: toId, kind: "COINS_RECEIVED", actorId: fromId, amount },
+      ],
+    });
+    return true;
   });
 }
 

@@ -4,6 +4,8 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { listFriends, listPendingRequests } from "@/lib/social/friends";
 import { listConversations } from "@/lib/social/messages";
 import { listTrades } from "@/lib/cards/trade-store";
+import { listNotifications } from "@/lib/social/notifications";
+import { getCoins } from "@/lib/coins";
 import { getCurrentUniverse } from "@/lib/universes/current";
 import { SocialHub, type SocialTab } from "@/components/social/SocialHub";
 import { UniverseLink } from "@/components/universe/UniverseLink";
@@ -18,7 +20,8 @@ export const dynamic = "force-dynamic";
 const TABS: SocialTab[] = ["friends", "trades", "messages"];
 
 /**
- * Hub SOCIAL du compte : amis, échanges de doublons, messagerie privée.
+ * Hub SOCIAL du compte : notifications, amis (et envoi de coins), échanges de
+ * doublons, messagerie privée.
  *
  * Amis et messages sont globaux (comme le compte) ; une offre d'échange porte
  * sur les cartes d'UN univers — le composeur propose celles de l'univers
@@ -35,12 +38,15 @@ export default async function SocialPage({
   if (!user) redirect("/login");
 
   const [universe, params] = await Promise.all([getCurrentUniverse(), searchParams]);
-  const [friends, requests, trades, conversations] = await Promise.all([
-    listFriends(user.id),
-    listPendingRequests(user.id),
-    listTrades(user.id),
-    listConversations(user.id),
-  ]);
+  const [friends, requests, trades, conversations, notifications, coins] =
+    await Promise.all([
+      listFriends(user.id, universe.id),
+      listPendingRequests(user.id, universe.id),
+      listTrades(user.id, universe.id),
+      listConversations(user.id, universe.id),
+      listNotifications(user.id, universe.id),
+      getCoins(user.id),
+    ]);
 
   const tab = TABS.includes(params.tab as SocialTab)
     ? (params.tab as SocialTab)
@@ -67,8 +73,8 @@ export default async function SocialPage({
           Amis &amp; échanges
         </h1>
         <p className="mt-2 text-sm text-white/50">
-          Échange tes doublons {universe.config.name} avec tes amis et discute
-          avec eux en privé.
+          Échange tes doublons {universe.config.name} avec tes amis, envoie-leur
+          des coins et discute avec eux en privé.
         </p>
       </header>
 
@@ -80,6 +86,8 @@ export default async function SocialPage({
         requests={requests}
         trades={trades}
         conversations={conversations}
+        notifications={notifications}
+        coins={coins}
         universeId={universe.id}
       />
     </main>

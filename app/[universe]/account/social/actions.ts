@@ -6,6 +6,8 @@ import {
   revalidateUniversePath,
 } from "@/lib/universes/current";
 import { triggerUser } from "@/lib/pusher/server";
+import { prisma } from "@/lib/prisma";
+import { userDecor, userDecorSelect } from "@/lib/leaderboard/store";
 import { SOCIAL_EVENTS } from "@/lib/social/events";
 import {
   cancelRequest,
@@ -26,11 +28,22 @@ import {
   getFriendTradableCards,
   getTradableCards,
 } from "@/lib/cards/trade-store";
+import {
+  clearNotifications,
+  deleteNotification,
+  notify,
+  sendCoinsToFriend,
+} from "@/lib/social/notifications";
+import type { NotificationKind } from "@prisma/client";
 import type { TradeLineInput } from "@/lib/cards/trade";
-import type { MessageView, TradableCard } from "@/lib/social/types";
+import type {
+  CoinsReceivedPayload,
+  MessageView,
+  TradableCard,
+} from "@/lib/social/types";
 
 /**
- * Server actions du SOCIAL (amis, échanges, messages).
+ * Server actions du SOCIAL (amis, échanges, coins, notifications, messages).
  *
  * Rien n'est cru côté client : chaque action relit la session, et les modules
  * `lib/social/*` / `lib/cards/trade-store` revérifient l'amitié et les
@@ -43,6 +56,16 @@ const NOT_LOGGED = { ok: false, error: "Connecte-toi d'abord." } as const;
 
 async function revalidateSocial(): Promise<void> {
   await revalidateUniversePath("/account/social");
+}
+
+/** Ajoute une notification au bloc du joueur et le prévient en direct. */
+async function notifyLive(
+  userId: string,
+  kind: NotificationKind,
+  actorId: string,
+): Promise<void> {
+  await notify(userId, kind, actorId);
+  await triggerUser(userId, SOCIAL_EVENTS.notification, { kind });
 }
 
 function isLines(value: unknown): value is TradeLineInput[] {
@@ -70,6 +93,8 @@ export async function sendFriendRequestAction(username: string): Promise<ActionR
   if (!res.ok) return res;
   if (res.targetId) {
     await triggerUser(res.targetId, SOCIAL_EVENTS.friend, { from: user.username });
+    // Demande croisée acceptée d'office : l'autre joueur est prévenu.
+    if (res.accepted) await notifyLive(res.targetId, "FRIEND_ACCEPTED", user.id);
   }
   await revalidateSocial();
   await revalidateUniversePath(`/u/${encodeURIComponent(username)}`);
@@ -84,6 +109,10 @@ export async function respondFriendRequestAction(
   if (!user) return NOT_LOGGED;
   const res = await respondToRequest(user.id, String(requestId), Boolean(accept));
   if (!res.ok) return res;
+  if (res.requesterId) {
+    await triggerUser(res.requesterId, SOCIAL_EVENTS.friend, { from: user.username });
+    await notifyLive(res.requesterId, "FRIEND_ACCEPTED", user.id);
+  }
   await revalidateSocial();
   return { ok: true, message: res.message };
 }
@@ -138,6 +167,7 @@ export async function createTradeAction(
   if (!res.ok) return res;
 
   await triggerUser(String(toUserId), SOCIAL_EVENTS.trade, { from: user.username });
+  await notifyLive(String(toUserId), "TRADE_RECEIVED", user.id);
   await revalidateSocial();
   return { ok: true, message: "Offre envoyée !" };
 }
@@ -151,6 +181,7 @@ export async function acceptTradeAction(offerId: string): Promise<ActionResult> 
     return res;
   }
   await triggerUser(res.fromUserId, SOCIAL_EVENTS.trade, { from: user.username });
+  await notifyLive(res.fromUserId, "TRADE_ACCEPTED", user.id);
   await revalidateSocial();
   await revalidateUniversePath("/account/deck");
   await revalidateUniversePath(`/u/${encodeURIComponent(user.username)}`);
@@ -163,6 +194,7 @@ export async function declineTradeAction(offerId: string): Promise<ActionResult>
   const res = await declineTrade(user.id, String(offerId));
   if (!res.ok) return res;
   await triggerUser(res.fromUserId, SOCIAL_EVENTS.trade, { from: user.username });
+  await notifyLive(res.fromUserId, "TRADE_DECLINED", user.id);
   await revalidateSocial();
   return { ok: true, message: "Offre refusée." };
 }
@@ -175,6 +207,54 @@ export async function cancelTradeAction(offerId: string): Promise<ActionResult> 
   await triggerUser(res.toUserId, SOCIAL_EVENTS.trade, { from: user.username });
   await revalidateSocial();
   return { ok: true, message: "Offre annulée." };
+}
+
+// ── Coins ─────────────────────────────────────────────────────────────────
+
+/**
+ * Envoie des coins à un ami. Le receveur reçoit un toast en direct (pseudo +
+ * décor + montant), où qu'il soit sur le site ; le donneur affiche le sien à
+ * partir du résultat.
+ */
+export async function sendCoinsAction(
+  friendId: string,
+  amount: number,
+): Promise<ActionResult & { amount?: number }> {
+  const user = await getCurrentUser();
+  if (!user) return NOT_LOGGED;
+  const id = String(friendId);
+  const res = await sendCoinsToFriend(user.id, id, amount);
+  if (!res.ok) return res;
+
+  const universe = await getCurrentUniverse();
+  const me = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: userDecorSelect(universe.id),
+  });
+  if (me) {
+    const payload: CoinsReceivedPayload = { amount: res.amount, from: userDecor(me) };
+    await triggerUser(id, SOCIAL_EVENTS.coins, payload);
+  }
+  await revalidateSocial();
+  return { ok: true, amount: res.amount };
+}
+
+// ── Notifications ─────────────────────────────────────────────────────────
+
+export async function deleteNotificationAction(id: string): Promise<ActionResult> {
+  const user = await getCurrentUser();
+  if (!user) return NOT_LOGGED;
+  await deleteNotification(user.id, String(id));
+  await revalidateSocial();
+  return { ok: true };
+}
+
+export async function clearNotificationsAction(): Promise<ActionResult> {
+  const user = await getCurrentUser();
+  if (!user) return NOT_LOGGED;
+  await clearNotifications(user.id);
+  await revalidateSocial();
+  return { ok: true };
 }
 
 // ── Messages ──────────────────────────────────────────────────────────────
