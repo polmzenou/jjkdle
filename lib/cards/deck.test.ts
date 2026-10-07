@@ -36,12 +36,12 @@ describe("barème de rareté", () => {
   });
 
   it("applique les valeurs de revente demandées", () => {
-    expect(cardRarityStyle("common").sellValue).toBe(2);
-    expect(cardRarityStyle("uncommon").sellValue).toBe(5);
-    expect(cardRarityStyle("rare").sellValue).toBe(8);
-    expect(cardRarityStyle("epic").sellValue).toBe(10);
-    expect(cardRarityStyle("legendary").sellValue).toBe(15);
-    expect(cardRarityStyle("exotic").sellValue).toBe(50);
+    expect(cardRarityStyle("common").sellValue).toBe(3);
+    expect(cardRarityStyle("uncommon").sellValue).toBe(25);
+    expect(cardRarityStyle("rare").sellValue).toBe(50);
+    expect(cardRarityStyle("epic").sellValue).toBe(250);
+    expect(cardRarityStyle("legendary").sellValue).toBe(750);
+    expect(cardRarityStyle("exotic").sellValue).toBe(2000);
   });
 
   it("ne colore que l'exotic en arc-en-ciel", () => {
