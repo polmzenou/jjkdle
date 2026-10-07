@@ -1353,6 +1353,42 @@ export async function adminGiveBoosterAction(
 }
 
 /**
+ * Offre un booster NON OUVERT à un joueur, dans l'univers administré.
+ *
+ * Contrairement à `adminGiveBoosterAction`, rien n'est tiré ici : le booster
+ * atterrit dans les « boosters en attente » du deck du joueur, qui l'ouvrira
+ * lui-même comme n'importe quel booster gagné en jeu.
+ */
+export async function adminGiftBoosterAction(
+  userId: string,
+  kind: string,
+): Promise<ActionResult> {
+  const admin = await getAdminUser();
+  if (!admin) {
+    return { ok: false, error: "Accès réservé aux administrateurs." };
+  }
+  if (!isBoosterKind(kind)) {
+    return { ok: false, error: "Booster inconnu." };
+  }
+  const target = await prisma.user.findUnique({
+    where: { id: String(userId ?? "") },
+    select: { id: true },
+  });
+  if (!target) {
+    return { ok: false, error: "Utilisateur introuvable." };
+  }
+
+  const universe = await getCurrentUniverse();
+  try {
+    await createBooster(target.id, universe.id, kind as BoosterKind, "admin");
+  } catch (e) {
+    return { ok: false, error: `Échec : ${(e as Error).message}` };
+  }
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+/**
  * Octroie une carte précise (idempotent). Renvoie la carte pour que l'admin
  * voie la même animation de révélation qu'à l'ouverture d'un booster.
  */

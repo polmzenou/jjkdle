@@ -7,11 +7,12 @@ import { BoosterPack } from "@/components/cards/BoosterPack";
 import { BoosterOpening } from "@/components/cards/BoosterOpening";
 import { CardGrid } from "@/components/cards/CardGrid";
 import {
+  adminGiftBoosterAction,
   adminGiveBoosterAction,
   adminGrantCardAction,
   adminRevokeCardAction,
 } from "./actions";
-import { BOOSTERS, BOOSTER_KINDS } from "@/lib/cards/boosters";
+import { BOOSTERS, BOOSTER_KINDS, type BoosterKind } from "@/lib/cards/boosters";
 import { BASE_RATES, BOOST_RATES } from "@/lib/cards/rates";
 import { CARD_RARITIES, cardRarityStyle } from "@/lib/cards/rarity";
 import type { CollectionCard, OpenedBooster } from "@/lib/cards/types";
@@ -29,9 +30,11 @@ interface CardsAdminProps {
   /** Collection de l'admin dans l'univers administré (roster complet). */
   collection: CollectionCard[];
   universeName: string;
+  /** Joueurs à qui offrir un booster (onglet « Utilisateurs »). */
+  users: { id: string; username: string }[];
 }
 
-export function CardsAdmin({ collection, universeName }: CardsAdminProps) {
+export function CardsAdmin({ collection, universeName, users }: CardsAdminProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [feedback, setFeedback] = useState<{ ok: boolean; msg: string } | null>(
@@ -42,7 +45,27 @@ export function CardsAdmin({ collection, universeName }: CardsAdminProps) {
   const [result, setResult] = useState<OpenedBooster | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const [giftUserId, setGiftUserId] = useState("");
+  const giftUser = users.find((u) => u.id === giftUserId);
+
   const ownedCount = collection.filter((c) => c.owned).length;
+
+  /** Offre un booster non ouvert : il rejoint les boosters en attente du joueur. */
+  const giftBooster = (kind: BoosterKind) => {
+    if (!giftUser) return;
+    setFeedback(null);
+    startTransition(async () => {
+      const res = await adminGiftBoosterAction(giftUser.id, kind);
+      setFeedback(
+        res.ok
+          ? {
+              ok: true,
+              msg: `${BOOSTERS[kind].label} offert à ${giftUser.username} (${universeName}).`,
+            }
+          : { ok: false, msg: res.error ?? "Échec." },
+      );
+    });
+  };
 
   const giveBooster = async (kind: string) => {
     setFeedback(null);
@@ -135,6 +158,49 @@ export function CardsAdmin({ collection, universeName }: CardsAdminProps) {
               </div>
             );
           })}
+        </div>
+      </section>
+
+      {/* ── Don de boosters à un joueur ── */}
+      <section>
+        <h3 className="mb-1 font-display text-lg font-bold text-white">
+          Offrir un booster à un joueur
+        </h3>
+        <p className="mb-5 text-sm text-white/50">
+          Le booster n&apos;est PAS ouvert : il apparaît dans les boosters en
+          attente du deck du joueur, dans l&apos;univers{" "}
+          <strong className="text-white/80">{universeName}</strong>, et c&apos;est
+          lui qui l&apos;ouvrira.
+        </p>
+
+        <select
+          value={giftUserId}
+          onChange={(e) => setGiftUserId(e.target.value)}
+          className="mb-4 w-full max-w-sm rounded-xl border border-white/10 bg-void-800/60 px-3 py-2 text-sm text-white"
+        >
+          <option value="">— Choisir un joueur —</option>
+          {[...users]
+            .sort((a, b) => a.username.localeCompare(b.username))
+            .map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.username}
+              </option>
+            ))}
+        </select>
+
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {BOOSTER_KINDS.map((kind) => (
+            <div key={kind} className="flex flex-col gap-2">
+              <BoosterPack
+                kind={kind}
+                onClick={() => giftBooster(kind)}
+                disabled={!giftUser || overlay || pending}
+              />
+              <p className="text-center text-[11px] text-white/40">
+                {giftUser ? `Offrir à ${giftUser.username}` : "Choisis un joueur"}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
 

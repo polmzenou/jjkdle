@@ -858,6 +858,7 @@ export function AdminDashboard({
           key={currentUniverse}
           collection={cardCollection}
           universeName={universeName}
+          users={users.map((u) => ({ id: u.id, username: u.username }))}
         />
       )}
 
