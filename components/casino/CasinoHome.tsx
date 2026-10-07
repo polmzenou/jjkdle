@@ -19,6 +19,7 @@ import {
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
 } from "react";
+import { CasinoGameIcon, type CasinoIconId } from "./CasinoGameIcon";
 
 /**
  * Accueil du casino : le choix du jeu.
@@ -47,8 +48,8 @@ export interface CasinoGameTile {
   id: string;
   title: string;
   description: string;
-  /** Symbole affiché en grand (aucune librairie d'icônes dans ce projet). */
-  icon: string;
+  /** Icône SVG affichée au centre du jeton (cf. CasinoGameIcon). */
+  icon: CasinoIconId;
   href: string | null;
   status: "live" | "coming-soon";
   /** Ligne de teasing affichée sous le titre (mise minimale, nb de joueurs…). */
@@ -375,7 +376,6 @@ function GameChip({ game, index }: { game: CasinoGameTile; index: number }) {
     <div
       className="relative h-full w-full overflow-hidden rounded-full border border-white/15 shadow-[0_30px_80px_-30px_rgb(var(--color-cursed)/0.7)]"
       style={{
-        containerType: "inline-size",
         // Les « inserts » du bord : bandes blanches régulières sur la couleur
         // du jeton, comme sur un vrai jeton de casino.
         background: `repeating-conic-gradient(from 0deg, rgb(${chip}) 0deg 22.5deg, rgb(245 245 245 / 0.92) 22.5deg 30deg, rgb(${chip}) 30deg 45deg)`,
@@ -405,15 +405,11 @@ function GameChip({ game, index }: { game: CasinoGameTile; index: number }) {
             "linear-gradient(140deg, rgb(255 255 255 / 0.22) 0%, transparent 38%, transparent 70%, rgb(0 0 0 / 0.3) 100%)",
         }}
       />
-      {/* Taille en `cqw` : l'icône suit la largeur du jeton, en orbite comme
-          en vue zoom. */}
-      <span
-        aria-hidden
-        className="absolute inset-0 grid place-items-center leading-none text-cursed-light drop-shadow-[0_8px_20px_rgb(0_0_0_/_0.7)]"
-        style={{ fontSize: "30cqw" }}
-      >
-        {game.icon}
-      </span>
+      {/* En % : l'icône suit la taille du jeton, en orbite comme en vue zoom. */}
+      <CasinoGameIcon
+        icon={game.icon}
+        className="absolute inset-0 m-auto h-[50%] w-[50%] drop-shadow-[0_8px_20px_rgb(0_0_0_/_0.6)]"
+      />
     </div>
   );
 }

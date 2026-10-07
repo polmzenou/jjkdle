@@ -24,7 +24,7 @@ const GAMES: CasinoGameTile[] = [
     title: "Blackjack",
     description:
       "Battre le croupier sans dépasser 21. En solo, ou à une table jusqu'à 5 joueurs.",
-    icon: "♠",
+    icon: "blackjack",
     href: "/casino/blackjack",
     status: "live",
     hint: "Solo ou 5 joueurs",
@@ -34,7 +34,7 @@ const GAMES: CasinoGameTile[] = [
     title: "Roulette",
     description:
       "Roulette européenne, vrai tapis : plein, cheval, carré, douzaines, rouge ou noir.",
-    icon: "🎯",
+    icon: "roulette",
     href: "/casino/roulette",
     status: "live",
   },
@@ -42,7 +42,7 @@ const GAMES: CasinoGameTile[] = [
     id: "slots",
     title: "Machine à sous",
     description: "Trois rouleaux, cinq lignes, un levier, et beaucoup d'espoir.",
-    icon: "🎰",
+    icon: "slots",
     href: "/casino/slots",
     status: "live",
   },
@@ -51,7 +51,7 @@ const GAMES: CasinoGameTile[] = [
     title: "Pile ou face",
     description:
       "Un camp, une pièce, une seconde. Tu doubles presque, ou tu perds tout.",
-    icon: "🪙",
+    icon: "coinflip",
     href: "/casino/coinflip",
     status: "live",
     hint: "Instantané",
