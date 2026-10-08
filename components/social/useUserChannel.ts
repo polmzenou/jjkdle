@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { isPusherClientConfigured, openChannel } from "@/lib/pusher/client";
+import { createPusherClient, isPusherClientConfigured } from "@/lib/pusher/client";
 import { userChannel } from "@/lib/social/events";
 
 /**
@@ -34,13 +34,16 @@ export function useUserChannel(
       return () => window.clearInterval(id);
     }
 
-    // Canal partagé : la bulle, les toasts et la pastille de la nav écoutent le
-    // même `private-user-<id>` sur la même connexion (cf. lib/pusher/client).
-    const channel = openChannel(userChannel(userId));
+    const client = createPusherClient();
+    const name = userChannel(userId);
+    const channel = client.subscribe(name);
     for (const event of events.split("|")) {
       if (!event) continue;
       channel.bind(event, (payload: unknown) => ref.current[event]?.(payload));
     }
-    return () => channel.close();
+    return () => {
+      client.unsubscribe(name);
+      client.disconnect();
+    };
   }, [userId, events]);
 }

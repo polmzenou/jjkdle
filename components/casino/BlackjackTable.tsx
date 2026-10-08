@@ -22,7 +22,7 @@ import {
   TURN_MS,
 } from "@/lib/casino/rules";
 import type { CasinoPhaseValue, CasinoTableView, Move } from "@/lib/casino/types";
-import { isPusherClientConfigured, openChannel } from "@/lib/pusher/client";
+import { createPusherClient, isPusherClientConfigured } from "@/lib/pusher/client";
 import { BetPad } from "./BetPad";
 import { DealerArea } from "./DealerArea";
 import { PhaseTimer, usePhaseCountdown } from "./PhaseTimer";
@@ -156,7 +156,8 @@ export function BlackjackTable({
     if (!pusherReady || !isPusherClientConfigured()) return;
     if (initialTable.mode === "SOLO") return; // personne d'autre à écouter
 
-    const channel = openChannel(casinoChannel(initialTable.code));
+    const client = createPusherClient();
+    const channel = client.subscribe(casinoChannel(initialTable.code));
 
     channel.bind(CASINO_EVENTS.tableState, (payload: TableStatePayload) => {
       // Le snapshot diffusé est ANONYME (canal partagé) : il ne porte ni mon
@@ -177,7 +178,9 @@ export function BlackjackTable({
     });
 
     return () => {
-      channel.close();
+      channel.unbind_all();
+      client.unsubscribe(casinoChannel(initialTable.code));
+      client.disconnect();
     };
   }, [pusherReady, initialTable.code, initialTable.mode]);
 

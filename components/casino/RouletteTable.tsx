@@ -21,7 +21,7 @@ import {
   type RouletteTableResult,
 } from "@/lib/casino/roulette-table-actions";
 import { STUCK_MS } from "@/lib/casino/rules";
-import { isPusherClientConfigured, openChannel } from "@/lib/pusher/client";
+import { createPusherClient, isPusherClientConfigured } from "@/lib/pusher/client";
 import { PhaseTimer, usePhaseCountdown } from "./PhaseTimer";
 import {
   CHIP_VALUES,
@@ -230,8 +230,9 @@ export function RouletteTable({
   // ── Temps réel ────────────────────────────────────────────────────────
   useEffect(() => {
     if (!pusherReady || !isPusherClientConfigured()) return;
+    const client = createPusherClient();
     const name = casinoChannel(initialTable.code);
-    const channel = openChannel(name);
+    const channel = client.subscribe(name);
 
     channel.bind(CASINO_EVENTS.tableState, (payload: { table: RouletteTableView }) => {
       applyView(payload.table, false);
@@ -244,7 +245,9 @@ export function RouletteTable({
     });
 
     return () => {
-      channel.close();
+      channel.unbind_all();
+      client.unsubscribe(name);
+      client.disconnect();
     };
   }, [pusherReady, initialTable.code, applyView, handle]);
 

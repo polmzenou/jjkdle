@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import type { Character } from "@/data/roster/characters";
 import type { SerializedLobby } from "@/lib/multiplayer/events";
 import { buildRosterMap } from "@/lib/multiplayer/state";
-import { openChannel } from "@/lib/pusher/client";
+import { createPusherClient } from "@/lib/pusher/client";
 import { WaitingRoom } from "@/components/multiplayer/WaitingRoom";
 import {
   autoBalanceTeamsAction,
@@ -108,7 +108,8 @@ export function CodenamesLobby({
   useEffect(() => {
     if (!pusherReady || !isMember) return;
 
-    const channel = openChannel(lobbyChannel(code));
+    const client = createPusherClient();
+    const channel = client.subscribe(lobbyChannel(code));
 
     channel.bind(CODENAMES_EVENTS.state, (payload: CodenamesStatePayload) => {
       setLobby(payload.lobby);
@@ -216,7 +217,9 @@ export function CodenamesLobby({
     });
 
     return () => {
-      channel.close();
+      channel.unbind_all();
+      client.unsubscribe(lobbyChannel(code));
+      client.disconnect();
     };
   }, [pusherReady, isMember, code, currentUserId, fetchKeyCard]);
 

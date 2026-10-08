@@ -19,7 +19,7 @@ import {
   type SerializedLobby,
 } from "@/lib/multiplayer/events";
 import { buildRosterMap } from "@/lib/multiplayer/state";
-import { openChannel } from "@/lib/pusher/client";
+import { createPusherClient } from "@/lib/pusher/client";
 import { WaitingRoom } from "./WaitingRoom";
 import { MultiplayerBoard } from "./MultiplayerBoard";
 import { MultiplayerRecap } from "./MultiplayerRecap";
@@ -54,7 +54,8 @@ export function MultiplayerLobby({
   useEffect(() => {
     if (!pusherReady || !isMember) return;
 
-    const channel = openChannel(lobbyChannel(code));
+    const client = createPusherClient();
+    const channel = client.subscribe(lobbyChannel(code));
 
     channel.bind(EVENTS.lobbyState, (payload: LobbyStatePayload) => {
       setLobby(payload.lobby);
@@ -84,7 +85,9 @@ export function MultiplayerLobby({
     });
 
     return () => {
-      channel.close();
+      channel.unbind_all();
+      client.unsubscribe(lobbyChannel(code));
+      client.disconnect();
     };
   }, [pusherReady, isMember, code]);
 
