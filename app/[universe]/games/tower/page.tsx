@@ -5,6 +5,7 @@ import { GameJsonLd } from "@/components/seo/JsonLd";
 import { TowerLeaderboard } from "@/components/leaderboard/TowerLeaderboard";
 import { parseTowerScope } from "@/lib/games/tower/ranking";
 import { gameMetadata } from "@/lib/seo/config";
+import { universeGameTitle } from "@/lib/games/universe";
 import { getCurrentUniverse, universeHref } from "@/lib/universes/current";
 import { TOWER_FLOORS } from "@/lib/games/tower/types";
 import { TowerGame } from "./TowerGame";
@@ -26,7 +27,10 @@ export async function generateMetadata({
   const { floor, score, attempt } = await searchParams;
   if (!floor) return base;
 
-  const universe = await getCurrentUniverse();
+  const [universe, towerTitle] = await Promise.all([
+    getCurrentUniverse(),
+    universeGameTitle("tower"),
+  ]);
   const query = new URLSearchParams({
     floor: String(floor),
     score: String(score ?? 0),
@@ -37,8 +41,8 @@ export async function generateMetadata({
   const reached = Number(floor);
   const title =
     reached >= TOWER_FLOORS
-      ? "J'ai franchi The Culling Tower"
-      : `J'ai atteint l'étage ${reached} de The Culling Tower`;
+      ? `J'ai franchi ${towerTitle}`
+      : `J'ai atteint l'étage ${reached} de ${towerTitle}`;
 
   return {
     ...base,

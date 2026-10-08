@@ -53,6 +53,8 @@ export const GAMES: Game[] = [
     title: "JJK Random Battle",
     description:
       "Affronte un ami en 1v1 : drafte une carte tirée au hasard à tour de rôle (garde-la ou refile-la), compose ton équipe de 5, puis laisse parler le combat. Le cumul le plus fort gagne.",
+    seoDescription:
+      "JJK Random Battle : affronte un ami en 1v1 sur Jujutsu Kaisen. Drafte une équipe de 5 à tour de rôle, puis laisse parler le combat.",
     route: "/games/battle",
     tags: ["1v1", "multijoueur", "draft", "roster JJK"],
     accent: "#dc2626",
@@ -65,6 +67,8 @@ export const GAMES: Game[] = [
     title: "Qui est-ce ?",
     description:
       "Affronte un ami en 1v1 : une grille de 25 personnages, un secret pour chacun. Pose des questions, élimine des cartes et devine le perso secret de l'adversaire avant lui. Un mauvais guess et c'est perdu.",
+    seoDescription:
+      "Qui est-ce ? version Jujutsu Kaisen : devine le personnage secret de ton adversaire en 1v1. Grille de 25, questions, éliminations et un seul guess pour gagner.",
     route: "/games/guesswho",
     tags: ["1v1", "multijoueur", "déduction", "roster JJK"],
     accent: "#7c3aed",
@@ -77,6 +81,8 @@ export const GAMES: Game[] = [
     title: "JJK Codenames",
     description:
       "En équipe (4 à 6 joueurs, rouge vs violet) : les maîtres-espions donnent des indices, les agents révèlent les bons personnages d'une grille de 36. Évitez l'assassin, révélez vos 8 cartes avant l'équipe adverse.",
+    seoDescription:
+      "JJK Codenames : jeu d'équipe multijoueur (4 à 6 joueurs, rouge vs violet). Les maîtres-espions donnent des indices, les agents révèlent les bons personnages d'une grille de 36. Évitez l'assassin !",
     route: "/games/codenames",
     tags: ["multijoueur", "2-6", "déduction", "roster JJK"],
     accent: "#dc2626",
@@ -89,6 +95,8 @@ export const GAMES: Game[] = [
     title: "JJKdle",
     description:
       "Devine le personnage JJK mystère du jour. Chaque proposition révèle des indices par attribut (race, grade, clan, arc…) avec des flèches ↑/↓. Un perso par jour, essais illimités.",
+    seoDescription:
+      "JJKdle : le jeu du jour Jujutsu Kaisen. Devine le personnage JJK mystère avec des indices par attribut (race, grade, clan, arc). Un nouveau perso chaque jour, essais illimités, gratuit et sans compte.",
     route: "/games/jjkdle",
     tags: ["quotidien", "déduction", "roster JJK"],
     accent: "#7c3aed",
@@ -171,7 +179,12 @@ function applyCopy(game: Game, copy: UniverseGameCopy): Game {
   return {
     ...game,
     ...(c.title ? { title: c.title } : {}),
-    ...(c.description ? { description: c.description } : {}),
+    // La meta description du registre parle de JJK : un univers qui réécrit la
+    // description sans fournir la sienne retombe donc sur SA description.
+    ...(c.description
+      ? { description: c.description, seoDescription: c.seoDescription }
+      : {}),
+    ...(c.seoDescription ? { seoDescription: c.seoDescription } : {}),
     ...(c.tags ? { tags: c.tags } : {}),
     ...(c.previewImage ? { previewImage: c.previewImage } : {}),
   };

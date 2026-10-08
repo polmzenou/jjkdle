@@ -144,7 +144,7 @@ export function ItemTip({ item }: { item: ItemView }) {
         {item.name}
       </p>
       <p className="mt-0.5 font-display text-[10px] font-bold uppercase tracking-[0.14em] text-white/40">
-        Objet maudit · {item.rarityLabel}
+        Objet · {item.rarityLabel}
       </p>
 
       <p className="mt-2 rounded-lg bg-white/[0.06] px-2 py-1.5 text-[11px] font-semibold leading-snug text-white/85">

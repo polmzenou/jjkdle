@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import {
   AnimatePresence,
@@ -293,7 +294,7 @@ function HubHeader({
         <h1 className="mt-5 font-display text-4xl font-black uppercase leading-[1.02] tracking-tight text-white sm:text-[3.4rem]">
           {/* Texte lu par les moteurs/lecteurs d'écran : la marque de la plateforme. */}
           <span className="sr-only">Anime Arcade — mini-jeux anime gratuits · </span>
-          Choisis ton
+          Choisis ton{" "}
           <span className="block bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
             univers
           </span>
@@ -485,10 +486,16 @@ function UniverseDisk({ universe }: { universe: HubUniverse }) {
         aria-hidden
         className="absolute inset-[6%] rounded-full border border-domain/30"
       />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      {/* next/image, chargé en différé : en <img>, React préchargeait les six
+          logos (~830 Ko) en tête de page, en concurrence avec le CSS et le JS. */}
+      <Image
         src={universe.logo.src}
         alt={universe.logo.alt}
+        width={800}
+        height={500}
+        // Le même disque sert la vue zoom (logo ~300 px de large) : la variante
+        // doit y rester nette, pas seulement à la taille d'orbite.
+        sizes="(min-width: 1024px) 360px, 300px"
         draggable={false}
         className="absolute inset-0 m-auto h-auto max-h-[52%] w-[68%] object-contain drop-shadow-[0_10px_30px_rgb(0_0_0_/_0.7)]"
       />

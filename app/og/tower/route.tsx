@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import type { NextRequest } from "next/server";
 import { TOWER_FLOORS } from "@/lib/games/tower/types";
+import { gameTitleForUniverse } from "@/lib/games/registry";
 import { getUniverseBySlug } from "@/lib/universes/registry";
 
 /**
@@ -50,6 +51,7 @@ export function GET(request: NextRequest) {
   const accent = universe?.theme.primaryLight ?? "#a78bfa";
   const deep = universe?.theme.surface.s900 ?? "#0a0a0f";
   const gold = "#fcd34d";
+  const towerTitle = gameTitleForUniverse("tower", universe?.gameCopy);
 
   return new ImageResponse(
     (
@@ -74,7 +76,7 @@ export function GET(request: NextRequest) {
             color: accent,
           }}
         >
-          The Culling Tower
+          {towerTitle}
         </div>
 
         {/* Le CHIFFRE est le sujet de l'image : il occupe la moitié de la

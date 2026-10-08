@@ -15,10 +15,7 @@ import {
 
 /** Métadonnées de l'univers courant (résolu par hostname). */
 export async function generateMetadata(): Promise<Metadata> {
-  return gameMetadata(
-    "guesswho",
-    "Qui est-ce ? version Jujutsu Kaisen : devine le personnage secret de ton adversaire en 1v1. Grille de 25, questions, éliminations et un seul guess pour gagner.",
-  );
+  return gameMetadata("guesswho");
 }
 
 export default async function GuessWhoHubPage() {

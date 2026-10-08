@@ -7,6 +7,9 @@ import { universeHref } from "@/lib/universes/current";
 
 export const metadata: Metadata = {
   title: "Créer un compte",
+  description: "Crée un compte gratuit pour garder ta progression, tes séries et tes classements sur tous les univers.",
+  // Sans canonical propre, la page héritait de celui de la landing d'univers.
+  alternates: { canonical: "/register" },
   robots: { index: false, follow: false },
 };
 

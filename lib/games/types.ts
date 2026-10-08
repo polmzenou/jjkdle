@@ -27,6 +27,11 @@ export interface GameCopy {
   description?: string;
   tags?: string[];
   /**
+   * Meta description de la page du jeu, quand elle doit différer du texte de la
+   * carte (`description`). Absent = `description`.
+   */
+  seoDescription?: string;
+  /**
    * Miniature/screenshot du jeu propre à l'univers (chemin sous public/). Une
    * capture montre le roster de l'anime : celle du registre est donc celle de
    * JJK. Absent = miniature par défaut du registre.
@@ -47,6 +52,12 @@ export interface Game {
   id: GameId;
   title: string;
   description: string;
+  /**
+   * Meta description de la page, si elle diffère de `description`. Celle du
+   * registre est écrite pour JJK : `applyCopy` l'écarte dès qu'un univers
+   * réécrit la description, pour qu'elle ne fuie pas sur un autre anime.
+   */
+  seoDescription?: string;
   /** Chemin vers la page du jeu. */
   route: string;
   /**

@@ -15,7 +15,7 @@ import {
 import { formatScore } from "@/lib/format";
 import { CategoryTile } from "@/components/CategoryTile";
 import { RankFooter } from "@/components/RankFooter";
-import { Logo } from "@/components/Logo";
+import { GameHeading } from "@/components/GameHeading";
 import { ScoreReveal } from "@/components/ScoreReveal";
 import type { DroppedBooster } from "@/lib/progress/recompute";
 import { UniverseLink } from "@/components/universe/UniverseLink";
@@ -198,7 +198,7 @@ export function BuilderGame({
         >
           ← Back
         </UniverseLink>
-        <Logo className="h-12 w-auto sm:h-14" />
+        <GameHeading id="builder" />
         <span className="rounded-full bg-void-700/60 px-3 py-1 text-xs text-white/60">
           Record&nbsp;:{" "}
           <span className="font-bold text-domain-light">

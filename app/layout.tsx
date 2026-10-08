@@ -15,6 +15,7 @@ import {
   siteSeo,
   hubSeo,
   DEFAULT_OG_IMAGE,
+  universeOgImage,
   isIndexableDeployment,
   siteVerification,
 } from "@/lib/seo/config";
@@ -61,7 +62,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description:
         "Le casino de la plateforme : mise tes coins au blackjack, en solo ou à une table jusqu'à 5 joueurs.",
       alternates: { canonical: "/casino" },
-      robots,
+      // Page de jeu d'argent virtuel, sans contenu à classer : hors index.
+      robots: { index: false, follow: true },
       verification: siteVerification,
     };
   }
@@ -98,6 +100,7 @@ export async function generateMetadata(): Promise<Metadata> {
       verification: siteVerification,
     };
   }
+  const ogImage = universeOgImage((await getCurrentUniverseConfig()).slug);
   return {
     metadataBase: new URL(seo.url),
     title: {
@@ -119,15 +122,13 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: seo.name,
       title: seo.title,
       description: seo.description,
-      images: [
-        { url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: seo.title },
-      ],
+      images: [{ url: ogImage, width: 1200, height: 630, alt: seo.title }],
     },
     twitter: {
       card: "summary_large_image",
       title: seo.title,
       description: seo.description,
-      images: [DEFAULT_OG_IMAGE],
+      images: [ogImage],
     },
     robots,
     verification: siteVerification,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Logo } from "@/components/Logo";
+import { GameHeading } from "@/components/GameHeading";
 import { DraftBoard } from "@/components/draft/DraftBoard";
 import { CombatScene } from "@/components/draft/CombatScene";
 import { DraftResultModal } from "@/components/draft/DraftResultModal";
@@ -134,7 +134,7 @@ export function JujutsuDraftGame({
         >
           ← Back
         </UniverseLink>
-        <Logo className="h-12 w-auto sm:h-14" />
+        <GameHeading id="jujutsu-draft" />
         <span className="rounded-full bg-void-700/60 px-3 py-1 text-xs text-white/60">
           Record&nbsp;:{" "}
           <span className="font-bold text-domain-light">
@@ -148,7 +148,7 @@ export function JujutsuDraftGame({
           {/* Consigne */}
           <div className="mb-4 rounded-2xl border border-white/10 bg-void-800/50 px-5 py-3 backdrop-blur">
             <p className="text-sm text-white/70">
-              Draft 1 sorcier par catégorie sans dépasser le budget, puis lance
+              Drafte 1 personnage par catégorie sans dépasser le budget, puis lance
               le combat. Place chaque perso dans{" "}
               <span className="text-white">sa</span> catégorie pour maximiser sa
               puissance — ton avatar de combat sera ton choix en{" "}

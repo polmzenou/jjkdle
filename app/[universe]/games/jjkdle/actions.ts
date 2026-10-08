@@ -58,7 +58,7 @@ export async function guessAction(characterId: string): Promise<GuessResult> {
     if (!dailyTarget) {
       return {
         ok: false,
-        error: "Pas assez de personnages configurés pour JJKdle.",
+        error: "Pas assez de personnages configurés pour le jeu du jour.",
       };
     }
     state = {

@@ -6,7 +6,6 @@ import { universeGameTitle } from "@/lib/games/universe";
 import { getGameFlags } from "@/lib/config/app-config";
 import { getCurrentUniverseConfig } from "@/lib/universes/current";
 import { UniverseLink } from "@/components/universe/UniverseLink";
-import { SiteJsonLd } from "@/components/seo/JsonLd";
 
 /**
  * Landing de l'UNIVERS COURANT : présente le site, puis met en scène les jeux.
@@ -36,7 +35,6 @@ export default async function HomePage() {
 
   return (
     <main className="flex flex-col">
-      <SiteJsonLd />
       {/* Couche décorative manga : kanji et objets de l'univers courant */}
       <MangaDecor
         kanjiColumns={universe.labels.kanjiColumns}
@@ -61,7 +59,12 @@ export default async function HomePage() {
           <span className="sr-only">
             {universe.name} — mini-jeux {universe.sourceWork} gratuits
           </span>
-          <Logo className="h-44 w-auto sm:h-60" glow />
+          <Logo
+            className="h-44 w-auto sm:h-60"
+            sizes="(min-width: 640px) 400px, 290px"
+            priority
+            glow
+          />
         </h1>
 
         <p className="mx-auto mt-6 max-w-xl text-balance text-lg leading-relaxed text-white/60">

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { UniverseLink } from "@/components/universe/UniverseLink";
+import { useGameTitle } from "@/components/universe/UniverseProvider";
 import { EventScreen, RestScreen } from "@/components/tower/EventScreen";
 import { InventoryStrip } from "@/components/tower/ItemCard";
 import { NodePicker } from "@/components/tower/NodePicker";
@@ -44,6 +45,8 @@ import {
  * ne peut pas raconter autre chose que ce qui a été validé.
  */
 export function TowerGame() {
+  // « The Culling Tower » sur JJK, « La Tour de Réincarnation » sur CSM…
+  const towerTitle = useGameTitle("tower");
   const [view, setView] = useState<TowerView | null>(null);
   const [exp, setExp] = useState<ExpResult | undefined>();
   const [xpNote, setXpNote] = useState<string | undefined>();
@@ -107,6 +110,9 @@ export function TowerGame() {
     return (
       <div className="flex flex-col gap-6">
         <BackLink />
+        {/* Le titre visible n'apparaît qu'une fois la tour chargée : sans ce H1,
+            la page servie (rendue en état de chargement) n'en avait aucun. */}
+        <h1 className="sr-only">{towerTitle}</h1>
         <p className="py-16 text-center text-white/40">Ouverture de la tour…</p>
       </div>
     );
@@ -132,7 +138,7 @@ export function TowerGame() {
       <header className="flex items-baseline justify-between gap-4">
         <div>
           <h1 className="font-display text-2xl font-bold text-white">
-            The Culling Tower
+            {towerTitle}
           </h1>
           <p className="text-xs text-white/45">
             {view.mode === "daily"
@@ -297,7 +303,7 @@ function StarterPicker({
           Choisis avec qui tu entres
         </h2>
         <p className="mt-1 text-sm text-white/50">
-          Trois sorciers, les mêmes pour tout le monde aujourd&apos;hui. Tu en
+          Trois personnages, les mêmes pour tout le monde aujourd&apos;hui. Tu en
           prends UN — les deux autres places de ton escouade se gagneront en
           montant, et les plus grands noms ne se croisent que dans les hauteurs.
         </p>

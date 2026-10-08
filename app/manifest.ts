@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { siteSeo } from "@/lib/seo/config";
+import { hubSeo, PLATFORM_NAME } from "@/lib/seo/config";
 import { getCurrentUniverseConfig } from "@/lib/universes/current";
 
 /**
@@ -7,17 +7,20 @@ import { getCurrentUniverseConfig } from "@/lib/universes/current";
  * « application » (icône, thème). `icon.png` sert les deux tailles déclarées ;
  * remplacer par des icônes dédiées 192/512 améliorera le rendu à l'installation.
  *
- * Par UNIVERS : nom, description et couleurs viennent de l'anime servi.
+ * Un seul manifest pour tout le domaine (`start_url: "/"`, le hub) : nom et
+ * description sont ceux de la PLATEFORME. Ils venaient de l'univers du cookie,
+ * si bien qu'un visiteur ou un robot sans cookie voyait « JJK Arcade » pour un
+ * site qui sert six animes. Seules les couleurs suivent l'anime visité.
  */
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
-  const [seo, universe] = await Promise.all([
-    siteSeo(),
+  const [hub, universe] = await Promise.all([
+    hubSeo(),
     getCurrentUniverseConfig(),
   ]);
   return {
-    name: seo.title,
-    short_name: seo.name,
-    description: seo.description,
+    name: hub.title,
+    short_name: PLATFORM_NAME,
+    description: hub.description,
     start_url: "/",
     display: "standalone",
     background_color: universe.theme.surface.s900,

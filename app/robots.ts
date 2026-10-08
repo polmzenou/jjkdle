@@ -2,9 +2,8 @@ import type { MetadataRoute } from "next";
 import { isIndexableDeployment, siteSeo } from "@/lib/seo/config";
 
 /**
- * robots.txt généré. Autorise tout le contenu public, bloque le privé et les
- * routes à faible valeur SEO (API, profils dynamiques, lobbys). Référence le
- * sitemap pour accélérer la découverte par Google/Bing.
+ * robots.txt généré. Autorise tout le contenu public, bloque l'admin et les
+ * API. Référence le sitemap pour accélérer la découverte par Google/Bing.
  *
  * Par UNIVERS : l'URL renvoyée est celle du domaine réellement servi.
  *
@@ -21,9 +20,10 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/api/", "/*/api/", "/admin", "/login", "/register"],
+      // `/login` et `/register` ne sont PAS bloqués : ils portent un `noindex`
+      // que Google ne pourrait pas lire s'il n'avait pas le droit d'y aller.
+      disallow: ["/api/", "/*/api/", "/admin"],
     },
     sitemap: `${url}/sitemap.xml`,
-    host: url,
   };
 }

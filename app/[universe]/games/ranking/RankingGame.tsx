@@ -28,7 +28,7 @@ import { RankingCard } from "@/components/ranking/RankingCard";
 import { VictoryModal } from "@/components/ranking/VictoryModal";
 import type { DroppedBooster } from "@/lib/progress/recompute";
 import { GameOverScreen } from "@/components/ranking/GameOverScreen";
-import { Logo } from "@/components/Logo";
+import { GameHeading } from "@/components/GameHeading";
 import { UniverseLink } from "@/components/universe/UniverseLink";
 
 interface RankingGameProps {
@@ -228,14 +228,23 @@ export function RankingGame({ initialBestScore }: RankingGameProps) {
     });
   }, [allFilled, status, pending, slots, locked, startNewGame]);
 
+  // Le serveur rend cet état de chargement : le H1 y figure donc aussi.
   if (error && !prompt) {
     return (
-      <p className="py-24 text-center text-white/40">{error}</p>
+      <>
+        <GameHeading id="ranking" logo={false} />
+        <p className="py-24 text-center text-white/40">{error}</p>
+      </>
     );
   }
 
   if (loading || !prompt) {
-    return <p className="py-24 text-center text-white/40">Chargement…</p>;
+    return (
+      <>
+        <GameHeading id="ranking" logo={false} />
+        <p className="py-24 text-center text-white/40">Chargement…</p>
+      </>
+    );
   }
 
   return (
@@ -249,7 +258,7 @@ export function RankingGame({ initialBestScore }: RankingGameProps) {
         >
           ← Back
         </UniverseLink>
-        <Logo className="h-12 w-auto sm:h-14" />
+        <GameHeading id="ranking" />
         <span className="rounded-full bg-void-700/60 px-3 py-1 text-xs text-white/60">
           Record&nbsp;:{" "}
           <span className="font-bold text-domain-light">

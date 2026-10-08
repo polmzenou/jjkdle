@@ -35,6 +35,7 @@ const UNIVERSE_FREE_PREFIXES = [
   "/errors", // pages d'erreur sans convention Next (405)
   "/robots.txt",
   "/sitemap.xml",
+  "/llms.txt", // plan du site pour les assistants IA (app/llms.txt)
   "/manifest.webmanifest",
   "/icon", // app/icon.png
   "/apple-icon", // app/apple-icon.tsx

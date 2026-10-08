@@ -27,7 +27,7 @@ export default async function MultiplayerHubPage() {
         </h1>
         <p className="mx-auto mt-4 max-w-md text-balance text-white/55">
           Lobby privé, jusqu'à 3 joueurs, en temps réel. Chacun compose son
-          sorcier manche après manche — le meilleur build l'emporte.
+          personnage manche après manche — le meilleur build l'emporte.
         </p>
       </header>
 

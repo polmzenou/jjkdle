@@ -41,6 +41,11 @@ export interface SiteSeo {
  */
 export const DEFAULT_OG_IMAGE = "/og";
 
+/** Image d'aperçu social par défaut d'un univers (son nom, ses jeux, sa palette). */
+export function universeOgImage(slug: string): string {
+  return `${DEFAULT_OG_IMAGE}?u=${encodeURIComponent(slug)}`;
+}
+
 /**
  * Marque de la PLATEFORME (le hub multi-anime, à la racine). Distincte du nom de
  * chaque univers (« JJK Arcade »…), qui ne vaut que sous son préfixe.
@@ -139,6 +144,28 @@ export async function absoluteUrl(path = "/"): Promise<string> {
 }
 
 /**
+ * Garantit que la meta description NOMME l'anime. Plusieurs descriptions de jeu
+ * sont génériques (« Classe 8 personnages… ») et identiques d'un univers à
+ * l'autre : sans le nom de l'œuvre, six pages partageraient le même snippet et
+ * aucune ne dirait de quel anime elle parle.
+ */
+function withSourceWork(
+  description: string,
+  title: string,
+  sourceWork: string,
+): string {
+  if (description.toLowerCase().includes(sourceWork.toLowerCase())) {
+    return description;
+  }
+  // « JJK Codenames : jeu… » → « JJK Codenames (Jujutsu Kaisen) : jeu… »,
+  // plutôt que de répéter le titre devant une description qui l'a déjà.
+  if (description.startsWith(title)) {
+    return `${title} (${sourceWork})${description.slice(title.length)}`;
+  }
+  return `${title} (${sourceWork}) : ${description}`;
+}
+
+/**
  * Métadonnées d'une page de jeu, dérivées du registre (`lib/games/registry.ts`)
  * — source unique : titre, description et screenshot (`previewImage`) servent à
  * la fois au hub, au SEO et à l'aperçu social.
@@ -151,8 +178,11 @@ export async function gameMetadata(
   id: string,
   seoDescription?: string,
 ): Promise<Metadata> {
-  const seo = await siteSeo();
-  const game = await universeGame(id);
+  const [seo, universe, game] = await Promise.all([
+    siteSeo(),
+    getCurrentUniverseConfig(),
+    universeGame(id),
+  ]);
   if (!game) {
     // Ne casse pas le build si un id est mal orthographié : fallback générique.
     return { title: seo.name, description: seo.description };
@@ -161,10 +191,19 @@ export async function gameMetadata(
   // L'univers est un préfixe de chemin : canonical et og:url doivent le porter,
   // sinon toutes les URLs canoniques des animes se confondraient.
   const route = await universeHref(game.route);
-  const description = seoDescription ?? game.description;
-  const images = game.previewImage
-    ? [{ url: game.previewImage, alt: `${game.title} — ${seo.name}` }]
-    : undefined;
+  const description = withSourceWork(
+    seoDescription ?? game.seoDescription ?? game.description,
+    game.title,
+    universe.sourceWork,
+  );
+  // Sans capture dédiée, l'image par défaut de l'univers : un `openGraph` de
+  // page REMPLACE celui du layout, l'omettre laissait la page sans aperçu.
+  const images = [
+    {
+      url: game.previewImage ?? universeOgImage(universe.slug),
+      alt: `${game.title} — ${seo.name}`,
+    },
+  ];
 
   return {
     title: game.title,
@@ -183,7 +222,7 @@ export async function gameMetadata(
       card: "summary_large_image",
       title: `${game.title} · ${seo.name}`,
       description,
-      images: images?.map((i) => i.url),
+      images: images.map((i) => i.url),
     },
   };
 }

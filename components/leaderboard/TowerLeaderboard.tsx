@@ -9,6 +9,7 @@ import { PlayerName } from "@/components/PlayerName";
 import { UserAvatar } from "@/components/UserAvatar";
 import { TowerScopeToggle } from "./TowerScopeToggle";
 import { UniverseLink } from "@/components/universe/UniverseLink";
+import { universeGameTitle } from "@/lib/games/universe";
 import { GameIcon } from "@/components/icons/GameIcon";
 import { TrophyIcon } from "@/components/icons/UiIcons";
 
@@ -34,7 +35,10 @@ export async function TowerLeaderboard({
   limit?: number;
   scope?: TowerScope;
 }) {
-  const entries = await topTowerEntries(limit, scope);
+  const [entries, towerTitle] = await Promise.all([
+    topTowerEntries(limit, scope),
+    universeGameTitle("tower"),
+  ]);
 
   return (
     <section
@@ -44,7 +48,7 @@ export async function TowerLeaderboard({
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <h2 className="flex items-center gap-2 font-display text-sm font-bold uppercase tracking-[0.2em] text-domain-light">
           <TrophyIcon className="h-4 w-4 shrink-0" /> Leaderboard{" "}
-          <GameIcon id="tower" className="h-4 w-4 shrink-0" /> The Culling Tower
+          <GameIcon id="tower" className="h-4 w-4 shrink-0" /> {towerTitle}
         </h2>
         <span className="h-px flex-1 bg-gradient-to-r from-domain/40 to-transparent" />
         <TowerScopeToggle scope={scope} />

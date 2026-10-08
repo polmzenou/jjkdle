@@ -8,7 +8,7 @@ import { Countdown } from "@/components/Countdown";
 import { ExpReward } from "@/components/progress/ExpReward";
 import { BoosterDrop } from "@/components/cards/BoosterDrop";
 import type { DroppedBooster } from "@/lib/progress/recompute";
-import { Logo } from "@/components/Logo";
+import { GameHeading } from "@/components/GameHeading";
 import {
   VIP_MAX_REPLAYS,
   type GameMode,
@@ -68,6 +68,7 @@ export function JJKdleGame({
   initialRevealed,
 }: JJKdleGameProps) {
   const router = useRouter();
+  const gameTitle = useGameTitle("jjkdle");
   const [pending, startTransition] = useTransition();
   const [rows, setRows] = useState<GuessRowData[]>(initialRows);
   const [status, setStatus] = useState<GameStatus>(initialStatus);
@@ -169,7 +170,7 @@ export function JJKdleGame({
 
       {poolEmpty ? (
         <div className="mt-8 rounded-2xl border border-cursed/30 bg-cursed/10 p-6 text-center text-cursed-light">
-          Aucun personnage n'a encore tous ses attributs JJKdle renseignés. Un
+          Aucun personnage n'a encore tous ses attributs {gameTitle} renseignés. Un
           administrateur doit les compléter dans le dashboard.
         </div>
       ) : (
@@ -255,7 +256,7 @@ function Header({ attempts, mode }: { attempts: number; mode: GameMode }) {
         >
           ← Back
         </UniverseLink>
-        <Logo className="h-12 w-auto sm:h-14" />
+        <GameHeading id="jjkdle" />
         <span className="rounded-full bg-void-700/60 px-3 py-1 text-xs text-white/60">
           Essais&nbsp;:{" "}
           <span className="font-bold text-domain-light">{attempts}</span>

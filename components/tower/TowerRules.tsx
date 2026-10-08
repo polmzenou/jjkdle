@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useGameTitle } from "@/components/universe/UniverseProvider";
 import {
   GUARD_COOLDOWN,
   GUARD_DURATION,
@@ -55,6 +56,7 @@ export function TowerRulesModal({
   open: boolean;
   onClose: () => void;
 }) {
+  const towerTitle = useGameTitle("tower");
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -77,7 +79,7 @@ export function TowerRulesModal({
           <motion.div
             role="dialog"
             aria-modal="true"
-            aria-label="Règles de The Culling Tower"
+            aria-label={`Règles de ${towerTitle}`}
             initial={{ y: 40, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 40, opacity: 0 }}
@@ -91,7 +93,7 @@ export function TowerRulesModal({
                   Comment on joue
                 </p>
                 <h2 className="font-display text-xl font-bold text-white">
-                  The Culling Tower
+                  {towerTitle}
                 </h2>
               </div>
               <button
@@ -136,7 +138,7 @@ export function TowerRulesModal({
                 l&apos;attaque chargée qui arrive.
               </Rule>
 
-              <Rule n="5" title="L'énergie occulte">
+              <Rule n="5" title="L'énergie">
                 Elle monte toute seule pendant le combat. Chaque technique en
                 coûte ; l&apos;<strong>ultime</strong>, lui, se charge avec les
                 dégâts que tu <strong>subis</strong> — il arrive donc quand ça va

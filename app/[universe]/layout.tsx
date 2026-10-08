@@ -1,4 +1,6 @@
+import { notFound } from "next/navigation";
 import { UniverseChrome } from "@/components/universe/UniverseChrome";
+import { getUniverseBySlug } from "@/lib/universes/registry";
 
 /**
  * Layout de l'ESPACE D'UN UNIVERS (`/jjk`, `/jjk/games/…`, `/jjk/account`…).
@@ -10,15 +12,20 @@ import { UniverseChrome } from "@/components/universe/UniverseChrome";
  * les deux URLs produisaient le même arbre et le chrome restait celui du premier
  * univers chargé.
  *
- * `params.universe` n'est volontairement pas lu ici : le slug est déjà résolu par
- * le middleware dans le header `x-universe`, seule source consultée par
- * `getCurrentUniverse()` — y compris depuis les Server Actions et les composants
- * profonds, qui n'ont accès à aucun `params`.
+ * Le slug est résolu par le middleware dans le header `x-universe`, seule source
+ * consultée par `getCurrentUniverse()` — y compris depuis les Server Actions et
+ * les composants profonds, qui n'ont accès à aucun `params`. `params.universe`
+ * ne sert ici qu'à une chose : refuser un slug inconnu. Les chemins exclus du
+ * middleware (`/favicon.ico`, `/x.png`…) arrivent ici sans avoir été validés, et
+ * rendaient sinon la landing de l'univers par défaut avec un statut 200.
  */
-export default function UniverseLayout({
+export default async function UniverseLayout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: Promise<{ universe: string }>;
 }) {
+  if (!getUniverseBySlug((await params).universe)) notFound();
   return <UniverseChrome jsonLd>{children}</UniverseChrome>;
 }

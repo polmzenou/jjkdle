@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Logo } from "@/components/Logo";
+import { GameHeading } from "@/components/GameHeading";
 import { useUniverseHref } from "@/components/universe/UniverseProvider";
 import { CharacterImage } from "@/components/CharacterImage";
 import { ExpReward } from "@/components/progress/ExpReward";
@@ -366,7 +366,7 @@ function Header({ score }: { score: number }) {
       >
         ← Back
       </UniverseLink>
-      <Logo className="h-12 w-auto sm:h-14" />
+      <GameHeading id="higher-lower" />
       <span className="rounded-full bg-void-700/60 px-3 py-1 text-xs text-white/60">
         Score&nbsp;: <span className="font-bold text-domain-light">{score}</span>
       </span>

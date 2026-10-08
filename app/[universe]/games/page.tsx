@@ -4,7 +4,7 @@ import { MultiplayerPicker } from "@/components/multiplayer/MultiplayerPicker";
 import { GamesListJsonLd } from "@/components/seo/JsonLd";
 import { universeGames } from "@/lib/games/universe";
 import { getGameFlags } from "@/lib/config/app-config";
-import { siteSeo } from "@/lib/seo/config";
+import { siteSeo, universeOgImage } from "@/lib/seo/config";
 import {
   getCurrentUniverseConfig,
   universeHref,
@@ -48,6 +48,9 @@ export async function generateMetadata(): Promise<Metadata> {
       url: route,
       title: `${title} · ${seo.name}`,
       description,
+      images: [
+        { url: universeOgImage(universe.slug), width: 1200, height: 630 },
+      ],
     },
   };
 }

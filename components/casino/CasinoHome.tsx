@@ -229,7 +229,7 @@ function CasinoHeader({ coins, isLoggedIn }: { coins: number; isLoggedIn: boolea
         </span>
 
         <h1 className="mt-5 font-display text-4xl font-black uppercase leading-[1.02] tracking-tight text-white sm:text-[3.4rem]">
-          Le
+          Le{" "}
           <span className="block bg-gradient-to-b from-cursed-light to-cursed/50 bg-clip-text text-transparent">
             casino
           </span>

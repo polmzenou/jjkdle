@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useGameTitle } from "@/components/universe/UniverseProvider";
 
 /**
  * Partage d'une ascension.
@@ -24,6 +25,7 @@ export function ShareRun({
   attempt: number;
   cleared: boolean;
 }) {
+  const towerTitle = useGameTitle("tower");
   const [copied, setCopied] = useState(false);
   /** Lien affiché en clair quand ni le partage natif ni la copie n'aboutissent. */
   const [fallback, setFallback] = useState<string | null>(null);
@@ -42,12 +44,12 @@ export function ShareRun({
   async function share() {
     const url = link();
     const text = cleared
-      ? `J'ai franchi The Culling Tower${attempt === 1 ? " du premier essai" : ""}.`
-      : `J'ai atteint l'étage ${floor} de The Culling Tower.`;
+      ? `J'ai franchi ${towerTitle}${attempt === 1 ? " du premier essai" : ""}.`
+      : `J'ai atteint l'étage ${floor} de ${towerTitle}.`;
 
     try {
       if (navigator.share) {
-        await navigator.share({ title: "The Culling Tower", text, url });
+        await navigator.share({ title: towerTitle, text, url });
         return;
       }
       await navigator.clipboard.writeText(`${text} ${url}`);

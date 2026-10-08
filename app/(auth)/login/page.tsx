@@ -7,6 +7,9 @@ import { universeHref } from "@/lib/universes/current";
 
 export const metadata: Metadata = {
   title: "Connexion",
+  description: "Connecte-toi pour garder ta progression, tes séries et tes classements sur tous les univers.",
+  // Sans canonical propre, la page héritait de celui de la landing d'univers.
+  alternates: { canonical: "/login" },
   robots: { index: false, follow: false },
 };
 

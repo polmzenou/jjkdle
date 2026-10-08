@@ -16,10 +16,7 @@ import {
 
 /** Métadonnées de l'univers courant (résolu par hostname). */
 export async function generateMetadata(): Promise<Metadata> {
-  return gameMetadata(
-    "codenames",
-    "JJK Codenames : jeu d'équipe multijoueur (4 à 6 joueurs, rouge vs violet). Les maîtres-espions donnent des indices, les agents révèlent les bons personnages d'une grille de 36. Évitez l'assassin !",
-  );
+  return gameMetadata("codenames");
 }
 
 export default async function CodenamesHubPage() {

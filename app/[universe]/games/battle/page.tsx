@@ -16,10 +16,7 @@ import {
 
 /** Métadonnées de l'univers courant (résolu par hostname). */
 export async function generateMetadata(): Promise<Metadata> {
-  return gameMetadata(
-    "battle",
-    "JJK Random Battle : affronte un ami en 1v1 sur Jujutsu Kaisen. Drafte une équipe de 5 à tour de rôle, puis laisse parler le combat.",
-  );
+  return gameMetadata("battle");
 }
 
 export default async function BattleHubPage() {

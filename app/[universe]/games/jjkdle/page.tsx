@@ -19,10 +19,7 @@ import { universeHref } from "@/lib/universes/current";
 
 /** Métadonnées de l'univers courant (résolu par hostname). */
 export async function generateMetadata(): Promise<Metadata> {
-  return gameMetadata(
-    "jjkdle",
-    "JJKdle : le jeu du jour Jujutsu Kaisen. Devine le personnage JJK mystère avec des indices par attribut (race, grade, clan, arc). Un nouveau perso chaque jour, essais illimités, gratuit et sans compte.",
-  );
+  return gameMetadata("jjkdle");
 }
 
 // État quotidien lu à chaque requête (cookie httpOnly) → toujours à jour.
