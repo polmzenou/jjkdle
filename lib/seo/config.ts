@@ -4,6 +4,7 @@ import { cache } from "react";
 import { universeGame } from "@/lib/games/universe";
 import {
   getCurrentUniverseConfig,
+  listAvailableUniverses,
   universeHref,
 } from "@/lib/universes/current";
 import type { UniverseConfig } from "@/lib/universes/types";
@@ -39,6 +40,26 @@ export interface SiteSeo {
  * screenshot via `gameMetadata`.
  */
 export const DEFAULT_OG_IMAGE = "/og";
+
+/**
+ * Marque de la PLATEFORME (le hub multi-anime, à la racine). Distincte du nom de
+ * chaque univers (« JJK Arcade »…), qui ne vaut que sous son préfixe.
+ */
+export const PLATFORM_NAME = "Anime Arcade";
+
+/**
+ * Faux sur les déploiements Vercel hors production (previews) : leurs URLs
+ * `*.vercel.app` dupliqueraient tout le contenu du site si Google les indexait.
+ * Vrai en local et hors Vercel (`VERCEL_ENV` absent).
+ */
+export const isIndexableDeployment =
+  !process.env.VERCEL_ENV || process.env.VERCEL_ENV === "production";
+
+/** Jeton de vérification Google Search Console (balise meta), si configuré. */
+export const siteVerification: Metadata["verification"] = process.env
+  .NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+  ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
+  : undefined;
 
 /** Lecture des headers tolérante au rendu statique (hors contexte de requête). */
 async function requestHeaders(): Promise<Headers | null> {
@@ -83,6 +104,32 @@ export const siteSeo = cache(async (): Promise<SiteSeo> => {
     locale: universe.locale,
     keywords: universe.keywords,
   };
+});
+
+/**
+ * SEO du HUB (la racine) : marque de la plateforme, et une description qui
+ * NOMME chaque anime disponible — c'est la page d'entrée du domaine, elle doit
+ * pouvoir ressortir sur « jeux Chainsaw Man » autant que sur « jeux JJK ».
+ * Mémoïsé par requête : lu par le layout et le JSON-LD du hub.
+ */
+export const hubSeo = cache(async () => {
+  const [{ url }, universes] = await Promise.all([
+    siteSeo(),
+    listAvailableUniverses(),
+  ]);
+  const works = universes.map((u) => u.config.sourceWork);
+  const title = `${PLATFORM_NAME} — Mini-jeux anime gratuits`;
+  const description = `Mini-jeux anime gratuits dans le navigateur : ${works.join(", ")}. Devine le personnage du jour (dle), Qui est-ce ?, quiz, draft, tier list et combats. Sans compte.`;
+  const keywords = [
+    "jeux anime",
+    "jeux anime gratuits",
+    "anime wordle",
+    "anime dle",
+    "quiz anime",
+    "tier list anime",
+    ...works.flatMap((w) => [`jeux ${w}`, `${w} quiz`, `${w} dle`]),
+  ];
+  return { url, name: PLATFORM_NAME, title, description, keywords };
 });
 
 /** Résout un chemin relatif en URL absolue (canonical, sitemap, JSON-LD). */

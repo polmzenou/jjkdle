@@ -194,6 +194,6 @@ export const config = {
    * Actions et Route Handlers — passe par ici, car tous peuvent lire le roster.
    */
   matcher: [
-    "/((?!_next/static|_next/image|assets/|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|woff|woff2|ttf)$).*)",
+    "/((?!_next/static|_next/image|assets/|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|woff|woff2|ttf|html)$).*)",
   ],
 };

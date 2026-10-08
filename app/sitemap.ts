@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { GAMES } from "@/lib/games/registry";
+import { todayKey } from "@/lib/games/jjkdle/daily";
 import { siteSeo } from "@/lib/seo/config";
 import { listAvailableUniverses } from "@/lib/universes/current";
 import { universePath } from "@/lib/universes/routing";
@@ -19,11 +20,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     siteSeo(),
     listAvailableUniverses(),
   ]);
-  const now = new Date();
+  // `lastModified` n'est posé que là où il dit vrai : un `now` sur toutes les
+  // URLs à chaque génération apprend à Google à ignorer le champ. Seul le jeu
+  // du jour change réellement chaque jour (minuit, heure de Paris).
+  const today = todayKey();
 
   // Le hub (choix d'univers), à la racine.
   const entries: MetadataRoute.Sitemap = [
-    { url: SITE_URL, lastModified: now, changeFrequency: "weekly", priority: 1 },
+    { url: SITE_URL, changeFrequency: "weekly", priority: 1 },
   ];
 
   const liveGames = GAMES.filter((g) => g.status !== "coming-soon");
@@ -32,16 +36,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const abs = (path: string) => `${SITE_URL}${universePath(path, slug)}`;
 
     entries.push(
-      { url: abs("/"), lastModified: now, changeFrequency: "daily", priority: 1 },
+      { url: abs("/"), changeFrequency: "daily", priority: 1 },
       {
         url: abs("/games"),
-        lastModified: now,
         changeFrequency: "weekly",
         priority: 0.9,
       },
       ...liveGames.map((g) => ({
         url: abs(g.route),
-        lastModified: now,
+        ...(g.id === "jjkdle" ? { lastModified: today } : {}),
         // JJKdle change chaque jour (perso du jour) → fraîcheur maximale.
         changeFrequency: (g.id === "jjkdle" ? "daily" : "weekly") as
           | "daily"

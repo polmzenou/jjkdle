@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { getGameFlags, getMaintenance } from "@/lib/config/app-config";
 import { gamesForUniverse } from "@/lib/games/registry";
 import { getCasinoConfig } from "@/lib/casino/config";
 import { listAvailableUniverses } from "@/lib/universes/current";
 import { casinoThemeVars, themeCssVars } from "@/lib/universes/theme";
+import { HubJsonLd } from "@/components/seo/JsonLd";
 import { UniverseHub, type HubUniverse } from "./UniverseHub";
 
 /**
@@ -16,13 +16,10 @@ import { UniverseHub, type HubUniverse } from "./UniverseHub";
  *
  * Ce fichier ne fait que RÉSOUDRE les données ; la mise en forme vit dans
  * `UniverseHub` (composant client, pour les animations d'entrée).
+ *
+ * Titre, description et aperçu social : ceux du hub, posés par `app/layout.tsx`
+ * (cf. `hubSeo`).
  */
-export const metadata: Metadata = {
-  title: "Les univers",
-  description:
-    "Tous les univers d'arcade de la plateforme : un anime, ses jeux et son roster. Un seul compte pour tous.",
-};
-
 export const dynamic = "force-dynamic";
 
 export default async function UniversesHubPage() {
@@ -76,11 +73,14 @@ export default async function UniversesHubPage() {
   );
 
   return (
-    <UniverseHub
-      universes={cards}
-      // Casino coupé en admin → la carte disparaît du hub, comme un jeu
-      // désactivé disparaît de la carte d'un univers.
-      casino={casino.enabled ? { vars: casinoThemeVars() } : null}
-    />
+    <>
+      <HubJsonLd />
+      <UniverseHub
+        universes={cards}
+        // Casino coupé en admin → la carte disparaît du hub, comme un jeu
+        // désactivé disparaît de la carte d'un univers.
+        casino={casino.enabled ? { vars: casinoThemeVars() } : null}
+      />
+    </>
   );
 }

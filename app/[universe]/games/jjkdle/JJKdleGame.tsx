@@ -302,7 +302,17 @@ function VictoryPanel({
   const gameTitle = useGameTitle("jjkdle");
 
   const share = useCallback(() => {
-    const text = buildShareText(rows, attempts, gameTitle);
+    // Le lien fait de chaque partage une porte d'entrée vers le jeu (boucle
+    // virale façon Wordle) — sans query string (`?scope=…` du classement).
+    const url = `${window.location.origin}${window.location.pathname}`;
+    const text = buildShareText(rows, attempts, gameTitle, url);
+    // Mobile : feuille de partage native (WhatsApp, Discord, Insta…). Une
+    // annulation de l'utilisateur rejette aussi : on ne retombe PAS alors sur
+    // le presse-papiers.
+    if (typeof navigator.share === "function" && navigator.maxTouchPoints > 0) {
+      navigator.share({ text }).catch(() => {});
+      return;
+    }
     navigator.clipboard?.writeText(text).then(
       () => {
         setCopied(true);
@@ -381,6 +391,7 @@ function buildShareText(
   rows: GuessRowData[],
   attempts: number,
   gameTitle: string,
+  url: string,
 ): string {
   const emoji: Record<string, string> = {
     correct: "🟩",
@@ -390,5 +401,5 @@ function buildShareText(
   const grid = rows
     .map((r) => r.hints.map((h) => emoji[h.status] ?? "⬜").join(""))
     .join("\n");
-  return `${gameTitle} — ${attempts} essai${attempts > 1 ? "s" : ""}\n${grid}`;
+  return `${gameTitle} — ${attempts} essai${attempts > 1 ? "s" : ""}\n${grid}\n${url}`;
 }

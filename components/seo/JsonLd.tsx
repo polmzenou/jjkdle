@@ -1,5 +1,5 @@
 import { universeGame, universeGames } from "@/lib/games/universe";
-import { siteSeo, absoluteUrl } from "@/lib/seo/config";
+import { siteSeo, hubSeo, absoluteUrl } from "@/lib/seo/config";
 import {
   getCurrentUniverseConfig,
   universeHref,
@@ -54,6 +54,33 @@ export async function SiteJsonLd() {
         name: seo.name,
         url: SITE_URL,
         logo: await absoluteUrl(universe.logo.src),
+      },
+    ],
+  };
+  return <JsonLd data={data} />;
+}
+
+/** WebSite + Organization de la PLATEFORME (le hub, à la racine du domaine). */
+export async function HubJsonLd() {
+  const hub = await hubSeo();
+  const data = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": `${hub.url}/#website`,
+        url: hub.url,
+        name: hub.name,
+        description: hub.description,
+        inLanguage: "fr-FR",
+        publisher: { "@id": `${hub.url}/#organization` },
+      },
+      {
+        "@type": "Organization",
+        "@id": `${hub.url}/#organization`,
+        name: hub.name,
+        url: hub.url,
+        logo: `${hub.url}/logo.png`,
       },
     ],
   };

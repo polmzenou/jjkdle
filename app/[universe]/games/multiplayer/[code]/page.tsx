@@ -1,9 +1,15 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth/session";
 import { isPusherConfigured } from "@/lib/pusher/server";
 import { loadLobbyView } from "@/lib/multiplayer/load";
 import { MultiplayerLobby } from "@/components/multiplayer/MultiplayerLobby";
+
+/** Lobby éphémère (code de partie) : rien à indexer. */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 interface PageProps {
   params: Promise<{ code: string }>;

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -5,6 +6,11 @@ import { isPusherConfigured } from "@/lib/pusher/server";
 import { loadGuessWhoView } from "@/lib/games/guesswho/load";
 import { GuessWhoLobby } from "@/components/guesswho/GuessWhoLobby";
 import { loadAttributeSchema } from "@/lib/games/jjkdle/attributes-db";
+
+/** Lobby éphémère (code de partie) : rien à indexer. */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 interface PageProps {
   params: Promise<{ code: string }>;

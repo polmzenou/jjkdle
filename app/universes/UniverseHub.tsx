@@ -291,6 +291,8 @@ function HubHeader({
         </span>
 
         <h1 className="mt-5 font-display text-4xl font-black uppercase leading-[1.02] tracking-tight text-white sm:text-[3.4rem]">
+          {/* Texte lu par les moteurs/lecteurs d'écran : la marque de la plateforme. */}
+          <span className="sr-only">Anime Arcade — mini-jeux anime gratuits · </span>
           Choisis ton
           <span className="block bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
             univers

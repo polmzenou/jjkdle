@@ -11,7 +11,13 @@ import {
   universeHref,
 } from "@/lib/universes/current";
 import { themeCss, hubThemeCss, casinoThemeCss } from "@/lib/universes/theme";
-import { siteSeo, DEFAULT_OG_IMAGE } from "@/lib/seo/config";
+import {
+  siteSeo,
+  hubSeo,
+  DEFAULT_OG_IMAGE,
+  isIndexableDeployment,
+  siteVerification,
+} from "@/lib/seo/config";
 import "./globals.css";
 
 const inter = Inter({
@@ -38,6 +44,14 @@ export async function generateMetadata(): Promise<Metadata> {
     isHubRequest(),
     isCasinoRequest(),
   ]);
+  // Previews Vercel : jamais indexées (contenu dupliqué de la prod).
+  const robots: Metadata["robots"] = isIndexableDeployment
+    ? {
+        index: true,
+        follow: true,
+        googleBot: { index: true, follow: true, "max-image-preview": "large" },
+      }
+    : { index: false, follow: false };
   // Le casino est hors univers : pas plus que le hub il ne doit porter le nom
   // d'un anime en suffixe.
   if (casino) {
@@ -47,19 +61,41 @@ export async function generateMetadata(): Promise<Metadata> {
       description:
         "Le casino de la plateforme : mise tes coins au blackjack, en solo ou à une table jusqu'à 5 joueurs.",
       alternates: { canonical: "/casino" },
-      robots: { index: true, follow: true },
+      robots,
+      verification: siteVerification,
     };
   }
-  // Sur le HUB, aucun suffixe de marque : « Les univers · JJK Arcade » n'aurait
-  // aucun sens sur une page qui sert justement à choisir entre les animes.
+  // Sur le HUB, la marque est celle de la PLATEFORME, jamais celle d'un anime :
+  // c'est la racine du domaine, la page que Google vérifie et classe en premier.
   if (hub) {
+    const h = await hubSeo();
     return {
       metadataBase: new URL(seo.url),
-      title: { default: "Les univers", template: "%s" },
-      description:
-        "Choisis ton univers : chaque anime a son arcade, son roster et ses classements.",
+      title: { default: h.title, template: `%s · ${h.name}` },
+      description: h.description,
+      keywords: h.keywords,
+      applicationName: h.name,
+      category: "games",
       alternates: { canonical: "/" },
-      robots: { index: true, follow: true },
+      openGraph: {
+        type: "website",
+        locale: "fr_FR",
+        url: "/",
+        siteName: h.name,
+        title: h.title,
+        description: h.description,
+        images: [
+          { url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: h.title },
+        ],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: h.title,
+        description: h.description,
+        images: [DEFAULT_OG_IMAGE],
+      },
+      robots,
+      verification: siteVerification,
     };
   }
   return {
@@ -93,14 +129,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description: seo.description,
       images: [DEFAULT_OG_IMAGE],
     },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: { index: true, follow: true, "max-image-preview": "large" },
-    },
-    verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
-      ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
-      : undefined,
+    robots,
+    verification: siteVerification,
   };
 }
 
