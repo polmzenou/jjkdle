@@ -7,7 +7,7 @@ import { SOCIAL_EVENTS } from "@/lib/social/events";
 import { useUserChannel } from "./useUserChannel";
 
 /** Deux silhouettes, dimensionnées par `className` (SVG maison, cf. CartIcon). */
-function FriendsIcon({ className = "h-[18px] w-[18px]" }: { className?: string }) {
+export function FriendsIcon({ className = "h-[18px] w-[18px]" }: { className?: string }) {
   return (
     <svg
       aria-hidden

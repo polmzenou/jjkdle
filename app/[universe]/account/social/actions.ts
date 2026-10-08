@@ -17,6 +17,7 @@ import {
 } from "@/lib/social/friends";
 import {
   listConversation,
+  listConversations,
   markConversationRead,
   sendMessage,
 } from "@/lib/social/messages";
@@ -31,6 +32,7 @@ import {
 import {
   clearNotifications,
   deleteNotification,
+  listNotifications,
   notify,
   sendCoinsToFriend,
 } from "@/lib/social/notifications";
@@ -38,7 +40,9 @@ import type { NotificationKind } from "@prisma/client";
 import type { TradeLineInput } from "@/lib/cards/trade";
 import type {
   CoinsReceivedPayload,
+  ConversationView,
   MessageView,
+  NotificationView,
   TradableCard,
 } from "@/lib/social/types";
 
@@ -255,6 +259,32 @@ export async function clearNotificationsAction(): Promise<ActionResult> {
   await clearNotifications(user.id);
   await revalidateSocial();
   return { ok: true };
+}
+
+// ── Boîte de réception (bulle flottante) ──────────────────────────────────
+
+/**
+ * Contenu de la bulle « boîte de réception » : notifications + conversations
+ * EN COURS (au moins un message échangé). Chargé à l'ouverture de la bulle.
+ */
+export async function loadInboxAction(): Promise<{
+  ok: boolean;
+  error?: string;
+  notifications?: NotificationView[];
+  conversations?: ConversationView[];
+}> {
+  const user = await getCurrentUser();
+  if (!user) return NOT_LOGGED;
+  const universe = await getCurrentUniverse();
+  const [notifications, conversations] = await Promise.all([
+    listNotifications(user.id, universe.id),
+    listConversations(user.id, universe.id),
+  ]);
+  return {
+    ok: true,
+    notifications,
+    conversations: conversations.filter((c) => c.lastMessage != null),
+  };
 }
 
 // ── Messages ──────────────────────────────────────────────────────────────

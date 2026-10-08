@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { FriendsPanel } from "@/components/social/FriendsPanel";
 import { TradesPanel } from "@/components/social/TradesPanel";
@@ -66,6 +66,13 @@ export function SocialHub({
   const [tradeWith, setTradeWith] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [feedback, setFeedback] = useState<{ ok: boolean; msg: string } | null>(null);
+
+  // Liens `?tab=…&with=…` suivis alors qu'on est déjà sur la page (ex. depuis
+  // la bulle « boîte de réception ») : le state initial ne se relit pas seul.
+  useEffect(() => {
+    setTab(initialTab);
+    if (initialChatWith) setChatWith(initialChatWith);
+  }, [initialTab, initialChatWith]);
 
   const run: SocialRun = (action, onSuccess) => {
     setFeedback(null);

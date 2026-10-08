@@ -6,6 +6,7 @@ import { MaintenanceScreen } from "@/components/MaintenanceScreen";
 import { SiteJsonLd } from "@/components/seo/JsonLd";
 import { UniverseProvider } from "@/components/universe/UniverseProvider";
 import { SocialToaster } from "@/components/social/SocialToaster";
+import { InboxBubble } from "@/components/social/InboxBubble";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getCachedImageCount } from "@/lib/admin/image-cache";
 import { getMaintenance } from "@/lib/config/app-config";
@@ -146,6 +147,10 @@ export async function UniverseChrome({
             <div className="flex-1">{children}</div>
             <SiteFooter variant="universe" name={universe.config.name} />
             <TutorialButton />
+            {/* Bulle « boîte de réception », empilée au-dessus du « ? ». */}
+            {user && (
+              <InboxBubble userId={user.id} unread={social?.messages ?? 0} />
+            )}
             {/* Toasts sociaux (coins reçus/envoyés) : ici plutôt que dans la
                 nav, masquée en jeu et dont le backdrop-blur casserait le fixed. */}
             {user && <SocialToaster userId={user.id} />}

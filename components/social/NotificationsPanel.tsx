@@ -9,7 +9,8 @@ import { CoinIcon } from "@/components/progress/CoinWallet";
 import type { NotificationKindView, NotificationView } from "@/lib/social/types";
 import { PlayerChip } from "./PlayerChip";
 
-const KIND: Record<
+/** Texte et couleur de chaque type de notification (aussi utilisé par `InboxBubble`). */
+export const NOTIFICATION_KIND: Record<
   NotificationKindView,
   { text: (amount: string) => string; accent: string }
 > = {
@@ -24,7 +25,7 @@ const KIND: Record<
 const rtf = new Intl.RelativeTimeFormat("fr-FR", { numeric: "auto" });
 
 /** « il y a 5 min », « hier »… */
-function ago(iso: string): string {
+export function ago(iso: string): string {
   const s = Math.round((new Date(iso).getTime() - Date.now()) / 1000);
   const abs = Math.abs(s);
   if (abs < 60) return "à l'instant";
@@ -75,7 +76,7 @@ export function NotificationsPanel({
       </div>
       <ul className="max-h-80 divide-y divide-white/5 overflow-y-auto rounded-2xl border border-white/10 bg-void-800/60 backdrop-blur">
         {items.map((n) => {
-          const kind = KIND[n.kind];
+          const kind = NOTIFICATION_KIND[n.kind];
           const amount = (n.amount ?? 0).toLocaleString("fr-FR");
           const isCoins = n.kind === "COINS_RECEIVED" || n.kind === "COINS_SENT";
           return (
