@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { invalidateContent } from "@/lib/content/cache";
 import { slugify, uniqueSlug } from "@/lib/admin/slug";
 import { getCurrentUniverse } from "@/lib/universes/current";
 import { getRoster } from "@/lib/content/queries";
@@ -162,6 +163,9 @@ export async function listRankingConditions(): Promise<
 export async function upsertRankingCondition(
   input: RankingConditionInput,
 ): Promise<void> {
+  // Contenu modifié : le cache partagé (roster, catégories, attributs,
+  // consignes) est invalidé — appliqué par Next à la fin de la requête.
+  invalidateContent();
   const { id: universeId, slug: universeSlug } = await getCurrentUniverse();
 
   const pool = input.pool.trim().slice(0, MAX_TEXT);
@@ -242,6 +246,9 @@ export async function setRankingTiebreak(
   id: string,
   order: string[],
 ): Promise<void> {
+  // Contenu modifié : le cache partagé (roster, catégories, attributs,
+  // consignes) est invalidé — appliqué par Next à la fin de la requête.
+  invalidateContent();
   const { id: universeId } = await getCurrentUniverse();
   const condition = await prisma.rankingCondition.findFirst({
     where: { id, universeId },
@@ -303,6 +310,9 @@ export interface ImportReport {
 }
 
 export async function importCategoryConditions(): Promise<ImportReport> {
+  // Contenu modifié : le cache partagé (roster, catégories, attributs,
+  // consignes) est invalidé — appliqué par Next à la fin de la requête.
+  invalidateContent();
   const { id: universeId, slug: universeSlug } = await getCurrentUniverse();
   const [categories, roster, existing] = await Promise.all([
     prisma.category.findMany({
@@ -389,6 +399,9 @@ export async function importCategoryConditions(): Promise<ImportReport> {
 
 /** Supprime une consigne (aucune donnée de joueur n'y est rattachée). */
 export async function deleteRankingCondition(id: string): Promise<void> {
+  // Contenu modifié : le cache partagé (roster, catégories, attributs,
+  // consignes) est invalidé — appliqué par Next à la fin de la requête.
+  invalidateContent();
   const { id: universeId } = await getCurrentUniverse();
   const { count } = await prisma.rankingCondition.deleteMany({
     where: { id, universeId },
@@ -404,6 +417,9 @@ export async function moveRankingCondition(
   id: string,
   direction: "up" | "down",
 ): Promise<void> {
+  // Contenu modifié : le cache partagé (roster, catégories, attributs,
+  // consignes) est invalidé — appliqué par Next à la fin de la requête.
+  invalidateContent();
   const { id: universeId } = await getCurrentUniverse();
   const rows = await prisma.rankingCondition.findMany({
     where: { universeId },

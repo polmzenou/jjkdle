@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import {
   deleteNotificationAction,
   loadInboxAction,
@@ -134,7 +134,7 @@ export function InboxBubble({
       {/* ── Boîte ── */}
       <AnimatePresence>
         {open && (
-          <motion.section
+          <m.section
             id="inbox-box"
             role="dialog"
             aria-label="Boîte de réception"
@@ -208,7 +208,7 @@ export function InboxBubble({
                 Ouvrir le hub social →
               </UniverseLink>
             </footer>
-          </motion.section>
+          </m.section>
         )}
       </AnimatePresence>
     </>

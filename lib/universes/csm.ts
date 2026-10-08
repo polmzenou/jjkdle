@@ -36,7 +36,7 @@ export const csm: UniverseConfig = {
     "Aki",
   ],
   logo: {
-    src: "/logo-csm.png",
+    src: "/logo-csm.webp",
     alt: "CSM Arcade",
   },
   // Palette « Blood & Chainsaw » : rouge sang en accent principal, or en

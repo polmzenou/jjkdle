@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import type { Character } from "@/data/roster/characters";
 import type { SerializedLobby } from "@/lib/multiplayer/events";
 import { buildRosterMap } from "@/lib/multiplayer/state";
-import { createPusherClient } from "@/lib/pusher/client";
+import { openChannel } from "@/lib/pusher/client";
 import { WaitingRoom } from "@/components/multiplayer/WaitingRoom";
 import {
   decideAction,
@@ -65,8 +65,7 @@ export function BattleLobby({
   useEffect(() => {
     if (!pusherReady || !isMember) return;
 
-    const client = createPusherClient();
-    const channel = client.subscribe(lobbyChannel(code));
+    const channel = openChannel(lobbyChannel(code));
 
     channel.bind(BATTLE_EVENTS.state, (payload: BattleStatePayload) => {
       setLobby(payload.lobby);
@@ -89,9 +88,7 @@ export function BattleLobby({
     });
 
     return () => {
-      channel.unbind_all();
-      client.unsubscribe(lobbyChannel(code));
-      client.disconnect();
+      channel.close();
     };
   }, [pusherReady, isMember, code, currentUserId]);
 

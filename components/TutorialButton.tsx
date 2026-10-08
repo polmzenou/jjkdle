@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import { GameIcon } from "@/components/icons/GameIcon";
 import {
   CalendarIcon,
@@ -271,7 +271,7 @@ export function TutorialButton() {
         title="Comment ça marche ?"
         className="fixed bottom-5 right-5 z-40 grid h-14 w-14 place-items-center rounded-full bg-domain font-display text-2xl font-black text-white shadow-glow ring-1 ring-white/20 transition-transform hover:scale-110 active:scale-95 sm:bottom-6 sm:right-6"
       >
-        <span aria-hidden className="animate-glow-pulse">
+        <span aria-hidden className="animate-glow-pulse motion-reduce:animate-none">
           ?
         </span>
       </button>
@@ -279,7 +279,7 @@ export function TutorialButton() {
       {/* ── Modals tutoriel ── */}
       <AnimatePresence>
         {open && (
-          <motion.div
+          <m.div
             key="tuto-overlay"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -290,7 +290,7 @@ export function TutorialButton() {
             aria-modal="true"
             aria-label={`Tutoriel ${name}`}
           >
-            <motion.div
+            <m.div
               key={step}
               initial={{ opacity: 0, y: 16, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -389,8 +389,8 @@ export function TutorialButton() {
                   </button>
                 )}
               </div>
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
     </>

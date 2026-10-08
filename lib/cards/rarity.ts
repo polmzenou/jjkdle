@@ -1,7 +1,7 @@
 import {
   normalizeTier,
   type CharacterTier,
-} from "@/data/roster/characters";
+} from "@/data/roster/tiers";
 
 /**
  * Échelle de rareté des CARTES à collectionner.

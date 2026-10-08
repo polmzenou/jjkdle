@@ -26,6 +26,8 @@ interface CardArtProps {
   /** Exemplaires possédés : pastille « ×N » en haut à gauche dès 2. */
   count?: number;
   className?: string;
+  /** Chargement différé de l'image (cf. `CharacterImage`). */
+  loading?: "lazy" | "eager";
 }
 
 export function CardArt({
@@ -34,6 +36,7 @@ export function CardArt({
   glow = false,
   count = 0,
   className = "",
+  loading,
 }: CardArtProps) {
   const style = cardRarityStyle(card.rarity);
 
@@ -53,7 +56,7 @@ export function CardArt({
       <span
         aria-hidden
         className={`pointer-events-none absolute inset-0 z-20 rounded-2xl ${
-          style.rainbow ? "animate-rainbow" : ""
+          style.rainbow ? "animate-rainbow motion-reduce:animate-none" : ""
         }`}
         style={
           style.rainbow
@@ -82,7 +85,10 @@ export function CardArt({
         </span>
       )}
 
-      <CharacterImage character={{ name: card.name, ...(card.image ? { image: card.image } : {}) }} />
+      <CharacterImage
+        character={{ name: card.name, ...(card.image ? { image: card.image } : {}) }}
+        loading={loading}
+      />
 
       {/* Voile dégradé : garantit la lisibilité du nom quelle que soit l'image. */}
       <span
@@ -96,7 +102,7 @@ export function CardArt({
         </p>
         <p
           className={`mt-0.5 truncate text-[10px] font-bold uppercase tracking-[0.18em] sm:text-[11px] ${
-            style.rainbow ? "animate-rainbow-pan bg-clip-text text-transparent" : ""
+            style.rainbow ? "animate-rainbow-pan bg-clip-text text-transparent motion-reduce:animate-none" : ""
           }`}
           style={
             style.rainbow

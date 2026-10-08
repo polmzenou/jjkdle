@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import {
   CONSENT_REOPEN_EVENT,
   readConsent,
@@ -39,7 +39,7 @@ export function CookieConsent() {
   return (
     <AnimatePresence>
       {visible && (
-        <motion.div
+        <m.div
           role="dialog"
           aria-live="polite"
           aria-label="Consentement aux cookies"
@@ -75,7 +75,7 @@ export function CookieConsent() {
               </button>
             </div>
           </div>
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   );

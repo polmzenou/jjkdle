@@ -38,13 +38,21 @@ export async function GET(_req: Request, { params }: Params) {
   });
 
   if (!item?.imageData || !item.imageMime) {
-    return new NextResponse("Not found", { status: 404 });
+    // 404 mis en cache brièvement au CDN : un id inconnu ne doit pas coûter
+    // une lecture BDD à chaque affichage.
+    return new NextResponse("Not found", {
+      status: 404,
+      headers: { "Cache-Control": "public, max-age=60, s-maxage=60" },
+    });
   }
 
   return new NextResponse(new Uint8Array(item.imageData), {
     headers: {
       "Content-Type": item.imageMime,
       "Cache-Control": "public, max-age=31536000, immutable",
+      // Sans directive CDN explicite, Vercel ne met pas en cache la réponse
+      // d'une fonction : chaque visiteur coûterait un appel + une lecture BDD.
+      "CDN-Cache-Control": "public, max-age=31536000, immutable",
     },
   });
 }

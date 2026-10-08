@@ -63,9 +63,14 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
   const token = (await cookies()).get(COOKIE)?.value;
   if (!token) return null;
 
+  // `select` ciblé : lue à CHAQUE requête, la session ne remonte que les quatre
+  // champs utiles (et jamais `passwordHash`).
   const session = await prisma.session.findUnique({
     where: { token },
-    include: { user: true },
+    select: {
+      expiresAt: true,
+      user: { select: { id: true, username: true, email: true, role: true } },
+    },
   });
   if (!session || session.expiresAt < new Date()) return null;
 

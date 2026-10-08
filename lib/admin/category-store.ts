@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { invalidateContent } from "@/lib/content/cache";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/admin/slug";
 import { getCurrentUniverse } from "@/lib/universes/current";
@@ -95,6 +96,9 @@ export async function listCategories(): Promise<AdminCategory[]> {
  * sont éditables.
  */
 export async function upsertCategory(input: CategoryInput): Promise<void> {
+  // Contenu modifié : le cache partagé (roster, catégories, attributs,
+  // consignes) est invalidé — appliqué par Next à la fin de la requête.
+  invalidateContent();
   const { id: universeId, slug: universeSlug } = await getCurrentUniverse();
 
   const label = input.label.trim();
@@ -153,6 +157,9 @@ export async function upsertCategory(input: CategoryInput): Promise<void> {
  * ressuscitée si un jour une catégorie reprenait le même id.
  */
 export async function deleteCategory(id: string): Promise<void> {
+  // Contenu modifié : le cache partagé (roster, catégories, attributs,
+  // consignes) est invalidé — appliqué par Next à la fin de la requête.
+  invalidateContent();
   const { id: universeId } = await getCurrentUniverse();
 
   const category = await prisma.category.findFirst({
@@ -194,6 +201,9 @@ export async function moveCategory(
   id: string,
   direction: "up" | "down",
 ): Promise<void> {
+  // Contenu modifié : le cache partagé (roster, catégories, attributs,
+  // consignes) est invalidé — appliqué par Next à la fin de la requête.
+  invalidateContent();
   const { id: universeId } = await getCurrentUniverse();
   const rows = await prisma.category.findMany({
     where: { universeId },

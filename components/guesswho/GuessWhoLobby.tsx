@@ -13,7 +13,7 @@ import type { Character } from "@/data/roster/characters";
 import type { AttributeSpec } from "@/lib/games/jjkdle/attribute-schema";
 import type { SerializedLobby } from "@/lib/multiplayer/events";
 import { buildRosterMap } from "@/lib/multiplayer/state";
-import { createPusherClient } from "@/lib/pusher/client";
+import { openChannel } from "@/lib/pusher/client";
 import { WaitingRoom } from "@/components/multiplayer/WaitingRoom";
 import {
   getMySecretAction,
@@ -119,8 +119,7 @@ export function GuessWhoLobby({
   useEffect(() => {
     if (!pusherReady || (!isMember && !isSpectator)) return;
 
-    const client = createPusherClient();
-    const channel = client.subscribe(lobbyChannel(code));
+    const channel = openChannel(lobbyChannel(code));
 
     channel.bind(GUESSWHO_EVENTS.state, (payload: GuessWhoStatePayload) => {
       setLobby(payload.lobby);
@@ -202,9 +201,7 @@ export function GuessWhoLobby({
     });
 
     return () => {
-      channel.unbind_all();
-      client.unsubscribe(lobbyChannel(code));
-      client.disconnect();
+      channel.close();
     };
   }, [pusherReady, isMember, isSpectator, code, currentUserId, fetchMySecret, resetLocalGame]);
 

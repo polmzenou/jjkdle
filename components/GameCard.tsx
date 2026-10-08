@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import type { CSSProperties } from "react";
 import type { Game } from "@/lib/games/types";
 import { UniverseLink } from "@/components/universe/UniverseLink";
+import { previewDisplaySrc } from "@/lib/images";
 
 interface GameCardProps {
   game: Game;
@@ -38,8 +39,9 @@ export function GameCard({ game, index, disabled = false }: GameCardProps) {
       {game.previewImage && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={game.previewImage}
+          src={previewDisplaySrc(game.previewImage)}
           alt={`Aperçu du jeu ${game.title}`}
+          loading="lazy"
           className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.12] transition-opacity duration-[400ms] ease-out md:opacity-0 md:group-hover/card:opacity-25"
         />
       )}

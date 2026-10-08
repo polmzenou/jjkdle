@@ -38,19 +38,26 @@ export default async function JjkdlePage({
 }: {
   searchParams: Promise<{ scope?: string }>;
 }) {
-  if (!(await isGameEnabled("jjkdle"))) redirect(await universeHref("/games"));
-  const [{ scope }, roster, user, schema] = await Promise.all([
+  // Tout est lancé en parallèle ; le flag est vérifié avant d'utiliser le reste.
+  const [enabled, { scope }, roster, user, schema] = await Promise.all([
+    isGameEnabled("jjkdle"),
     searchParams,
     getRoster(),
     getCurrentUser(),
     loadAttributeSchema(),
   ]);
+  if (!enabled) redirect(await universeHref("/games"));
 
   const eligibleCount = eligibleRoster(roster, schema).length;
   const isAdmin = user?.role === "ADMIN";
   const isVip = user?.role === "VIP";
-  // Streak courant (univers courant) pour l'en-tête (affiché si > 0).
-  const streak = user ? (await getUniverseLoadout(user.id)).jjkdleStreak : 0;
+  // Streak courant (univers courant) pour l'en-tête (affiché si > 0), mot du
+  // jour et état sauvegardé : indépendants, lus en parallèle.
+  const [streak, dailyTarget, state] = await Promise.all([
+    user ? getUniverseLoadout(user.id).then((l) => l.jjkdleStreak) : 0,
+    resolveDailyTarget(roster, schema),
+    readState(),
+  ]);
 
   // Réhydratation de l'état (si toujours valide).
   const map = Object.fromEntries(roster.map((c) => [c.id, c]));
@@ -60,8 +67,6 @@ export default async function JjkdlePage({
   let revealed: JJKdleRevealed = null;
   let vipReplaysUsed = 0;
 
-  const dailyTarget = await resolveDailyTarget(roster, schema);
-  const state = await readState();
   if (state && isStateFresh(state, roster, schema, dailyTarget?.id)) {
     mode = state.mode;
     status = state.status;

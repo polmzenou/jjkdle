@@ -1,11 +1,15 @@
 import { prisma } from "@/lib/prisma";
-import { universeConfigPrefix } from "@/lib/config/app-config";
+import {
+  invalidateAppConfig,
+  universeConfigPrefix,
+} from "@/lib/config/app-config";
 import {
   DEFAULT_UNIVERSE_SLUG,
   getUniverseBySlug,
   listUniverses,
 } from "@/lib/universes/registry";
 import { isUniverseFreePath } from "@/lib/universes/routing";
+import { invalidateUniverses } from "@/lib/universes/current";
 
 /**
  * GESTION DES UNIVERS (table `Universe`) — vue d'administration globale.
@@ -198,6 +202,7 @@ export async function createUniverse(input: {
     data: { slug: input.slug, name: input.name },
     select: { id: true },
   });
+  invalidateUniverses();
   // Relit par la voie normale : même forme (compteurs, config) que la liste.
   const created = (await listAdminUniverses()).find(
     (u) => u.slug === input.slug,
@@ -209,6 +214,7 @@ export async function createUniverse(input: {
 /** Renomme un univers (le slug, lui, est immuable — il est dans les URLs). */
 export async function renameUniverse(id: string, name: string): Promise<void> {
   await prisma.universe.update({ where: { id }, data: { name } });
+  invalidateUniverses();
 }
 
 /**
@@ -241,6 +247,8 @@ export async function deleteUniverse(id: string): Promise<void> {
     }),
     prisma.universe.delete({ where: { id } }),
   ]);
+  invalidateUniverses();
+  invalidateAppConfig();
 }
 
 /** Résumé lisible du contenu restant (message d'erreur de suppression). */

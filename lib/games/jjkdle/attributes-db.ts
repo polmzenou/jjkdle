@@ -1,5 +1,7 @@
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { CONTENT_REVALIDATE, CONTENT_TAG } from "@/lib/content/cache";
 import { getCurrentUniverse } from "@/lib/universes/current";
 import {
   buildAttributeSchema,
@@ -16,18 +18,19 @@ import {
  */
 
 /**
- * Mémoïsation PAR REQUÊTE (`cache()` de React), pas par process.
+ * Cache PARTAGÉ entre requêtes (Data Cache de Next, tag `content`), puis
+ * mémoïsation par requête (`cache()` de React).
  *
- * Un cache mémoire au niveau du module semblait raisonnable — définitions lues à
- * chaque partie, écrites de loin en loin — mais il ne peut être vidé que dans
- * l'instance qui a fait la modification. Toutes les autres continuaient de
- * servir l'ancien schéma jusqu'à leur recyclage : un attribut supprimé restait
- * listé dans le formulaire du roster, un attribut créé n'y apparaissait pas, et
- * l'admin ne pouvait qu'attendre. La table est minuscule : une requête par rendu
- * est un prix dérisoire pour un effet immédiat.
+ * Un cache mémoire au niveau du module avait été écarté : il ne pouvait être
+ * vidé que dans l'instance qui faisait la modification, les autres continuaient
+ * de servir l'ancien schéma. Le Data Cache, lui, est commun à toutes les
+ * instances : chaque écriture d'attribut (lib/admin/attribute-store.ts) appelle
+ * `invalidateContent()`, et la lecture suivante repart de la base partout.
+ * Seules les colonnes brutes (JSON pur) sont mises en cache ; le schéma est
+ * reconstruit à chaque lecture.
  */
-const loadForUniverse = cache(
-  async (universeId: string): Promise<AttributeSchema> => {
+const loadColumns = unstable_cache(
+  async (universeId: string): Promise<AttributeSpec[]> => {
     const rows = await prisma.attribute.findMany({
       where: { universeId },
       orderBy: { position: "asc" },
@@ -59,8 +62,15 @@ const loadForUniverse = cache(
       })),
     }));
 
-    return buildAttributeSchema(columns);
+    return columns;
   },
+  ["content-attribute-columns"],
+  { tags: [CONTENT_TAG], revalidate: CONTENT_REVALIDATE },
+);
+
+const loadForUniverse = cache(
+  async (universeId: string): Promise<AttributeSchema> =>
+    buildAttributeSchema(await loadColumns(universeId)),
 );
 
 /**

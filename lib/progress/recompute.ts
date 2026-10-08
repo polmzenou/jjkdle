@@ -88,29 +88,29 @@ export async function awardExp(
       gained > 0
         ? { totalXp: { increment: gained }, coins: { increment: gainedCoins } }
         : {},
-    select: { totalXp: true },
+    select: { totalXp: true, level: true },
   });
 
   const totalXp = Math.max(0, user.totalXp);
   const { level } = xpToLevel(totalXp);
 
-  await prisma.user.update({
-    where: { id: userId },
-    data: { level },
-  });
-
   // Le drop ne dépend PAS du score : une partie perdue loote comme une gagnée.
-  let droppedBooster: DroppedBooster | null = null;
-  if (universe && Math.random() < BOOSTER_DROP_CHANCE) {
-    droppedBooster = await createBooster(
-      userId,
-      universe.id,
-      rollBoosterKind(),
-      gameId ?? "unknown",
-    );
-  }
+  // Indépendant du niveau : écrit en parallèle de sa mise à jour.
+  const dropBooster =
+    universe && Math.random() < BOOSTER_DROP_CHANCE
+      ? createBooster(userId, universe.id, rollBoosterKind(), gameId ?? "unknown")
+      : null;
 
-  const newBadges = await evaluateBadges(userId);
+  // Le niveau n'est réécrit que s'il change (la plupart des parties n'en font
+  // pas gagner). Les badges ne dépendent ni du niveau ni des boosters (cf.
+  // lib/badges/definitions) : les trois écritures partent en parallèle.
+  const [droppedBooster, , newBadges] = await Promise.all([
+    dropBooster,
+    level !== user.level
+      ? prisma.user.update({ where: { id: userId }, data: { level } })
+      : null,
+    evaluateBadges(userId),
+  ]);
   return { newBadges, level, totalXp, gained, gainedCoins, droppedBooster };
 }
 

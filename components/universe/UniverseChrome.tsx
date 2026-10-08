@@ -7,7 +7,7 @@ import { SiteJsonLd } from "@/components/seo/JsonLd";
 import { UniverseProvider } from "@/components/universe/UniverseProvider";
 import { SocialToaster } from "@/components/social/SocialToaster";
 import { InboxBubble } from "@/components/social/InboxBubble";
-import { getCurrentUser } from "@/lib/auth/session";
+import { getCurrentUser, type SessionUser } from "@/lib/auth/session";
 import { getCachedImageCount } from "@/lib/admin/image-cache";
 import { getMaintenance } from "@/lib/config/app-config";
 import { getSocialCounts } from "@/lib/social/messages";
@@ -15,6 +15,7 @@ import { prisma } from "@/lib/prisma";
 import {
   getCurrentUniverse,
   listAvailableUniverses,
+  type CurrentUniverse,
 } from "@/lib/universes/current";
 import { themeCss, themeCssVars } from "@/lib/universes/theme";
 
@@ -40,41 +41,28 @@ export async function UniverseChrome({
   children: React.ReactNode;
   jsonLd?: boolean;
 }) {
-  const [user, maintenance, universe, available] = await Promise.all([
-    getCurrentUser(),
-    getMaintenance(),
-    getCurrentUniverse(),
-    // Arcades en ligne, pour le sélecteur d'univers de l'en-tête. Résolu ICI
-    // (serveur) plutôt que dans la nav : la liste vient de la base, et le
-    // sélecteur est un composant client.
-    listAvailableUniverses(),
-  ]);
+  const userPromise = getCurrentUser();
+  const universePromise = getCurrentUniverse();
+  // Profil (avatar + niveau + coins) pour la barre de nav + pastille « Amis ».
+  // Lancés dès que l'utilisateur et l'univers sont connus, SANS attendre la
+  // config ni la liste des arcades : un aller-retour BDD de moins par page.
+  // Niveau et coins = globaux (User) ; loadout équipé (avatar/cadre) = univers
+  // courant (UserUniverseProfile). Le titre équipé n'est plus affiché dans la nav.
+  const navDataPromise = loadNavData(userPromise, universePromise);
+  const [user, maintenance, universe, available, { profile, social }] =
+    await Promise.all([
+      userPromise,
+      getMaintenance(),
+      universePromise,
+      // Arcades en ligne, pour le sélecteur d'univers de l'en-tête. Résolu ICI
+      // (serveur) plutôt que dans la nav : la liste vient de la base, et le
+      // sélecteur est un composant client.
+      listAvailableUniverses(),
+      navDataPromise,
+    ]);
   const isAdmin = user?.role === "ADMIN";
   const maintenanceActive = maintenance.enabled && !isAdmin;
-
-  // Profil (avatar + niveau + coins) pour la barre de nav. Niveau et coins =
-  // globaux (User) ; loadout équipé (avatar/cadre) = univers courant
-  // (UserUniverseProfile). Le titre équipé n'est plus affiché dans la nav.
-  // Pastille « Amis » : lancée en parallèle de la lecture du profil.
-  const socialPromise = user ? getSocialCounts(user.id) : Promise.resolve(null);
-  const profile = user
-    ? await prisma.user.findUnique({
-        where: { id: user.id },
-        select: {
-          level: true,
-          coins: true,
-          universeProfiles: {
-            where: { universeId: universe.id },
-            select: {
-              equippedFrameKey: true,
-              avatarCharacter: { select: { image: true } },
-            },
-          },
-        },
-      })
-    : null;
   const navProfile = profile?.universeProfiles[0];
-  const social = await socialPromise;
   const navUser = user
     ? {
         username: user.username,
@@ -159,4 +147,31 @@ export async function UniverseChrome({
       </UniverseProvider>
     </>
   );
+}
+
+/** Profil de nav + compteurs sociaux, lus en parallèle dès que possible. */
+async function loadNavData(
+  userPromise: Promise<SessionUser | null>,
+  universePromise: Promise<CurrentUniverse>,
+) {
+  const [user, universe] = await Promise.all([userPromise, universePromise]);
+  if (!user) return { profile: null, social: null };
+  const [profile, social] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: user.id },
+      select: {
+        level: true,
+        coins: true,
+        universeProfiles: {
+          where: { universeId: universe.id },
+          select: {
+            equippedFrameKey: true,
+            avatarCharacter: { select: { image: true } },
+          },
+        },
+      },
+    }),
+    getSocialCounts(user.id),
+  ]);
+  return { profile, social };
 }

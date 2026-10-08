@@ -402,6 +402,10 @@ model HigherLowerScore {
 
   @@index([userId])
   @@index([universeId, score])
+  // Best par joueur (`DISTINCT ON ("userId") … ORDER BY score DESC, createdAt`)
+  // et classement hebdo : servis par index, sans tri de toute la table.
+  @@index([universeId, userId, score(sort: Desc), createdAt])
+  @@index([universeId, createdAt])
 }
 
 /// État autoritatif d'une partie « Higher/Lower » EN COURS (anti-triche).

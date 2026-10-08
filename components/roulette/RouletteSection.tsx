@@ -89,17 +89,21 @@ export function RouletteSection({
   // le serveur (l'horloge du visiteur peut être décalée : seul l'écoulement est
   // mesuré ici, même principe que <Countdown>).
   const [freeAt, setFreeAt] = useState(() => Date.now() + state.msUntilFree);
-  const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     setFreeAt(Date.now() + state.msUntilFree);
   }, [state.msUntilFree]);
+  // La section (roue comprise) ne se re-rend qu'au passage « tour gratuit
+  // disponible » ; le décompte seconde par seconde vit dans <FreeSpinClock>.
+  const [freeAvailable, setFreeAvailable] = useState(
+    () => state.msUntilFree <= 0,
+  );
   useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
-  }, []);
-
-  const remaining = Math.max(0, freeAt - now);
-  const freeAvailable = remaining === 0;
+    const delay = freeAt - Date.now();
+    setFreeAvailable(delay <= 0);
+    if (delay <= 0) return;
+    const t = setTimeout(() => setFreeAvailable(true), delay);
+    return () => clearTimeout(t);
+  }, [freeAt]);
   const canPay = coins >= PAID_SPIN_PRICE;
   const locked = spinning || pending || busy;
 
@@ -226,12 +230,7 @@ export function RouletteSection({
                 <p className="text-[11px] font-black uppercase tracking-[0.25em] text-white/45">
                   Prochain tour gratuit dans
                 </p>
-                <p
-                  suppressHydrationWarning
-                  className="mt-1 font-display text-4xl font-black tabular-nums tracking-wider text-white"
-                >
-                  {formatClock(remaining)}
-                </p>
+                <FreeSpinClock freeAt={freeAt} />
               </>
             )}
 
@@ -402,6 +401,34 @@ function LegendDot({ slot }: { slot: RouletteSlot }) {
       className="h-4 w-3 rounded-[3px] border"
       style={{ borderColor: color, background: `color-mix(in srgb, ${color} 55%, transparent)` }}
     />
+  );
+}
+
+/** Décompte HH:MM:SS jusqu'au tour gratuit ; s'arrête à zéro. */
+function FreeSpinClock({ freeAt }: { freeAt: number }) {
+  const [remaining, setRemaining] = useState(() =>
+    Math.max(0, freeAt - Date.now()),
+  );
+  useEffect(() => {
+    const update = () => {
+      const left = Math.max(0, freeAt - Date.now());
+      setRemaining(left);
+      return left;
+    };
+    if (update() === 0) return;
+    const t = setInterval(() => {
+      if (update() === 0) clearInterval(t);
+    }, 1000);
+    return () => clearInterval(t);
+  }, [freeAt]);
+
+  return (
+    <p
+      suppressHydrationWarning
+      className="mt-1 font-display text-4xl font-black tabular-nums tracking-wider text-white"
+    >
+      {formatClock(remaining)}
+    </p>
   );
 }
 

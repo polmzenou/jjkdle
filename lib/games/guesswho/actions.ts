@@ -16,7 +16,8 @@ import {
   type LobbyWithPlayers,
 } from "@/lib/multiplayer/store";
 import type { MpResult } from "@/lib/multiplayer/actions";
-import { awardExp, refreshLevelAndBadges } from "@/lib/progress/recompute";
+import { after } from "next/server";
+import { awardExp } from "@/lib/progress/recompute";
 import { guessWhoLossExp, guessWhoWinExp } from "@/lib/progress/exp-rewards";
 import { GUESSWHO_EVENTS } from "./events";
 import { toPublicState } from "./load";
@@ -293,14 +294,15 @@ export async function guessAction(
   // Les deux joueurs peuvent looter (le drop ne dépend pas du résultat). Le
   // booster n'est pas remonté à l'écran de fin — celui-ci passe par Pusher et
   // ne sert qu'un des deux joueurs ; il les attend dans leur onglet Deck.
-  await Promise.all([
-    awardExp(winnerId, guessWhoWinExp(), "guesswho"),
-    awardExp(loserId, guessWhoLossExp(), "guesswho"),
-  ]);
-  await Promise.all([
-    refreshLevelAndBadges(winnerId),
-    refreshLevelAndBadges(loserId),
-  ]);
+  // Rien de ces récompenses n'étant renvoyé, elles sont créditées APRÈS la
+  // réponse (`after`) : l'écran de fin n'attend plus XP, coins, booster et
+  // badges. `awardExp` recalcule déjà niveau et badges (scores écrits ci-dessus).
+  after(() =>
+    Promise.all([
+      awardExp(winnerId, guessWhoWinExp(), "guesswho"),
+      awardExp(loserId, guessWhoLossExp(), "guesswho"),
+    ]),
+  );
 
   const payload: GuessWhoGuessResultPayload = {
     status: "FINISHED",

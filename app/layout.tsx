@@ -3,6 +3,7 @@ import { Inter, Space_Grotesk } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AnalyticsGate } from "@/components/AnalyticsGate";
 import { CookieConsent } from "@/components/CookieConsent";
+import { MotionProvider } from "@/components/MotionProvider";
 import {
   getCurrentUniverseConfig,
   isCasinoRequest,
@@ -139,8 +140,10 @@ export default async function RootLayout({
         </style>
       </head>
       <body className="min-h-screen">
-        {children}
-        <CookieConsent />
+        <MotionProvider>
+          {children}
+          <CookieConsent />
+        </MotionProvider>
         <AnalyticsGate />
         <SpeedInsights />
       </body>

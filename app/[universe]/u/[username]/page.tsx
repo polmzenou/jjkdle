@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUniverse } from "@/lib/universes/current";
 import { bannerStyle } from "@/lib/profile/banners";
@@ -21,8 +22,9 @@ import { friendshipState } from "@/lib/social/friends";
 export const dynamic = "force-dynamic";
 
 /** Charge le profil public (données non sensibles) d'un utilisateur par pseudo.
- * Le loadout et le streak sont ceux de l'UNIVERS COURANT (UserUniverseProfile). */
-async function getPublicProfile(username: string) {
+ * Le loadout et le streak sont ceux de l'UNIVERS COURANT (UserUniverseProfile).
+ * Mémoïsé par requête : `generateMetadata` et la page le lisent tous les deux. */
+const getPublicProfile = cache(async (username: string) => {
   const { id: universeId } = await getCurrentUniverse();
   return prisma.user.findUnique({
     where: { username },
@@ -48,7 +50,7 @@ async function getPublicProfile(username: string) {
       },
     },
   });
-}
+});
 
 export async function generateMetadata({
   params,
@@ -98,6 +100,10 @@ export default async function PublicProfilePage({
     cards: visible("cards"),
   };
 
+  // Le propriétaire qui consulte son propre profil garde ses raccourcis vers
+  // /account/deck ; un visiteur ne voit que la vitrine.
+  const isOwner = viewer?.id === profile.id;
+
   // Les scores alimentent aussi la carte « Meilleur rang » : toujours chargés.
   const [
     classicScores,
@@ -106,6 +112,7 @@ export default async function PublicProfilePage({
     higherLowerScore,
     guessWhoStats,
     deckShowcase,
+    friendship,
   ] = await Promise.all([
     getUserScores(profile.id),
     getUserDraftScore(profile.id),
@@ -113,6 +120,7 @@ export default async function PublicProfilePage({
     getUserHigherLowerScore(profile.id),
     visibility.scores ? getUserGuessWhoStats(profile.id) : null,
     visibility.cards ? getDeckShowcase(profile.id, universeId) : null,
+    viewer && !isOwner ? friendshipState(viewer.id, profile.id) : null,
   ]);
   const scores = [
     ...classicScores,
@@ -121,11 +129,6 @@ export default async function PublicProfilePage({
     ...(higherLowerScore ? [higherLowerScore] : []),
   ];
   const badgeKeys = profile.badges.map((b) => b.badgeKey);
-  // Le propriétaire qui consulte son propre profil garde ses raccourcis vers
-  // /account/deck ; un visiteur ne voit que la vitrine.
-  const isOwner = viewer?.id === profile.id;
-  const friendship =
-    viewer && !isOwner ? await friendshipState(viewer.id, profile.id) : null;
 
   return (
     <main className="mx-auto w-full max-w-[1600px] px-5 py-10 sm:px-6 sm:py-14 lg:w-3/4">

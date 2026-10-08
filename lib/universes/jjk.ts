@@ -37,7 +37,7 @@ export const jjk: UniverseConfig = {
     "Itadori",
   ],
   logo: {
-    src: "/logo.png",
+    src: "/logo.webp",
     alt: "JJK Arcade",
   },
   // Palette « Cursed Energy » (miroir de tailwind.config.ts).

@@ -1,5 +1,7 @@
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { CONTENT_REVALIDATE, CONTENT_TAG } from "@/lib/content/cache";
 import { getCachedImage } from "@/lib/admin/image-cache";
 import { getCurrentUniverse } from "@/lib/universes/current";
 import { deriveRanking } from "@/lib/ranking/derive";
@@ -71,15 +73,77 @@ function toCharacter(row: CharacterRow): Character {
   };
 }
 
+/**
+ * Lectures BRUTES partagées entre requêtes (Data Cache, tag `content`). Les
+ * valeurs mises en cache sont du JSON pur ; la mise en forme (dont la surcharge
+ * d'image en mémoire, propre à l'instance) se fait APRÈS, à chaque lecture.
+ */
+const contentCache = { tags: [CONTENT_TAG], revalidate: CONTENT_REVALIDATE };
+
+const loadCategoryRows = unstable_cache(
+  async (uid: string) =>
+    prisma.category.findMany({
+      where: { universeId: uid },
+      orderBy: { position: "asc" },
+      select: {
+        id: true,
+        label: true,
+        description: true,
+        weight: true,
+        drawCount: true,
+      },
+    }),
+  ["content-categories"],
+  contentCache,
+);
+
+const loadRosterRows = unstable_cache(
+  // On ne sélectionne PAS `imageData` (les octets) : l'image est servie par la
+  // route /api/characters/[id]/image, `image` ne porte que l'URL d'affichage.
+  async (uid: string): Promise<CharacterRow[]> =>
+    prisma.character.findMany({
+      where: { universeId: uid },
+      orderBy: { position: "asc" },
+      select: {
+        id: true,
+        name: true,
+        title: true,
+        tier: true,
+        image: true,
+        ratings: true,
+        battleValue: true,
+        attributeValues: ATTRIBUTE_VALUES_SELECT,
+      },
+    }),
+  ["content-roster"],
+  contentCache,
+);
+
+const loadConditionRows = unstable_cache(
+  async (uid: string) =>
+    prisma.rankingCondition.findMany({
+      where: { universeId: uid },
+      orderBy: { position: "asc" },
+      select: {
+        id: true,
+        pool: true,
+        category: true,
+        prompt: true,
+        order: true,
+        criterion: true,
+        tiebreak: true,
+      },
+    }),
+  ["content-conditions"],
+  contentCache,
+);
+
 /** Catégories de stats du builder de l'univers, dans l'ordre d'affichage. */
 export async function getCategories(
   universeId?: string,
 ): Promise<CategoryConfig[]> {
   const uid = universeId ?? (await getCurrentUniverse()).id;
-  const rows = await prisma.category.findMany({
-    where: { universeId: uid },
-    orderBy: { position: "asc" },
-  });
+  const rows = await loadCategoryRows(uid);
   return rows.map((c) => ({
     id: c.id as CategoryId,
     label: c.label,
@@ -97,22 +161,7 @@ export async function getCategories(
  * Pyramid dérivées se recalculent depuis les notes. Une seule requête suffit.
  */
 const loadRoster = cache(async (uid: string): Promise<Character[]> => {
-  // On ne sélectionne PAS `imageData` (les octets) : l'image est servie par la
-  // route /api/characters/[id]/image, `image` ne porte que l'URL d'affichage.
-  const rows = await prisma.character.findMany({
-    where: { universeId: uid },
-    orderBy: { position: "asc" },
-    select: {
-      id: true,
-      name: true,
-      title: true,
-      tier: true,
-      image: true,
-      ratings: true,
-      battleValue: true,
-      attributeValues: ATTRIBUTE_VALUES_SELECT,
-    },
-  });
+  const rows = await loadRosterRows(uid);
   return rows.map(toCharacter);
 });
 
@@ -147,10 +196,7 @@ export async function getConditions(
   universeId?: string,
 ): Promise<RankingCondition[]> {
   const uid = universeId ?? (await getCurrentUniverse()).id;
-  const rows = await prisma.rankingCondition.findMany({
-    where: { universeId: uid },
-    orderBy: { position: "asc" },
-  });
+  const rows = await loadConditionRows(uid);
 
   // Roster chargé une seule fois, et seulement s'il existe des dérivées.
   const roster = rows.some((c) => c.criterion) ? await getRoster(uid) : [];

@@ -127,7 +127,9 @@ export function middleware(request: NextRequest) {
     // Uniquement sur une NAVIGATION : un appel d'API n'exprime pas une visite.
     // L'admin, par exemple, appelle l'API de l'univers qu'il administre — ce qui
     // ne doit pas déplacer l'univers de repli du site public dans son navigateur.
-    if (!isApi) {
+    // Posé seulement s'il change : un Set-Cookie à chaque page alourdit toutes
+    // les réponses pour rien.
+    if (!isApi && request.cookies.get(LAST_UNIVERSE_COOKIE)?.value !== split.slug) {
       response.cookies.set(LAST_UNIVERSE_COOKIE, split.slug, {
         sameSite: "lax",
         path: "/",

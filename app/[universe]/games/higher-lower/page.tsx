@@ -31,13 +31,14 @@ export default async function HigherLowerPage({
 }: {
   searchParams: Promise<{ scope?: string }>;
 }) {
-  if (!(await isGameEnabled("higher-lower")))
-    redirect(await universeHref("/games"));
-  const user = await getCurrentUser();
-  const [{ scope }, pool] = await Promise.all([
+  // Tout est lancé en parallèle ; le flag est vérifié avant d'utiliser le reste.
+  const [enabled, user, { scope }, pool] = await Promise.all([
+    isGameEnabled("higher-lower"),
+    getCurrentUser(),
     searchParams,
     getHigherLowerPool(),
   ]);
+  if (!enabled) redirect(await universeHref("/games"));
 
   return (
     <main className="mx-auto max-w-5xl px-4 pb-24 sm:px-6">

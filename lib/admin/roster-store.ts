@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { invalidateContent } from "@/lib/content/cache";
 import { prisma } from "@/lib/prisma";
 import type { Character } from "@/data/roster/characters";
 import { getRoster } from "@/lib/content/queries";
@@ -86,6 +87,9 @@ export async function upsertCharacter(
   char: Character,
   universeId: string,
 ): Promise<void> {
+  // Contenu modifié : le cache partagé (roster, catégories, attributs,
+  // consignes) est invalidé — appliqué par Next à la fin de la requête.
+  invalidateContent();
   const data = {
     name: char.name,
     title: char.title,
@@ -149,6 +153,9 @@ export async function removeCharacterRating(
   characterId: string,
   categoryId: string,
 ): Promise<void> {
+  // Contenu modifié : le cache partagé (roster, catégories, attributs,
+  // consignes) est invalidé — appliqué par Next à la fin de la requête.
+  invalidateContent();
   const existing = await prisma.character.findUnique({
     where: { id: characterId },
     select: { ratings: true },
@@ -167,6 +174,9 @@ export async function removeCharacterRating(
 
 /** Supprime un personnage par id (ignore s'il n'existe pas). */
 export async function deleteCharacter(id: string): Promise<void> {
+  // Contenu modifié : le cache partagé (roster, catégories, attributs,
+  // consignes) est invalidé — appliqué par Next à la fin de la requête.
+  invalidateContent();
   // Les CharacterAttribute partent en cascade (onDelete: Cascade).
   await prisma.character.deleteMany({ where: { id } });
 }

@@ -303,26 +303,22 @@ export async function topHigherLowerEntries(
   scope: LeaderboardScope = "all-time",
 ): Promise<HigherLowerLeaderboardEntry[]> {
   const { id: universeId } = await getCurrentUniverse();
-  const bestPerUser = await prisma.$queryRaw<BestRow[]>(
+  const weekFilter =
     scope === "weekly"
-      ? Prisma.sql`
-          SELECT DISTINCT ON ("userId") "id", "userId", "score", "createdAt"
-          FROM "HigherLowerScore"
-          WHERE "universeId" = ${universeId} AND "createdAt" >= ${getWeekBounds().start}
-          ORDER BY "userId", "score" DESC, "createdAt" ASC`
-      : Prisma.sql`
-          SELECT DISTINCT ON ("userId") "id", "userId", "score", "createdAt"
-          FROM "HigherLowerScore"
-          WHERE "universeId" = ${universeId}
-          ORDER BY "userId", "score" DESC, "createdAt" ASC`,
-  );
-
-  const ranked = bestPerUser
-    .sort(
-      (a, b) =>
-        b.score - a.score || a.createdAt.getTime() - b.createdAt.getTime(),
-    )
-    .slice(0, limit);
+      ? Prisma.sql`AND "createdAt" >= ${getWeekBounds().start}`
+      : Prisma.empty;
+  // Classement + coupe faits en SQL : seules les `limit` lignes du podium
+  // remontent, au lieu du best de CHAQUE joueur. Dernier départage sur `userId`
+  // = l'ordre de sortie du `DISTINCT ON`, que gardait le tri JS (stable).
+  const ranked = await prisma.$queryRaw<BestRow[]>(Prisma.sql`
+    SELECT * FROM (
+      SELECT DISTINCT ON ("userId") "id", "userId", "score", "createdAt"
+      FROM "HigherLowerScore"
+      WHERE "universeId" = ${universeId} ${weekFilter}
+      ORDER BY "userId", "score" DESC, "createdAt" ASC
+    ) AS best
+    ORDER BY "score" DESC, "createdAt" ASC, "userId" ASC
+    LIMIT ${limit}`);
   if (ranked.length === 0) return [];
 
   const users = await prisma.user.findMany({
@@ -360,26 +356,31 @@ export async function topHigherLowerEntries(
 export async function getUserHigherLowerScore(
   userId: string,
 ): Promise<UserScore | null> {
-  // Bests de tous les joueurs de l'univers (un max par userId).
   const { id: universeId } = await getCurrentUniverse();
-  const grouped = await prisma.higherLowerScore.groupBy({
-    by: ["userId"],
-    where: { universeId },
+  // Best du joueur d'abord (index userId), puis rang et effectif comptés en
+  // SQL — sans rapatrier le best de chaque joueur de l'univers.
+  const mine = await prisma.higherLowerScore.aggregate({
+    where: { universeId, userId },
     _max: { score: true, createdAt: true },
   });
-
-  const mine = grouped.find((g) => g.userId === userId);
-  if (!mine || mine._max.score == null) return null;
+  if (mine._max.score == null) return null;
   const myBest = mine._max.score;
 
-  const totalPlayers = grouped.length;
-  const better = grouped.filter((g) => (g._max.score ?? 0) > myBest).length;
+  // Un joueur fait mieux ssi l'une de ses parties dépasse `myBest`.
+  const [counts] = await prisma.$queryRaw<
+    { totalPlayers: number; better: number }[]
+  >(Prisma.sql`
+    SELECT
+      COUNT(DISTINCT "userId")::int AS "totalPlayers",
+      (COUNT(DISTINCT "userId") FILTER (WHERE "score" > ${myBest}))::int AS "better"
+    FROM "HigherLowerScore"
+    WHERE "universeId" = ${universeId}`);
 
   return {
     gameId: GAME_ID,
     best: myBest,
-    rank: better + 1,
-    totalPlayers,
+    rank: (counts?.better ?? 0) + 1,
+    totalPlayers: counts?.totalPlayers ?? 1,
     updatedAt: (mine._max.createdAt ?? new Date()).toISOString(),
   };
 }

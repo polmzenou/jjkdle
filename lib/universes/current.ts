@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { DEFAULT_UNIVERSE_SLUG, getUniverseBySlug } from "./registry";
@@ -107,6 +107,28 @@ export async function revalidateUniversePath(
   revalidatePath(await universeHref(pathname), type);
 }
 
+/** Tag du cache des lignes `Universe` (invalidé par `invalidateUniverses`). */
+const UNIVERSES_TAG = "universes";
+
+/**
+ * Lignes `Universe`, partagées entre requêtes : lues sur chaque page (sélecteur
+ * d'arcade de la nav) mais modifiées seulement depuis /admin/universes.
+ */
+const loadUniverseRows = unstable_cache(
+  async () =>
+    prisma.universe.findMany({
+      orderBy: { createdAt: "asc" },
+      select: { id: true, slug: true, name: true },
+    }),
+  ["universe-rows"],
+  { tags: [UNIVERSES_TAG], revalidate: 600 },
+);
+
+/** À appeler après toute création / modification / suppression d'univers. */
+export function invalidateUniverses(): void {
+  revalidateTag(UNIVERSES_TAG);
+}
+
 /** Univers utilisable : présent en base ET configuré en code. */
 export interface AvailableUniverse {
   id: string;
@@ -123,10 +145,7 @@ export interface AvailableUniverse {
  * Sert au sélecteur d'univers de l'admin et au hub.
  */
 export async function listAvailableUniverses(): Promise<AvailableUniverse[]> {
-  const rows = await prisma.universe.findMany({
-    orderBy: { createdAt: "asc" },
-    select: { id: true, slug: true, name: true },
-  });
+  const rows = await loadUniverseRows();
   return rows.flatMap((row) => {
     const config = getUniverseBySlug(row.slug);
     return config ? [{ ...row, config }] : [];

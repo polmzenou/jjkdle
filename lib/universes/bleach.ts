@@ -43,7 +43,7 @@ export const bleach: UniverseConfig = {
     "bankai",
   ],
   logo: {
-    src: "/logo-bleach.png",
+    src: "/logo-bleach.webp",
     alt: "Bleach Arcade",
   },
   // Palette du LOGO officiel. Le wordmark « BLEACH » est MONOCHROME depuis 2001

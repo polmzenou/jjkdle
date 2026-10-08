@@ -18,6 +18,7 @@ import type { MpResult } from "@/lib/multiplayer/actions";
 import { BATTLE_EVENTS } from "./events";
 import { parseBattleState } from "./state";
 import { computeBattleResult } from "./scoring";
+import { after } from "next/server";
 import { awardExp } from "@/lib/progress/recompute";
 import { battleWinExp } from "@/lib/progress/exp-rewards";
 import { pickCard, randomSeed } from "./rng";
@@ -253,11 +254,13 @@ export async function finishCombatAction(codeRaw: string): Promise<MpResult> {
     where: { id: lobby.id, status: "PLAYING" },
     data: { gameState: toJson(next), status: "FINISHED" },
   });
-  if (count === 1 && state.result?.winnerUserId) {
+  const winnerUserId = state.result?.winnerUserId;
+  if (count === 1 && winnerUserId) {
     // Le booster éventuel n'est pas remonté : l'écran de fin multijoueur est
     // piloté par Pusher, pas par le retour de cette action. Il attend le
-    // vainqueur dans son onglet Deck.
-    await awardExp(state.result.winnerUserId, battleWinExp(), "battle");
+    // vainqueur dans son onglet Deck. Crédité APRÈS la réponse (`after`) : la
+    // diffusion du résultat n'attend plus les récompenses.
+    after(() => awardExp(winnerUserId, battleWinExp(), "battle"));
   }
   await broadcastBattle(code, { gameState: next });
   return { ok: true };

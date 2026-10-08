@@ -42,7 +42,7 @@ export const tg: UniverseConfig = {
     "goules",
   ],
   logo: {
-    src: "/logo-tg.png",
+    src: "/logo-tg.webp",
     alt: "TG Arcade",
   },
   // Palette du LOGO officiel : le wordmark blanc/rouge sur noir, dédoublé par

@@ -115,6 +115,12 @@ describe("lecture d'un objet en base", () => {
     );
     expect(normalizeItem(row)?.image).toBeUndefined();
   });
+
+  it("garde le `?v=` de l'URL stockée (cache immuable de la route d'image)", () => {
+    expect(
+      normalizeItem({ ...row, imageData: true, image: "/api/items/x/image?v=42" })?.image,
+    ).toBe("/api/items/x/image?v=42");
+  });
 });
 
 describe("validation admin", () => {

@@ -33,18 +33,28 @@ export default async function JujutsuDraftPage({
 }: {
   searchParams: Promise<{ scope?: string }>;
 }) {
-  if (!(await isGameEnabled("jujutsu-draft")))
-    redirect(await universeHref("/games"));
-  const user = await getCurrentUser();
-  const [{ scope }, initialBest, roster, bosses, categories, avatarCategory] =
-    await Promise.all([
-      searchParams,
-      user ? getUserDraftBest(user.id) : Promise.resolve(null),
-      getDraftRoster(),
-      getDraftBosses(),
-      getDraftCategories(),
-      getDraftAvatarCategory(),
-    ]);
+  // Tout est lancé en parallèle ; le flag est vérifié avant d'utiliser le reste.
+  const userPromise = getCurrentUser();
+  const [
+    enabled,
+    user,
+    { scope },
+    initialBest,
+    roster,
+    bosses,
+    categories,
+    avatarCategory,
+  ] = await Promise.all([
+    isGameEnabled("jujutsu-draft"),
+    userPromise,
+    searchParams,
+    userPromise.then((u) => (u ? getUserDraftBest(u.id) : null)),
+    getDraftRoster(),
+    getDraftBosses(),
+    getDraftCategories(),
+    getDraftAvatarCategory(),
+  ]);
+  if (!enabled) redirect(await universeHref("/games"));
 
   return (
     <main className="mx-auto max-w-5xl px-4 pb-24 sm:px-6">

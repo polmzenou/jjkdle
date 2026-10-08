@@ -9,13 +9,18 @@ interface CharacterImageProps {
   /** Forme minimale partagée par le roster builder et le roster draft. */
   character: { name: string; image?: string };
   className?: string;
+  /**
+   * `"lazy"` : à réserver aux longues grilles qui défilent (collection). Jamais
+   * dans une modale ni un reveal : l'image y apparaîtrait APRÈS l'animation.
+   */
+  loading?: "lazy" | "eager";
 }
 
 /**
  * Affiche l'image du personnage si `character.image` est défini et chargeable,
  * sinon retombe sur un placeholder (initiales sur fond violet uniforme).
  */
-export function CharacterImage({ character, className = "" }: CharacterImageProps) {
+export function CharacterImage({ character, className = "", loading }: CharacterImageProps) {
   const [failed, setFailed] = useState(false);
   const showImage = character.image && !failed;
 
@@ -27,6 +32,7 @@ export function CharacterImage({ character, className = "" }: CharacterImageProp
         <img
           src={character.image}
           alt={character.name}
+          loading={loading}
           onError={() => setFailed(true)}
           className="h-full w-full object-cover"
         />

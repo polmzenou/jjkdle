@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { revalidateTag, unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { GAMES } from "@/lib/games/registry";
 import { getCurrentUniverseSlug } from "@/lib/universes/current";
@@ -8,10 +9,11 @@ import { getCurrentUniverseSlug } from "@/lib/universes/current";
  * mot du jour JJKdle), persistée dans la table `AppConfig` (clé/valeur JSON) et
  * lisible partout via `getConfig`.
  *
- * Lecture mémoïsée par requête via React `cache()` (même pattern que
- * `getCurrentUser`, cf. lib/auth/session.ts) → une seule requête `findMany` par
- * rendu, même si plusieurs jeux interrogent leur flag. L'écriture se fait depuis
- * /admin (Server Actions) et invalide le cache via `revalidatePath("/", "layout")`.
+ * Lecture partagée entre requêtes (`unstable_cache`, tag `app-config`) puis
+ * mémoïsée par requête via React `cache()` → au plus une requête `findMany` par
+ * rendu, et aucune tant que la config ne change pas. L'écriture se fait depuis
+ * /admin (Server Actions) : `setConfig` invalide le tag, l'appelant invalide les
+ * pages via `revalidatePath("/", "layout")`.
  *
  * MULTI-UNIVERS (étape 4) : toutes les clés sont PRÉFIXÉES PAR L'UNIVERS
  * (`u.<slug>.…`). Désactiver un jeu ou passer en maintenance sur JJK ne doit rien
@@ -62,13 +64,41 @@ export const MAINTENANCE_DEFAULT: MaintenanceConfig = { enabled: false };
 
 // ── Lecture ──────────────────────────────────────────────────────────────
 
-/** Charge toute la table `AppConfig` en une requête (mémoïsé par requête). */
+/** Tag du cache de données de la config (invalidé par `setConfig`). */
+export const APP_CONFIG_TAG = "app-config";
+
+/**
+ * Lignes de config, partagées ENTRE requêtes (Data Cache de Next) : la config est
+ * lue sur chaque page (maintenance, flags) mais n'est écrite que depuis /admin.
+ * Toute écriture passe par `setConfig` ou `invalidateAppConfig`, qui invalident
+ * le tag ; la lecture suivante repart de la base.
+ *
+ * Les clés `sys.` (anti-spam des mails d'erreur, cf. lib/mail/error-throttle.ts)
+ * sont exclues : elles ne servent jamais à la lecture de config et changent à
+ * chaque erreur.
+ */
+const loadConfigRows = unstable_cache(
+  async (): Promise<{ key: string; value: unknown }[]> =>
+    prisma.appConfig.findMany({
+      where: { NOT: { key: { startsWith: "sys." } } },
+      select: { key: true, value: true },
+    }),
+  ["app-config"],
+  { tags: [APP_CONFIG_TAG], revalidate: 600 },
+);
+
+/** Charge toute la config en une lecture (mémoïsé par requête). */
 const loadAllConfig = cache(
   async (): Promise<Map<string, unknown>> => {
-    const rows = await prisma.appConfig.findMany();
+    const rows = await loadConfigRows();
     return new Map(rows.map((r) => [r.key, r.value as unknown]));
   },
 );
+
+/** Invalide le cache de config (après une écriture directe dans `AppConfig`). */
+export function invalidateAppConfig(): void {
+  revalidateTag(APP_CONFIG_TAG);
+}
 
 /**
  * Lit une clé de config, avec repli typé si absente. Passe par le cache de
@@ -140,4 +170,5 @@ export async function setConfig(key: string, value: unknown): Promise<void> {
     create: { key, value: value as never },
     update: { value: value as never },
   });
+  invalidateAppConfig();
 }

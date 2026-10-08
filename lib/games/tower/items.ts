@@ -130,7 +130,13 @@ export function normalizeItem(raw: {
     name: raw.name,
     description: raw.description,
     // Image binaire en base → servie par la route API ; sinon chemin statique.
-    image: raw.imageData ? `/api/items/${raw.id}/image` : (raw.image ?? undefined),
+    // L'URL stockée porte le `?v=` posé à l'upload : la route répond en cache
+    // immuable, sans ce suffixe une image remplacée resterait figée côté client.
+    image: raw.imageData
+      ? raw.image?.startsWith(`/api/items/${raw.id}/image`)
+        ? raw.image
+        : `/api/items/${raw.id}/image`
+      : (raw.image ?? undefined),
     rarity: isItemRarity(raw.rarity) ? raw.rarity : "COMMON",
     effects,
     enabled: raw.enabled,

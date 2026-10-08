@@ -38,7 +38,7 @@ export const aot: UniverseConfig = {
     "Titan",
   ],
   logo: {
-    src: "/logo-aot.png",
+    src: "/logo-aot.webp",
     alt: "AOT Arcade",
   },
   // Palette « Ailes de la Liberté » : vert de la cape du Bataillon d'exploration

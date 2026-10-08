@@ -42,7 +42,7 @@ export const kny: UniverseConfig = {
     "Piliers",
   ],
   logo: {
-    src: "/logo-kny.png",
+    src: "/logo-kny.webp",
     alt: "KNY Arcade",
   },
   // Palette du LOGO officiel : le rouge du cercle au pinceau (ensō), l'encre

@@ -1,4 +1,5 @@
 import { getConfig, setConfig } from "@/lib/config/app-config";
+import { prisma } from "@/lib/prisma";
 import { DEFAULT_CARD_BACK, resolveCardBack } from "./skins";
 import { DEFAULT_MIN_BET } from "./rules";
 
@@ -73,11 +74,24 @@ export async function setCasinoCardBack(id: string): Promise<void> {
  * Roulette truquée : la bille ne tombe que sur un numéro rouge. Basculé par un
  * ADMIN en cliquant sur la roue ; faux par défaut, et remis à faux quand un ADMIN
  * arrive sur une table à plusieurs.
+ *
+ * Lu et écrit DIRECTEMENT en base, hors du cache de config (`getConfig`) : le
+ * flag bascule à chaud, y compris pendant le rendu de la page d'une table (où
+ * invalider un cache est interdit), et chaque tirage doit voir sa valeur exacte.
  */
 export async function isRouletteRigged(): Promise<boolean> {
-  return Boolean(await getConfig<boolean>(KEY_ROULETTE_RIGGED, false));
+  const row = await prisma.appConfig.findUnique({
+    where: { key: KEY_ROULETTE_RIGGED },
+    select: { value: true },
+  });
+  return Boolean(row?.value);
 }
 
 export async function setRouletteRigged(rigged: boolean): Promise<void> {
-  await setConfig(KEY_ROULETTE_RIGGED, Boolean(rigged));
+  const value = Boolean(rigged);
+  await prisma.appConfig.upsert({
+    where: { key: KEY_ROULETTE_RIGGED },
+    create: { key: KEY_ROULETTE_RIGGED, value },
+    update: { value },
+  });
 }

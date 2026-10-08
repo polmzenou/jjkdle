@@ -5,6 +5,7 @@ import type { CSSProperties } from "react";
 import { useUniverseGames } from "@/components/universe/UniverseProvider";
 import { UniverseLink } from "@/components/universe/UniverseLink";
 import { GameIcon } from "@/components/icons/GameIcon";
+import { previewDisplaySrc } from "@/lib/images";
 
 /**
  * Présentation des jeux sur la landing : pour chaque jeu en ligne, une rangée
@@ -53,8 +54,9 @@ export function GameShowcase({ disabledIds = [] }: { disabledIds?: string[] }) {
                 {game.previewImage ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={game.previewImage}
+                    src={previewDisplaySrc(game.previewImage)}
                     alt={`Capture d'écran du jeu ${game.title}`}
+                    loading="lazy"
                     className="relative aspect-[2/1] w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                   />
                 ) : (

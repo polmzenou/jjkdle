@@ -1,4 +1,5 @@
 import type { AttributeKind } from "@prisma/client";
+import { invalidateContent } from "@/lib/content/cache";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUniverse } from "@/lib/universes/current";
 
@@ -125,6 +126,9 @@ export async function listAttributes(): Promise<AdminAttribute[]> {
  * comparé par Higher/Lower). La renommer orphelinerait ces références.
  */
 export async function upsertAttribute(input: AttributeInput): Promise<void> {
+  // Contenu modifié : le cache partagé (roster, catégories, attributs,
+  // consignes) est invalidé — appliqué par Next à la fin de la requête.
+  invalidateContent();
   const { id: universeId } = await getCurrentUniverse();
   // La tolérance n'a de sens que pour un NUMERIC.
   const tolerance = input.kind === "NUMERIC" ? input.tolerance : null;
@@ -161,6 +165,9 @@ export async function upsertAttribute(input: AttributeInput): Promise<void> {
  * rendre des persos incomplets et donc inéligibles au tirage quotidien.
  */
 export async function deleteAttribute(id: string): Promise<void> {
+  // Contenu modifié : le cache partagé (roster, catégories, attributs,
+  // consignes) est invalidé — appliqué par Next à la fin de la requête.
+  invalidateContent();
   const { id: universeId } = await getCurrentUniverse();
   // `deleteMany` borné à l'univers : un id d'un autre univers ne peut rien casser.
   await prisma.attribute.deleteMany({ where: { id, universeId } });
@@ -170,6 +177,9 @@ export async function deleteAttribute(id: string): Promise<void> {
 export async function upsertAttributeOption(
   input: AttributeOptionInput,
 ): Promise<void> {
+  // Contenu modifié : le cache partagé (roster, catégories, attributs,
+  // consignes) est invalidé — appliqué par Next à la fin de la requête.
+  invalidateContent();
   const { id: universeId } = await getCurrentUniverse();
   // L'attribut doit appartenir à l'univers administré.
   const attribute = await prisma.attribute.findFirst({
@@ -200,6 +210,9 @@ export async function upsertAttributeOption(
  * perdent cet attribut (cascade), et deviennent donc incomplets.
  */
 export async function deleteAttributeOption(id: string): Promise<void> {
+  // Contenu modifié : le cache partagé (roster, catégories, attributs,
+  // consignes) est invalidé — appliqué par Next à la fin de la requête.
+  invalidateContent();
   const { id: universeId } = await getCurrentUniverse();
   const option = await prisma.attributeOption.findFirst({
     where: { id, attribute: { universeId } },

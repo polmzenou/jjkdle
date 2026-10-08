@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useUniverse } from "./UniverseProvider";
 
@@ -123,7 +123,7 @@ export function UniverseSwitcher({
 
       <AnimatePresence>
         {open && (
-          <motion.div
+          <m.div
             role="menu"
             aria-label="Arcades"
             initial={{ opacity: 0, y: -6, scale: 0.97 }}
@@ -189,7 +189,7 @@ export function UniverseSwitcher({
                 </Link>
               );
             })}
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>

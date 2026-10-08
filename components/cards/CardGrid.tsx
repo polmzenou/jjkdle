@@ -118,10 +118,10 @@ export function CardGrid({
                     className="block w-full rounded-2xl transition-transform hover:scale-[1.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-domain"
                     aria-label={`${card.owned ? "Retirer" : "Donner"} la carte ${card.name}`}
                   >
-                    <CardArt card={card} owned={card.owned} count={card.count} />
+                    <CardArt card={card} owned={card.owned} count={card.count} loading="lazy" />
                   </button>
                 ) : (
-                  <CardArt card={card} owned={card.owned} count={card.count} />
+                  <CardArt card={card} owned={card.owned} count={card.count} loading="lazy" />
                 )}
 
                 {renderBadge && (

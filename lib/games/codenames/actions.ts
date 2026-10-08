@@ -16,7 +16,8 @@ import {
   type LobbyWithPlayers,
 } from "@/lib/multiplayer/store";
 import type { MpResult } from "@/lib/multiplayer/actions";
-import { awardExp, refreshLevelAndBadges } from "@/lib/progress/recompute";
+import { after } from "next/server";
+import { awardExp } from "@/lib/progress/recompute";
 import { codenamesLossExp, codenamesWinExp } from "@/lib/progress/exp-rewards";
 import { CODENAMES_EVENTS } from "./events";
 import {
@@ -659,19 +660,22 @@ async function finishGame(
     })),
   });
 
-  // XP : gagnants > perdants, puis recompute niveau/badges pour tous.
-  await Promise.all(
-    userIds.map((userId) =>
-      // Booster non remonté : l'écran de fin est diffusé par Pusher à toute la
-      // table, il attend chaque joueur dans son onglet Deck.
-      awardExp(
-        userId,
-        teams[userId] === winnerTeam ? codenamesWinExp() : codenamesLossExp(),
-        "codenames",
+  // XP : gagnants > perdants (`awardExp` recalcule aussi niveau et badges, les
+  // scores étant déjà écrits). Rien n'en est renvoyé : crédité APRÈS la réponse
+  // (`after`), l'écran de fin n'attend plus les récompenses de toute la table.
+  after(() =>
+    Promise.all(
+      userIds.map((userId) =>
+        // Booster non remonté : l'écran de fin est diffusé par Pusher à toute la
+        // table, il attend chaque joueur dans son onglet Deck.
+        awardExp(
+          userId,
+          teams[userId] === winnerTeam ? codenamesWinExp() : codenamesLossExp(),
+          "codenames",
+        ),
       ),
     ),
   );
-  await Promise.all(userIds.map((userId) => refreshLevelAndBadges(userId)));
 
   const payload: CodenamesEndPayload = {
     status: "FINISHED",

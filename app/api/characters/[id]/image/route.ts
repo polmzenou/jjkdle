@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { invalidateContent } from "@/lib/content/cache";
 import { getAdminUser } from "@/lib/auth/session";
 import { getCurrentUniverse } from "@/lib/universes/current";
 
@@ -40,7 +41,12 @@ export async function GET(_req: Request, { params }: Params) {
   });
 
   if (!character?.imageData || !character.imageMime) {
-    return new NextResponse("Not found", { status: 404 });
+    // 404 mis en cache brièvement au CDN : un id inconnu ne doit pas coûter
+    // une lecture BDD à chaque affichage.
+    return new NextResponse("Not found", {
+      status: 404,
+      headers: { "Cache-Control": "public, max-age=60, s-maxage=60" },
+    });
   }
 
   return new NextResponse(new Uint8Array(character.imageData), {
@@ -48,6 +54,9 @@ export async function GET(_req: Request, { params }: Params) {
       "Content-Type": character.imageMime,
       // L'URL change à chaque upload (?v=timestamp) → cache long et immuable.
       "Cache-Control": "public, max-age=31536000, immutable",
+      // Sans directive CDN explicite, Vercel ne met pas en cache la réponse
+      // d'une fonction : chaque visiteur coûterait un appel + une lecture BDD.
+      "CDN-Cache-Control": "public, max-age=31536000, immutable",
     },
   });
 }
@@ -89,6 +98,7 @@ export async function POST(req: Request, { params }: Params) {
     data: { imageData: bytes, imageMime: file.type, image: url },
   });
 
+  invalidateContent(); // roster en cache : `image` vient de changer
   revalidatePath("/", "layout");
   return NextResponse.json({ ok: true, image: url });
 }
@@ -105,6 +115,7 @@ export async function DELETE(_req: Request, { params }: Params) {
     data: { imageData: null, imageMime: null, image: null },
   });
 
+  invalidateContent(); // roster en cache : `image` vient de changer
   revalidatePath("/", "layout");
   return NextResponse.json({ ok: true });
 }
