@@ -94,8 +94,12 @@ export function ShopView({
     setResult(null);
     setError(null);
     const opened = await openBoosterAction(boosterId);
-    if (opened.ok && opened.result) setResult(opened.result);
-    else {
+    if (opened.ok && opened.result) {
+      setResult(opened.result);
+      // Solde et collection rafraîchis MAINTENANT, sous l'overlay opaque, et
+      // non à la fermeture où la page changeait pendant le fondu de sortie.
+      router.refresh();
+    } else {
       setError(
         opened.error ??
           "L'ouverture a échoué. Retrouve ton booster dans « Mon deck ».",
@@ -309,11 +313,7 @@ export function ShopView({
             result={result}
             loading={!result && !error}
             error={error}
-            onClose={() => {
-              setOpening(false);
-              // Le solde a baissé et la collection a changé.
-              router.refresh();
-            }}
+            onClose={() => setOpening(false)}
           />
         )}
       </AnimatePresence>

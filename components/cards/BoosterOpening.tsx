@@ -88,11 +88,6 @@ export function BoosterOpening({
     }
   }, [result]);
 
-  // Rendu dans <body> : monté dans l'écran de victoire (lui-même animé en
-  // `transform`), un `position: fixed` se calait sur cet ancêtre et non sur
-  // l'écran — l'overlay sautait de place à la fin de l'animation du parent.
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
 
   const advance = () => {
     if (atRecap || !result) return;
@@ -101,15 +96,17 @@ export function BoosterOpening({
 
   const revealing = result != null && !atRecap && !error && cards.length > 0;
 
-  if (!mounted) return null;
-
+  // Rendu dans <body> : monté dans l'écran de victoire (lui-même animé en
+  // `transform`), un `position: fixed` se calait sur cet ancêtre et non sur
+  // l'écran — l'overlay sautait de place à la fin de l'animation du parent.
+  // Toujours monté APRÈS un clic, jamais au rendu serveur : `document` existe.
   return createPortal(
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.18 }}
-      className="fixed inset-0 z-[110] flex items-center justify-center overflow-y-auto bg-void-900/95 p-4"
+      className="fixed inset-0 z-[110] flex items-center justify-center overflow-y-auto bg-void-900 p-4"
       role="dialog"
       aria-modal="true"
       aria-label="Ouverture d'un booster"
@@ -373,9 +370,11 @@ function Recap({
   const newCards = result.cards.filter((c) => !c.duplicate).length;
 
   return (
+    // Pas de fondu depuis 0 : la dernière carte disparaissait et laissait un
+    // écran vide le temps que le récap remonte. Il glisse en place, déjà visible.
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ y: 16, scale: 0.98 }}
+      animate={{ y: 0, scale: 1 }}
       transition={{ duration: 0.25, ease: "easeOut" }}
       className="rounded-3xl border border-white/10 bg-void-800/95 p-6 sm:p-8"
     >

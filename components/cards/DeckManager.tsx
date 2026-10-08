@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState, useTransition } from "react";
+import { useCallback, useMemo, useRef, useState, useTransition } from "react";
 import { AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { BoosterPack } from "@/components/cards/BoosterPack";
@@ -63,6 +63,10 @@ export function DeckManager({
   const [result, setResult] = useState<OpenedBooster | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [skip, setSkip] = useState(false);
+  // Verrou anti double-clic. Une ref et non `disabled` sur les packs : griser
+  // toute la pile au clic changeait la page PENDANT le fondu de l'overlay
+  // (« la carte disparaît puis revient »).
+  const openingRef = useRef(false);
 
   const [tab, setTab] = useState<"collection" | "duplicates">("collection");
   const [picks, setPicks] = useState<string[]>([]);
@@ -84,13 +88,20 @@ export function DeckManager({
   };
 
   const openPack = async (boosterId: string, skipAnimation: boolean) => {
+    if (openingRef.current) return;
+    openingRef.current = true;
     setSkip(skipAnimation);
     setOpeningId(boosterId);
     setResult(null);
     setError(null);
     const res = await openBoosterAction(boosterId);
-    if (res.ok && res.result) setResult(res.result);
-    else setError(res.error ?? "Impossible d'ouvrir ce booster.");
+    if (res.ok && res.result) {
+      setResult(res.result);
+      // Rafraîchit la page MAINTENANT, cachée sous l'overlay opaque, et non à
+      // la fermeture : sinon la liste et la collection changeaient pendant le
+      // fondu de sortie, sous les yeux du joueur.
+      router.refresh();
+    } else setError(res.error ?? "Impossible d'ouvrir ce booster.");
   };
 
   const deckIds = new Set(deck.map((c) => c.characterId));
@@ -166,6 +177,7 @@ export function DeckManager({
     if (res.ok && res.card) {
       setFusionResult({ boosterId: "fusion", kind: "simple", cards: [res.card] });
       setPicks([]);
+      router.refresh();
     } else {
       setFusionError(res.error ?? "Fusion impossible.");
     }
@@ -234,13 +246,11 @@ export function DeckManager({
                 <BoosterPack
                   kind={booster.kind}
                   animated
-                  disabled={openingId !== null}
                   onClick={() => void openPack(booster.id, false)}
                 />
                 <button
                   type="button"
                   onClick={() => void openPack(booster.id, true)}
-                  disabled={openingId !== null}
                   className="text-[10px] font-medium uppercase tracking-wider text-white/35 underline-offset-4 transition-colors hover:text-white/70 hover:underline disabled:opacity-50"
                 >
                   Sans animation
@@ -355,27 +365,25 @@ export function DeckManager({
       <AnimatePresence>
         {openingId && (
           <BoosterOpening
+            key="booster"
             result={result}
             loading={!result && !error}
             error={error}
             initialSkip={skip}
             onClose={() => {
+              openingRef.current = false;
               setOpeningId(null);
-              // Le booster a disparu de la liste et la collection a changé.
-              if (result) router.refresh();
             }}
           />
         )}
         {fusing && (
           <BoosterOpening
+            key="fusion"
             result={fusionResult}
             loading={!fusionResult && !fusionError}
             error={fusionError}
             label="Fusion"
-            onClose={() => {
-              setFusing(false);
-              if (fusionResult) router.refresh();
-            }}
+            onClose={() => setFusing(false)}
           />
         )}
       </AnimatePresence>
