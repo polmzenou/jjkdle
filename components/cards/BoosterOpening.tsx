@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { CardArt, RAINBOW_GRADIENT } from "@/components/cards/CardArt";
 import { CloseIcon } from "@/components/cards/CardIcons";
@@ -52,19 +53,46 @@ export function BoosterOpening({
   const atRecap = skipped || (result != null && index >= cards.length);
   const current = cards[index];
 
-  // Fermeture au clavier (Échap) + verrou du scroll de fond, comme les autres
-  // modales du site (cf. MultiplayerPicker).
+  // Fermeture au clavier (Échap). `onClose` est une flèche recréée à chaque
+  // rendu du parent : on la lit via une ref pour ne pas réabonner l'écouteur.
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") onCloseRef.current();
     };
     document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
+
+  // Verrou du scroll de fond, posé UNE fois pour toute la vie de l'overlay et
+  // restauré à sa valeur précédente : l'overlay peut s'ouvrir par-dessus une
+  // modale qui verrouille déjà (écran de victoire).
+  useEffect(() => {
+    const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
+      document.body.style.overflow = previous;
     };
-  }, [onClose]);
+  }, []);
+
+  // Précharge TOUTES les images dès le résultat connu : sans ça, chaque carte
+  // retournée apparaît sur un fond vide puis l'image « pope » une fraction de
+  // seconde plus tard.
+  useEffect(() => {
+    for (const card of result?.cards ?? []) {
+      if (!card.image) continue;
+      const img = new Image();
+      img.decoding = "async";
+      img.src = card.image;
+    }
+  }, [result]);
+
+  // Rendu dans <body> : monté dans l'écran de victoire (lui-même animé en
+  // `transform`), un `position: fixed` se calait sur cet ancêtre et non sur
+  // l'écran — l'overlay sautait de place à la fin de l'animation du parent.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   const advance = () => {
     if (atRecap || !result) return;
@@ -73,15 +101,15 @@ export function BoosterOpening({
 
   const revealing = result != null && !atRecap && !error && cards.length > 0;
 
-  // `!m-0` : l'overlay est monté DANS des conteneurs `space-y-12` (boutique,
-  // onglet Deck) qui lui donnaient une marge haute — le header passait devant.
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.18 }}
-      className="fixed inset-0 z-[110] !m-0 flex items-center justify-center overflow-y-auto bg-void-900/95 p-4 backdrop-blur-md"
+      className="fixed inset-0 z-[110] flex items-center justify-center overflow-y-auto bg-void-900/95 p-4"
       role="dialog"
       aria-modal="true"
       aria-label="Ouverture d'un booster"
@@ -155,7 +183,8 @@ export function BoosterOpening({
           />
         )}
       </div>
-    </motion.div>
+    </motion.div>,
+    document.body,
   );
 }
 
@@ -348,7 +377,7 @@ function Recap({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, ease: "easeOut" }}
-      className="rounded-3xl border border-white/10 bg-void-800/90 p-6 backdrop-blur sm:p-8"
+      className="rounded-3xl border border-white/10 bg-void-800/95 p-6 sm:p-8"
     >
       <p
         className="text-xs font-black uppercase tracking-[0.3em]"

@@ -30,6 +30,11 @@
      (CursedBackground, MangaDecor) à cause de l'ordre de peinture CSS. */
   html {
     @apply bg-void-900 text-white antialiased;
+    /* Réserve TOUJOURS la place de la barre de défilement. Sans ça, chaque
+       modale qui verrouille le scroll (`body { overflow: hidden }`) fait
+       disparaître la barre : toute la page glisse de 10px à l'ouverture puis
+       revient à la fermeture — le « clignotement » perçu. */
+    scrollbar-gutter: stable;
   }
   body {
     @apply text-white antialiased;
@@ -54,6 +59,34 @@
   /* Titre avec effet glitch léger au survol */
   .glitch-hover:hover {
     animation: glitch 0.4s steps(2, end) 1;
+  }
+
+  /*
+   * Fond plein écran d'une MODALE. Fondu d'entrée en CSS (compositeur) au lieu
+   * d'une apparition sèche d'un voile sombre sur toute la page.
+   *
+   * ⚠️ Jamais de `backdrop-blur` sur un overlay : Chrome recompose le flou au
+   * moment où le fondu d'opacité se termine (et à chaque défilement de
+   * l'overlay), ce qui produit un flash d'une image. Le voile est assez opaque
+   * pour s'en passer.
+   */
+  .modal-overlay {
+    animation: modal-overlay-in 0.16s ease-out both;
+  }
+
+  @keyframes modal-overlay-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .modal-overlay {
+      animation: none;
+    }
   }
 
   /* Texte néon "domain" */

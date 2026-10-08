@@ -26,10 +26,11 @@ export function MultiplayerPicker({ games }: MultiplayerPickerProps) {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
     document.addEventListener("keydown", onKey);
+    const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousOverflow;
     };
   }, [open]);
 
@@ -63,7 +64,7 @@ export function MultiplayerPicker({ games }: MultiplayerPickerProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.18 }}
-            className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-void-900/80 p-4 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-void-900/90 p-4"
             onClick={() => setOpen(false)}
             role="dialog"
             aria-modal="true"

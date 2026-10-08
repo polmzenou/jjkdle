@@ -52,7 +52,7 @@ export function InfoTip({
       role="tooltip"
       className={[
         "pointer-events-none absolute left-1/2 z-40 w-64 -translate-x-1/2 rounded-xl border border-white/15",
-        "bg-void-900/95 p-3 text-left shadow-xl backdrop-blur",
+        "bg-void-900/95 p-3 text-left shadow-xl",
         "transition-opacity duration-100",
         open
           ? "opacity-100"

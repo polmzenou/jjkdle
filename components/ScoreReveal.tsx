@@ -48,12 +48,12 @@ export function ScoreReveal({
   useScrollLock();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-void-900/85 p-2 backdrop-blur-sm sm:p-4">
+    <div className="modal-overlay fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-void-900/90 p-2 sm:p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.4 }}
-        className="flex h-full max-h-[880px] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-white/10 bg-void-800/70 p-4 text-center backdrop-blur sm:p-6"
+        className="flex h-full max-h-[880px] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-white/10 bg-void-800/95 p-4 text-center sm:p-6"
       >
         {/* ── Haut : hauteur naturelle, jamais comprimé ───────────────── */}
         <div className="shrink-0">

@@ -68,7 +68,7 @@ export function SocialToaster({ userId }: { userId: string }) {
         <div
           key={t.id}
           role="status"
-          className="pointer-events-auto flex items-center gap-3 rounded-xl border border-amber-400/40 bg-void-800/95 px-4 py-3 shadow-2xl backdrop-blur animate-float"
+          className="pointer-events-auto flex items-center gap-3 rounded-xl border border-amber-400/40 bg-void-800/95 px-4 py-3 shadow-2xl animate-float"
         >
           <CoinIcon className="h-8 w-8 shrink-0 text-amber-300" />
           <div className="min-w-0 flex-1">

@@ -35,7 +35,7 @@ export function BadgeToast({ badgeKeys, duration = 5000 }: BadgeToastProps) {
         return (
           <div
             key={key}
-            className="pointer-events-auto flex items-center gap-3 rounded-xl border bg-void-800/95 px-4 py-3 shadow-2xl backdrop-blur animate-float"
+            className="pointer-events-auto flex items-center gap-3 rounded-xl border bg-void-800/95 px-4 py-3 shadow-2xl animate-float"
             style={{ borderColor: `${b.color}66` }}
           >
             <BadgeMedal

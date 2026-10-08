@@ -1469,7 +1469,7 @@ function CharacterPreviewModal({
       role="dialog"
       aria-modal="true"
       onClick={onClose}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-void-900/80 p-4 backdrop-blur-sm"
+      className="modal-overlay fixed inset-0 z-[100] flex items-center justify-center bg-void-900/90 p-4"
     >
       <div
         onClick={(e) => e.stopPropagation()}

@@ -142,7 +142,7 @@ export function InboxBubble({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.97 }}
             transition={{ type: "spring", damping: 28, stiffness: 340 }}
-            className="fixed bottom-3 left-3 right-3 z-50 flex max-h-[min(32rem,calc(100vh-1.5rem))] flex-col overflow-hidden rounded-2xl border border-white/10 bg-void-900/95 shadow-[0_24px_80px_-20px_rgb(var(--color-domain)/0.45)] backdrop-blur sm:bottom-6 sm:left-auto sm:right-24 sm:w-[22rem]"
+            className="fixed bottom-3 left-3 right-3 z-50 flex max-h-[min(32rem,calc(100vh-1.5rem))] flex-col overflow-hidden rounded-2xl border border-white/10 bg-void-900/95 shadow-[0_24px_80px_-20px_rgb(var(--color-domain)/0.45)] sm:bottom-6 sm:left-auto sm:right-24 sm:w-[22rem]"
           >
             <header className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
               <h2 className="font-display text-sm font-black uppercase tracking-[0.14em] text-white">

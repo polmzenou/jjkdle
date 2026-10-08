@@ -55,7 +55,7 @@ export function DraftResultModal({
   const color = victory ? "#22c55e" : "#dc2626";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-void-900/85 p-4 backdrop-blur-sm">
+    <div className="modal-overlay fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-void-900/90 p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}

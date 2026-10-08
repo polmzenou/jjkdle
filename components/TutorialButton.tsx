@@ -285,7 +285,7 @@ export function TutorialButton() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={close}
-            className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-void-900/80 p-4 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-void-900/90 p-4"
             role="dialog"
             aria-modal="true"
             aria-label={`Tutoriel ${name}`}
@@ -297,7 +297,7 @@ export function TutorialButton() {
               exit={{ opacity: 0, y: -16, scale: 0.97 }}
               transition={{ duration: 0.28 }}
               onClick={(e) => e.stopPropagation()}
-              className="relative my-auto w-full max-w-lg overflow-hidden rounded-3xl border border-white/10 bg-void-800/95 p-7 backdrop-blur sm:p-8"
+              className="relative my-auto w-full max-w-lg overflow-hidden rounded-3xl border border-white/10 bg-void-800/95 p-7 sm:p-8"
             >
               {/* Liseré d'accent */}
               <span

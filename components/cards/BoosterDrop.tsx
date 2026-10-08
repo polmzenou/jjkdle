@@ -76,18 +76,16 @@ export function BoosterDrop({ booster }: BoosterDropProps) {
         </button>
       </motion.div>
 
-      <AnimatePresence>
+      {/* Le drop n'est retiré qu'une fois l'overlay SORTI : le démonter dès la
+          fermeture coupait net l'animation de sortie (flash). */}
+      <AnimatePresence onExitComplete={() => result && setDone(true)}>
         {opening && (
           <BoosterOpening
             result={result}
             loading={!result && !error}
             error={error}
             initialSkip={skip}
-            onClose={() => {
-              setOpening(false);
-              // Le booster est consommé : on retire le drop de l'écran de fin.
-              if (result) setDone(true);
-            }}
+            onClose={() => setOpening(false)}
           />
         )}
       </AnimatePresence>
