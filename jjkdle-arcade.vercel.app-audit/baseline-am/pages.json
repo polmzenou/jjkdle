@@ -7,7 +7,7 @@
   "robots": "index, follow",
   "ogimg": "/og",
   "h1": [
-   "Anime Arcade — mini-jeux anime gratuits · Choisis ton univers"
+   "Anime Arcade — mini-jeux anime gratuits · Choisis tonunivers"
   ],
   "h2": 0,
   "words": 85,
@@ -28,7 +28,7 @@
    "/kny",
    "/tg"
   ],
-  "bytes": 75449
+  "bytes": 68703
  },
  {
   "url": "/jjk",
@@ -36,7 +36,7 @@
   "desc": "L'arcade fan dédiée à Jujutsu Kaisen : une collection de mini-jeux gratuits (JJKdle, Qui est-ce ?, quiz, draft, tier list…) pour tester ta connaissance de l'univers JJK. Sans compte, jouable dans le navigateur.",
   "canon": "/jjk",
   "robots": "index, follow",
-  "ogimg": "/og?u=jjk",
+  "ogimg": "/og",
   "h1": [
    "JJK Arcade — mini-jeux Jujutsu Kaisen gratuits"
   ],
@@ -44,6 +44,8 @@
   "words": 522,
   "text": "Accueil Jeux Connexion 呪術廻 領域展開 無量空処 両面宿儺 呪 術 式 発 動 縛 Jujutsu Kaisen · Fan Arcade 呪 JJK Arcade — mini-jeux Jujutsu Kaisen gratuits La salle d'arcade maudite dédiée à Jujutsu Kaisen . Une collection de mini-jeux nerveux pour tester ta connaissance de l'univers et libérer ton énergie maudite. Voir les jeux → Build the Perfect Sorcerer 9 jeux jouables 0 compte requis S grade max à atteindre 遊技 · Arcade Liste des jeux Un aperçu de ce qui t'attend dans l'arcade. Jeu # 01 Build the Perfect Sorcerer Compose ton sorcier idéal catégorie par catégorie. Chaque choix verrouille une stat et re-mélange le reste. Score sur 1000, du Grade 4− au Grade S. tap game roster JJK score Jouer maintenant → Jeu # 02 JJK Pyramid Classe 8 personnages du plus fort au plus faible selon la consigne. Les bonnes positions se verrouillent, les fausses reviennent. 4 tentatives, jusqu'à 10 000 points. ranking drag & drop roster JJK Jouer maintenant → Jeu # 03 Jujutsu Draft Drafte 1 sorcier par catégorie sous budget, place chacun au bon endroit, puis affronte une série de boss de plus en plus forts. Va le plus loin possible. draft combat roster JJK Jouer maintenant → Jeu # 04 JJK Random Battle Affronte un ami en 1v1 : drafte une carte tirée au hasard à tour de rôle (garde-la ou refile-la), compose ton équipe de 5, puis laisse parler le combat. Le cumul le plus fort gagne. 1v1 multijoueur draft roster JJK Jouer maintenant → Jeu # 05 Qui est-ce ? Affronte un ami en 1v1 : une grille de 25 personnages, un secret pou",
   "ld": [
+   "WebSite",
+   "Organization",
    "WebSite",
    "Organization"
   ],
@@ -69,7 +71,7 @@
    "/jjk/shop",
    "/login"
   ],
-  "bytes": 93812
+  "bytes": 91415
  },
  {
   "url": "/jjk/games",
@@ -77,7 +79,7 @@
   "desc": "Tous les mini-jeux Jujutsu Kaisen de JJK Arcade : Build the Perfect Sorcerer, JJK Pyramid, Jujutsu Draft, JJK Random Battle, Qui est-ce ?, JJK Codenames, JJKdle, JJK Higher/Lower, The Culling Tower… Gratuits, sans compte, dans le navigateur.",
   "canon": "/jjk/games",
   "robots": "index, follow",
-  "ogimg": "/og?u=jjk",
+  "ogimg": "",
   "h1": [
    "Les jeux maudits"
   ],
@@ -123,21 +125,19 @@
    "/jjk/shop",
    "/login"
   ],
-  "bytes": 86252
+  "bytes": 82960
  },
  {
   "url": "/jjk/games/builder",
   "title": "Build the Perfect Sorcerer · JJK Arcade",
-  "desc": "Build the Perfect Sorcerer (Jujutsu Kaisen) : Compose ton sorcier idéal catégorie par catégorie. Chaque choix verrouille une stat et re-mélange le reste. Score sur 1000, du Grade 4− au Grade S.",
+  "desc": "Compose ton sorcier idéal catégorie par catégorie. Chaque choix verrouille une stat et re-mélange le reste. Score sur 1000, du Grade 4− au Grade S.",
   "canon": "/jjk/games/builder",
   "robots": "index, follow",
   "ogimg": "/assets/builder-screen.png",
-  "h1": [
-   "Build the Perfect Sorcerer — jeu Jujutsu Kaisen gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 114,
-  "text": "← Back Build the Perfect Sorcerer — jeu Jujutsu Kaisen gratuit Record : 0 👆 Tape une catégorie pour la verrouiller ! ( 0 / 9 ) ↻ Tirage en cours… 🏆 Best Rank Joue pour obtenir un rang ! Grade S Grade 1 Grade 2 Top Ranks Leaderboard Builder All-time Hebdo 1 47 GROKAKAKIPU Roi du Draft 1 000 2 8 rover VIP Black Flash 1 000 3 21 Kata Roi du Draft 1 000 4 5 kakakaka Maître du IdleGames 937 5 K 1 kkatharsis 844 6 3 Skynnnnner 791 7 T 1 Talek_ 733 JJK Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 106,
+  "text": "← Back Record : 0 👆 Tape une catégorie pour la verrouiller ! ( 0 / 9 ) ↻ Tirage en cours… 🏆 Best Rank Joue pour obtenir un rang ! Grade S Grade 1 Grade 2 Top Ranks Leaderboard Builder All-time Hebdo 1 47 GROKAKAKIPU Roi du Draft 1 000 2 8 rover VIP Black Flash 1 000 3 21 Kata Roi du Draft 1 000 4 5 kakakaka Maître du IdleGames 937 5 K 1 kkatharsis 844 6 3 Skynnnnner 791 7 T 1 Talek_ 733 JJK Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -164,21 +164,19 @@
    "/jjk/u/kkatharsis",
    "/jjk/u/rover"
   ],
-  "bytes": 102669
+  "bytes": 100099
  },
  {
   "url": "/jjk/games/ranking",
   "title": "JJK Pyramid · JJK Arcade",
-  "desc": "JJK Pyramid (Jujutsu Kaisen) : Classe 8 personnages du plus fort au plus faible selon la consigne. Les bonnes positions se verrouillent, les fausses reviennent. 4 tentatives, jusqu'à 10 000 points.",
+  "desc": "Classe 8 personnages du plus fort au plus faible selon la consigne. Les bonnes positions se verrouillent, les fausses reviennent. 4 tentatives, jusqu'à 10 000 points.",
   "canon": "/jjk/games/ranking",
   "robots": "index, follow",
   "ogimg": "/assets/pyramid-screen.png",
-  "h1": [
-   "JJK Pyramid — jeu Jujutsu Kaisen gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 69,
-  "text": "JJK Pyramid — jeu Jujutsu Kaisen gratuit Chargement… Leaderboard Pyramid All-time Hebdo 1 21 Kata Roi du Draft 10 000 2 K 1 kkatharsis 7 500 3 8 rover VIP Black Flash 7 500 4 47 GROKAKAKIPU Roi du Draft 7 500 JJK Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 63,
+  "text": "Chargement… Leaderboard Pyramid All-time Hebdo 1 21 Kata Roi du Draft 10 000 2 K 1 kkatharsis 7 500 3 8 rover VIP Black Flash 7 500 4 47 GROKAKAKIPU Roi du Draft 7 500 JJK Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -202,21 +200,19 @@
    "/jjk/u/kkatharsis",
    "/jjk/u/rover"
   ],
-  "bytes": 63034
+  "bytes": 61625
  },
  {
   "url": "/jjk/games/jujutsu-draft",
   "title": "Jujutsu Draft · JJK Arcade",
-  "desc": "Jujutsu Draft (Jujutsu Kaisen) : Drafte 1 sorcier par catégorie sous budget, place chacun au bon endroit, puis affronte une série de boss de plus en plus forts. Va le plus loin possible.",
+  "desc": "Drafte 1 sorcier par catégorie sous budget, place chacun au bon endroit, puis affronte une série de boss de plus en plus forts. Va le plus loin possible.",
   "canon": "/jjk/games/jujutsu-draft",
   "robots": "index, follow",
   "ogimg": "/assets/draft-screen.png",
-  "h1": [
-   "Jujutsu Draft — jeu Jujutsu Kaisen gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 115,
-  "text": "← Back Jujutsu Draft — jeu Jujutsu Kaisen gratuit Record : 0 Drafte 1 personnage par catégorie sans dépasser le budget, puis lance le combat. Place chaque perso dans sa catégorie pour maximiser sa puissance — ton avatar de combat sera ton choix en Sort inné . Tirage en cours… Leaderboard Jujutsu Draft All-time Hebdo 1 47 GROKAKAKIPU Roi du Draft ★ clear 6 vaincus 2 21 Kata Roi du Draft ★ clear 6 vaincus 3 8 rover VIP Black Flash 4 vaincus 4 3 Skynnnnner 4 vaincus 5 K 1 kkatharsis 3 vaincus JJK Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 109,
+  "text": "← Back Record : 0 Draft 1 sorcier par catégorie sans dépasser le budget, puis lance le combat. Place chaque perso dans sa catégorie pour maximiser sa puissance — ton avatar de combat sera ton choix en Sort inné . Tirage en cours… Leaderboard Jujutsu Draft All-time Hebdo 1 47 GROKAKAKIPU Roi du Draft ★ clear 6 vaincus 2 21 Kata Roi du Draft ★ clear 6 vaincus 3 8 rover VIP Black Flash 4 vaincus 4 3 Skynnnnner 4 vaincus 5 K 1 kkatharsis 3 vaincus JJK Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -241,7 +237,7 @@
    "/jjk/u/kkatharsis",
    "/jjk/u/rover"
   ],
-  "bytes": 104998
+  "bytes": 102515
  },
  {
   "url": "/jjk/games/battle",
@@ -276,7 +272,7 @@
    "/jjk/shop",
    "/login"
   ],
-  "bytes": 43680
+  "bytes": 42750
  },
  {
   "url": "/jjk/games/guesswho",
@@ -311,12 +307,12 @@
    "/jjk/shop",
    "/login"
   ],
-  "bytes": 43932
+  "bytes": 42959
  },
  {
   "url": "/jjk/games/codenames",
   "title": "JJK Codenames · JJK Arcade",
-  "desc": "JJK Codenames (Jujutsu Kaisen) : jeu d'équipe multijoueur (4 à 6 joueurs, rouge vs violet). Les maîtres-espions donnent des indices, les agents révèlent les bons personnages d'une grille de 36. Évitez l'assassin !",
+  "desc": "JJK Codenames : jeu d'équipe multijoueur (4 à 6 joueurs, rouge vs violet). Les maîtres-espions donnent des indices, les agents révèlent les bons personnages d'une grille de 36. Évitez l'assassin !",
   "canon": "/jjk/games/codenames",
   "robots": "index, follow",
   "ogimg": "/assets/codenames-screen.png",
@@ -346,7 +342,7 @@
    "/jjk/shop",
    "/login"
   ],
-  "bytes": 44479
+  "bytes": 43404
  },
  {
   "url": "/jjk/games/jjkdle",
@@ -355,12 +351,10 @@
   "canon": "/jjk/games/jjkdle",
   "robots": "index, follow",
   "ogimg": "/assets/idle-screen.png",
-  "h1": [
-   "JJKdle — jeu Jujutsu Kaisen gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 60,
-  "text": "← Back JJKdle — jeu Jujutsu Kaisen gratuit Essais : 0 Devine le personnage mystère du jour. Leaderboard JJKdle Du jour All-time Hebdo Personne n'a encore trouvé le perso du jour — sois le premier ! JJK Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 55,
+  "text": "← Back Essais : 0 Devine le personnage mystère du jour. Leaderboard JJKdle Du jour All-time Hebdo Personne n'a encore trouvé le perso du jour — sois le premier ! JJK Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -380,21 +374,19 @@
    "/jjk/games",
    "/jjk/shop"
   ],
-  "bytes": 56498
+  "bytes": 54348
  },
  {
   "url": "/jjk/games/higher-lower",
   "title": "JJK Higher/Lower · JJK Arcade",
-  "desc": "JJK Higher/Lower (Jujutsu Kaisen) : Plus ou moins d'énergie occulte ? Compare deux personnages du roster, devine si celui de droite dépasse celui de gauche et enchaîne les bonnes réponses le plus loin possible.",
+  "desc": "Plus ou moins d'énergie occulte ? Compare deux personnages du roster, devine si celui de droite dépasse celui de gauche et enchaîne les bonnes réponses le plus loin possible.",
   "canon": "/jjk/games/higher-lower",
   "robots": "index, follow",
   "ogimg": "/assets/higher-lower-screen.png",
-  "h1": [
-   "JJK Higher/Lower — jeu Jujutsu Kaisen gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 124,
-  "text": "← Back JJK Higher/Lower — jeu Jujutsu Kaisen gratuit Score : 0 Plus ou moins d'énergie occulte ? Deux personnages s'affichent. Devine si celui de droite a plus ou moins d'énergie occulte que celui de gauche. Chaque bonne réponse fait avancer la chaîne. Une erreur et c'est terminé. Tu peux jouer sans compte, mais connecte-toi pour enregistrer ton score et gagner de l'XP. Jouer → Leaderboard Higher/Lower All-time Hebdo 1 21 Kata Roi du Draft 80 pts 2 47 GROKAKAKIPU Roi du Draft 59 pts 3 8 rover VIP Black Flash 45 pts JJK Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 117,
+  "text": "← Back Score : 0 Plus ou moins d'énergie occulte ? Deux personnages s'affichent. Devine si celui de droite a plus ou moins d'énergie occulte que celui de gauche. Chaque bonne réponse fait avancer la chaîne. Une erreur et c'est terminé. Tu peux jouer sans compte, mais connecte-toi pour enregistrer ton score et gagner de l'XP. Jouer → Leaderboard Higher/Lower All-time Hebdo 1 21 Kata Roi du Draft 80 pts 2 47 GROKAKAKIPU Roi du Draft 59 pts 3 8 rover VIP Black Flash 45 pts JJK Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -418,21 +410,19 @@
    "/jjk/u/rover",
    "/login"
   ],
-  "bytes": 62644
+  "bytes": 60144
  },
  {
   "url": "/jjk/games/tower",
   "title": "The Culling Tower · JJK Arcade",
-  "desc": "The Culling Tower (Jujutsu Kaisen) : Grimpe 20 étages avec une escouade de 3 que tu constitues en route. Les combats se résolvent seuls : à toi de déclencher les techniques au bon moment, quand un ennemi charge son attaque. Un mort reste mort.",
+  "desc": "Grimpe 20 étages avec une escouade de 3 que tu constitues en route. Les combats se résolvent seuls : à toi de déclencher les techniques au bon moment, quand un ennemi charge son attaque. Un mort reste mort.",
   "canon": "/jjk/games/tower",
   "robots": "index, follow",
-  "ogimg": "/og?u=jjk",
-  "h1": [
-   "The Culling Tower"
-  ],
+  "ogimg": "",
+  "h1": [],
   "h2": 1,
-  "words": 105,
-  "text": "← Les jeux Ton ascension est gardée : tu reprendras où tu t'es arrêté. The Culling Tower Ouverture de la tour… Leaderboard The Culling Tower Tour du jour Panthéon La tour d'aujourd'hui, la même pour tout le monde. Classé sur le nombre d'essais qu'il a fallu pour la franchir — puis sur l'étage atteint. Remise à zéro à minuit, avec la tour. Personne n'a encore tenté la tour d'aujourd'hui — sois le premier. JJK Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 102,
+  "text": "← Les jeux Ton ascension est gardée : tu reprendras où tu t'es arrêté. Ouverture de la tour… Leaderboard The Culling Tower Tour du jour Panthéon La tour d'aujourd'hui, la même pour tout le monde. Classé sur le nombre d'essais qu'il a fallu pour la franchir — puis sur l'étage atteint. Remise à zéro à minuit, avec la tour. Personne n'a encore tenté la tour d'aujourd'hui — sois le premier. JJK Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -452,7 +442,7 @@
    "/jjk/games",
    "/jjk/shop"
   ],
-  "bytes": 46982
+  "bytes": 45272
  },
  {
   "url": "/csm",
@@ -460,7 +450,7 @@
   "desc": "L'arcade fan dédiée à Chainsaw Man : une collection de mini-jeux gratuits (devinette du jour, Qui est-ce ?, quiz, draft, tier list…) pour tester ta connaissance de l'univers CSM. Sans compte, jouable dans le navigateur.",
   "canon": "/csm",
   "robots": "index, follow",
-  "ogimg": "/og?u=csm",
+  "ogimg": "/og",
   "h1": [
    "CSM Arcade — mini-jeux Chainsaw Man gratuits"
   ],
@@ -468,6 +458,8 @@
   "words": 522,
   "text": "Accueil Jeux Connexion 電気鋸人 悪魔 公安 契約 Chainsaw Man · Fan Arcade 鬼 CSM Arcade — mini-jeux Chainsaw Man gratuits La salle d'arcade la plus sanglante, dédiée à Chainsaw Man . Une collection de mini-jeux nerveux pour tester ta connaissance de l'univers et faire hurler la tronçonneuse. Voir les jeux → Build the Perfect Devil 9 jeux jouables 0 compte requis S grade max à atteindre 遊技 · Arcade Liste des jeux Un aperçu de ce qui t'attend dans l'arcade. Jeu # 01 Build the Perfect Devil Compose ton démon idéal catégorie par catégorie. Chaque choix verrouille une stat et re-mélange le reste. Score sur 1000, du rang le plus bas au rang S. tap game roster CSM score Jouer maintenant → Jeu # 02 CSM Pyramid Classe 8 personnages du plus fort au plus faible selon la consigne. Les bonnes positions se verrouillent, les fausses reviennent. 4 tentatives, jusqu'à 10 000 points. ranking drag & drop roster CSM Jouer maintenant → Jeu # 03 Chainsaw Draft Drafte 1 chasseur par catégorie sous budget, place chacun au bon poste, puis affronte une série de démons de plus en plus féroces. Va le plus loin possible. draft combat roster CSM Jouer maintenant → Jeu # 04 CSM Random Battle Affronte un ami en 1v1 : drafte une carte tirée au hasard à tour de rôle (garde-la ou refile-la), compose ton équipe de 5, puis laisse parler la tronçonneuse. Le cumul le plus fort gagne. 1v1 multijoueur draft roster CSM Jouer maintenant → Jeu # 05 Qui est-ce ? Affronte un ami en 1v1 : une grille de 25 personnages, un secret pour ",
   "ld": [
+   "WebSite",
+   "Organization",
    "WebSite",
    "Organization"
   ],
@@ -493,7 +485,7 @@
    "/csm/shop",
    "/login"
   ],
-  "bytes": 84195
+  "bytes": 81593
  },
  {
   "url": "/csm/games",
@@ -501,7 +493,7 @@
   "desc": "Tous les mini-jeux Chainsaw Man de CSM Arcade : Build the Perfect Devil, CSM Pyramid, Chainsaw Draft, CSM Random Battle, Qui est-ce ?, CSM Codenames, CSMdle, CSM Higher/Lower, La Tour de Réincarnation… Gratuits, sans compte, dans le navigateur.",
   "canon": "/csm/games",
   "robots": "index, follow",
-  "ogimg": "/og?u=csm",
+  "ogimg": "",
   "h1": [
    "Les jeux des démons"
   ],
@@ -547,21 +539,19 @@
    "/csm/shop",
    "/login"
   ],
-  "bytes": 89143
+  "bytes": 86310
  },
  {
   "url": "/csm/games/builder",
   "title": "Build the Perfect Devil · CSM Arcade",
-  "desc": "Build the Perfect Devil (Chainsaw Man) : Compose ton démon idéal catégorie par catégorie. Chaque choix verrouille une stat et re-mélange le reste. Score sur 1000, du rang le plus bas au rang S.",
+  "desc": "Compose ton démon idéal catégorie par catégorie. Chaque choix verrouille une stat et re-mélange le reste. Score sur 1000, du rang le plus bas au rang S.",
   "canon": "/csm/games/builder",
   "robots": "index, follow",
   "ogimg": "/assets/builder-screen-csm.png",
-  "h1": [
-   "Build the Perfect Devil — jeu Chainsaw Man gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 80,
-  "text": "← Back Build the Perfect Devil — jeu Chainsaw Man gratuit Record : 0 👆 Tape une catégorie pour la verrouiller ! ( 0 / 9 ) ↻ Tirage en cours… 🏆 Best Rank Joue pour obtenir un rang ! Grade S Grade 1 Grade 2 Top Ranks Leaderboard Builder All-time Hebdo 1 21 Kata Roi du Draft 960 2 3 Skynnnnner 855 CSM Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 72,
+  "text": "← Back Record : 0 👆 Tape une catégorie pour la verrouiller ! ( 0 / 9 ) ↻ Tirage en cours… 🏆 Best Rank Joue pour obtenir un rang ! Grade S Grade 1 Grade 2 Top Ranks Leaderboard Builder All-time Hebdo 1 21 Kata Roi du Draft 960 2 3 Skynnnnner 855 CSM Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -583,21 +573,19 @@
    "/csm/u/Kata",
    "/csm/u/Skynnnnner"
   ],
-  "bytes": 94792
+  "bytes": 92355
  },
  {
   "url": "/csm/games/ranking",
   "title": "CSM Pyramid · CSM Arcade",
-  "desc": "CSM Pyramid (Chainsaw Man) : Classe 8 personnages du plus fort au plus faible selon la consigne. Les bonnes positions se verrouillent, les fausses reviennent. 4 tentatives, jusqu'à 10 000 points.",
+  "desc": "Classe 8 personnages du plus fort au plus faible selon la consigne. Les bonnes positions se verrouillent, les fausses reviennent. 4 tentatives, jusqu'à 10 000 points.",
   "canon": "/csm/games/ranking",
   "robots": "index, follow",
   "ogimg": "/assets/pyramid-screen-csm.png",
-  "h1": [
-   "CSM Pyramid — jeu Chainsaw Man gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 47,
-  "text": "CSM Pyramid — jeu Chainsaw Man gratuit Chargement… Leaderboard Pyramid All-time Hebdo 1 21 Kata Roi du Draft 5 000 CSM Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 41,
+  "text": "Chargement… Leaderboard Pyramid All-time Hebdo 1 21 Kata Roi du Draft 5 000 CSM Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -618,21 +606,19 @@
    "/csm/shop",
    "/csm/u/Kata"
   ],
-  "bytes": 55458
+  "bytes": 54178
  },
  {
   "url": "/csm/games/jujutsu-draft",
   "title": "Chainsaw Draft · CSM Arcade",
-  "desc": "Chainsaw Draft (Chainsaw Man) : Drafte 1 chasseur par catégorie sous budget, place chacun au bon poste, puis affronte une série de démons de plus en plus féroces. Va le plus loin possible.",
+  "desc": "Drafte 1 chasseur par catégorie sous budget, place chacun au bon poste, puis affronte une série de démons de plus en plus féroces. Va le plus loin possible.",
   "canon": "/csm/games/jujutsu-draft",
   "robots": "index, follow",
   "ogimg": "/assets/draft-screen.png",
-  "h1": [
-   "Chainsaw Draft — jeu Chainsaw Man gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 86,
-  "text": "← Back Chainsaw Draft — jeu Chainsaw Man gratuit Record : 0 Drafte 1 personnage par catégorie sans dépasser le budget, puis lance le combat. Place chaque perso dans sa catégorie pour maximiser sa puissance — ton avatar de combat sera ton choix en Combat / Overall . Tirage en cours… Leaderboard Chainsaw Draft All-time Hebdo 1 21 Kata Roi du Draft 3 vaincus CSM Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 80,
+  "text": "← Back Record : 0 Draft 1 sorcier par catégorie sans dépasser le budget, puis lance le combat. Place chaque perso dans sa catégorie pour maximiser sa puissance — ton avatar de combat sera ton choix en Combat / Overall . Tirage en cours… Leaderboard Chainsaw Draft All-time Hebdo 1 21 Kata Roi du Draft 3 vaincus CSM Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -653,12 +639,12 @@
    "/csm/shop",
    "/csm/u/Kata"
   ],
-  "bytes": 86343
+  "bytes": 83965
  },
  {
   "url": "/csm/games/battle",
   "title": "CSM Random Battle · CSM Arcade",
-  "desc": "CSM Random Battle (Chainsaw Man) : Affronte un ami en 1v1 : drafte une carte tirée au hasard à tour de rôle (garde-la ou refile-la), compose ton équipe de 5, puis laisse parler la tronçonneuse. Le cumul le plus fort gagne.",
+  "desc": "JJK Random Battle : affronte un ami en 1v1 sur Jujutsu Kaisen. Drafte une équipe de 5 à tour de rôle, puis laisse parler le combat.",
   "canon": "/csm/games/battle",
   "robots": "index, follow",
   "ogimg": "/assets/battle-screen-csm.png",
@@ -688,12 +674,12 @@
    "/csm/shop",
    "/login"
   ],
-  "bytes": 47288
+  "bytes": 45769
  },
  {
   "url": "/csm/games/guesswho",
   "title": "Qui est-ce ? · CSM Arcade",
-  "desc": "Qui est-ce ? (Chainsaw Man) : Affronte un ami en 1v1 : une grille de 25 personnages, un secret pour chacun. Pose des questions, élimine des cartes et devine le perso secret de l'adversaire avant lui. Un mauvais guess et c'est perdu.",
+  "desc": "Qui est-ce ? version Jujutsu Kaisen : devine le personnage secret de ton adversaire en 1v1. Grille de 25, questions, éliminations et un seul guess pour gagner.",
   "canon": "/csm/games/guesswho",
   "robots": "index, follow",
   "ogimg": "/assets/guesswho-screen-csm.png",
@@ -723,12 +709,12 @@
    "/csm/shop",
    "/login"
   ],
-  "bytes": 47450
+  "bytes": 46009
  },
  {
   "url": "/csm/games/codenames",
   "title": "CSM Codenames · CSM Arcade",
-  "desc": "CSM Codenames (Chainsaw Man) : En équipe (4 à 6 joueurs, rouge vs violet) : les maîtres-espions donnent des indices, les agents révèlent les bons personnages d'une grille de 36. Évitez l'assassin, révélez vos 8 cartes avant l'équipe adverse.",
+  "desc": "JJK Codenames : jeu d'équipe multijoueur (4 à 6 joueurs, rouge vs violet). Les maîtres-espions donnent des indices, les agents révèlent les bons personnages d'une grille de 36. Évitez l'assassin !",
   "canon": "/csm/games/codenames",
   "robots": "index, follow",
   "ogimg": "/assets/codenames-screen.png",
@@ -758,21 +744,19 @@
    "/csm/shop",
    "/login"
   ],
-  "bytes": 47673
+  "bytes": 46430
  },
  {
   "url": "/csm/games/jjkdle",
   "title": "CSMdle · CSM Arcade",
-  "desc": "Devine le personnage Chainsaw Man mystère du jour. Chaque proposition révèle des indices par attribut (espèce, camp, contrat, arc…) avec des flèches ↑/↓. Un perso par jour, essais illimités.",
+  "desc": "JJKdle : le jeu du jour Jujutsu Kaisen. Devine le personnage JJK mystère avec des indices par attribut (race, grade, clan, arc). Un nouveau perso chaque jour, essais illimités, gratuit et sans compte.",
   "canon": "/csm/games/jjkdle",
   "robots": "index, follow",
   "ogimg": "/assets/idle-screen-csm.png",
-  "h1": [
-   "CSMdle — jeu Chainsaw Man gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 60,
-  "text": "← Back CSMdle — jeu Chainsaw Man gratuit Essais : 0 Devine le personnage mystère du jour. Leaderboard CSMdle Du jour All-time Hebdo Personne n'a encore trouvé le perso du jour — sois le premier ! CSM Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 55,
+  "text": "← Back Essais : 0 Devine le personnage mystère du jour. Leaderboard CSMdle Du jour All-time Hebdo Personne n'a encore trouvé le perso du jour — sois le premier ! CSM Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -792,21 +776,19 @@
    "/csm/games",
    "/csm/shop"
   ],
-  "bytes": 60446
+  "bytes": 58427
  },
  {
   "url": "/csm/games/higher-lower",
   "title": "CSM Higher/Lower · CSM Arcade",
-  "desc": "CSM Higher/Lower (Chainsaw Man) : Plus ou moins puissant ? Compare deux personnages du roster, devine si celui de droite dépasse celui de gauche en puissance et enchaîne les bonnes réponses le plus loin possible.",
+  "desc": "Plus ou moins puissant ? Compare deux personnages du roster, devine si celui de droite dépasse celui de gauche en puissance et enchaîne les bonnes réponses le plus loin possible.",
   "canon": "/csm/games/higher-lower",
   "robots": "index, follow",
   "ogimg": "/assets/higher-lower-screen-csm.png",
-  "h1": [
-   "CSM Higher/Lower — jeu Chainsaw Man gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 106,
-  "text": "← Back CSM Higher/Lower — jeu Chainsaw Man gratuit Score : 0 Plus ou moins de puissance ? Deux personnages s'affichent. Devine si celui de droite a plus ou moins de puissance que celui de gauche. Chaque bonne réponse fait avancer la chaîne. Une erreur et c'est terminé. Tu peux jouer sans compte, mais connecte-toi pour enregistrer ton score et gagner de l'XP. Jouer → Leaderboard Higher/Lower All-time Hebdo 1 21 Kata Roi du Draft 17 pts CSM Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 99,
+  "text": "← Back Score : 0 Plus ou moins de puissance ? Deux personnages s'affichent. Devine si celui de droite a plus ou moins de puissance que celui de gauche. Chaque bonne réponse fait avancer la chaîne. Une erreur et c'est terminé. Tu peux jouer sans compte, mais connecte-toi pour enregistrer ton score et gagner de l'XP. Jouer → Leaderboard Higher/Lower All-time Hebdo 1 21 Kata Roi du Draft 17 pts CSM Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -828,21 +810,19 @@
    "/csm/u/Kata",
    "/login"
   ],
-  "bytes": 57481
+  "bytes": 55093
  },
  {
   "url": "/csm/games/tower",
   "title": "La Tour de Réincarnation · CSM Arcade",
-  "desc": "La Tour de Réincarnation (Chainsaw Man) : Grimpe 20 étages avec une escouade de 3 que tu constitues en route. Les combats se résolvent seuls : à toi de déclencher les pouvoirs au bon moment, quand un ennemi charge son attaque. Un mort reste mort.",
+  "desc": "Grimpe 20 étages avec une escouade de 3 que tu constitues en route. Les combats se résolvent seuls : à toi de déclencher les pouvoirs au bon moment, quand un ennemi charge son attaque. Un mort reste mort.",
   "canon": "/csm/games/tower",
   "robots": "index, follow",
-  "ogimg": "/og?u=csm",
-  "h1": [
-   "La Tour de Réincarnation"
-  ],
+  "ogimg": "",
+  "h1": [],
   "h2": 1,
-  "words": 107,
-  "text": "← Les jeux Ton ascension est gardée : tu reprendras où tu t'es arrêté. La Tour de Réincarnation Ouverture de la tour… Leaderboard La Tour de Réincarnation Tour du jour Panthéon La tour d'aujourd'hui, la même pour tout le monde. Classé sur le nombre d'essais qu'il a fallu pour la franchir — puis sur l'étage atteint. Remise à zéro à minuit, avec la tour. Personne n'a encore tenté la tour d'aujourd'hui — sois le premier. CSM Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 102,
+  "text": "← Les jeux Ton ascension est gardée : tu reprendras où tu t'es arrêté. Ouverture de la tour… Leaderboard The Culling Tower Tour du jour Panthéon La tour d'aujourd'hui, la même pour tout le monde. Classé sur le nombre d'essais qu'il a fallu pour la franchir — puis sur l'étage atteint. Remise à zéro à minuit, avec la tour. Personne n'a encore tenté la tour d'aujourd'hui — sois le premier. CSM Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -862,7 +842,7 @@
    "/csm/games",
    "/csm/shop"
   ],
-  "bytes": 50113
+  "bytes": 48338
  },
  {
   "url": "/aot",
@@ -870,7 +850,7 @@
   "desc": "L'arcade fan dédiée à Attack on Titan : une collection de mini-jeux gratuits (devinette du jour, Qui est-ce ?, quiz, draft, tier list…) pour tester ta connaissance de l'univers AOT. Sans compte, jouable dans le navigateur.",
   "canon": "/aot",
   "robots": "index, follow",
-  "ogimg": "/og?u=aot",
+  "ogimg": "/og",
   "h1": [
    "AOT Arcade — mini-jeux Attack on Titan gratuits"
   ],
@@ -878,6 +858,8 @@
   "words": 529,
   "text": "Accueil Jeux Connexion 進撃巨人 自由之翼 調査兵団 献身 Attack on Titan · Fan Arcade 進 AOT Arcade — mini-jeux Attack on Titan gratuits La salle d'arcade derrière les Murs, dédiée à Attack on Titan . Une collection de mini-jeux nerveux pour tester ta connaissance de l'univers et mériter tes ailes de la liberté. Voir les jeux → Build the Perfect Soldier 9 jeux jouables 0 compte requis S grade max à atteindre 遊技 · Arcade Liste des jeux Un aperçu de ce qui t'attend dans l'arcade. Jeu # 01 Build the Perfect Soldier Compose ton soldat idéal catégorie par catégorie. Chaque choix verrouille une stat et re-mélange le reste. Score sur 1000, de la simple recrue au rang S. tap game roster AOT score Jouer maintenant → Jeu # 02 AOT Pyramid Classe 8 personnages du plus fort au plus faible selon la consigne. Les bonnes positions se verrouillent, les fausses reviennent. 4 tentatives, jusqu'à 10 000 points. ranking drag & drop roster AOT Jouer maintenant → Jeu # 03 Scout Draft Drafte 1 soldat par catégorie sous budget, place chacun au bon poste, puis affronte une série de titans de plus en plus colossaux. Va le plus loin possible. draft combat roster AOT Jouer maintenant → Jeu # 04 AOT Random Battle Affronte un ami en 1v1 : drafte une carte tirée au hasard à tour de rôle (garde-la ou refile-la), compose ton escouade de 5, puis laisse parler les lames. Le cumul le plus fort gagne. 1v1 multijoueur draft roster AOT Jouer maintenant → Jeu # 05 Qui est-ce ? Affronte un ami en 1v1 : une grille de 25 personnages, u",
   "ld": [
+   "WebSite",
+   "Organization",
    "WebSite",
    "Organization"
   ],
@@ -903,7 +885,7 @@
    "/casino",
    "/login"
   ],
-  "bytes": 84311
+  "bytes": 81715
  },
  {
   "url": "/aot/games",
@@ -911,7 +893,7 @@
   "desc": "Tous les mini-jeux Attack on Titan de AOT Arcade : Build the Perfect Soldier, AOT Pyramid, Scout Draft, AOT Random Battle, Qui est-ce ?, AOT Codenames, AOTdle, AOT Higher/Lower, La Tour de Wall Maria… Gratuits, sans compte, dans le navigateur.",
   "canon": "/aot/games",
   "robots": "index, follow",
-  "ogimg": "/og?u=aot",
+  "ogimg": "",
   "h1": [
    "Les jeux du Bataillon"
   ],
@@ -957,21 +939,19 @@
    "/casino",
    "/login"
   ],
-  "bytes": 89066
+  "bytes": 86325
  },
  {
   "url": "/aot/games/builder",
   "title": "Build the Perfect Soldier · AOT Arcade",
-  "desc": "Build the Perfect Soldier (Attack on Titan) : Compose ton soldat idéal catégorie par catégorie. Chaque choix verrouille une stat et re-mélange le reste. Score sur 1000, de la simple recrue au rang S.",
+  "desc": "Compose ton soldat idéal catégorie par catégorie. Chaque choix verrouille une stat et re-mélange le reste. Score sur 1000, de la simple recrue au rang S.",
   "canon": "/aot/games/builder",
   "robots": "index, follow",
   "ogimg": "/assets/builder-aot.png",
-  "h1": [
-   "Build the Perfect Soldier — jeu Attack on Titan gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 78,
-  "text": "← Back Build the Perfect Soldier — jeu Attack on Titan gratuit Record : 0 👆 Tape une catégorie pour la verrouiller ! ( 0 / 9 ) ↻ Tirage en cours… 🏆 Best Rank Joue pour obtenir un rang ! Grade S Grade 1 Grade 2 Top Ranks Leaderboard Builder All-time Hebdo 1 21 Kata 971 2 3 Skynnnnner 812 AOT Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 69,
+  "text": "← Back Record : 0 👆 Tape une catégorie pour la verrouiller ! ( 0 / 9 ) ↻ Tirage en cours… 🏆 Best Rank Joue pour obtenir un rang ! Grade S Grade 1 Grade 2 Top Ranks Leaderboard Builder All-time Hebdo 1 21 Kata 971 2 3 Skynnnnner 812 AOT Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -993,21 +973,19 @@
    "/aot/u/Skynnnnner",
    "/casino"
   ],
-  "bytes": 102316
+  "bytes": 99844
  },
  {
   "url": "/aot/games/ranking",
   "title": "AOT Pyramid · AOT Arcade",
-  "desc": "AOT Pyramid (Attack on Titan) : Classe 8 personnages du plus fort au plus faible selon la consigne. Les bonnes positions se verrouillent, les fausses reviennent. 4 tentatives, jusqu'à 10 000 points.",
+  "desc": "Classe 8 personnages du plus fort au plus faible selon la consigne. Les bonnes positions se verrouillent, les fausses reviennent. 4 tentatives, jusqu'à 10 000 points.",
   "canon": "/aot/games/ranking",
   "robots": "index, follow",
   "ogimg": "/assets/pyramid-aot.png",
-  "h1": [
-   "AOT Pyramid — jeu Attack on Titan gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 52,
-  "text": "AOT Pyramid — jeu Attack on Titan gratuit Chargement… Leaderboard Pyramid All-time Hebdo Aucun score pour l'instant — gagne une partie et sois le premier ! AOT Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 45,
+  "text": "Chargement… Leaderboard Pyramid All-time Hebdo Aucun score pour l'instant — gagne une partie et sois le premier ! AOT Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -1027,21 +1005,19 @@
    "/aot/shop",
    "/casino"
   ],
-  "bytes": 50989
+  "bytes": 49740
  },
  {
   "url": "/aot/games/jujutsu-draft",
   "title": "Scout Draft · AOT Arcade",
-  "desc": "Scout Draft (Attack on Titan) : Drafte 1 soldat par catégorie sous budget, place chacun au bon poste, puis affronte une série de titans de plus en plus colossaux. Va le plus loin possible.",
+  "desc": "Drafte 1 soldat par catégorie sous budget, place chacun au bon poste, puis affronte une série de titans de plus en plus colossaux. Va le plus loin possible.",
   "canon": "/aot/games/jujutsu-draft",
   "robots": "index, follow",
   "ogimg": "/assets/draft-screen.png",
-  "h1": [
-   "Scout Draft — jeu Attack on Titan gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 84,
-  "text": "← Back Scout Draft — jeu Attack on Titan gratuit Record : 0 Drafte 1 personnage par catégorie sans dépasser le budget, puis lance le combat. Place chaque perso dans sa catégorie pour maximiser sa puissance — ton avatar de combat sera ton choix en Manœuvre tridimensionnel . Tirage en cours… Leaderboard Scout Draft All-time Hebdo 1 21 Kata 3 vaincus AOT Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 77,
+  "text": "← Back Record : 0 Draft 1 sorcier par catégorie sans dépasser le budget, puis lance le combat. Place chaque perso dans sa catégorie pour maximiser sa puissance — ton avatar de combat sera ton choix en Manœuvre tridimensionnel . Tirage en cours… Leaderboard Scout Draft All-time Hebdo 1 21 Kata 3 vaincus AOT Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -1062,12 +1038,12 @@
    "/aot/u/Kata",
    "/casino"
   ],
-  "bytes": 87868
+  "bytes": 85490
  },
  {
   "url": "/aot/games/battle",
   "title": "AOT Random Battle · AOT Arcade",
-  "desc": "AOT Random Battle (Attack on Titan) : Affronte un ami en 1v1 : drafte une carte tirée au hasard à tour de rôle (garde-la ou refile-la), compose ton escouade de 5, puis laisse parler les lames. Le cumul le plus fort gagne.",
+  "desc": "JJK Random Battle : affronte un ami en 1v1 sur Jujutsu Kaisen. Drafte une équipe de 5 à tour de rôle, puis laisse parler le combat.",
   "canon": "/aot/games/battle",
   "robots": "index, follow",
   "ogimg": "/assets/battle-screen-aot.png",
@@ -1097,12 +1073,12 @@
    "/casino",
    "/login"
   ],
-  "bytes": 47338
+  "bytes": 45868
  },
  {
   "url": "/aot/games/guesswho",
   "title": "Qui est-ce ? · AOT Arcade",
-  "desc": "Qui est-ce ? (Attack on Titan) : Affronte un ami en 1v1 : une grille de 25 personnages, un secret pour chacun. Pose des questions, élimine des cartes et devine le perso secret de l'adversaire avant lui. Un mauvais guess et c'est perdu.",
+  "desc": "Qui est-ce ? version Jujutsu Kaisen : devine le personnage secret de ton adversaire en 1v1. Grille de 25, questions, éliminations et un seul guess pour gagner.",
   "canon": "/aot/games/guesswho",
   "robots": "index, follow",
   "ogimg": "/assets/guesswho-aot.png",
@@ -1132,12 +1108,12 @@
    "/casino",
    "/login"
   ],
-  "bytes": 47490
+  "bytes": 46031
  },
  {
   "url": "/aot/games/codenames",
   "title": "AOT Codenames · AOT Arcade",
-  "desc": "AOT Codenames (Attack on Titan) : En équipe (4 à 6 joueurs, rouge vs violet) : les maîtres-espions donnent des indices, les agents révèlent les bons personnages d'une grille de 36. Évitez l'assassin, révélez vos 8 cartes avant l'équipe adverse.",
+  "desc": "JJK Codenames : jeu d'équipe multijoueur (4 à 6 joueurs, rouge vs violet). Les maîtres-espions donnent des indices, les agents révèlent les bons personnages d'une grille de 36. Évitez l'assassin !",
   "canon": "/aot/games/codenames",
   "robots": "index, follow",
   "ogimg": "/assets/codenames-screen.png",
@@ -1167,21 +1143,19 @@
    "/casino",
    "/login"
   ],
-  "bytes": 47755
+  "bytes": 46494
  },
  {
   "url": "/aot/games/jjkdle",
   "title": "AOTdle · AOT Arcade",
-  "desc": "Devine le personnage Attack on Titan mystère du jour. Chaque proposition révèle des indices par attribut (espèce, bataillon, pouvoir de titan, arc…) avec des flèches ↑/↓. Un perso par jour, essais illimités.",
+  "desc": "JJKdle : le jeu du jour Jujutsu Kaisen. Devine le personnage JJK mystère avec des indices par attribut (race, grade, clan, arc). Un nouveau perso chaque jour, essais illimités, gratuit et sans compte.",
   "canon": "/aot/games/jjkdle",
   "robots": "index, follow",
   "ogimg": "/assets/idle-screen-aot.png",
-  "h1": [
-   "AOTdle — jeu Attack on Titan gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 61,
-  "text": "← Back AOTdle — jeu Attack on Titan gratuit Essais : 0 Devine le personnage mystère du jour. Leaderboard AOTdle Du jour All-time Hebdo Personne n'a encore trouvé le perso du jour — sois le premier ! AOT Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 55,
+  "text": "← Back Essais : 0 Devine le personnage mystère du jour. Leaderboard AOTdle Du jour All-time Hebdo Personne n'a encore trouvé le perso du jour — sois le premier ! AOT Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -1201,21 +1175,19 @@
    "/aot/shop",
    "/casino"
   ],
-  "bytes": 62327
+  "bytes": 60117
  },
  {
   "url": "/aot/games/higher-lower",
   "title": "AOT Higher/Lower · AOT Arcade",
-  "desc": "AOT Higher/Lower (Attack on Titan) : Plus ou moins puissant ? Compare deux personnages du roster, devine si celui de droite dépasse celui de gauche en puissance et enchaîne les bonnes réponses le plus loin possible.",
+  "desc": "Plus ou moins puissant ? Compare deux personnages du roster, devine si celui de droite dépasse celui de gauche en puissance et enchaîne les bonnes réponses le plus loin possible.",
   "canon": "/aot/games/higher-lower",
   "robots": "index, follow",
   "ogimg": "/assets/higher-lower-aot.png",
-  "h1": [
-   "AOT Higher/Lower — jeu Attack on Titan gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 104,
-  "text": "← Back AOT Higher/Lower — jeu Attack on Titan gratuit Score : 0 Plus ou moins de puissance ? Deux personnages s'affichent. Devine si celui de droite a plus ou moins de puissance que celui de gauche. Chaque bonne réponse fait avancer la chaîne. Une erreur et c'est terminé. Tu peux jouer sans compte, mais connecte-toi pour enregistrer ton score et gagner de l'XP. Jouer → Leaderboard Higher/Lower All-time Hebdo 1 21 Kata 29 pts AOT Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 96,
+  "text": "← Back Score : 0 Plus ou moins de puissance ? Deux personnages s'affichent. Devine si celui de droite a plus ou moins de puissance que celui de gauche. Chaque bonne réponse fait avancer la chaîne. Une erreur et c'est terminé. Tu peux jouer sans compte, mais connecte-toi pour enregistrer ton score et gagner de l'XP. Jouer → Leaderboard Higher/Lower All-time Hebdo 1 21 Kata 29 pts AOT Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -1237,21 +1209,19 @@
    "/casino",
    "/login"
   ],
-  "bytes": 56423
+  "bytes": 54014
  },
  {
   "url": "/aot/games/tower",
   "title": "La Tour de Wall Maria · AOT Arcade",
-  "desc": "La Tour de Wall Maria (Attack on Titan) : Grimpe 20 étages avec une escouade de 3 que tu constitues en route. Les combats se résolvent seuls : à toi de déclencher les capacités au bon moment, quand un ennemi charge son attaque. Un mort reste mort.",
+  "desc": "Grimpe 20 étages avec une escouade de 3 que tu constitues en route. Les combats se résolvent seuls : à toi de déclencher les capacités au bon moment, quand un ennemi charge son attaque. Un mort reste mort.",
   "canon": "/aot/games/tower",
   "robots": "index, follow",
-  "ogimg": "/og?u=aot",
-  "h1": [
-   "La Tour de Wall Maria"
-  ],
+  "ogimg": "",
+  "h1": [],
   "h2": 1,
-  "words": 109,
-  "text": "← Les jeux Ton ascension est gardée : tu reprendras où tu t'es arrêté. La Tour de Wall Maria Ouverture de la tour… Leaderboard La Tour de Wall Maria Tour du jour Panthéon La tour d'aujourd'hui, la même pour tout le monde. Classé sur le nombre d'essais qu'il a fallu pour la franchir — puis sur l'étage atteint. Remise à zéro à minuit, avec la tour. Personne n'a encore tenté la tour d'aujourd'hui — sois le premier. AOT Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 102,
+  "text": "← Les jeux Ton ascension est gardée : tu reprendras où tu t'es arrêté. Ouverture de la tour… Leaderboard The Culling Tower Tour du jour Panthéon La tour d'aujourd'hui, la même pour tout le monde. Classé sur le nombre d'essais qu'il a fallu pour la franchir — puis sur l'étage atteint. Remise à zéro à minuit, avec la tour. Personne n'a encore tenté la tour d'aujourd'hui — sois le premier. AOT Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -1271,7 +1241,7 @@
    "/aot/shop",
    "/casino"
   ],
-  "bytes": 50146
+  "bytes": 48386
  },
  {
   "url": "/kny",
@@ -1279,7 +1249,7 @@
   "desc": "L'arcade fan dédiée à Demon Slayer : une collection de mini-jeux gratuits (devinette du jour, Qui est-ce ?, quiz, draft, tier list…) pour tester ta connaissance de l'univers Kimetsu no Yaiba. Sans compte, jouable dans le navigateur.",
   "canon": "/kny",
   "robots": "index, follow",
-  "ogimg": "/og?u=kny",
+  "ogimg": "/og",
   "h1": [
    "KNY Arcade — mini-jeux Kimetsu no Yaiba gratuits"
   ],
@@ -1287,6 +1257,8 @@
   "words": 529,
   "text": "Accueil Jeux Connexion 鬼滅之刃 全集中 呼吸法 柱 Kimetsu no Yaiba · Fan Arcade 鬼 KNY Arcade — mini-jeux Kimetsu no Yaiba gratuits La salle d'arcade au fil de la lame, dédiée à Kimetsu no Yaiba . Une collection de mini-jeux nerveux pour tester ta connaissance de l'univers et graver ton nom au rang de Pilier. Voir les jeux → Build the Perfect Slayer 9 jeux jouables 0 compte requis S grade max à atteindre 遊技 · Arcade Liste des jeux Un aperçu de ce qui t'attend dans l'arcade. Jeu # 01 Build the Perfect Slayer Compose ton pourfendeur idéal catégorie par catégorie. Chaque choix verrouille une stat et re-mélange le reste. Score sur 1000, du simple Mizunoto au rang de Pilier. tap game roster KNY score Jouer maintenant → Jeu # 02 KNY Pyramid Classe 8 personnages du plus fort au plus faible selon la consigne. Les bonnes positions se verrouillent, les fausses reviennent. 4 tentatives, jusqu'à 10 000 points. ranking drag & drop roster KNY Jouer maintenant → Jeu # 03 Hashira Draft Drafte 1 pourfendeur par catégorie sous budget, place chacun au bon poste, puis affronte une série de démons de plus en plus redoutables. Va le plus loin possible. draft combat roster KNY Jouer maintenant → Jeu # 04 KNY Random Battle Affronte un ami en 1v1 : drafte une carte tirée au hasard à tour de rôle (garde-la ou refile-la), compose ton escouade de 5, puis laisse parler les lames Nichirin. Le cumul le plus fort gagne. 1v1 multijoueur draft roster KNY Jouer maintenant → Jeu # 05 Qui est-ce ? Affronte un ami en 1v1 : un",
   "ld": [
+   "WebSite",
+   "Organization",
    "WebSite",
    "Organization"
   ],
@@ -1312,7 +1284,7 @@
    "/kny/shop",
    "/login"
   ],
-  "bytes": 84599
+  "bytes": 82023
  },
  {
   "url": "/kny/games",
@@ -1320,7 +1292,7 @@
   "desc": "Tous les mini-jeux Kimetsu no Yaiba de KNY Arcade : Build the Perfect Slayer, KNY Pyramid, Hashira Draft, KNY Random Battle, Qui est-ce ?, KNY Codenames, KNYdle, KNY Higher/Lower, La Forteresse Infinie… Gratuits, sans compte, dans le navigateur.",
   "canon": "/kny/games",
   "robots": "index, follow",
-  "ogimg": "/og?u=kny",
+  "ogimg": "",
   "h1": [
    "Les jeux du Souffle"
   ],
@@ -1366,21 +1338,19 @@
    "/kny/shop",
    "/login"
   ],
-  "bytes": 89229
+  "bytes": 86531
  },
  {
   "url": "/kny/games/builder",
   "title": "Build the Perfect Slayer · KNY Arcade",
-  "desc": "Build the Perfect Slayer (Kimetsu no Yaiba) : Compose ton pourfendeur idéal catégorie par catégorie. Chaque choix verrouille une stat et re-mélange le reste. Score sur 1000, du simple Mizunoto au rang de Pilier.",
+  "desc": "Compose ton pourfendeur idéal catégorie par catégorie. Chaque choix verrouille une stat et re-mélange le reste. Score sur 1000, du simple Mizunoto au rang de Pilier.",
   "canon": "/kny/games/builder",
   "robots": "index, follow",
   "ogimg": "/assets/builder-kny.png",
-  "h1": [
-   "Build the Perfect Slayer — jeu Kimetsu no Yaiba gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 74,
-  "text": "← Back Build the Perfect Slayer — jeu Kimetsu no Yaiba gratuit Record : 0 👆 Tape une catégorie pour la verrouiller ! ( 0 / 10 ) ↻ Tirage en cours… 🏆 Best Rank Joue pour obtenir un rang ! Grade S Grade 1 Grade 2 Top Ranks Leaderboard Builder All-time Hebdo 1 21 Kata 919 KNY Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 65,
+  "text": "← Back Record : 0 👆 Tape une catégorie pour la verrouiller ! ( 0 / 10 ) ↻ Tirage en cours… 🏆 Best Rank Joue pour obtenir un rang ! Grade S Grade 1 Grade 2 Top Ranks Leaderboard Builder All-time Hebdo 1 21 Kata 919 KNY Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -1401,21 +1371,19 @@
    "/kny/shop",
    "/kny/u/Kata"
   ],
-  "bytes": 99776
+  "bytes": 97304
  },
  {
   "url": "/kny/games/ranking",
   "title": "KNY Pyramid · KNY Arcade",
-  "desc": "KNY Pyramid (Kimetsu no Yaiba) : Classe 8 personnages du plus fort au plus faible selon la consigne. Les bonnes positions se verrouillent, les fausses reviennent. 4 tentatives, jusqu'à 10 000 points.",
+  "desc": "Classe 8 personnages du plus fort au plus faible selon la consigne. Les bonnes positions se verrouillent, les fausses reviennent. 4 tentatives, jusqu'à 10 000 points.",
   "canon": "/kny/games/ranking",
   "robots": "index, follow",
   "ogimg": "/assets/pyramid-kny.png",
-  "h1": [
-   "KNY Pyramid — jeu Kimetsu no Yaiba gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 45,
-  "text": "KNY Pyramid — jeu Kimetsu no Yaiba gratuit Chargement… Leaderboard Pyramid All-time Hebdo 1 21 Kata 7 500 KNY Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 38,
+  "text": "Chargement… Leaderboard Pyramid All-time Hebdo 1 21 Kata 7 500 KNY Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -1436,21 +1404,19 @@
    "/kny/shop",
    "/kny/u/Kata"
   ],
-  "bytes": 54882
+  "bytes": 53531
  },
  {
   "url": "/kny/games/jujutsu-draft",
   "title": "Hashira Draft · KNY Arcade",
-  "desc": "Hashira Draft (Kimetsu no Yaiba) : Drafte 1 pourfendeur par catégorie sous budget, place chacun au bon poste, puis affronte une série de démons de plus en plus redoutables. Va le plus loin possible.",
+  "desc": "Drafte 1 pourfendeur par catégorie sous budget, place chacun au bon poste, puis affronte une série de démons de plus en plus redoutables. Va le plus loin possible.",
   "canon": "/kny/games/jujutsu-draft",
   "robots": "index, follow",
   "ogimg": "/assets/draft-screen.png",
-  "h1": [
-   "Hashira Draft — jeu Kimetsu no Yaiba gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 83,
-  "text": "← Back Hashira Draft — jeu Kimetsu no Yaiba gratuit Record : 0 Drafte 1 personnage par catégorie sans dépasser le budget, puis lance le combat. Place chaque perso dans sa catégorie pour maximiser sa puissance — ton avatar de combat sera ton choix en Souffle . Tirage en cours… Leaderboard Hashira Draft All-time Hebdo 1 21 Kata 3 vaincus KNY Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 76,
+  "text": "← Back Record : 0 Draft 1 sorcier par catégorie sans dépasser le budget, puis lance le combat. Place chaque perso dans sa catégorie pour maximiser sa puissance — ton avatar de combat sera ton choix en Souffle . Tirage en cours… Leaderboard Hashira Draft All-time Hebdo 1 21 Kata 3 vaincus KNY Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -1471,12 +1437,12 @@
    "/kny/shop",
    "/kny/u/Kata"
   ],
-  "bytes": 87592
+  "bytes": 85193
  },
  {
   "url": "/kny/games/battle",
   "title": "KNY Random Battle · KNY Arcade",
-  "desc": "KNY Random Battle (Kimetsu no Yaiba) : Affronte un ami en 1v1 : drafte une carte tirée au hasard à tour de rôle (garde-la ou refile-la), compose ton escouade de 5, puis laisse parler les lames Nichirin. Le cumul le plus fort gagne.",
+  "desc": "JJK Random Battle : affronte un ami en 1v1 sur Jujutsu Kaisen. Drafte une équipe de 5 à tour de rôle, puis laisse parler le combat.",
   "canon": "/kny/games/battle",
   "robots": "index, follow",
   "ogimg": "/assets/battle-screen-kny.png",
@@ -1506,12 +1472,12 @@
    "/kny/shop",
    "/login"
   ],
-  "bytes": 47490
+  "bytes": 45917
  },
  {
   "url": "/kny/games/guesswho",
   "title": "Qui est-ce ? · KNY Arcade",
-  "desc": "Qui est-ce ? (Kimetsu no Yaiba) : Affronte un ami en 1v1 : une grille de 25 personnages, un secret pour chacun. Pose des questions, élimine des cartes et devine le perso secret de l'adversaire avant lui. Un mauvais guess et c'est perdu.",
+  "desc": "Qui est-ce ? version Jujutsu Kaisen : devine le personnage secret de ton adversaire en 1v1. Grille de 25, questions, éliminations et un seul guess pour gagner.",
   "canon": "/kny/games/guesswho",
   "robots": "index, follow",
   "ogimg": "/assets/guesswho-kny.png",
@@ -1541,12 +1507,12 @@
    "/kny/shop",
    "/login"
   ],
-  "bytes": 47570
+  "bytes": 46105
  },
  {
   "url": "/kny/games/codenames",
   "title": "KNY Codenames · KNY Arcade",
-  "desc": "KNY Codenames (Kimetsu no Yaiba) : En équipe (4 à 6 joueurs, rouge vs violet) : les maîtres-espions donnent des indices, les agents révèlent les bons personnages d'une grille de 36. Évitez l'assassin, révélez vos 8 cartes avant l'équipe adverse.",
+  "desc": "JJK Codenames : jeu d'équipe multijoueur (4 à 6 joueurs, rouge vs violet). Les maîtres-espions donnent des indices, les agents révèlent les bons personnages d'une grille de 36. Évitez l'assassin !",
   "canon": "/kny/games/codenames",
   "robots": "index, follow",
   "ogimg": "/assets/codenames-screen.png",
@@ -1576,21 +1542,19 @@
    "/kny/shop",
    "/login"
   ],
-  "bytes": 47835
+  "bytes": 46568
  },
  {
   "url": "/kny/games/jjkdle",
   "title": "KNYdle · KNY Arcade",
-  "desc": "KNYdle (Kimetsu no Yaiba) : Devine le personnage Demon Slayer mystère du jour. Chaque proposition révèle des indices par attribut (espèce, souffle, grade, arc…) avec des flèches ↑/↓. Un perso par jour, essais illimités.",
+  "desc": "JJKdle : le jeu du jour Jujutsu Kaisen. Devine le personnage JJK mystère avec des indices par attribut (race, grade, clan, arc). Un nouveau perso chaque jour, essais illimités, gratuit et sans compte.",
   "canon": "/kny/games/jjkdle",
   "robots": "index, follow",
   "ogimg": "/assets/idle-screen-kny.png",
-  "h1": [
-   "KNYdle — jeu Kimetsu no Yaiba gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 61,
-  "text": "← Back KNYdle — jeu Kimetsu no Yaiba gratuit Essais : 0 Devine le personnage mystère du jour. Leaderboard KNYdle Du jour All-time Hebdo Personne n'a encore trouvé le perso du jour — sois le premier ! KNY Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 55,
+  "text": "← Back Essais : 0 Devine le personnage mystère du jour. Leaderboard KNYdle Du jour All-time Hebdo Personne n'a encore trouvé le perso du jour — sois le premier ! KNY Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -1610,21 +1574,19 @@
    "/kny/games",
    "/kny/shop"
   ],
-  "bytes": 62667
+  "bytes": 60427
  },
  {
   "url": "/kny/games/higher-lower",
   "title": "KNY Higher/Lower · KNY Arcade",
-  "desc": "KNY Higher/Lower (Kimetsu no Yaiba) : Plus ou moins puissant ? Compare deux personnages du roster, devine si celui de droite dépasse celui de gauche en puissance et enchaîne les bonnes réponses le plus loin possible.",
+  "desc": "Plus ou moins puissant ? Compare deux personnages du roster, devine si celui de droite dépasse celui de gauche en puissance et enchaîne les bonnes réponses le plus loin possible.",
   "canon": "/kny/games/higher-lower",
   "robots": "index, follow",
   "ogimg": "/assets/higher-lower-kny.png",
-  "h1": [
-   "KNY Higher/Lower — jeu Kimetsu no Yaiba gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 104,
-  "text": "← Back KNY Higher/Lower — jeu Kimetsu no Yaiba gratuit Score : 0 Plus ou moins de puissance ? Deux personnages s'affichent. Devine si celui de droite a plus ou moins de puissance que celui de gauche. Chaque bonne réponse fait avancer la chaîne. Une erreur et c'est terminé. Tu peux jouer sans compte, mais connecte-toi pour enregistrer ton score et gagner de l'XP. Jouer → Leaderboard Higher/Lower All-time Hebdo 1 21 Kata 20 pts KNY Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 96,
+  "text": "← Back Score : 0 Plus ou moins de puissance ? Deux personnages s'affichent. Devine si celui de droite a plus ou moins de puissance que celui de gauche. Chaque bonne réponse fait avancer la chaîne. Une erreur et c'est terminé. Tu peux jouer sans compte, mais connecte-toi pour enregistrer ton score et gagner de l'XP. Jouer → Leaderboard Higher/Lower All-time Hebdo 1 21 Kata 20 pts KNY Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -1646,21 +1608,19 @@
    "/kny/u/Kata",
    "/login"
   ],
-  "bytes": 56862
+  "bytes": 54446
  },
  {
   "url": "/kny/games/tower",
   "title": "La Forteresse Infinie · KNY Arcade",
-  "desc": "La Forteresse Infinie (Kimetsu no Yaiba) : Grimpe 20 étages avec une escouade de 3 que tu constitues en route. Les combats se résolvent seuls : à toi de déclencher les souffles au bon moment, quand un démon charge son attaque. Un mort reste mort.",
+  "desc": "Grimpe 20 étages avec une escouade de 3 que tu constitues en route. Les combats se résolvent seuls : à toi de déclencher les souffles au bon moment, quand un démon charge son attaque. Un mort reste mort.",
   "canon": "/kny/games/tower",
   "robots": "index, follow",
-  "ogimg": "/og?u=kny",
-  "h1": [
-   "La Forteresse Infinie"
-  ],
+  "ogimg": "",
+  "h1": [],
   "h2": 1,
-  "words": 105,
-  "text": "← Les jeux Ton ascension est gardée : tu reprendras où tu t'es arrêté. La Forteresse Infinie Ouverture de la tour… Leaderboard La Forteresse Infinie Tour du jour Panthéon La tour d'aujourd'hui, la même pour tout le monde. Classé sur le nombre d'essais qu'il a fallu pour la franchir — puis sur l'étage atteint. Remise à zéro à minuit, avec la tour. Personne n'a encore tenté la tour d'aujourd'hui — sois le premier. KNY Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 102,
+  "text": "← Les jeux Ton ascension est gardée : tu reprendras où tu t'es arrêté. Ouverture de la tour… Leaderboard The Culling Tower Tour du jour Panthéon La tour d'aujourd'hui, la même pour tout le monde. Classé sur le nombre d'essais qu'il a fallu pour la franchir — puis sur l'étage atteint. Remise à zéro à minuit, avec la tour. Personne n'a encore tenté la tour d'aujourd'hui — sois le premier. KNY Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -1680,7 +1640,7 @@
    "/kny/games",
    "/kny/shop"
   ],
-  "bytes": 50210
+  "bytes": 48444
  },
  {
   "url": "/tg",
@@ -1688,7 +1648,7 @@
   "desc": "L'arcade fan dédiée à Tokyo Ghoul : une collection de mini-jeux gratuits (devinette du jour, Qui est-ce ?, quiz, draft, tier list…) pour tester ta connaissance de l'univers Tokyo Ghoul. Sans compte, jouable dans le navigateur.",
   "canon": "/tg",
   "robots": "index, follow",
-  "ogimg": "/og?u=tg",
+  "ogimg": "/og",
   "h1": [
    "TG Arcade — mini-jeux Tokyo Ghoul gratuits"
   ],
@@ -1696,6 +1656,8 @@
   "words": 525,
   "text": "Accueil Jeux Connexion 東京喰種 赫子 隻眼 二十区 Tokyo Ghoul · Fan Arcade 喰 TG Arcade — mini-jeux Tokyo Ghoul gratuits La salle d'arcade du 20e arrondissement, dédiée à Tokyo Ghoul . Une collection de mini-jeux nerveux pour tester ta connaissance de l'univers et t'imposer dans le 20e arrondissement. Voir les jeux → Build the Perfect Ghoul 9 jeux jouables 0 compte requis S grade max à atteindre 遊技 · Arcade Liste des jeux Un aperçu de ce qui t'attend dans l'arcade. Jeu # 01 Build the Perfect Ghoul Compose ta goule idéale catégorie par catégorie. Chaque choix verrouille une stat et re-mélange le reste. Score sur 1000, de la simple menace de classe C au rang SSS. tap game roster TG score Jouer maintenant → Jeu # 02 TG Pyramid Classe 8 personnages du plus fort au plus faible selon la consigne. Les bonnes positions se verrouillent, les fausses reviennent. 4 tentatives, jusqu'à 10 000 points. ranking drag & drop roster TG Jouer maintenant → Jeu # 03 Kagune Draft Drafte 1 personnage par catégorie sous budget, place chacun au bon poste, puis affronte une série d'adversaires de plus en plus redoutables. Va le plus loin possible. draft combat roster TG Jouer maintenant → Jeu # 04 TG Random Battle Affronte un ami en 1v1 : drafte une carte tirée au hasard à tour de rôle (garde-la ou refile-la), compose ton escouade de 5, puis laisse parler les kagune. Le cumul le plus fort gagne. 1v1 multijoueur draft roster TG Jouer maintenant → Jeu # 05 Qui est-ce ? Affronte un ami en 1v1 : une grille de 25 person",
   "ld": [
+   "WebSite",
+   "Organization",
    "WebSite",
    "Organization"
   ],
@@ -1721,7 +1683,7 @@
    "/tg/games/tower",
    "/tg/shop"
   ],
-  "bytes": 84232
+  "bytes": 81679
  },
  {
   "url": "/tg/games",
@@ -1729,7 +1691,7 @@
   "desc": "Tous les mini-jeux Tokyo Ghoul de TG Arcade : Build the Perfect Ghoul, TG Pyramid, Kagune Draft, TG Random Battle, Qui est-ce ?, TG Codenames, TGdle, TG Higher/Lower, La Tour de Cochlea… Gratuits, sans compte, dans le navigateur.",
   "canon": "/tg/games",
   "robots": "index, follow",
-  "ogimg": "/og?u=tg",
+  "ogimg": "",
   "h1": [
    "Les jeux du 20e arrondissement"
   ],
@@ -1775,21 +1737,19 @@
    "/tg/games/tower",
    "/tg/shop"
   ],
-  "bytes": 89027
+  "bytes": 86078
  },
  {
   "url": "/tg/games/builder",
   "title": "Build the Perfect Ghoul · TG Arcade",
-  "desc": "Build the Perfect Ghoul (Tokyo Ghoul) : Compose ta goule idéale catégorie par catégorie. Chaque choix verrouille une stat et re-mélange le reste. Score sur 1000, de la simple menace de classe C au rang SSS.",
+  "desc": "Compose ta goule idéale catégorie par catégorie. Chaque choix verrouille une stat et re-mélange le reste. Score sur 1000, de la simple menace de classe C au rang SSS.",
   "canon": "/tg/games/builder",
   "robots": "index, follow",
   "ogimg": "/assets/builder-tg.png",
-  "h1": [
-   "Build the Perfect Ghoul — jeu Tokyo Ghoul gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 79,
-  "text": "← Back Build the Perfect Ghoul — jeu Tokyo Ghoul gratuit Record : 0 👆 Tape une catégorie pour la verrouiller ! ( 0 / 10 ) ↻ Tirage en cours… 🏆 Best Rank Joue pour obtenir un rang ! Grade S Grade 1 Grade 2 Top Ranks Leaderboard Builder All-time Hebdo 1 21 Kata 879 2 5 kakakaka Goule Novice 684 TG Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 71,
+  "text": "← Back Record : 0 👆 Tape une catégorie pour la verrouiller ! ( 0 / 10 ) ↻ Tirage en cours… 🏆 Best Rank Joue pour obtenir un rang ! Grade S Grade 1 Grade 2 Top Ranks Leaderboard Builder All-time Hebdo 1 21 Kata 879 2 5 kakakaka Goule Novice 684 TG Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -1811,21 +1771,19 @@
    "/tg/u/Kata",
    "/tg/u/kakakaka"
   ],
-  "bytes": 100401
+  "bytes": 97986
  },
  {
   "url": "/tg/games/ranking",
   "title": "TG Pyramid · TG Arcade",
-  "desc": "TG Pyramid (Tokyo Ghoul) : Classe 8 personnages du plus fort au plus faible selon la consigne. Les bonnes positions se verrouillent, les fausses reviennent. 4 tentatives, jusqu'à 10 000 points.",
+  "desc": "Classe 8 personnages du plus fort au plus faible selon la consigne. Les bonnes positions se verrouillent, les fausses reviennent. 4 tentatives, jusqu'à 10 000 points.",
   "canon": "/tg/games/ranking",
   "robots": "index, follow",
   "ogimg": "/assets/pyramid-tg.png",
-  "h1": [
-   "TG Pyramid — jeu Tokyo Ghoul gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 44,
-  "text": "TG Pyramid — jeu Tokyo Ghoul gratuit Chargement… Leaderboard Pyramid All-time Hebdo 1 21 Kata 2 500 TG Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 38,
+  "text": "Chargement… Leaderboard Pyramid All-time Hebdo 1 21 Kata 2 500 TG Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -1846,21 +1804,19 @@
    "/tg/shop",
    "/tg/u/Kata"
   ],
-  "bytes": 54683
+  "bytes": 53374
  },
  {
   "url": "/tg/games/jujutsu-draft",
   "title": "Kagune Draft · TG Arcade",
-  "desc": "Kagune Draft (Tokyo Ghoul) : Drafte 1 personnage par catégorie sous budget, place chacun au bon poste, puis affronte une série d'adversaires de plus en plus redoutables. Va le plus loin possible.",
+  "desc": "Drafte 1 personnage par catégorie sous budget, place chacun au bon poste, puis affronte une série d'adversaires de plus en plus redoutables. Va le plus loin possible.",
   "canon": "/tg/games/jujutsu-draft",
   "robots": "index, follow",
   "ogimg": "/assets/draft-screen.png",
-  "h1": [
-   "Kagune Draft — jeu Tokyo Ghoul gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 82,
-  "text": "← Back Kagune Draft — jeu Tokyo Ghoul gratuit Record : 0 Drafte 1 personnage par catégorie sans dépasser le budget, puis lance le combat. Place chaque perso dans sa catégorie pour maximiser sa puissance — ton avatar de combat sera ton choix en Kagune . Tirage en cours… Leaderboard Kagune Draft All-time Hebdo 1 21 Kata 4 vaincus TG Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 76,
+  "text": "← Back Record : 0 Draft 1 sorcier par catégorie sans dépasser le budget, puis lance le combat. Place chaque perso dans sa catégorie pour maximiser sa puissance — ton avatar de combat sera ton choix en Kagune . Tirage en cours… Leaderboard Kagune Draft All-time Hebdo 1 21 Kata 4 vaincus TG Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -1881,12 +1837,12 @@
    "/tg/shop",
    "/tg/u/Kata"
   ],
-  "bytes": 86503
+  "bytes": 84161
  },
  {
   "url": "/tg/games/battle",
   "title": "TG Random Battle · TG Arcade",
-  "desc": "TG Random Battle (Tokyo Ghoul) : Affronte un ami en 1v1 : drafte une carte tirée au hasard à tour de rôle (garde-la ou refile-la), compose ton escouade de 5, puis laisse parler les kagune. Le cumul le plus fort gagne.",
+  "desc": "JJK Random Battle : affronte un ami en 1v1 sur Jujutsu Kaisen. Drafte une équipe de 5 à tour de rôle, puis laisse parler le combat.",
   "canon": "/tg/games/battle",
   "robots": "index, follow",
   "ogimg": "/assets/battle-screen-tg.png",
@@ -1916,12 +1872,12 @@
    "/tg/games",
    "/tg/shop"
   ],
-  "bytes": 47255
+  "bytes": 45766
  },
  {
   "url": "/tg/games/guesswho",
   "title": "Qui est-ce ? · TG Arcade",
-  "desc": "Qui est-ce ? (Tokyo Ghoul) : Affronte un ami en 1v1 : une grille de 25 personnages, un secret pour chacun. Pose des questions, élimine des cartes et devine le perso secret de l'adversaire avant lui. Un mauvais guess et c'est perdu.",
+  "desc": "Qui est-ce ? version Jujutsu Kaisen : devine le personnage secret de ton adversaire en 1v1. Grille de 25, questions, éliminations et un seul guess pour gagner.",
   "canon": "/tg/games/guesswho",
   "robots": "index, follow",
   "ogimg": "/assets/guesswho-tg.png",
@@ -1951,12 +1907,12 @@
    "/tg/games",
    "/tg/shop"
   ],
-  "bytes": 47417
+  "bytes": 45982
  },
  {
   "url": "/tg/games/codenames",
   "title": "TG Codenames · TG Arcade",
-  "desc": "TG Codenames (Tokyo Ghoul) : En équipe (4 à 6 joueurs, rouge vs violet) : les maîtres-espions donnent des indices, les agents révèlent les bons personnages d'une grille de 36. Évitez l'assassin, révélez vos 8 cartes avant l'équipe adverse.",
+  "desc": "JJK Codenames : jeu d'équipe multijoueur (4 à 6 joueurs, rouge vs violet). Les maîtres-espions donnent des indices, les agents révèlent les bons personnages d'une grille de 36. Évitez l'assassin !",
   "canon": "/tg/games/codenames",
   "robots": "index, follow",
   "ogimg": "/assets/codenames-screen.png",
@@ -1986,21 +1942,19 @@
    "/tg/games",
    "/tg/shop"
   ],
-  "bytes": 47670
+  "bytes": 46482
  },
  {
   "url": "/tg/games/jjkdle",
   "title": "TGdle · TG Arcade",
-  "desc": "Devine le personnage Tokyo Ghoul mystère du jour. Chaque proposition révèle des indices par attribut (espèce, kagune, classement, arc…) avec des flèches ↑/↓. Un perso par jour, essais illimités.",
+  "desc": "JJKdle : le jeu du jour Jujutsu Kaisen. Devine le personnage JJK mystère avec des indices par attribut (race, grade, clan, arc). Un nouveau perso chaque jour, essais illimités, gratuit et sans compte.",
   "canon": "/tg/games/jjkdle",
   "robots": "index, follow",
   "ogimg": "/assets/idle-screen-tg.png",
-  "h1": [
-   "TGdle — jeu Tokyo Ghoul gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 60,
-  "text": "← Back TGdle — jeu Tokyo Ghoul gratuit Essais : 0 Devine le personnage mystère du jour. Leaderboard TGdle Du jour All-time Hebdo Personne n'a encore trouvé le perso du jour — sois le premier ! TG Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 55,
+  "text": "← Back Essais : 0 Devine le personnage mystère du jour. Leaderboard TGdle Du jour All-time Hebdo Personne n'a encore trouvé le perso du jour — sois le premier ! TG Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -2020,21 +1974,19 @@
    "/tg/games",
    "/tg/shop"
   ],
-  "bytes": 61376
+  "bytes": 59264
  },
  {
   "url": "/tg/games/higher-lower",
   "title": "TG Higher/Lower · TG Arcade",
-  "desc": "TG Higher/Lower (Tokyo Ghoul) : Plus ou moins puissant ? Compare deux personnages du roster, devine si celui de droite dépasse celui de gauche en puissance et enchaîne les bonnes réponses le plus loin possible.",
+  "desc": "Plus ou moins puissant ? Compare deux personnages du roster, devine si celui de droite dépasse celui de gauche en puissance et enchaîne les bonnes réponses le plus loin possible.",
   "canon": "/tg/games/higher-lower",
   "robots": "index, follow",
   "ogimg": "/assets/higher-lower-tg.png",
-  "h1": [
-   "TG Higher/Lower — jeu Tokyo Ghoul gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 103,
-  "text": "← Back TG Higher/Lower — jeu Tokyo Ghoul gratuit Score : 0 Plus ou moins de puissance ? Deux personnages s'affichent. Devine si celui de droite a plus ou moins de puissance que celui de gauche. Chaque bonne réponse fait avancer la chaîne. Une erreur et c'est terminé. Tu peux jouer sans compte, mais connecte-toi pour enregistrer ton score et gagner de l'XP. Jouer → Leaderboard Higher/Lower All-time Hebdo 1 21 Kata 9 pts TG Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 96,
+  "text": "← Back Score : 0 Plus ou moins de puissance ? Deux personnages s'affichent. Devine si celui de droite a plus ou moins de puissance que celui de gauche. Chaque bonne réponse fait avancer la chaîne. Une erreur et c'est terminé. Tu peux jouer sans compte, mais connecte-toi pour enregistrer ton score et gagner de l'XP. Jouer → Leaderboard Higher/Lower All-time Hebdo 1 21 Kata 9 pts TG Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -2056,21 +2008,19 @@
    "/tg/shop",
    "/tg/u/Kata"
   ],
-  "bytes": 56640
+  "bytes": 54281
  },
  {
   "url": "/tg/games/tower",
   "title": "La Tour de Cochlea · TG Arcade",
-  "desc": "La Tour de Cochlea (Tokyo Ghoul) : Grimpe 20 étages avec une escouade de 3 que tu constitues en route. Les combats se résolvent seuls : à toi de déclencher les kagune au bon moment, quand un adversaire charge son attaque. Un mort reste mort.",
+  "desc": "Grimpe 20 étages avec une escouade de 3 que tu constitues en route. Les combats se résolvent seuls : à toi de déclencher les kagune au bon moment, quand un adversaire charge son attaque. Un mort reste mort.",
   "canon": "/tg/games/tower",
   "robots": "index, follow",
-  "ogimg": "/og?u=tg",
-  "h1": [
-   "La Tour de Cochlea"
-  ],
+  "ogimg": "",
+  "h1": [],
   "h2": 1,
-  "words": 107,
-  "text": "← Les jeux Ton ascension est gardée : tu reprendras où tu t'es arrêté. La Tour de Cochlea Ouverture de la tour… Leaderboard La Tour de Cochlea Tour du jour Panthéon La tour d'aujourd'hui, la même pour tout le monde. Classé sur le nombre d'essais qu'il a fallu pour la franchir — puis sur l'étage atteint. Remise à zéro à minuit, avec la tour. Personne n'a encore tenté la tour d'aujourd'hui — sois le premier. TG Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 102,
+  "text": "← Les jeux Ton ascension est gardée : tu reprendras où tu t'es arrêté. Ouverture de la tour… Leaderboard The Culling Tower Tour du jour Panthéon La tour d'aujourd'hui, la même pour tout le monde. Classé sur le nombre d'essais qu'il a fallu pour la franchir — puis sur l'étage atteint. Remise à zéro à minuit, avec la tour. Personne n'a encore tenté la tour d'aujourd'hui — sois le premier. TG Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -2090,7 +2040,7 @@
    "/tg/games",
    "/tg/shop"
   ],
-  "bytes": 49983
+  "bytes": 48329
  },
  {
   "url": "/bleach",
@@ -2098,7 +2048,7 @@
   "desc": "L'arcade fan dédiée à Bleach : une collection de mini-jeux gratuits (devinette du jour, Qui est-ce ?, quiz, draft, tier list…) pour tester ta connaissance de l'univers Bleach. Sans compte, jouable dans le navigateur.",
   "canon": "/bleach",
   "robots": "index, follow",
-  "ogimg": "/og?u=bleach",
+  "ogimg": "/og",
   "h1": [
    "Bleach Arcade — mini-jeux Bleach gratuits"
   ],
@@ -2106,6 +2056,8 @@
   "words": 522,
   "text": "Accueil Jeux Connexion 死神 斬魄刀 卍解 尸魂界 Bleach · Fan Arcade 死 Bleach Arcade — mini-jeux Bleach gratuits La salle d'arcade de la Soul Society, dédiée à Bleach . Une collection de mini-jeux nerveux pour tester ta connaissance de l'univers et trancher avant même d'avoir dégainé. Voir les jeux → Build the Perfect Shinigami 9 jeux jouables 0 compte requis S grade max à atteindre 遊技 · Arcade Liste des jeux Un aperçu de ce qui t'attend dans l'arcade. Jeu # 01 Build the Perfect Shinigami Compose ton shinigami idéal catégorie par catégorie. Chaque choix verrouille une stat et re-mélange le reste. Score sur 1000, du simple élève de l'Académie au Capitaine-commandant. tap game roster Bleach score Jouer maintenant → Jeu # 02 Bleach Pyramid Classe 8 personnages du plus fort au plus faible selon la consigne. Les bonnes positions se verrouillent, les fausses reviennent. 4 tentatives, jusqu'à 10 000 points. ranking drag & drop roster Bleach Jouer maintenant → Jeu # 03 Zanpakutō Draft Drafte 1 personnage par catégorie sous budget, place chacun au bon poste, puis affronte une série d'adversaires de plus en plus redoutables. Va le plus loin possible. draft combat roster Bleach Jouer maintenant → Jeu # 04 Bleach Random Battle Affronte un ami en 1v1 : drafte une carte tirée au hasard à tour de rôle (garde-la ou refile-la), compose ton escouade de 5, puis laisse parler les lames. Le cumul le plus fort gagne. 1v1 multijoueur draft roster Bleach Jouer maintenant → Jeu # 05 Qui est-ce ? Affronte un ami ",
   "ld": [
+   "WebSite",
+   "Organization",
    "WebSite",
    "Organization"
   ],
@@ -2131,7 +2083,7 @@
    "/casino",
    "/login"
   ],
-  "bytes": 84830
+  "bytes": 82117
  },
  {
   "url": "/bleach/games",
@@ -2139,7 +2091,7 @@
   "desc": "Tous les mini-jeux Bleach de Bleach Arcade : Build the Perfect Shinigami, Bleach Pyramid, Zanpakutō Draft, Bleach Random Battle, Qui est-ce ?, Bleach Codenames, Bleachdle, Bleach Higher/Lower, La Tour du Repentir… Gratuits, sans compte, dans le navigateur.",
   "canon": "/bleach/games",
   "robots": "index, follow",
-  "ogimg": "/og?u=bleach",
+  "ogimg": "",
   "h1": [
    "Les jeux de la Soul Society"
   ],
@@ -2185,21 +2137,19 @@
    "/casino",
    "/login"
   ],
-  "bytes": 89853
+  "bytes": 86963
  },
  {
   "url": "/bleach/games/builder",
   "title": "Build the Perfect Shinigami · Bleach Arcade",
-  "desc": "Build the Perfect Shinigami (Bleach) : Compose ton shinigami idéal catégorie par catégorie. Chaque choix verrouille une stat et re-mélange le reste. Score sur 1000, du simple élève de l'Académie au Capitaine-commandant.",
+  "desc": "Compose ton shinigami idéal catégorie par catégorie. Chaque choix verrouille une stat et re-mélange le reste. Score sur 1000, du simple élève de l'Académie au Capitaine-commandant.",
   "canon": "/bleach/games/builder",
   "robots": "index, follow",
   "ogimg": "/assets/builder-bleach.png",
-  "h1": [
-   "Build the Perfect Shinigami — jeu Bleach gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 87,
-  "text": "← Back Build the Perfect Shinigami — jeu Bleach gratuit Record : 0 👆 Tape une catégorie pour la verrouiller ! ( 0 / 11 ) ↻ Tirage en cours… 🏆 Best Rank Joue pour obtenir un rang ! Grade S Grade 1 Grade 2 Top Ranks Leaderboard Builder All-time Hebdo 1 21 Kata 917 2 3 Skynnnnner 866 3 G 47 GROKAKAKIPU 819 4 5 kakakaka Officier Gradé 818 Bleach Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 80,
+  "text": "← Back Record : 0 👆 Tape une catégorie pour la verrouiller ! ( 0 / 11 ) ↻ Tirage en cours… 🏆 Best Rank Joue pour obtenir un rang ! Grade S Grade 1 Grade 2 Top Ranks Leaderboard Builder All-time Hebdo 1 21 Kata 917 2 3 Skynnnnner 866 3 G 47 GROKAKAKIPU 819 4 5 kakakaka Officier Gradé 818 Bleach Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -2223,21 +2173,19 @@
    "/bleach/u/kakakaka",
    "/casino"
   ],
-  "bytes": 133529
+  "bytes": 131018
  },
  {
   "url": "/bleach/games/ranking",
   "title": "Bleach Pyramid · Bleach Arcade",
-  "desc": "Bleach Pyramid (Bleach) : Classe 8 personnages du plus fort au plus faible selon la consigne. Les bonnes positions se verrouillent, les fausses reviennent. 4 tentatives, jusqu'à 10 000 points.",
+  "desc": "Classe 8 personnages du plus fort au plus faible selon la consigne. Les bonnes positions se verrouillent, les fausses reviennent. 4 tentatives, jusqu'à 10 000 points.",
   "canon": "/bleach/games/ranking",
   "robots": "index, follow",
   "ogimg": "/assets/pyramid-screen-bleach.png",
-  "h1": [
-   "Bleach Pyramid — jeu Bleach gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 50,
-  "text": "Bleach Pyramid — jeu Bleach gratuit Chargement… Leaderboard Pyramid All-time Hebdo Aucun score pour l'instant — gagne une partie et sois le premier ! Bleach Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 45,
+  "text": "Chargement… Leaderboard Pyramid All-time Hebdo Aucun score pour l'instant — gagne une partie et sois le premier ! Bleach Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -2257,21 +2205,19 @@
    "/bleach/shop",
    "/casino"
   ],
-  "bytes": 51342
+  "bytes": 50092
  },
  {
   "url": "/bleach/games/jujutsu-draft",
   "title": "Zanpakutō Draft · Bleach Arcade",
-  "desc": "Zanpakutō Draft (Bleach) : Drafte 1 personnage par catégorie sous budget, place chacun au bon poste, puis affronte une série d'adversaires de plus en plus redoutables. Va le plus loin possible.",
+  "desc": "Drafte 1 personnage par catégorie sous budget, place chacun au bon poste, puis affronte une série d'adversaires de plus en plus redoutables. Va le plus loin possible.",
   "canon": "/bleach/games/jujutsu-draft",
   "robots": "index, follow",
   "ogimg": "/assets/draft-screen.png",
-  "h1": [
-   "Zanpakutō Draft — jeu Bleach gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 81,
-  "text": "← Back Zanpakutō Draft — jeu Bleach gratuit Record : 0 Drafte 1 personnage par catégorie sans dépasser le budget, puis lance le combat. Place chaque perso dans sa catégorie pour maximiser sa puissance — ton avatar de combat sera ton choix en Zanpakutō . Tirage en cours… Leaderboard Zanpakutō Draft All-time Hebdo 1 21 Kata 3 vaincus Bleach Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 76,
+  "text": "← Back Record : 0 Draft 1 sorcier par catégorie sans dépasser le budget, puis lance le combat. Place chaque perso dans sa catégorie pour maximiser sa puissance — ton avatar de combat sera ton choix en Zanpakutō . Tirage en cours… Leaderboard Zanpakutō Draft All-time Hebdo 1 21 Kata 3 vaincus Bleach Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -2292,12 +2238,12 @@
    "/bleach/u/Kata",
    "/casino"
   ],
-  "bytes": 89235
+  "bytes": 86804
  },
  {
   "url": "/bleach/games/battle",
   "title": "Bleach Random Battle · Bleach Arcade",
-  "desc": "Bleach Random Battle (Bleach) : Affronte un ami en 1v1 : drafte une carte tirée au hasard à tour de rôle (garde-la ou refile-la), compose ton escouade de 5, puis laisse parler les lames. Le cumul le plus fort gagne.",
+  "desc": "JJK Random Battle : affronte un ami en 1v1 sur Jujutsu Kaisen. Drafte une équipe de 5 à tour de rôle, puis laisse parler le combat.",
   "canon": "/bleach/games/battle",
   "robots": "index, follow",
   "ogimg": "/assets/battle-bleach.png",
@@ -2327,12 +2273,12 @@
    "/casino",
    "/login"
   ],
-  "bytes": 47579
+  "bytes": 46102
  },
  {
   "url": "/bleach/games/guesswho",
   "title": "Qui est-ce ? · Bleach Arcade",
-  "desc": "Qui est-ce ? (Bleach) : Affronte un ami en 1v1 : une grille de 25 personnages, un secret pour chacun. Pose des questions, élimine des cartes et devine le perso secret de l'adversaire avant lui. Un mauvais guess et c'est perdu.",
+  "desc": "Qui est-ce ? version Jujutsu Kaisen : devine le personnage secret de ton adversaire en 1v1. Grille de 25, questions, éliminations et un seul guess pour gagner.",
   "canon": "/bleach/games/guesswho",
   "robots": "index, follow",
   "ogimg": "/assets/guesswho-bleach.png",
@@ -2362,12 +2308,12 @@
    "/casino",
    "/login"
   ],
-  "bytes": 47719
+  "bytes": 46314
  },
  {
   "url": "/bleach/games/codenames",
   "title": "Bleach Codenames · Bleach Arcade",
-  "desc": "Bleach Codenames (Bleach) : En équipe (4 à 6 joueurs, rouge vs violet) : les maîtres-espions donnent des indices, les agents révèlent les bons personnages d'une grille de 36. Évitez l'assassin, révélez vos 8 cartes avant l'équipe adverse.",
+  "desc": "JJK Codenames : jeu d'équipe multijoueur (4 à 6 joueurs, rouge vs violet). Les maîtres-espions donnent des indices, les agents révèlent les bons personnages d'une grille de 36. Évitez l'assassin !",
   "canon": "/bleach/games/codenames",
   "robots": "index, follow",
   "ogimg": "/assets/codenames-screen.png",
@@ -2397,21 +2343,19 @@
    "/casino",
    "/login"
   ],
-  "bytes": 48020
+  "bytes": 46838
  },
  {
   "url": "/bleach/games/jjkdle",
   "title": "Bleachdle · Bleach Arcade",
-  "desc": "Devine le personnage Bleach mystère du jour. Chaque proposition révèle des indices par attribut (espèce, libération, rang, arc…) avec des flèches ↑/↓. Un perso par jour, essais illimités.",
+  "desc": "JJKdle : le jeu du jour Jujutsu Kaisen. Devine le personnage JJK mystère avec des indices par attribut (race, grade, clan, arc). Un nouveau perso chaque jour, essais illimités, gratuit et sans compte.",
   "canon": "/bleach/games/jjkdle",
   "robots": "index, follow",
   "ogimg": "/assets/idle-bleach.png",
-  "h1": [
-   "Bleachdle — jeu Bleach gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 59,
-  "text": "← Back Bleachdle — jeu Bleach gratuit Essais : 0 Devine le personnage mystère du jour. Leaderboard Bleachdle Du jour All-time Hebdo Personne n'a encore trouvé le perso du jour — sois le premier ! Bleach Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 55,
+  "text": "← Back Essais : 0 Devine le personnage mystère du jour. Leaderboard Bleachdle Du jour All-time Hebdo Personne n'a encore trouvé le perso du jour — sois le premier ! Bleach Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -2431,21 +2375,19 @@
    "/bleach/shop",
    "/casino"
   ],
-  "bytes": 66091
+  "bytes": 64091
  },
  {
   "url": "/bleach/games/higher-lower",
   "title": "Bleach Higher/Lower · Bleach Arcade",
-  "desc": "Bleach Higher/Lower (Bleach) : Plus ou moins de reiatsu ? Compare deux personnages du roster, devine si celui de droite dépasse celui de gauche en puissance et enchaîne les bonnes réponses le plus loin possible.",
+  "desc": "Plus ou moins de reiatsu ? Compare deux personnages du roster, devine si celui de droite dépasse celui de gauche en puissance et enchaîne les bonnes réponses le plus loin possible.",
   "canon": "/bleach/games/higher-lower",
   "robots": "index, follow",
   "ogimg": "/assets/higher-lower-bleach.png",
-  "h1": [
-   "Bleach Higher/Lower — jeu Bleach gratuit"
-  ],
+  "h1": [],
   "h2": 1,
-  "words": 109,
-  "text": "← Back Bleach Higher/Lower — jeu Bleach gratuit Score : 0 Plus ou moins de reiatsu ? Deux personnages s'affichent. Devine si celui de droite a plus ou moins de reiatsu que celui de gauche. Chaque bonne réponse fait avancer la chaîne. Une erreur et c'est terminé. Tu peux jouer sans compte, mais connecte-toi pour enregistrer ton score et gagner de l'XP. Jouer → Leaderboard Higher/Lower All-time Hebdo 1 5 kakakaka Officier Gradé 23 pts 2 21 Kata 15 pts Bleach Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 103,
+  "text": "← Back Score : 0 Plus ou moins de reiatsu ? Deux personnages s'affichent. Devine si celui de droite a plus ou moins de reiatsu que celui de gauche. Chaque bonne réponse fait avancer la chaîne. Une erreur et c'est terminé. Tu peux jouer sans compte, mais connecte-toi pour enregistrer ton score et gagner de l'XP. Jouer → Leaderboard Higher/Lower All-time Hebdo 1 5 kakakaka Officier Gradé 23 pts 2 21 Kata 15 pts Bleach Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -2468,21 +2410,19 @@
    "/casino",
    "/login"
   ],
-  "bytes": 61006
+  "bytes": 58594
  },
  {
   "url": "/bleach/games/tower",
   "title": "La Tour du Repentir · Bleach Arcade",
-  "desc": "La Tour du Repentir (Bleach) : Grimpe 20 étages avec une escouade de 3 que tu constitues en route. Les combats se résolvent seuls : à toi de déclencher les libérations au bon moment, quand un adversaire charge son attaque. Un mort reste mort.",
+  "desc": "Grimpe 20 étages avec une escouade de 3 que tu constitues en route. Les combats se résolvent seuls : à toi de déclencher les libérations au bon moment, quand un adversaire charge son attaque. Un mort reste mort.",
   "canon": "/bleach/games/tower",
   "robots": "index, follow",
-  "ogimg": "/og?u=bleach",
-  "h1": [
-   "La Tour du Repentir"
-  ],
+  "ogimg": "",
+  "h1": [],
   "h2": 1,
-  "words": 107,
-  "text": "← Les jeux Ton ascension est gardée : tu reprendras où tu t'es arrêté. La Tour du Repentir Ouverture de la tour… Leaderboard La Tour du Repentir Tour du jour Panthéon La tour d'aujourd'hui, la même pour tout le monde. Classé sur le nombre d'essais qu'il a fallu pour la franchir — puis sur l'étage atteint. Remise à zéro à minuit, avec la tour. Personne n'a encore tenté la tour d'aujourd'hui — sois le premier. Bleach Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
+  "words": 102,
+  "text": "← Les jeux Ton ascension est gardée : tu reprendras où tu t'es arrêté. Ouverture de la tour… Leaderboard The Culling Tower Tour du jour Panthéon La tour d'aujourd'hui, la même pour tout le monde. Classé sur le nombre d'essais qu'il a fallu pour la franchir — puis sur l'étage atteint. Remise à zéro à minuit, avec la tour. Personne n'a encore tenté la tour d'aujourd'hui — sois le premier. Bleach Arcade Fan-projet non officiel · aucun asset copyrighté · © 2026 Accueil Jeux Boutique Mon compte Mon deck Amis & échanges Tous les univers Casino Contact Gérer les cookies ?",
   "ld": [
    "WebSite",
    "Organization",
@@ -2502,17 +2442,17 @@
    "/bleach/shop",
    "/casino"
   ],
-  "bytes": 50379
+  "bytes": 48677
  },
  {
   "url": "/casino",
   "title": "Casino",
   "desc": "Le casino de la plateforme : mise tes coins au blackjack, en solo ou à une table jusqu'à 5 joueurs.",
   "canon": "/casino",
-  "robots": "noindex, follow",
+  "robots": "index, follow",
   "ogimg": "",
   "h1": [
-   "Le casino"
+   "Lecasino"
   ],
   "h2": 0,
   "words": 54,
@@ -2529,15 +2469,15 @@
    "/casino/slots",
    "/login"
   ],
-  "bytes": 52926
+  "bytes": 52903
  },
  {
   "url": "/login",
   "title": "Connexion · JJK Arcade",
-  "desc": "Connecte-toi pour garder ta progression, tes séries et tes classements sur tous les univers.",
-  "canon": "/login",
+  "desc": "L'arcade fan dédiée à Jujutsu Kaisen : une collection de mini-jeux gratuits (JJKdle, Qui est-ce ?, quiz, draft, tier list…) pour tester ta connaissance de l'univers JJK. Sans compte, jouable dans le navigateur.",
+  "canon": "/jjk",
   "robots": "noindex, nofollow",
-  "ogimg": "/og?u=jjk",
+  "ogimg": "/og",
   "h1": [
    "Connexion"
   ],
@@ -2559,6 +2499,6 @@
    "/login",
    "/register"
   ],
-  "bytes": 45693
+  "bytes": 42887
  }
 ]

@@ -1,45 +1,36 @@
-# On-Page SEO — jjkdle-arcade.vercel.app
+# On-Page SEO — jjkdle-arcade.vercel.app (re-audit)
 
-**Score: 55/100**
+Re-audited 2026-10-08 (afternoon) after commit `0c5de81`, 69 URLs re-crawled. Baseline: 52/100 (`baseline-am/findings/onpage.md`).
+
+**Score: 78/100** (+26)
+
+## Fixed since baseline
+| Metric | Baseline | Now |
+|---|---|---|
+| Pages without `<h1>` | 36 | **0** |
+| Non-JJK pages whose meta description mentions JJK / Jujutsu Kaisen | 20 | **0** |
+| Non-JJK pages with JJK body copy ("The Culling Tower", "sorcier") | 10 | **0** |
+| URLs sharing a duplicate meta description | 38 | **0** |
+| Pages without `og:image` | 13 | **1** (`/casino`, now noindex) |
+| Landing pages with duplicate WebSite JSON-LD | 6 | **0** |
+| `/login` canonical → `/jjk` | yes | **self (`/login`)** |
+| Hub H1 "tonunivers" / casino "Lecasino" | broken | fixed |
+
+## Still open
+
+### MEDIUM — Meta descriptions now longer (65/69 > 160 chars, median 216, max 256)
+The anime-name prefix (`CSM Pyramid (Chainsaw Man) : …`) fixed relevance and uniqueness but pushed most snippets past the ~155–160 char display limit (was 50/69). Google truncates rather than penalises, but the tail ("4 tentatives, jusqu'à 10 000 points") is lost. Longest: `/bleach/games` 256, `/aot/games/tower` 247.
+Fix: give each game a dedicated short `seoDescription` (≤ 155 chars) per universe, front-loading *game type + anime* — e.g. "CSM Pyramid : classe 8 personnages Chainsaw Man du plus fort au plus faible. 4 essais, jusqu'à 10 000 points." Shorten the `/{u}/games` template (it lists all 9 titles).
+Falsifiable: `max(len(desc)) ≤ 160` on re-crawl.
+
+### MEDIUM — JJK slugs on every universe (unchanged)
+`/csm/games/jjkdle`, `/bleach/games/jujutsu-draft`. Rename with 308s, ideally bundled with a custom-domain move.
+
+### LOW — "Qui est-ce ?" title/H1 identical on all 6 universes
+Visible H1 is "Qui est-ce ?" everywhere; `<title>` differs only by suffix ("· CSM Arcade"). Make the game title per-universe ("Qui est-ce ? Chainsaw Man") in each `gameCopy.guesswho.title`.
+
+### LOW — Titles don't signal French
+No title mentions "en français"/"FR" — the differentiator vs. English-only competitors (see `sxo.md`). Consider on dle pages: "CSMdle — le jeu Chainsaw Man du jour en français".
 
 ## What works
-- Unique `<title>` on all 69 URLs, all ≤ 60 chars, universe-branded (`CSMdle · CSM Arcade`).
-- Self-canonical on every indexable page; OG + Twitter cards everywhere; per-game screenshots as og:image on most game pages.
-- Universe hubs (/jjk, /csm…) have one clear H1 ("JJK Arcade — mini-jeux Jujutsu Kaisen gratuits") and ~520 words.
-- Clean internal linking: hub → 6 universes → /games → 9 games; header/footer links on every page.
-
-## Findings
-
-### HIGH — Wrong-anime meta descriptions on 20 pages (JJK text on CSM/AOT/KNY/TG/Bleach; also in og/twitter descriptions)
-Hard-coded JJK strings passed to `gameMetadata(id, seoDescription)` override the per-universe registry text:
-
-| File | Description shown on all 6 universes |
-|---|---|
-| `app/[universe]/games/jjkdle/page.tsx:24` | "JJKdle : le jeu du jour Jujutsu Kaisen. Devine le personnage JJK mystère…" — shown on **CSMdle, AOTdle, KNYdle, TGdle, Bleachdle** |
-| `app/[universe]/games/battle/page.tsx:21` | "JJK Random Battle : affronte un ami en 1v1 sur Jujutsu Kaisen…" |
-| `app/[universe]/games/guesswho/page.tsx:20` | "Qui est-ce ? version Jujutsu Kaisen…" |
-| `app/[universe]/games/codenames/page.tsx:21` | "JJK Codenames : jeu d'équipe…" |
-
-Effect: the SERP snippet for "chainsaw man dle" says *Jujutsu Kaisen* → Google likely rewrites it, CTR drops, and the 6 pages look like templated duplicates. The `dle` page is the highest-intent page on the site.
-Fix: build these from the universe config (`universe.sourceWork`, `universeGame(id).title`) — e.g. `` `${game.title} : le jeu du jour ${universe.sourceWork}. Devine le personnage mystère…` ``.
-
-### MEDIUM — Identical descriptions across universes (template duplication)
-- `ranking` description identical on all 6 universes (registry + each `lib/universes/*.ts`); `higher-lower` identical on 4; `jujutsu-draft` identical on TG/Bleach.
-- Add the anime name + 1 distinctive detail (roster size, signature character) per universe.
-
-### MEDIUM — 36 game pages have no H1
-- builder, ranking, jujutsu-draft, jjkdle, higher-lower, tower × 6 universes render no `<h1>` in server HTML. battle/guesswho/codenames do.
-- Add a server-rendered H1 per game page (can be visually compact or `sr-only`-free but small): e.g. "CSMdle — devine le personnage Chainsaw Man du jour".
-
-### MEDIUM — Game URL slugs are JJK-specific on every universe
-- `/csm/games/jjkdle` (titled CSMdle), `/bleach/games/jujutsu-draft` (Zanpakutō Draft). The URL is a (weak) relevance signal and is what users see in SERPs/shares.
-- Fix (later, with 308 redirects): neutral slugs `/{u}/games/dle`, `/{u}/games/draft`, or per-universe aliases. Do this together with any domain migration to pay the redirect cost once.
-
-### LOW — 50/69 meta descriptions > 160 chars
-- Truncated in SERPs. Front-load the anime name + game type in the first 120 chars.
-
-### LOW — Homepage H1 is mostly sr-only
-- H1 = sr-only "Anime Arcade — mini-jeux anime gratuits —" + visible "Choisis ton univers". Acceptable, but visible-text H1 with the keyword is stronger; 85 words of body text total, no H2.
-
-### LOW — 13 pages without og:image
-- `/{u}/games` and `/{u}/games/tower` (×6) and `/casino` emit no `og:image` (the layout default is lost because page-level `openGraph` replaces it). Add `images` to those `openGraph` objects.
+Unique titles ≤ 60 chars on all 69 URLs · one H1 per page · self-canonicals · OG/Twitter on every indexable page · per-universe default OG image (`/og?u=<slug>`) · clean hub → universe → games → game linking.

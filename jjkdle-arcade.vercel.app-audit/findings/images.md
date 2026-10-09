@@ -1,14 +1,15 @@
-# Images — jjkdle-arcade.vercel.app
+# Images — jjkdle-arcade.vercel.app (re-audit)
 
-**Score: 60/100**
+**Score: 72/100** (+12, baseline 60)
 
-## What works
-- All server-rendered `<img>` have non-empty, meaningful `alt` (0 missing across 69 pages).
-- Logos served as WebP on pages.
+## Fixed since baseline
+- Logos served through `next/image` (`/_next/image?…`, AVIF/WebP at display width): ~3 KB (header, 96 w) to ~57 KB (828 w) instead of the 111–162 KB 800 px originals.
+- Homepage no longer emits 6 `<link rel=preload as=image>` (0 now); hub discs lazy-load. Only the universe landing hero logo is preloaded (`priority`), as the likely LCP image.
+- Per-universe default OG image (`/og?u=<slug>`, ~170 KB PNG) replaces the JJK-branded one on hubs, `/games` and tower pages.
+- All 185 `<img>` across 69 pages still have meaningful `alt` (0 missing).
 
-## Findings
-- **MEDIUM — Homepage preloads 6 logos ≈ 850 KB** (`logo*.webp` 115–162 KB each, `<link rel=preload as=image>` ×6). Six preloads compete with each other and with LCP; they display at ~68 % of a card width. Re-export at display size (≤ 600 px wide, ~20–40 KB each, or AVIF), preload only the first/LCP one, `loading="lazy"` + `fetchpriority="low"` for the rest. Consider `next/image`.
-- **MEDIUM — OG/preview screenshots are 0.7–1.3 MB PNGs** (`public/assets/guesswho-screen-csm.png` 1.28 MB …). Some platforms (WhatsApp ~300 KB) drop previews over size; also used as `VideoGame.image`. Convert to 1200×630 JPEG/WebP ≤ 200 KB.
-- **LOW — Organization logo `logo.png` is 730 KB** and is the JJK logo used for the multi-anime platform. Provide a square platform logo ≥ 112 px, < 50 KB.
-- **LOW — Unused 6.5 MB of MP4 in `public/`** (`Hero_video_background*.mp4`, no references in `app/` or `components/`). Deployed for nothing; delete.
-- **LOW — Logo PNG originals 0.7–2.9 MB in `public/`**: publicly fetchable; keep sources out of `public/`.
+## Still open
+- **MEDIUM — Game OG screenshots still 0.7–1.3 MB PNG** (`guesswho-screen-csm.png` 1.28 MB, `builder-screen-csm.png` 0.74 MB). Some platforms drop previews over ~300 KB. Convert to 1200×630 JPEG/WebP ≤ 200 KB.
+- **LOW — Organization logo `logo.png` (730 KB, JJK logo)** used as the platform logo in JSON-LD. Provide a square "Anime Arcade" logo ≥ 112 px, < 50 KB.
+- **LOW — ~6.5 MB unused MP4 and 0.7–2.9 MB PNG originals in `public/`.** Deployed and fetchable for nothing.
+- **LOW — `UniverseSwitcher` still uses a raw `<img>` of the 800 px logo** for a 56×28 thumbnail (6 logos ≈ 830 KB whenever the switcher list renders; not verified whether it mounts before being opened). Switch to `next/image` with `sizes="56px"`.

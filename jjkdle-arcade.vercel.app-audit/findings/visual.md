@@ -1,56 +1,76 @@
-# Visual Analysis - jjkdle-arcade.vercel.app
+# Visual Analysis (re-check) - jjkdle-arcade.vercel.app
 
-Date: 2026-10-08. Score: 66/100.
+Date: 2026-10-08 (afternoon). Score: 70/100 (baseline this morning: 66/100).
 
-Screenshots in `screenshots/`: `home_desktop.png`, `home_mobile.png`, `jjk_desktop.png`, `jjk_mobile.png`, `jjkdle_desktop.png`, `jjkdle_mobile.png`. Mobile files are 750 px wide because they were captured at 2x DPR (375 CSS px).
+Pages: `/`, `/csm`, `/csm/games/jjkdle`. Screenshots in `screenshots/`: `home_desktop.png`, `home_mobile.png`, `csm_desktop.png`, `csm_mobile.png`, `csm_jjkdle_desktop.png`, `csm_jjkdle_mobile.png`. Mobile files are 750 px wide (2x DPR, 375 CSS px). The scripts also produced laptop and tablet captures, which were not kept.
 
-Limitation: only bundled scripts can run, so no custom DOM measurement was possible. Tap-target sizes and font sizes are estimated from the screenshots. `analyze_visual.py` reports a 16px base font and a viewport meta tag on all three pages.
+Limitation: only the bundled scripts can run, so tap-target and font sizes are estimated from the screenshots (CSS px = image px / 2 on mobile). `analyze_visual.py` reports on all 3 pages: viewport meta present, no horizontal scroll, no overlaps or text overflow detected, 16 px base font, touch_targets_ok true. It is blind to the nav overlap below, so do not trust it on that point. It reports `cta_visible: false` above the fold on `/` and `/csm`, and `true` on the game page.
 
-## Home (/)
-- Desktop: the visible heading "CHOISIS TON UNIVERS" sits centered in a ring of six universe cards. This is a strong, clear hero. The only other CTA is the gold "CASINO - TOUS UNIVERS" pill.
-- The card ring runs past the bottom of the 1080px fold. The KNY card is cut off and covered by the cookie banner. This looks intentional but hides one of the six primary CTAs.
-- The rendered text reads "Anime Arcade - mini-jeux anime gratuits - Choisis tonunivers", so the SEO H1 is sr-only and visually the H1 is just "Choisis ton univers". No keyword or value proposition ("mini-jeux anime gratuits") is visible to sighted users. The extracted text also shows a missing space ("tonunivers"), which suggests the sr-only span and the visible spans are joined without whitespace. Check this.
-- Mobile (375x812): the H1, subtitle and chips are visible above the fold. The first universe cards start at about y=415 CSS px, but the cookie banner then covers the bottom ~50% of the viewport (about y=590 to 800). Only the JJK and CSM cards are partly visible. The card names (e.g. "JJK Arcade") are cut off behind the banner.
-- The universe-card links are the primary CTAs, and they are mostly hidden on first paint.
-- The "Accepter" button is slate grey on the home page but purple on the other pages. This is inconsistent, because it picks up the universe theme.
+## Correction to the baseline
+The baseline said the cookie banner covers about 49% of the mobile viewport. Measured at 2x it spans y=1178 to 1590 of 1624 image px, which is about 206 CSS px or about 25% of the 812 px viewport. The banner has not changed, but it hides less than the baseline claimed. It still hides the primary CTAs on two pages.
 
-## /jjk
-- Desktop: strong hero with the logo, a description, and two visible CTAs ("VOIR LES JEUX" in purple, and "BUILD THE PERFECT SORCERER"). A stats strip is below. The cookie banner overlays the "Liste des jeux" heading at the bottom, which is acceptable.
-- No visible H1 text. The logo image is the heading visually. `analyze_visual.py` says H1 is "visible", but it is probably the logo's alt text or an sr-only element. A visible keyword H1 is missing.
-- Mobile: BUG. In the top nav, the "Accueil" label overlaps the JJK logo (the logo image sits behind or over the text, at about y=60 on the 2x screenshot). This is a clear overlap defect.
-- Mobile: the primary CTAs ("VOIR LES JEUX", "BUILD...") are fully covered by the cookie banner at 375x812. Only the top edge of the purple button peeks out above it. This is a primary CTA obstruction.
-- Mobile: the eyebrow pill "JUJUTSU KAISEN - FAN ARCADE" wraps onto two lines with wide letter-spacing, which looks clumsy but is readable.
-- Desktop: the decorative kanji and the "?" floating button (bottom right, ~56 px) are fine. The "?" button could collide with the footer or content on small screens.
+## Regression checks
 
-## /jjk/games/jjkdle
-- Desktop: no H1 and no title text. The only visible heading text is the small 14 px tagline "Devine le personnage mystere du jour." The page has a logo, a search input, and a leaderboard. About 55% of the 1080px viewport is empty below the leaderboard.
-- The primary action (search input "Tape un personnage...") is visible above the fold on both desktop and mobile. This is good. On mobile the input is 100 px high in the 2x screenshot, so about 50 CSS px, which is OK.
-- No SEO copy, rules, or explanation is visible. A thin page for search engines as well as for users.
-- The desktop footer is partly covered by the cookie banner. Footer text ("Fan-projet non officiel...", links) is small, about 11-12 px, and low contrast grey. The footer links ("CASINO", "CONTACT", "GERER LES COOKIES") are tiny uppercase text.
-- Mobile: the cookie banner covers about 30% of the viewport but the input stays visible. No overlap with the primary UI. The footer is hidden under the banner.
-- Leaderboard toggle (ALL-TIME / HEBDO) is about 40 CSS px high and the "Back" link is about 24 CSS px high. Both are below the 48 px recommendation.
+### Logos moved to next/image
+- Home ring (desktop): the six logos (JJK, Bleach, CSM, TG, AOT, KNY) are crisp and not stretched. The aspect ratios look natural.
+- `/csm` hero logo (desktop and mobile): crisp, correct aspect ratio, no distortion. Chains and chainsaw edges are sharp at 2x.
+- `/csm/games/jjkdle` header logo: renders correctly and is centered. It is small (about 60x30 CSS px on desktop, about 65x35 on mobile), but not distorted.
+- Header logo on `/csm`: small (about 50x25 CSS px on desktop) but not distorted.
+- `analyze_visual.py` shows the hero image served as `/_next/image?url=%2Flogo.webp&w=3840&q=75`. The 3840 width is probably just the largest srcset candidate it picked. It is not a visual issue, but check the `sizes` attribute so small logos do not download huge variants.
+- Verdict: no visual regression from next/image.
 
-## Cookie banner (all pages)
-- Desktop: centered bottom bar, about 770x125 px, about 12% of the viewport height. This is acceptable.
-- Mobile: about 400 CSS px of the 812 px viewport (~49%). The banner has a large text block with a 15-16 px font and two large buttons. It is a layout-blocking interstitial on first visit that hides the CTAs on / and /jjk. Suggest a compact one-line layout, or a two-line banner with small buttons, on mobile.
-- The buttons "REFUSER" and "ACCEPTER" are about 37 CSS px high on mobile and fine on width. Refuse is as prominent as Accept, which is good for CNIL compliance.
+### sr-only H1 on game pages
+- No visible change on `/csm/games/jjkdle`. The layout is identical to the baseline pattern: logo, 14 px tagline "Devine le personnage mystere du jour.", search input, leaderboard. There is no visible H1 shift, no overlap, and no stray text. This is good.
+- The visible page still has no heading text. This is acceptable for SEO now that an H1 exists, but sighted users get no title beyond the logo.
 
-## Mobile overall
-- Viewport meta is present. No horizontal scroll was seen in any screenshot, and `analyze_visual.py` found no overflow.
-- Base font is 16 px. Body text is readable. The small caps eyebrow labels, footer links, stat labels ("JEUX JOUABLES") and universe sub-labels are about 10-12 px and low contrast.
-- Tap targets: home chips are not interactive. The nav icon buttons (home, grid) on /jjk are about 36 px on mobile (below 48 px). "Back" on the game page is a small text link. The "?" help button is fine.
+## Above the fold
+
+### / (home)
+- Desktop 1920x1080: the H1 "CHOISIS TON UNIVERS", the subtitle, the chips and the gold "CASINO - TOUS UNIVERS" CTA are visible and centered, with five of the six universe cards around them. KNY (bottom) is clipped by the fold and covered by the cookie banner. This is the same as the baseline.
+- Mobile 375x812: the pill, H1, subtitle, chips and casino CTA are visible. The JJK and CSM cards start at about y=415 CSS px. The cookie banner (from y=589) cuts the card titles ("JJK Arcade" and "CSM Arcade" are half hidden). The other four universes need a scroll, and the banner also covers the next row. Primary navigation to universes is partly obstructed on first visit.
+- The "Accepter" button is slate-blue/grey on `/`, but red on `/csm`. It follows the universe theme, so it looks inconsistent. This is minor.
+
+### /csm
+- Desktop: the logo, description, "VOIR LES JEUX" (red) and "BUILD THE PERFECT DEVIL" CTAs and the stats strip are all visible, with the CTAs at y=634. The banner only clips the "Liste des jeux" heading at the bottom. Good.
+- Mobile: BUG, still present. The logo image in the nav pill sits on top of the "Accueil" label (around x=110-185, y=30 CSS px). The two overlap and the text is hard to read. This is the same as the baseline defect, now seen on /csm. It is not fixed.
+- Mobile: the "VOIR LES JEUX" CTA is fully hidden by the cookie banner. Only its top edge shows at y=585. The primary CTA is not usable until the user accepts or refuses.
+- The eyebrow pill wraps onto two lines with wide letter-spacing. It is readable but clumsy.
+
+### /csm/games/jjkdle
+- Desktop and mobile: the search input is above the fold and fully visible, and the banner does not cover it on mobile. The leaderboard is visible. Good.
+- Desktop: about 55% of the viewport below the leaderboard is empty. The footer is partly hidden under the cookie banner on first paint (the copyright line is cut off).
+- Mobile: the footer is below the fold and not visible in the capture.
+
+## Cookie banner
+- Desktop: bottom-centered bar, about 770x125 px (about 12% of the height). It is acceptable. It clips the home KNY card and the footer on the game page.
+- Mobile: full-width card, about 206 CSS px (about 25% of the viewport). It has a large 17 px text block and two large buttons. Refuse and Accept have equal weight, which is good for CNIL. The banner obstructs the primary CTA on `/csm` (and, from the baseline, `/jjk`) and the universe cards on `/`.
+- Suggestion: on mobile, use a compact layout. For example, cut the copy to one or two lines with a "En savoir plus" link, and make the buttons side by side at about 40 px.
+
+## Tap targets (estimated, mobile)
+- Nav home and grid icon buttons on `/csm`: about 36x44 CSS px, below 48.
+- "Back" link on the game page: about 24 px high, below 48.
+- Leaderboard ALL-TIME / HEBDO toggle: segments about 22-28 CSS px high, below 48. This is the weakest target.
+- Cookie buttons REFUSER and ACCEPTER: about 37 CSS px high and wide enough. Slightly below 48.
+- "Jeux" and "Connexion" nav items: about 36 CSS px high. Slightly below 48.
+- Search input: about 50 CSS px high. OK.
+- Casino chip and the universe cards: large, OK.
+
+## Overflow and typography
+- No horizontal scroll and no text overflow on any page at 375 px.
+- Body text is 16 px or more. Eyebrow labels, stat labels, "Du jour", footer links and the "Essais" pill are about 10-12 px and low contrast (grey on near-black). The footer link row ("CASINO", "CONTACT", "GERER LES COOKIES") is tiny uppercase text.
 
 ## Issues by priority
-1. Cookie banner hides the primary CTAs on mobile on / and /jjk (about 49% of the viewport).
-2. The /jjk mobile nav has a logo/"Accueil" overlap.
-3. There is no visible H1 or value proposition on the home page (the keywords exist only in sr-only text) and on /jjk. The game page has no H1 and no descriptive text (about 55 words).
-4. The home universe ring is cut off at the fold on desktop (KNY hidden), and the cards are hidden on mobile by the banner.
-5. The small tap targets (nav icons, Back, toggles) and the tiny, low-contrast footer text.
-6. The accept-button color varies between pages.
+1. `/csm` mobile nav: the logo overlaps the "Accueil" label (not fixed since the baseline).
+2. Cookie banner hides the primary CTA on `/csm` mobile and the card titles on `/` mobile.
+3. Tap targets under 48 px: nav icons, Back link, leaderboard toggle and the cookie buttons.
+4. Low-contrast, tiny footer and label text.
+5. The home ring is clipped at the fold on desktop (KNY), and the banner covers it.
+6. Inconsistent "Accepter" button color on `/`.
+7. The sr-only H1 means that no visible title or keyword text exists on the game page (minor, no regression).
 
-## Score: 66/100
-- Above-the-fold clarity: 15/25
+## Score: 70/100
+- Above-the-fold clarity: 17/25
 - Mobile usability: 15/25
-- Layout defects: 14/20
+- Layout defects: 14/20 (the nav overlap persists, and the logos render cleanly)
 - Typography and legibility: 12/15
-- Cookie banner impact: 10/15
+- Cookie banner impact: 12/15 (about 25% of the viewport, but it still blocks CTAs)
