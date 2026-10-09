@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
 /**
@@ -19,6 +21,11 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
  *
  * Aucun asset : l'animation est composée de dégradés et de traits, pour rester
  * juste dans les cinq univers et ne rien coûter au chargement.
+ *
+ * Elle couvre l'ÉCRAN ENTIER, pas seulement le cadre du combat : rendue dans
+ * `<body>` (portail) en `position: fixed`, au-dessus de la nav et des bulles.
+ * Le portail évite qu'un ancêtre animé en `transform` ne recale le `fixed` sur
+ * lui. Aucun `backdrop-blur` (cf. règles anti-flash des overlays).
  */
 
 /** Durée totale, en millisecondes. Doit rester lisible sans devenir pénible. */
@@ -40,12 +47,17 @@ export function DomainCinematic({
   // l'information — en retirant le mouvement.
   const still = useReducedMotion();
 
-  return (
+  // Le portail a besoin de `document` : jamais au rendu serveur.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+
+  return createPortal(
     <AnimatePresence onExitComplete={onDone}>
       {caster && (
         <motion.div
           key="domain"
-          className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center overflow-hidden rounded-xl"
+          className="pointer-events-none fixed inset-0 z-[140] flex items-center justify-center overflow-hidden"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -55,9 +67,14 @@ export function DomainCinematic({
           role="status"
           aria-live="polite"
         >
-          {/* Le territoire qui s'ouvre : un disque qui avale l'écran. */}
+          {/* Le territoire qui s'ouvre : un disque qui avale l'écran. Taillé en
+              `vmax` pour couvrir aussi bien un écran large qu'un téléphone. */}
           <motion.div
-            className="absolute left-1/2 top-1/2 aspect-square w-[10%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,var(--tw-gradient-stops))] from-cursed/90 via-domain/80 to-void-900"
+            className="absolute left-1/2 top-1/2 aspect-square w-[20vmax] rounded-full bg-[radial-gradient(circle,var(--tw-gradient-stops))] from-cursed/90 via-domain/80 to-void-900"
+            // Centrage via framer (`x`/`y`) et non `-translate-*` : framer
+            // réécrit tout le `transform` en animant `scale`, ce qui annulait la
+            // translation Tailwind et décentrait le disque.
+            style={{ x: "-50%", y: "-50%" }}
             initial={still ? { scale: 12, opacity: 0.96 } : { scale: 0, opacity: 0.9 }}
             animate={{ scale: 12, opacity: 0.96 }}
             transition={{ duration: still ? 0 : 0.55, ease: "easeOut" }}
@@ -82,9 +99,9 @@ export function DomainCinematic({
             </>
           )}
 
-          <div className="relative flex flex-col items-center gap-1 px-6 text-center">
+          <div className="relative flex flex-col items-center gap-2 px-6 text-center">
             <motion.p
-              className="font-display text-xs font-bold uppercase tracking-[0.35em] text-white/70"
+              className="font-display text-sm font-bold uppercase tracking-[0.35em] text-white/70 sm:text-base"
               initial={still ? { opacity: 1 } : { opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: still ? 0 : 0.4, duration: 0.3 }}
@@ -93,7 +110,7 @@ export function DomainCinematic({
             </motion.p>
 
             <motion.p
-              className="font-display text-2xl font-bold leading-tight text-white drop-shadow-[0_0_18px_rgba(255,255,255,0.45)] sm:text-4xl"
+              className="font-display text-4xl font-bold leading-tight text-white drop-shadow-[0_0_24px_rgba(255,255,255,0.45)] sm:text-6xl"
               initial={still ? { opacity: 1 } : { opacity: 0, scale: 1.35 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: still ? 0 : 0.5, duration: 0.35, ease: "easeOut" }}
@@ -103,6 +120,7 @@ export function DomainCinematic({
           </div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   );
 }
