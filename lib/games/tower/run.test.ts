@@ -354,7 +354,7 @@ describe("recrutement", () => {
     expect(out.ok && out.state.status).toBe("combat");
   });
 
-  it("accepte un personnage puissant dès la première strate (plus de plafond)", () => {
+  it("refuse un personnage au-dessus de 75 avant l'étage 12", () => {
     const state = atRecruitFloor(started());
     const out = recruit(
       state,
@@ -364,7 +364,8 @@ describe("recrutement", () => {
       config,
     );
 
-    expect(out.ok).toBe(true);
+    expect(out.ok).toBe(false);
+    expect(out.ok === false && out.error).toBe("recruit-capped");
   });
 
   it("refuse un personnage qui n'était pas proposé", () => {

@@ -30,9 +30,16 @@ export const STRATE_COUNT = TOWER_FLOORS / FLOORS_PER_STRATE;
 
 /**
  * Starters proposés à l'entrée. Le joueur en prend UN. Tirés au hasard dans
- * tout le roster (cf. `starterPool`).
+ * le vivier `starterPool`.
  */
 export const STARTER_CHOICES = 3;
+
+/**
+ * Bornes de `battleValue` du vivier de starters (incluses) : tout le roster
+ * sauf les têtes d'affiche (Gojo, Sukuna…).
+ */
+export const STARTER_MIN_VALUE = 0;
+export const STARTER_MAX_VALUE = 70;
 
 // ──────────────────────────────────────────────────────────────────────────
 // Archétypes de capacités

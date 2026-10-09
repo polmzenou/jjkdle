@@ -7,8 +7,8 @@ import { getUniverseBySlug } from "@/lib/universes/registry";
 import { resolveTowerConfig, type TowerConfig } from "./config";
 import { buildTowerRoster, isTowerPlayable, type TowerRoster } from "./floors";
 import { normalizeItem, type TowerItem } from "./items";
-import { isValidEvent, type TowerEvent } from "./events";
-import { JJK_EVENTS } from "@/lib/universes/jjk-events";
+import type { TowerEvent } from "./events";
+import { eventsFor } from "./event-catalogs";
 import { prisma } from "@/lib/prisma";
 
 /**
@@ -142,17 +142,4 @@ const loadContext = cache(
 export async function getTowerContext(): Promise<TowerContext> {
   const universe = await getCurrentUniverse();
   return loadContext(universe.id, universe.slug);
-}
-
-/**
- * Évènements d'un univers.
- *
- * En CODE et non en base, contrairement aux objets : un évènement est un texte
- * de trois lignes et deux issues, il n'y a rien à y régler au quotidien. Un
- * univers sans catalogue n'a simplement pas de nœud d'évènement — la carte
- * propose alors autre chose.
- */
-function eventsFor(slug: string): TowerEvent[] {
-  const catalogs: Record<string, TowerEvent[]> = { jjk: JJK_EVENTS };
-  return (catalogs[slug] ?? []).filter(isValidEvent);
 }

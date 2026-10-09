@@ -5,6 +5,8 @@ import { JJK_TOWER_CONFIG } from "./config";
 import {
   RECRUIT_CAPS,
   buildTowerRoster,
+  EARLY_RECRUIT_LAST_FLOOR,
+  EARLY_RECRUIT_MAX_VALUE,
   canRecruit,
   isBossFloor,
   isTowerPlayable,
@@ -253,19 +255,34 @@ describe("génération de la tour", () => {
     }
   });
 
-  it("peut proposer des recrues de n'importe quelle strate, dès l'étage 1", () => {
-    const strateOfId = new Map<string, number>();
-    tower.byStrate.forEach((pool, strate) =>
-      pool.forEach((id) => strateOfId.set(id, strate)),
-    );
-
-    const seen = new Set<number>();
+  it("jusqu'à l'étage 11, ne propose que des recrues de valeur 75 au plus", () => {
     for (let seed = 0; seed < 200; seed += 1) {
-      for (const option of planTower(seed, tower)[0].options) {
-        for (const id of option.recruitIds) seen.add(strateOfId.get(id)!);
+      for (const at of planTower(seed, tower)) {
+        if (at.floor > EARLY_RECRUIT_LAST_FLOOR) continue;
+        for (const option of at.options) {
+          for (const id of option.recruitIds) {
+            expect(tower.entries[id].value).toBeLessThanOrEqual(
+              EARLY_RECRUIT_MAX_VALUE,
+            );
+          }
+        }
       }
     }
-    expect(seen.size).toBe(STRATE_COUNT);
+  });
+
+  it("après l'étage 11, peut proposer des recrues au-delà de 75", () => {
+    let strong = 0;
+    for (let seed = 0; seed < 300; seed += 1) {
+      for (const at of planTower(seed, tower)) {
+        if (at.floor <= EARLY_RECRUIT_LAST_FLOOR) continue;
+        for (const option of at.options) {
+          for (const id of option.recruitIds) {
+            if (tower.entries[id].value > EARLY_RECRUIT_MAX_VALUE) strong += 1;
+          }
+        }
+      }
+    }
+    expect(strong).toBeGreaterThan(0);
   });
 
   it("n'attache des recrues qu'aux préludes de recrutement", () => {
@@ -289,19 +306,27 @@ describe("génération de la tour", () => {
   });
 });
 
-describe("recrutement sans plafond", () => {
+describe("plafond de recrutement par étage", () => {
   const roster = [
     character("faible", JJK_ARCS[0], 20),
+    character("limite", JJK_ARCS[0], 75),
     character("costaud", JJK_ARCS[0], 90),
   ];
   const tower = buildTowerRoster(roster, JJK_ARCS, JJK_TOWER_CONFIG);
 
-  it("accepte n'importe quel personnage de la tour, faible ou fort", () => {
-    expect(canRecruit(tower, "faible")).toBe(true);
-    expect(canRecruit(tower, "costaud")).toBe(true);
+  it("jusqu'à l'étage 11 inclus, accepte jusqu'à 75 et refuse au-delà", () => {
+    expect(canRecruit(tower, "faible", 1)).toBe(true);
+    expect(canRecruit(tower, "limite", 11)).toBe(true);
+    expect(canRecruit(tower, "costaud", 1)).toBe(false);
+    expect(canRecruit(tower, "costaud", 11)).toBe(false);
+  });
+
+  it("à partir de l'étage 12, accepte tout le monde", () => {
+    expect(canRecruit(tower, "costaud", 12)).toBe(true);
+    expect(canRecruit(tower, "faible", 20)).toBe(true);
   });
 
   it("refuse un id inconnu (garde serveur)", () => {
-    expect(canRecruit(tower, "inexistant")).toBe(false);
+    expect(canRecruit(tower, "inexistant", 20)).toBe(false);
   });
 });

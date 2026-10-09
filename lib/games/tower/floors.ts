@@ -41,8 +41,8 @@ import {
  * curseur qui fait que Gojo et Sukuna n'apparaissent en adversaires qu'après
  * 15 étages de survie.
  *
- * Le recrutement, lui, n'a plus de plafond : les renforts sont tirés au hasard
- * dans tout le roster (cf. `pickRecruits`).
+ * Le recrutement suit sa propre règle, indépendante des strates (cf.
+ * `isRecruitable`).
  */
 export const RECRUIT_CAPS: readonly number[] = [35, 55, 80, Infinity];
 
@@ -56,6 +56,14 @@ const ENEMY_COUNT: ReadonlyArray<readonly [number, number]> = [
 
 /** Candidats proposés à un nœud de recrutement, avant filtrage par l'escouade. */
 export const RECRUIT_CANDIDATES = 5;
+
+/**
+ * Jusqu'à cet étage (inclus), les renforts ont une `battleValue` d'au plus
+ * `EARLY_RECRUIT_MAX_VALUE`. Au-delà, tout le roster de la tour est recrutable,
+ * têtes d'affiche comprises — toujours au hasard.
+ */
+export const EARLY_RECRUIT_LAST_FLOOR = 11;
+export const EARLY_RECRUIT_MAX_VALUE = 75;
 
 /** Un personnage prêt à être placé dans la tour. */
 export interface TowerEntry {
@@ -255,7 +263,8 @@ export function planTower(seed: number, tower: TowerRoster): FloorOptions[] {
         kind,
         prelude,
         enemyIds: pickEnemies(rand, tower, strate, kind, usedBosses),
-        recruitIds: prelude === "recruit" ? pickRecruits(rand, tower) : [],
+        recruitIds:
+          prelude === "recruit" ? pickRecruits(rand, tower, floor) : [],
         eventIndex: prelude === "event" ? Math.floor(rand() * 1_000_003) : 0,
       })),
     });
@@ -427,18 +436,32 @@ function pickDistinct(
 }
 
 /**
- * Candidats au recrutement : tirage UNIFORME dans tout le vivier de la tour,
- * toutes strates confondues. Un renfort peut aussi bien être un second couteau
- * que Gojo, dès l'étage 1.
+ * Un personnage de valeur `value` peut-il être recruté à l'étage `floor` ?
+ * Jusqu'à l'étage 11 : `battleValue` ≤ 75. Ensuite : n'importe qui.
+ */
+function isRecruitable(value: number, floor: number): boolean {
+  return floor > EARLY_RECRUIT_LAST_FLOOR || value <= EARLY_RECRUIT_MAX_VALUE;
+}
+
+/**
+ * Candidats au recrutement : tirage UNIFORME parmi les personnages de la tour
+ * recrutables à cet étage (cf. `isRecruitable`), toutes strates confondues.
  *
  * On en propose `RECRUIT_CANDIDATES` et non 3 : `run.ts` doit pouvoir en écarter
  * ceux déjà présents dans l'escouade sans se retrouver à court, et sans avoir à
  * re-tirer (ce qui casserait le déterminisme).
  */
-function pickRecruits(rand: () => number, tower: TowerRoster): string[] {
+function pickRecruits(
+  rand: () => number,
+  tower: TowerRoster,
+  floor: number,
+): string[] {
   // Tri par `id` : l'ordre des clés ne doit dépendre que du roster, sinon la
   // même graine ne redonnerait pas les mêmes recrues.
-  const pool = Object.keys(tower.entries).sort((a, b) => a.localeCompare(b));
+  const pool = Object.values(tower.entries)
+    .filter((entry) => isRecruitable(entry.value, floor))
+    .map((entry) => entry.id)
+    .sort((a, b) => a.localeCompare(b));
 
   const chosen: string[] = [];
   for (let i = 0; i < RECRUIT_CANDIDATES && pool.length > 0; i += 1) {
@@ -449,7 +472,12 @@ function pickRecruits(rand: () => number, tower: TowerRoster): string[] {
   return chosen;
 }
 
-/** Un personnage est-il recrutable ? (garde serveur : il doit être dans la tour) */
-export function canRecruit(tower: TowerRoster, id: string): boolean {
-  return id in tower.entries;
+/** Un personnage est-il recrutable à cet étage ? (garde serveur) */
+export function canRecruit(
+  tower: TowerRoster,
+  id: string,
+  floor: number,
+): boolean {
+  const entry = tower.entries[id];
+  return Boolean(entry) && isRecruitable(entry.value, floor);
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
+import { GameHeading } from "@/components/GameHeading";
 import { UniverseLink } from "@/components/universe/UniverseLink";
 import { useGameTitle } from "@/components/universe/UniverseProvider";
 import { EventScreen, RestScreen } from "@/components/tower/EventScreen";
@@ -17,7 +18,7 @@ import {
   TowerRulesButton,
   TowerRulesSummary,
 } from "@/components/tower/TowerRules";
-import type { Intervention } from "@/lib/games/tower/types";
+import { TOWER_FLOORS, type Intervention } from "@/lib/games/tower/types";
 import type { TowerActionResult, TowerView } from "@/lib/games/tower/view";
 import type { ExpResult } from "@/lib/leaderboard/types";
 import {
@@ -109,10 +110,7 @@ export function TowerGame() {
   if (booting) {
     return (
       <div className="flex flex-col gap-6">
-        <BackLink />
-        {/* Le titre visible n'apparaît qu'une fois la tour chargée : sans ce H1,
-            la page servie (rendue en état de chargement) n'en avait aucun. */}
-        <h1 className="sr-only">{towerTitle}</h1>
+        <TopBar />
         <p className="py-16 text-center text-white/40">Ouverture de la tour…</p>
       </div>
     );
@@ -123,7 +121,7 @@ export function TowerGame() {
   if (!view) {
     return (
       <div className="flex flex-col gap-6">
-        <BackLink />
+        <TopBar />
         <p className="py-16 text-center text-white/60">
           {error ?? "La tour est close pour le moment."}
         </p>
@@ -133,13 +131,13 @@ export function TowerGame() {
 
   return (
     <div className="flex flex-col gap-6">
-      <BackLink />
+      <TopBar floor={view.status === "starter" ? undefined : view.floor} />
 
       <header className="flex items-baseline justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-bold text-white">
+          <h2 className="font-display text-2xl font-bold text-white">
             {towerTitle}
-          </h1>
+          </h2>
           <p className="text-xs text-white/45">
             {view.mode === "daily"
               ? `Tour du jour · essai n°${view.attempt}`
@@ -271,18 +269,31 @@ export function TowerGame() {
  * qu'on revient exactement à l'étage où l'on s'était arrêté. Le lien le dit,
  * sans quoi on hésite à cliquer au milieu d'une ascension de quinze minutes.
  */
-function BackLink() {
+/**
+ * Barre de tête unifiée des jeux (retour, logo de l'univers, donnée du jeu) —
+ * la même que JJKdle, Higher or Lower… Le logo porte le H1 de la page.
+ */
+function TopBar({ floor }: { floor?: number }) {
   return (
-    <div className="flex items-center gap-3">
-      <UniverseLink
-        href="/games"
-        className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 px-3 py-1.5 font-display text-xs font-bold uppercase tracking-wide text-white/60 transition hover:border-domain/60 hover:text-domain-light"
-      >
-        <span aria-hidden>←</span> Les jeux
-      </UniverseLink>
-      <span className="text-[11px] text-white/35">
-        Ton ascension est gardée : tu reprendras où tu t'es arrêté.
-      </span>
+    <div>
+      <header className="flex items-center justify-between py-4">
+        <UniverseLink
+          href="/"
+          className="flex items-center gap-1 text-sm text-white/60 transition-colors hover:text-domain-light"
+        >
+          ← Back
+        </UniverseLink>
+        <GameHeading id="tower" />
+        <span className="rounded-full bg-void-700/60 px-3 py-1 text-xs text-white/60">
+          Étage&nbsp;:{" "}
+          <span className="font-bold text-domain-light">
+            {floor ?? "—"}/{TOWER_FLOORS}
+          </span>
+        </span>
+      </header>
+      <p className="text-center text-[11px] text-white/35">
+        Ton ascension est gardée : tu reprendras où tu t&apos;es arrêté.
+      </p>
     </div>
   );
 }

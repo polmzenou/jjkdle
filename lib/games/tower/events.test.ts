@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { JJK_EVENTS } from "@/lib/universes/jjk-events";
+import { listUniverses } from "@/lib/universes/registry";
+import { EVENT_CATALOGS, eventsFor } from "./event-catalogs";
+import { GENERIC_EVENTS } from "./generic-events";
 import { ITEM_RARITIES } from "./items";
 import { eventFor, isValidEvent, type TowerEvent } from "./events";
 
@@ -66,21 +68,46 @@ describe("garde de forme", () => {
   });
 });
 
-describe("catalogue JJK", () => {
+const CATALOGS: Array<[string, TowerEvent[]]> = [
+  ...Object.entries(EVENT_CATALOGS),
+  ["générique", GENERIC_EVENTS],
+];
+
+describe("chaque univers a ses évènements", () => {
+  it("tout univers enregistré a un catalogue propre", () => {
+    for (const universe of listUniverses()) {
+      expect(EVENT_CATALOGS[universe.slug], universe.slug).toBeDefined();
+    }
+  });
+
+  it("un univers inconnu retombe sur le catalogue générique, jamais sur du vide", () => {
+    expect(eventsFor("univers-inconnu")).toEqual(GENERIC_EVENTS);
+    for (const universe of listUniverses()) {
+      expect(eventsFor(universe.slug).length).toBeGreaterThan(0);
+    }
+  });
+
+  it("les slugs sont uniques sur l'ensemble des catalogues", () => {
+    const slugs = CATALOGS.flatMap(([, events]) => events.map((e) => e.slug));
+    expect(new Set(slugs).size).toBe(slugs.length);
+  });
+});
+
+describe.each(CATALOGS)("catalogue %s", (_name, EVENTS) => {
   it("est intégralement valide", () => {
-    expect(JJK_EVENTS.length).toBeGreaterThanOrEqual(8);
-    for (const e of JJK_EVENTS) {
+    expect(EVENTS.length).toBeGreaterThanOrEqual(8);
+    for (const e of EVENTS) {
       expect(isValidEvent(e)).toBe(true);
     }
   });
 
   it("a des slugs uniques", () => {
-    const slugs = JJK_EVENTS.map((e) => e.slug);
+    const slugs = EVENTS.map((e) => e.slug);
     expect(new Set(slugs).size).toBe(slugs.length);
   });
 
   it("ne référence que des raretés connues", () => {
-    for (const e of JJK_EVENTS) {
+    for (const e of EVENTS) {
       for (const c of e.choices) {
         if (!c.outcome.item) continue;
         if (c.outcome.item === "any") continue;
@@ -90,7 +117,7 @@ describe("catalogue JJK", () => {
   });
 
   it("AUCUNE branche n'est gratuite : chacune prend ou parie quelque chose", () => {
-    for (const e of JJK_EVENTS) {
+    for (const e of EVENTS) {
       const costs = e.choices.map((c) => {
         const o = c.outcome;
         const gains =
@@ -108,7 +135,7 @@ describe("catalogue JJK", () => {
   });
 
   it("garde des libellés qui disent l'intention, pas le résultat", () => {
-    for (const e of JJK_EVENTS) {
+    for (const e of EVENTS) {
       for (const c of e.choices) {
         // Un libellé chiffré (« Gagner 60 fragments ») supprimerait le risque.
         expect(c.label).not.toMatch(/\d/);

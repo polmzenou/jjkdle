@@ -1,6 +1,11 @@
 import type { Character } from "@/data/roster/characters";
+import { battleValueOf } from "@/lib/games/battle/battleValues";
 import { dailyIndexes } from "@/lib/rotation";
-import { STARTER_CHOICES } from "./types";
+import {
+  STARTER_CHOICES,
+  STARTER_MAX_VALUE,
+  STARTER_MIN_VALUE,
+} from "./types";
 
 /**
  * Starters du jour — module PUR.
@@ -19,18 +24,22 @@ import { STARTER_CHOICES } from "./types";
 export const STARTER_SALT = "tower-starter";
 
 /**
- * Vivier des starters : le roster ENTIER, sans filtre de puissance.
- *
- * Le tirage est volontairement aléatoire sur tout le roster : un jour on part
- * avec des seconds couteaux, un autre avec une tête d'affiche. L'ancien filtre
- * par `battleValue` (18 → 40) ne servait que des personnages de tier 4 / 4−.
+ * Vivier des starters : tout personnage dont la `battleValue` est comprise
+ * entre `STARTER_MIN_VALUE` et `STARTER_MAX_VALUE` (0 → 70). Le tirage est
+ * uniforme dans ce vivier : un jour on part avec des seconds couteaux, un autre
+ * avec un Megumi ou un Mahito — mais jamais avec Gojo ou Sukuna.
  *
  * Le tri par `id` n'est pas cosmétique : `dailyIndexes` indexe une POSITION.
  * Un vivier dont l'ordre changerait d'un rendu à l'autre servirait des starters
  * différents au même joueur le même jour.
  */
 export function starterPool(roster: readonly Character[]): Character[] {
-  return roster.slice().sort((a, b) => a.id.localeCompare(b.id));
+  return roster
+    .filter((c) => {
+      const value = battleValueOf(c);
+      return value >= STARTER_MIN_VALUE && value <= STARTER_MAX_VALUE;
+    })
+    .sort((a, b) => a.id.localeCompare(b.id));
 }
 
 /**

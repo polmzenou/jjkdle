@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { ROSTER } from "@/data/roster/characters";
+import { battleValueOf } from "@/lib/games/battle/battleValues";
 import { dailyStarters, isDailyStarter, starterPool } from "./starters";
-import { STARTER_CHOICES } from "./types";
+import { STARTER_CHOICES, STARTER_MAX_VALUE, STARTER_MIN_VALUE } from "./types";
 
 /**
- * Les starters sont tirés au hasard dans TOUT le roster. Ces tests tournent sur
- * le ROSTER RÉEL, pas sur des données de laboratoire.
+ * Les starters sont tirés au hasard parmi les personnages de `battleValue`
+ * 0 → 70. Ces tests tournent sur le ROSTER RÉEL, pas sur des données de
+ * laboratoire.
  */
 
 const DAYS = [
@@ -17,8 +19,24 @@ const DAYS = [
 ];
 
 describe("vivier", () => {
-  it("retient tout le roster, têtes d'affiche comprises", () => {
-    expect(starterPool(ROSTER)).toHaveLength(ROSTER.length);
+  it("ne retient que des personnages de valeur 0 à 70", () => {
+    for (const c of starterPool(ROSTER)) {
+      const value = battleValueOf(c);
+      expect(value).toBeGreaterThanOrEqual(STARTER_MIN_VALUE);
+      expect(value).toBeLessThanOrEqual(STARTER_MAX_VALUE);
+    }
+  });
+
+  it("retient TOUS les personnages dans les bornes", () => {
+    const inRange = ROSTER.filter((c) => battleValueOf(c) <= STARTER_MAX_VALUE);
+    expect(starterPool(ROSTER)).toHaveLength(inRange.length);
+  });
+
+  it("laisse les têtes d'affiche hors de portée au départ", () => {
+    const ids = starterPool(ROSTER).map((c) => c.id);
+    for (const star of ["gojo", "sukuna", "yuji-modulo", "mahoraga", "kenjaku"]) {
+      expect(ids).not.toContain(star);
+    }
   });
 
   it("est ordonné de façon STABLE (dailyIndexes indexe une position)", () => {
@@ -56,13 +74,16 @@ describe("rotation quotidienne", () => {
     expect(new Set(signatures).size).toBe(DAYS.length);
   });
 
-  it("finit par proposer des personnages forts comme faibles", () => {
+  it("finit par proposer des personnages forts comme faibles, jamais hors bornes", () => {
     const offered = new Set<string>();
     for (let i = 0; i < 400; i += 1) {
       const day = new Date(Date.UTC(2026, 0, 1 + i)).toISOString().slice(0, 10);
-      for (const c of dailyStarters(day, ROSTER)) offered.add(c.id);
+      for (const c of dailyStarters(day, ROSTER)) {
+        expect(battleValueOf(c)).toBeLessThanOrEqual(STARTER_MAX_VALUE);
+        offered.add(c.id);
+      }
     }
-    expect(offered).toContain("gojo");
+    expect(offered).toContain("geto"); // 70 : borne haute incluse
     expect(offered).toContain("momo");
   });
 
@@ -77,6 +98,7 @@ describe("garde serveur", () => {
     const chosen = dailyStarters(day, ROSTER)[0];
 
     expect(isDailyStarter(day, ROSTER, chosen.id)).toBe(true);
+    expect(isDailyStarter(day, ROSTER, "gojo")).toBe(false);
     expect(isDailyStarter(day, ROSTER, "inconnu")).toBe(false);
   });
 

@@ -671,7 +671,7 @@ export async function skipRecruitAction(): Promise<TowerActionResult> {
 function recruitError(error: string): string {
   switch (error) {
     case "recruit-capped":
-      return "Ce personnage ne peut pas être recruté.";
+      return "Ce personnage est encore hors de portée à cet étage.";
     case "bad-slot":
       return "Choisis le personnage à sacrifier.";
     case "already-in-squad":
