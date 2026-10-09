@@ -151,6 +151,15 @@ export const csm: UniverseConfig = {
    */
   tower: {
     arcAttributeKey: "csmAppearanceArc",
+    // Arcs 1-4 (Démon-Tronçonneuse → Katana Man), 5-8 (Reze → Démon-Contrôle),
+    // 9-12 (Démon-Justice → Église Chainsaw Man), 13-15 (Évasion →
+    // Démon-Guerre).
+    strateNames: [
+      "Le Démon-Éternité",
+      "Le Démon-Contrôle",
+      "L'Église Chainsaw Man",
+      "Le Démon-Guerre",
+    ],
     ultimateAttributeKey: "csmpower",
     ultimateAttributeValues: ["EXTREME", "CATASTROPHIC"],
     energyAttributeKey: "csmpower",

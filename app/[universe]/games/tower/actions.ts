@@ -153,6 +153,7 @@ async function viewOf(params: {
     items: params.context.items,
     itemsById: params.context.itemsById,
     events: params.context.events,
+    strateNames: params.context.strateNames,
     options:
       optionsAt(params.seed, params.context.tower, params.state.floor)?.options ??
       [],

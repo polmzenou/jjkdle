@@ -11,14 +11,14 @@ import { FLOORS_PER_STRATE, TOWER_FLOORS } from "@/lib/games/tower/types";
  * les portraits.
  */
 
-const STRATE_NAMES = [
-  "Les premiers fléaux",
-  "Le tournoi",
-  "Shibuya",
-  "Le dénouement",
-];
-
-export function TowerMap({ floor }: { floor: number }) {
+export function TowerMap({
+  floor,
+  strateNames,
+}: {
+  floor: number;
+  /** Noms des strates de l'univers, du bas vers le haut (cf. `strateNamesFor`). */
+  strateNames: readonly string[];
+}) {
   // De haut en bas à l'écran, donc du sommet vers le rez-de-chaussée.
   const floors = Array.from({ length: TOWER_FLOORS }, (_, i) => TOWER_FLOORS - i);
 
@@ -40,7 +40,7 @@ export function TowerMap({ floor }: { floor: number }) {
             <div key={n}>
               {startsStrate && (
                 <p className="mb-[3px] mt-2 font-display text-[9px] uppercase tracking-[0.16em] text-white/25">
-                  {STRATE_NAMES[strate]}
+                  {strateNames[strate]}
                 </p>
               )}
               <div

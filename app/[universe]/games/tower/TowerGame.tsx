@@ -174,7 +174,7 @@ export function TowerGame() {
       )}
 
       <div className="flex flex-col gap-6 sm:flex-row">
-        {view.status !== "starter" && <TowerMap floor={view.floor} />}
+        {view.status !== "starter" && <TowerMap floor={view.floor} strateNames={view.strateNames} />}
 
         <div className="min-w-0 flex-1">
           {view.status === "starter" && (

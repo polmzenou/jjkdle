@@ -184,6 +184,15 @@ export const bleach: UniverseConfig = {
    */
   tower: {
     arcAttributeKey: "bleachAppearanceArc",
+    // Arcs 1-2 (Agent Shinigami → Soul Society), 3-4 (Arrancar → Hueco
+    // Mundo), 5-6 (Faux Karakura → Deicide), 7-8 (Fullbring → Guerre
+    // Sanglante Millénaire).
+    strateNames: [
+      "Soul Society",
+      "Hueco Mundo",
+      "La bataille de Karakura",
+      "La Guerre Sanglante",
+    ],
     ultimateAttributeKey: "bleachrelease",
     ultimateAttributeValues: [
       "BANKAI",

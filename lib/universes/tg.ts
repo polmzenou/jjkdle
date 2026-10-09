@@ -169,6 +169,15 @@ export const tg: UniverseConfig = {
    */
   tower: {
     arcAttributeKey: "tgAppearanceArc",
+    // Arcs 1-3 (Tragédie → Gourmet), 4-5 (Arbre Aogiri → Chasse au Hibou),
+    // 6-8 (Escouade Quinx → Extermination des Tsukiyama), 9-10 (Rushima →
+    // Dragon).
+    strateNames: [
+      "La tragédie",
+      "L'Arbre Aogiri",
+      "L'escouade Quinx",
+      "Le Dragon",
+    ],
     ultimateAttributeKey: "tgrate",
     ultimateAttributeValues: ["SS", "SSS"],
     ultimateName: "Surpuissance",

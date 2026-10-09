@@ -84,6 +84,16 @@ export interface TowerConfig {
    * (« Division 4 », « Piliers ») en aura besoin.
    */
   categoryArchetypes: Readonly<Record<string, Archetype>>;
+  /**
+   * Noms des 4 strates (du bas vers le haut), d'après les arcs MAJEURS qu'elles
+   * couvrent — le découpage des arcs en strates est proportionnel (cf.
+   * `strateOfArc`), les noms doivent donc suivre le même découpage.
+   *
+   * Absent ⇒ chaque strate prend le libellé de son premier arc en base (cf.
+   * `strateNamesFor`). Jamais hérité de JJK : « Shibuya » n'a rien à faire dans
+   * la tour de Demon Slayer.
+   */
+  strateNames?: readonly string[];
 }
 
 /**
@@ -96,6 +106,14 @@ export const JJK_TOWER_CONFIG: TowerConfig = {
   ultimateBadge: "領域",
   ultimateAttributeKey: "hasDomain",
   energyAttributeKey: "cursedEnergy",
+  // Arcs 1-3 (JJK 0 → Vs Mahito), 4-6 (Tournoi → passé de Gojo),
+  // 7-9 (Shibuya → Culling Game), 10-12 (Shinjuku → Modulo).
+  strateNames: [
+    "Les premiers fléaux",
+    "Le tournoi Tokyo-Kyoto",
+    "L'incident de Shibuya",
+    "Le dénouement",
+  ],
   categoryArchetypes: {
     "innate-technique": "technique",
     speed: "swift",
@@ -141,6 +159,9 @@ export function resolveTowerConfig(
       override.categoryArchetypes ?? JJK_TOWER_CONFIG.categoryArchetypes,
     ultimateName: override.ultimateName ?? JJK_TOWER_CONFIG.ultimateName,
     ultimateBadge: override.ultimateBadge ?? JJK_TOWER_CONFIG.ultimateBadge,
+    // Pas de repli sur JJK : des noms d'arcs ne s'héritent pas d'un anime à
+    // l'autre (cf. `strateNamesFor`).
+    strateNames: override.strateNames,
     // Même règle que les valeurs : ces deux clés décrivent l'attribut d'ultime,
     // elles ne s'héritent pas d'un univers à l'autre une fois celui-ci redéfini.
     ...(override.ultimateAttributeKey

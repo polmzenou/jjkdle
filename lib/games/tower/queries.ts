@@ -5,7 +5,12 @@ import { loadAttributeSchema } from "@/lib/games/jjkdle/attributes-db";
 import { getCurrentUniverse } from "@/lib/universes/current";
 import { getUniverseBySlug } from "@/lib/universes/registry";
 import { resolveTowerConfig, type TowerConfig } from "./config";
-import { buildTowerRoster, isTowerPlayable, type TowerRoster } from "./floors";
+import {
+  buildTowerRoster,
+  isTowerPlayable,
+  strateNamesFor,
+  type TowerRoster,
+} from "./floors";
 import { normalizeItem, type TowerItem } from "./items";
 import type { TowerEvent } from "./events";
 import { eventsFor } from "./event-catalogs";
@@ -31,6 +36,8 @@ export interface TowerContext {
   tower: TowerRoster;
   /** Valeurs d'arc dans l'ordre du récit. */
   arcOrder: string[];
+  /** Noms des 4 strates, du bas vers le haut. */
+  strateNames: string[];
   /** Objets ACTIFS de l'univers, dans l'ordre d'affichage. */
   items: TowerItem[];
   /** Les mêmes, indexés par id, pour résoudre un inventaire de run. */
@@ -57,15 +64,13 @@ export function towerConfigForSlug(slug: string): TowerConfig {
  * n'a pas de place sur une échelle chronologique, et l'y glisser décalerait
  * toutes les strates suivantes.
  */
-function orderedValues(
+function orderedOptions(
   schema: Awaited<ReturnType<typeof loadAttributeSchema>>,
   key: string,
-): string[] {
+): { value: string; label: string }[] {
   const spec = schema.get(key);
   if (!spec) return [];
-  return spec.options
-    .filter((o) => typeof o.order === "number")
-    .map((o) => o.value);
+  return spec.options.filter((o) => typeof o.order === "number");
 }
 
 /**
@@ -121,7 +126,8 @@ const loadContext = cache(
       .map((r) => normalizeItem({ ...r, imageData: withImage.has(r.id) }))
       .filter((i): i is TowerItem => i !== null);
 
-    const arcOrder = orderedValues(schema, config.arcAttributeKey);
+    const arcs = orderedOptions(schema, config.arcAttributeKey);
+    const arcOrder = arcs.map((o) => o.value);
     const tower = buildTowerRoster(list, arcOrder, config);
 
     return {
@@ -131,6 +137,10 @@ const loadContext = cache(
       list,
       tower,
       arcOrder,
+      strateNames: strateNamesFor(
+        config,
+        arcs.map((o) => o.label),
+      ),
       items,
       itemsById: Object.fromEntries(items.map((i) => [i.id, i])),
       events: eventsFor(slug),

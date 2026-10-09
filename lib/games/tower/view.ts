@@ -10,6 +10,7 @@ import {
 import { recruitChoices, runScore, type TowerRunState } from "./run";
 import { describeItem, itemRarityStyle, resolveItems, type TowerItem } from "./items";
 import { eventFor, type TowerEvent } from "./events";
+import { strateNamesFor } from "./floors";
 import { REST_HEAL_PCT } from "./run";
 import {
   MERCHANT_HEAL_PCT,
@@ -130,6 +131,8 @@ export interface TowerView {
   attempt: number;
   floor: number;
   strate: number;
+  /** Noms des 4 strates de l'univers, du bas vers le haut (carte). */
+  strateNames: string[];
   kind: NodeKind;
   squad: SquadSlotView[];
   /** Ennemis de l'étage COURANT uniquement. */
@@ -265,6 +268,8 @@ export function buildView(params: {
   events?: TowerEvent[];
   /** Les branches de l'étage courant, pour l'écran de carte. */
   options?: FloorPlan[];
+  /** Noms des strates de l'univers. */
+  strateNames?: string[];
 }): TowerView {
   const { state, plan, roster, config } = params;
   const catalog = params.items ?? [];
@@ -302,6 +307,7 @@ export function buildView(params: {
     attempt: params.attempt,
     floor: state.floor,
     strate: plan.strate,
+    strateNames: params.strateNames ?? strateNamesFor(config, []),
     kind: plan.kind,
     squad,
     enemies,

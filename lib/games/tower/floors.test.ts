@@ -15,8 +15,11 @@ import {
   strateOfFloor,
   strateOf,
   strateOfValue,
+  strateNamesFor,
 } from "./floors";
 import { STRATE_COUNT, TOWER_FLOORS } from "./types";
+import { resolveTowerConfig } from "./config";
+import { listUniverses } from "@/lib/universes/registry";
 
 /** L'ordre réel des arcs JJK, tel qu'il est amorcé en base. */
 const JJK_ARCS = (
@@ -328,5 +331,32 @@ describe("plafond de recrutement par étage", () => {
 
   it("refuse un id inconnu (garde serveur)", () => {
     expect(canRecruit(tower, "inexistant", 20)).toBe(false);
+  });
+});
+
+describe("noms des strates", () => {
+  it("chaque univers a ses propres noms, jamais ceux de JJK", () => {
+    const jjk = strateNamesFor(resolveTowerConfig(), []);
+    for (const universe of listUniverses()) {
+      const names = strateNamesFor(resolveTowerConfig(universe.tower), []);
+      expect(names).toHaveLength(STRATE_COUNT);
+      if (universe.slug !== "jjk") {
+        for (const name of names) expect(jjk).not.toContain(name);
+      }
+    }
+  });
+
+  it("sans noms en config, reprend le premier arc de chaque strate", () => {
+    const arcs = ["A", "B", "C", "D", "E", "F", "G", "H"];
+    expect(strateNamesFor({}, arcs)).toEqual(["A", "C", "E", "G"]);
+  });
+
+  it("sans arcs ni config, ne laisse jamais de strate sans nom", () => {
+    expect(strateNamesFor({}, [])).toEqual([
+      "Strate 1",
+      "Strate 2",
+      "Strate 3",
+      "Strate 4",
+    ]);
   });
 });

@@ -167,6 +167,15 @@ export const kny: UniverseConfig = {
    */
   tower: {
     arcAttributeKey: "knyAppearanceArc",
+    // Arcs 1-3 (Sélection finale → Manoir des tambours), 4-6 (Natagumo →
+    // Train de l'infini), 7-9 (Quartier des plaisirs → Entraînement des
+    // Piliers), 10-11 (Château de l'infini → Bataille finale).
+    strateNames: [
+      "La Sélection finale",
+      "Le Train de l'infini",
+      "Le Quartier des plaisirs",
+      "Le Château de l'infini",
+    ],
     ultimateAttributeKey: "knyrank",
     ultimateAttributeValues: ["HASHIRA"],
     energyAttributeKey: "knypower",

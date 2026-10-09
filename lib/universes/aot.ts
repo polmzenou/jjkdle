@@ -150,6 +150,15 @@ export const aot: UniverseConfig = {
    */
   tower: {
     arcAttributeKey: "aotAppearanceArc",
+    // Arcs 1-3 (Chute de Shiganshina → 104e Brigade), 4-6 (Titan Féminin →
+    // Soulèvement), 7-9 (Retour à Shiganshina → Guerre pour Paradis),
+    // 10-11 (Grand Terrassement → Bataille finale).
+    strateNames: [
+      "La chute de Shiganshina",
+      "Le Titan Féminin",
+      "Retour à Shiganshina",
+      "Le Grand Terrassement",
+    ],
     ultimateAttributeKey: "aottitan",
     energyAttributeKey: "aotpower",
     ultimateName: "Transformation en Titan",

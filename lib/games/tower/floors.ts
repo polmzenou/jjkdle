@@ -126,6 +126,28 @@ export function strateOf(arcIndex: number, arcCount: number, value: number): num
   return Math.max(strateOfArc(arcIndex, arcCount), strateOfValue(value));
 }
 
+/**
+ * Noms des strates affichés sur la carte de la tour.
+ *
+ * Les noms écrits dans la config de l'univers font foi. À défaut, chaque strate
+ * prend le libellé du premier arc qu'elle couvre (`arcLabels` dans l'ordre du
+ * récit) : un nouvel univers a ainsi des noms cohérents sans une ligne de code,
+ * au lieu d'hériter de ceux de JJK.
+ */
+export function strateNamesFor(
+  config: Pick<TowerConfig, "strateNames">,
+  arcLabels: readonly string[],
+): string[] {
+  return Array.from({ length: STRATE_COUNT }, (_, strate) => {
+    const own = config.strateNames?.[strate];
+    if (own) return own;
+    const firstArc = arcLabels.findIndex(
+      (_label, i) => strateOfArc(i, arcLabels.length) === strate,
+    );
+    return firstArc >= 0 ? arcLabels[firstArc] : `Strate ${strate + 1}`;
+  });
+}
+
 /** Strate d'un étage (1-indexé). */
 export function strateOfFloor(floor: number): number {
   const index = Math.floor((floor - 1) / FLOORS_PER_STRATE);
