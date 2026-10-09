@@ -437,7 +437,7 @@ function toNodeView(
     prelude: option.prelude,
     label: prelude ? `${prelude.label} puis combat` : fight.label,
     hint: prelude
-      ? `${prelude.hint}, puis le combat de l'étage — mais pas de butin après.`
+      ? `${prelude.hint}, puis le combat — sans récompense après.`
       : option.kind === "boss"
         ? fight.hint
         : `${fight.hint} Butin à la clé.`,

@@ -162,13 +162,15 @@ export function isBossFloor(floor: number): boolean {
 /**
  * Poids de tirage du PRÉLUDE de la branche bonus.
  *
- * Le renfort domine : c'est le seul prélude qui répare une escouade amputée, et
- * l'escouade est la ressource la plus difficile à reconstituer.
+ * Le marchand et le renfort dominent : le premier donne un débouché aux
+ * fragments, le second répare une escouade amputée. Le repos est volontairement
+ * RARE — le soin est déjà proposé en récompense après chaque combat, et un
+ * repos fréquent faisait doublon.
  */
 const PRELUDE_WEIGHTS: ReadonlyArray<readonly [PreludeKind, number]> = [
-  ["recruit", 34],
-  ["merchant", 22],
-  ["rest", 22],
+  ["recruit", 32],
+  ["merchant", 34],
+  ["rest", 12],
   ["event", 22],
 ];
 

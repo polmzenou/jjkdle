@@ -1,6 +1,7 @@
 "use client";
 
 import { ULTIMATE, passiveOf } from "@/lib/games/tower/abilities";
+import { TowerIcon, techniqueIcon, type TowerIconName } from "./TowerIcon";
 import { JJK_TOWER_CONFIG } from "@/lib/games/tower/config";
 
 /** Repli quand l'appelant n'a pas la vue sous la main. */
@@ -118,6 +119,7 @@ export function CharacterTip({
         <Block
           label="Technique"
           title={`${card.technique.name} · ${card.technique.cost} énergie`}
+          icon={techniqueIcon(card.archetype)}
         >
           {card.technique.description}
         </Block>
@@ -128,7 +130,12 @@ export function CharacterTip({
       )}
 
       {card.hasDomain && (
-        <Block label="Ultime" title={card.ultimateName ?? ultimateName} accent="cursed">
+        <Block
+          label="Ultime"
+          title={card.ultimateName ?? ultimateName}
+          accent="cursed"
+          icon="ultimate"
+        >
           {ULTIMATE.description} La jauge se remplit avec les dégâts subis.
         </Block>
       )}
@@ -175,11 +182,13 @@ function Block({
   label,
   title,
   accent = "domain",
+  icon,
   children,
 }: {
   label: string;
   title: string;
   accent?: "domain" | "cursed";
+  icon?: TowerIconName;
   children: React.ReactNode;
 }) {
   return (
@@ -189,10 +198,11 @@ function Block({
       </p>
       <p
         className={[
-          "font-display text-[11px] font-bold",
+          "flex items-center gap-1 font-display text-[11px] font-bold",
           accent === "cursed" ? "text-cursed-light" : "text-domain-light",
         ].join(" ")}
       >
+        {icon && <TowerIcon name={icon} className="h-3.5 w-3.5" />}
         {title}
       </p>
       <p className="text-[11px] leading-snug text-white/60">{children}</p>

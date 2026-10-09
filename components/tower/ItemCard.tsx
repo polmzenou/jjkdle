@@ -86,9 +86,9 @@ export function InventoryStrip({ items }: { items: ItemView[] }) {
   if (items.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
+    <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-white/5 bg-white/[0.02] px-2.5 py-2">
       <span className="font-display text-[10px] font-bold uppercase tracking-[0.16em] text-white/35">
-        Objets
+        Objets · {items.length}
       </span>
       {items.map((item) => (
         <div key={item.id} className="group relative">

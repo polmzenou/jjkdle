@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CharacterImage } from "@/components/CharacterImage";
 import {
+  GUARD_COOLDOWN,
   GUARD_SLOT,
   MAX_ENERGY,
   TICKS_PER_SECOND,
@@ -18,6 +19,13 @@ import {
 } from "@/lib/games/tower/view";
 import { CINEMATIC_MS, DomainCinematic } from "./DomainCinematic";
 import { CharacterTip } from "./InfoTip";
+import {
+  TowerIcon,
+  nodeIcon,
+  nodeTone,
+  techniqueIcon,
+  type TowerIconName,
+} from "./TowerIcon";
 import type { Intervention } from "@/lib/games/tower/types";
 
 /**
@@ -163,8 +171,18 @@ export function TowerCombat({
     [intervene],
   );
 
+  // Seuils de coût affichés sur la jauge : on voit d'un coup d'œil quelle
+  // technique sera payable, sans comparer deux nombres.
+  const costMarks = Array.from(
+    new Set(
+      view.squad
+        .map((c) => c.technique?.cost)
+        .filter((c): c is number => typeof c === "number" && c < MAX_ENERGY),
+    ),
+  );
+
   return (
-    <div className="relative flex flex-col gap-4">
+    <div className="relative flex flex-col gap-3">
       <DomainCinematic
         caster={casting}
         ultimateName={castName}
@@ -173,53 +191,86 @@ export function TowerCombat({
 
       <FloorHeader view={view} tick={snap.tick} />
 
-      <section aria-label="Ennemis" className="flex flex-wrap justify-center gap-2">
-        {snap.enemies.map((enemy, i) => (
-          <FighterTile
-            key={enemy.uid}
-            fighter={enemy}
-            tick={snap.tick}
-            card={view.enemies[i]}
-            ultimateName={view.ultimateName}
-            hostile
-            focused={canFocus && enemy.uid === focused}
-            onFocus={canFocus ? () => focus(i) : undefined}
-          />
-        ))}
-      </section>
+      {/* Arène : les deux camps face à face, séparés par la jauge commune. */}
+      <div className="overflow-hidden rounded-2xl border border-white/10 bg-void-900/60">
+        <section
+          aria-label="Ennemis"
+          className="flex flex-wrap justify-center gap-2 bg-gradient-to-b from-cursed/[0.12] to-transparent px-2 pb-3 pt-3"
+        >
+          {snap.enemies.map((enemy, i) => (
+            <FighterTile
+              key={enemy.uid}
+              fighter={enemy}
+              tick={snap.tick}
+              card={view.enemies[i]}
+              ultimateName={view.ultimateName}
+              hostile
+              focused={canFocus && enemy.uid === focused}
+              onFocus={canFocus ? () => focus(i) : undefined}
+            />
+          ))}
+        </section>
 
-      <EnergyGauge value={snap.energy} windowOpen={snap.windowOpen} />
+        <div className="border-y border-white/5 bg-black/30 px-3 py-2.5">
+          <EnergyGauge
+            value={snap.energy}
+            windowOpen={snap.windowOpen}
+            marks={costMarks}
+          />
+        </div>
 
-      <section aria-label="Escouade" className="flex flex-wrap justify-center gap-2">
-        {snap.squad.map((member, i) => (
-          <FighterTile
-            key={member.uid}
-            fighter={member}
-            tick={snap.tick}
-            card={view.squad[i]}
-            ultimateName={view.ultimateName}
-          />
-        ))}
-        {snap.summons.map((summon) => (
-          <FighterTile
-            key={summon.uid}
-            fighter={summon}
-            tick={snap.tick}
-            summon
-          />
-        ))}
-      </section>
+        <section
+          aria-label="Escouade"
+          className="flex flex-wrap justify-center gap-2 bg-gradient-to-t from-domain/[0.12] to-transparent px-2 pb-3 pt-3"
+        >
+          {snap.squad.map((member, i) => (
+            <FighterTile
+              key={member.uid}
+              fighter={member}
+              tick={snap.tick}
+              card={view.squad[i]}
+              ultimateName={view.ultimateName}
+            />
+          ))}
+          {snap.summons.map((summon) => (
+            <FighterTile
+              key={summon.uid}
+              fighter={summon}
+              tick={snap.tick}
+              summon
+            />
+          ))}
+        </section>
+      </div>
+
+      <StatusLine
+        finished={snap.finished}
+        busy={busy}
+        victory={result.victory}
+        windowOpen={snap.windowOpen}
+      />
 
       <section aria-label="Actions" className="grid grid-cols-3 gap-2">
         {view.squad.map((card, slot) => {
           const member = snap.squad[slot];
+          const alive = Boolean(member?.alive);
           const ultimate = member?.domainReady ?? false;
           const cost = ultimate ? 0 : (card.technique?.cost ?? 0);
           const usable =
             !snap.finished &&
             !busy &&
-            Boolean(member?.alive) &&
+            alive &&
             (ultimate || (card.technique !== null && snap.energy >= cost));
+          // Part de l'énergie déjà réunie pour cette technique : la barre se
+          // remplit sous le bouton, on sait quand il va s'allumer.
+          const charge =
+            ultimate || cost === 0 ? 1 : Math.min(1, snap.energy / cost);
+          const defensive = card.archetype === "stalwart";
+          const icon: TowerIconName = ultimate
+            ? "ultimate"
+            : card.technique
+              ? techniqueIcon(card.archetype)
+              : "ultimate";
 
           return (
             <button
@@ -227,27 +278,85 @@ export function TowerCombat({
               type="button"
               onClick={() => intervene(slot)}
               disabled={!usable}
-              className={[
-                "flex flex-col items-center gap-0.5 rounded-lg border px-2 py-3 transition",
+              title={
                 ultimate
-                  ? "border-cursed bg-cursed/20 text-cursed-light shadow-glow-cursed"
+                  ? (card.ultimateName ?? view.ultimateName)
+                  : card.technique?.description
+              }
+              className={[
+                "relative flex min-h-[92px] flex-col items-center justify-center gap-1 overflow-hidden rounded-xl border px-1.5 pb-2.5 pt-2 transition active:scale-[0.97]",
+                ultimate
+                  ? "border-cursed bg-cursed/25 text-white shadow-glow-cursed"
                   : usable
-                    ? "border-domain/70 bg-domain/15 text-domain-light"
+                    ? defensive
+                      ? "border-sky-400/70 bg-sky-400/15 text-sky-100 hover:bg-sky-400/25"
+                      : "border-domain/70 bg-domain/15 text-domain-light hover:bg-domain/25"
                     : "border-white/10 bg-void-800/50 text-white/30",
                 // La fenêtre est le seul moment qui compte : elle doit se voir
                 // sans qu'on ait à lire quoi que ce soit.
-                snap.windowOpen && usable ? "animate-pulse ring-2 ring-cursed" : "",
+                snap.windowOpen && usable ? "ring-2 ring-cursed ring-offset-2 ring-offset-void-900" : "",
               ].join(" ")}
             >
-              <span className="font-display text-[11px] font-bold uppercase leading-tight tracking-wide">
+              {snap.windowOpen && usable && (
+                <span className="absolute left-1/2 top-1 -translate-x-1/2 animate-pulse rounded bg-cursed px-1.5 font-display text-[9px] font-bold uppercase leading-4 tracking-wider text-white">
+                  {defensive ? "Parade" : "Contre"}
+                </span>
+              )}
+
+              <span
+                className={[
+                  "mt-2 flex h-9 w-9 items-center justify-center rounded-full",
+                  ultimate
+                    ? "bg-cursed text-white"
+                    : usable
+                      ? defensive
+                        ? "bg-sky-400/25"
+                        : "bg-domain/30"
+                      : "bg-white/5",
+                ].join(" ")}
+              >
+                <TowerIcon
+                  name={alive ? icon : "skull"}
+                  className="h-5 w-5"
+                />
+              </span>
+
+              <span className="max-w-full truncate font-display text-[11px] font-bold uppercase leading-tight tracking-wide">
                 {/* « ULTIME » et non le nom de l'univers : « Extension de
                     Territoire » ne tient pas dans un tiers de largeur d'écran.
                     Le nom complet est annoncé par la cinématique, en grand. */}
-                {ultimate ? "Ultime" : (card.technique?.name ?? "—")}
+                {!alive ? "K.O." : ultimate ? "Ultime" : (card.technique?.name ?? "Ultime")}
               </span>
-              <span className="text-[11px] tabular-nums opacity-70">
-                {ultimate ? "PRÊT" : cost}
+
+              <span className="flex max-w-full items-center gap-1 text-[10px] leading-none opacity-80">
+                {ultimate ? (
+                  <span className="font-bold">PRÊT</span>
+                ) : card.technique ? (
+                  <>
+                    <TowerIcon name="energy" className="h-3 w-3" />
+                    <span className="tabular-nums">{cost}</span>
+                  </>
+                ) : (
+                  <span>jauge</span>
+                )}
+                <span className="truncate text-white/40">· {card.name}</span>
               </span>
+
+              {card.technique && !ultimate && alive && (
+                <span className="absolute inset-x-0 bottom-0 h-1 bg-black/40">
+                  <span
+                    className={[
+                      "block h-full transition-[width] duration-100",
+                      charge >= 1
+                        ? defensive
+                          ? "bg-sky-400"
+                          : "bg-domain-light"
+                        : "bg-white/25",
+                    ].join(" ")}
+                    style={{ width: `${charge * 100}%` }}
+                  />
+                </span>
+              )}
             </button>
           );
         })}
@@ -258,54 +367,111 @@ export function TowerCombat({
         onClick={() => intervene(GUARD_SLOT, "guard")}
         disabled={!canGuard}
         className={[
-          "flex items-center justify-center gap-2 rounded-lg border px-3 py-3 font-display text-sm font-bold uppercase tracking-wide transition",
+          "relative flex items-center justify-center gap-2 overflow-hidden rounded-xl border px-3 py-3.5 font-display text-sm font-bold uppercase tracking-wide transition active:scale-[0.99]",
           snap.guardActive
-            ? "border-sky-400 bg-sky-400/25 text-sky-200"
+            ? "border-sky-400 bg-sky-400/25 text-sky-100"
             : canGuard
-              ? "border-white/25 bg-white/[0.06] text-white/85 hover:border-sky-400/60"
-              : "border-white/10 bg-void-800/50 text-white/25",
+              ? "border-white/25 bg-white/[0.06] text-white/90 hover:border-sky-400/60 hover:bg-sky-400/10"
+              : "border-white/10 bg-void-800/50 text-white/30",
         ].join(" ")}
       >
-        <span aria-hidden>🛡</span>
-        {snap.guardActive
-          ? "Garde levée"
-          : snap.guardCooldown > 0
-            ? `Garde · ${(snap.guardCooldown / TICKS_PER_SECOND).toFixed(1)}s`
-            : "Garde"}
+        {/* Recharge de la garde : la barre se vide jusqu'à la disponibilité. */}
+        {snap.guardCooldown > 0 && !snap.guardActive && (
+          <span
+            aria-hidden
+            className="absolute inset-y-0 left-0 bg-white/[0.06]"
+            style={{ width: `${(snap.guardCooldown / GUARD_COOLDOWN) * 100}%` }}
+          />
+        )}
+        <TowerIcon name="barrier" className="relative h-5 w-5" />
+        <span className="relative">
+          {snap.guardActive
+            ? "Garde levée"
+            : snap.guardCooldown > 0
+              ? `Garde · ${(snap.guardCooldown / TICKS_PER_SECOND).toFixed(1)}s`
+              : "Garde"}
+        </span>
+        <span className="relative hidden text-[10px] font-normal normal-case tracking-normal text-white/45 sm:inline">
+          — réduit les dégâts reçus par toute l&apos;escouade
+        </span>
       </button>
-
-      <p className="text-center text-xs text-white/40">
-        {snap.finished
-          ? busy
-            ? "Résolution…"
-            : result.victory
-              ? "Étage franchi."
-              : "Escouade à terre."
-          : snap.windowOpen
-            ? "Fenêtre ouverte — frappe maintenant pour contrer, ou garde pour amortir."
-            : "Le combat se joue seul. Garde pour encaisser, et attends qu'un ennemi charge."}
-      </p>
     </div>
+  );
+}
+
+function StatusLine({
+  finished,
+  busy,
+  victory,
+  windowOpen,
+}: {
+  finished: boolean;
+  busy: boolean;
+  victory: boolean;
+  windowOpen: boolean;
+}) {
+  if (finished) {
+    return (
+      <p
+        className={[
+          "flex items-center justify-center gap-2 rounded-lg py-2 text-center font-display text-sm font-bold",
+          victory ? "bg-emerald-400/10 text-emerald-300" : "bg-cursed/10 text-cursed-light",
+        ].join(" ")}
+      >
+        <TowerIcon name={victory ? "star" : "skull"} className="h-4 w-4" />
+        {busy ? "Résolution…" : victory ? "Étage franchi" : "Escouade à terre"}
+      </p>
+    );
+  }
+
+  return (
+    <p
+      className={[
+        "flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-center text-xs transition-colors",
+        windowOpen
+          ? "bg-cursed/15 font-semibold text-cursed-light"
+          : "bg-white/[0.03] text-white/45",
+      ].join(" ")}
+    >
+      <TowerIcon
+        name={windowOpen ? "warning" : "clock"}
+        className="h-4 w-4"
+      />
+      {windowOpen
+        ? "Un ennemi charge — frappe pour contrer, ou lève la garde."
+        : "Le combat se joue seul. Attends qu'un ennemi charge pour agir."}
+    </p>
   );
 }
 
 function FloorHeader({ view, tick }: { view: TowerView; tick: number }) {
   const label =
-    view.kind === "boss" ? "BOSS" : view.kind === "elite" ? "ÉLITE" : "COMBAT";
+    view.kind === "boss" ? "Boss" : view.kind === "elite" ? "Élite" : "Combat";
+  const tone = nodeTone(view.kind);
 
   return (
-    <header className="flex items-baseline justify-between">
-      <p className="font-display text-xs font-bold uppercase tracking-[0.18em] text-white/50">
-        Étage {view.floor} · Strate {["I", "II", "III", "IV"][view.strate]}
-      </p>
-      <p
-        className={
-          view.kind === "combat"
-            ? "font-display text-xs font-bold tracking-widest text-white/40"
-            : "font-display text-xs font-bold tracking-widest text-cursed"
-        }
-      >
-        {label} · {(tick / 10).toFixed(1)}s
+    <header className="flex items-center justify-between gap-3">
+      <div className="flex items-center gap-2">
+        <span
+          className={[
+            "flex h-8 w-8 items-center justify-center rounded-lg",
+            tone.ring,
+          ].join(" ")}
+        >
+          <TowerIcon name={nodeIcon(view.kind)} className="h-4 w-4" />
+        </span>
+        <div className="leading-tight">
+          <p className={["font-display text-sm font-bold uppercase tracking-wide", tone.text].join(" ")}>
+            {label}
+          </p>
+          <p className="text-[11px] text-white/45">
+            Étage {view.floor} · {view.strateNames[view.strate] ?? `Strate ${view.strate + 1}`}
+          </p>
+        </div>
+      </div>
+      <p className="flex items-center gap-1.5 rounded-full bg-white/[0.05] px-2.5 py-1 font-display text-xs font-bold tabular-nums text-white/60">
+        <TowerIcon name="clock" className="h-3.5 w-3.5" />
+        {(tick / TICKS_PER_SECOND).toFixed(1)}s
       </p>
     </header>
   );
@@ -314,52 +480,48 @@ function FloorHeader({ view, tick }: { view: TowerView; tick: number }) {
 function EnergyGauge({
   value,
   windowOpen,
+  marks,
 }: {
   value: number;
   windowOpen: boolean;
+  /** Coûts des techniques de l'escouade, repérés sur la jauge. */
+  marks: number[];
 }) {
   return (
     <div>
-      <div className="mb-1 flex items-baseline justify-between">
-        <span className="font-display text-[10px] font-bold uppercase tracking-[0.18em] text-white/45">
-          Énergie occulte
+      <div className="mb-1.5 flex items-center justify-between">
+        <span className="flex items-center gap-1.5 font-display text-[10px] font-bold uppercase tracking-[0.18em] text-white/50">
+          <TowerIcon name="energy" className="h-3.5 w-3.5 text-domain-light" />
+          Énergie
         </span>
         <span className="font-display text-sm font-bold tabular-nums text-domain-light">
           {Math.round(value)}
+          <span className="text-white/30"> / {MAX_ENERGY}</span>
         </span>
       </div>
-      <div className="h-2.5 w-full overflow-hidden rounded-full bg-black/50">
+      <div className="relative h-3 w-full overflow-hidden rounded-full bg-black/60">
         <div
-          className={
+          className={[
+            "h-full rounded-full transition-[width] duration-100",
             windowOpen
-              ? "h-full bg-cursed transition-[width] duration-100"
-              : "h-full bg-domain transition-[width] duration-100"
-          }
+              ? "bg-gradient-to-r from-cursed-dark to-cursed"
+              : "bg-gradient-to-r from-domain-dark to-domain-light",
+          ].join(" ")}
           style={{ width: `${(value / MAX_ENERGY) * 100}%` }}
         />
+        {marks.map((mark) => (
+          <span
+            key={mark}
+            aria-hidden
+            className="absolute inset-y-0 w-px bg-white/40"
+            style={{ left: `${(mark / MAX_ENERGY) * 100}%` }}
+          />
+        ))}
       </div>
     </div>
   );
 }
 
-/**
- * Une carte de combattant : portrait, barres, et tout le retour visuel.
- *
- * Trois animations s'y superposent, chacune répondant à une question que le
- * joueur se posait sans réponse :
- *
- *   « qui vient de frapper ? »  — la carte se déplace au moment du coup. Vers
- *     le HAUT pour l'escouade, vers le BAS pour les ennemis : les deux camps
- *     bougent en sens opposés, donc un regard suffit à savoir de quel côté
- *     part le coup, sans lire un nom.
- *
- *   « mon appui a-t-il servi ? » — un trait lumineux barre la cible quand le
- *     coup vient d'une action DÉCLENCHÉE par le joueur. Avant, une technique
- *     et une frappe automatique produisaient le même nombre rouge.
- *
- *   « qui mon escouade attaque-t-elle ? » — l'ennemi ciblé porte un liseré et
- *     un repère. Cliquer sur un autre le désigne (cf. `onFocus`).
- */
 /**
  * Une carte de combattant : portrait, barres, et tout le retour visuel.
  *
@@ -461,7 +623,7 @@ function FighterTile({
   }, [slash]);
 
   const className = [
-    "relative block w-[104px] overflow-hidden rounded-lg border transition-colors",
+    "relative block w-[92px] overflow-hidden rounded-lg border bg-void-900/70 transition-colors sm:w-[104px]",
     fighter.alive ? "" : "opacity-30 grayscale",
     fighter.charging
       ? "border-cursed shadow-glow-cursed"
@@ -471,15 +633,15 @@ function FighterTile({
           ? "border-cursed/30"
           : "border-domain/30",
     targetable && !focused ? "cursor-pointer hover:border-amber-300/60" : "",
-    summon ? "w-[76px] border-dashed" : "",
+    summon ? "!w-[76px] border-dashed" : "",
   ].join(" ");
 
   const content = (
     <>
       <div className="relative aspect-square w-full bg-void-900">
         {summon ? (
-          <div className="flex h-full w-full items-center justify-center text-2xl">
-            &#128021;
+          <div className="flex h-full w-full items-center justify-center text-domain-light">
+            <TowerIcon name="summon" className="h-8 w-8" />
           </div>
         ) : (
           <CharacterImage character={{ name: fighter.name, image: card?.image }} />
@@ -514,9 +676,42 @@ function FighterTile({
           <span
             aria-hidden
             title="Cible de ton escouade"
-            className="absolute right-1 top-1 rounded bg-amber-300/90 px-1 text-[9px] font-bold leading-4 text-void-900"
+            className="absolute right-1 top-1 flex items-center gap-0.5 rounded bg-amber-300/90 px-1 text-[9px] font-bold leading-4 text-void-900"
           >
+            <TowerIcon name="target" className="h-2.5 w-2.5" />
             CIBLE
+          </span>
+        )}
+
+        {/* Un ennemi qui charge : le danger doit se voir sans lire. */}
+        {fighter.charging && fighter.alive && (
+          <span
+            aria-hidden
+            className="absolute left-1 top-1 flex h-5 w-5 animate-pulse items-center justify-center rounded-full bg-cursed text-white"
+          >
+            <TowerIcon name="warning" className="h-3 w-3" />
+          </span>
+        )}
+
+        {/* Technique du personnage, en coin : on relie la carte à son bouton. */}
+        {card && !hostile && (
+          <span
+            aria-hidden
+            className="absolute bottom-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-void-900/85 text-domain-light ring-1 ring-domain/40"
+          >
+            <TowerIcon
+              name={card.technique ? techniqueIcon(card.archetype) : "ultimate"}
+              className="h-3 w-3"
+            />
+          </span>
+        )}
+
+        {!fighter.alive && (
+          <span
+            aria-hidden
+            className="absolute inset-0 flex items-center justify-center text-white/80"
+          >
+            <TowerIcon name="skull" className="h-8 w-8" />
           </span>
         )}
       </div>
@@ -538,9 +733,14 @@ function FighterTile({
         />
       </div>
 
-      <p className="truncate px-1.5 py-1 text-center text-[10px] text-white/60">
-        {fighter.name}
-      </p>
+      <div className="px-1.5 py-1 text-center">
+        <p className="truncate text-[10px] font-semibold text-white/75">
+          {fighter.name}
+        </p>
+        <p className="text-[9px] tabular-nums text-white/40">
+          {Math.max(0, Math.round(fighter.hp))} PV
+        </p>
+      </div>
     </>
   );
 

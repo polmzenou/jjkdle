@@ -10,7 +10,9 @@ import {
   TICKS_PER_SECOND,
 } from "@/lib/games/tower/combat";
 import { STRATE_CLEAR_HEAL_PCT } from "@/lib/games/tower/run";
-import { SQUAD_SIZE, TOWER_FLOORS } from "@/lib/games/tower/types";
+import { ARCHETYPES, SQUAD_SIZE, TOWER_FLOORS } from "@/lib/games/tower/types";
+import { TECHNIQUES } from "@/lib/games/tower/abilities";
+import { TowerIcon, techniqueIcon } from "./TowerIcon";
 
 /**
  * Règles du jeu.
@@ -178,6 +180,74 @@ export function TowerRulesModal({
                 compte le nombre d&apos;essais qu&apos;il t&apos;a fallu, pas ton
                 score seul.
               </Rule>
+
+              <section>
+                <h3 className="font-display text-sm font-bold text-white">
+                  Les techniques
+                </h3>
+                <p className="mt-0.5 text-xs text-white/50">
+                  Chaque personnage en porte une, signalée par son icône sur sa
+                  carte et sur son bouton d&apos;action.
+                </p>
+                <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+                  {ARCHETYPES.map((archetype) => {
+                    const technique = TECHNIQUES[archetype];
+                    if (!technique) return null;
+                    const defensive = !technique.offensive;
+                    return (
+                      <li
+                        key={archetype}
+                        className="flex items-start gap-2.5 rounded-lg border border-white/5 bg-white/[0.03] p-2"
+                      >
+                        <span
+                          className={[
+                            "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
+                            defensive
+                              ? "bg-sky-400/20 text-sky-300"
+                              : "bg-domain/20 text-domain-light",
+                          ].join(" ")}
+                        >
+                          <TowerIcon name={techniqueIcon(archetype)} className="h-4 w-4" />
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block font-display text-xs font-bold text-white">
+                            {technique.name}
+                          </span>
+                          <span className="block text-[11px] leading-snug text-white/55">
+                            {technique.description}
+                          </span>
+                        </span>
+                      </li>
+                    );
+                  })}
+                  <li className="flex items-start gap-2.5 rounded-lg border border-cursed/20 bg-cursed/[0.06] p-2">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cursed/25 text-cursed-light">
+                      <TowerIcon name="ultimate" className="h-4 w-4" />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block font-display text-xs font-bold text-white">
+                        Ultime
+                      </span>
+                      <span className="block text-[11px] leading-snug text-white/55">
+                        Remplace la technique quand sa jauge est pleine.
+                      </span>
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2.5 rounded-lg border border-white/5 bg-white/[0.03] p-2">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white">
+                      <TowerIcon name="barrier" className="h-4 w-4" />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block font-display text-xs font-bold text-white">
+                        Garde
+                      </span>
+                      <span className="block text-[11px] leading-snug text-white/55">
+                        Gratuite, pour toute l&apos;escouade, avec un temps de recharge.
+                      </span>
+                    </span>
+                  </li>
+                </ul>
+              </section>
             </div>
 
             <button

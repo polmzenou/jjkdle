@@ -1,6 +1,7 @@
 "use client";
 
 import { FLOORS_PER_STRATE, TOWER_FLOORS } from "@/lib/games/tower/types";
+import { TowerIcon } from "./TowerIcon";
 
 /**
  * La tour en coupe verticale : 20 paliers empilés, on monte du bas vers le haut.
@@ -63,8 +64,14 @@ export function TowerMap({
                   {n}
                 </span>
                 {isBoss && (
-                  <span className="font-display text-[9px] font-bold uppercase tracking-wider text-cursed">
+                  <span className="flex items-center gap-1 font-display text-[9px] font-bold uppercase tracking-wider text-cursed">
+                    <TowerIcon name="boss" className="h-3 w-3" />
                     Boss
+                  </span>
+                )}
+                {current && (
+                  <span className="ml-auto font-display text-[8px] font-bold uppercase tracking-wider text-domain-light">
+                    ici
                   </span>
                 )}
               </div>

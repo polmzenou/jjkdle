@@ -14,6 +14,7 @@ import { RunRecap } from "@/components/tower/RunRecap";
 import { TowerCard } from "@/components/tower/TowerCard";
 import { TowerCombat } from "@/components/tower/TowerCombat";
 import { TowerMap } from "@/components/tower/TowerMap";
+import { TowerIcon } from "@/components/tower/TowerIcon";
 import {
   TowerRulesButton,
   TowerRulesSummary,
@@ -147,11 +148,19 @@ export function TowerGame() {
         <div className="flex shrink-0 items-center gap-3">
           {view.status !== "won" && view.status !== "lost" && (
             <>
-              <p className="font-display text-sm tabular-nums text-amber-300">
-                ◈ {view.fragments}
+              <p
+                title="Fragments — à dépenser chez le marchand"
+                className="flex items-center gap-1 rounded-full border border-amber-400/25 bg-amber-400/10 px-2.5 py-1 font-display text-sm font-bold tabular-nums text-amber-300"
+              >
+                <TowerIcon name="fragments" className="h-3.5 w-3.5" />
+                {view.fragments}
               </p>
-              <p className="font-display text-sm tabular-nums text-white/50">
-                {view.score} pts
+              <p
+                title="Score de l'ascension"
+                className="flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 font-display text-sm font-bold tabular-nums text-white/70"
+              >
+                <TowerIcon name="star" className="h-3.5 w-3.5" />
+                {view.score}
               </p>
             </>
           )}
@@ -162,13 +171,15 @@ export function TowerGame() {
       {view.status !== "starter" && <InventoryStrip items={view.inventory} />}
 
       {error && (
-        <p className="rounded-lg border border-cursed/40 bg-cursed/10 px-3 py-2 text-sm text-cursed-light">
+        <p className="flex items-center gap-2 rounded-lg border border-cursed/40 bg-cursed/10 px-3 py-2 text-sm text-cursed-light">
+          <TowerIcon name="warning" className="h-4 w-4" />
           {error}
         </p>
       )}
 
       {notice && (
-        <p className="rounded-lg border border-sky-400/40 bg-sky-400/10 px-3 py-2 text-sm italic text-sky-100">
+        <p className="flex items-start gap-2 rounded-lg border border-sky-400/40 bg-sky-400/10 px-3 py-2 text-sm italic text-sky-100">
+          <TowerIcon name="event" className="mt-0.5 h-4 w-4 not-italic" />
           {notice}
         </p>
       )}
@@ -310,7 +321,11 @@ function StarterPicker({
   return (
     <div className="flex flex-col gap-5">
       <header>
-        <h2 className="font-display text-xl font-bold text-white">
+        <p className="flex items-center gap-1.5 font-display text-[10px] font-bold uppercase tracking-[0.2em] text-domain-light">
+          <TowerIcon name="recruit" className="h-3.5 w-3.5" />
+          Starter du jour
+        </p>
+        <h2 className="mt-1 font-display text-xl font-bold text-white">
           Choisis avec qui tu entres
         </h2>
         <p className="mt-1 text-sm text-white/50">

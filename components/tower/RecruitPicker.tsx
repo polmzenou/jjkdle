@@ -4,6 +4,7 @@ import { useState } from "react";
 import { SQUAD_SIZE } from "@/lib/games/tower/types";
 import type { TowerView } from "@/lib/games/tower/view";
 import { TowerCard } from "./TowerCard";
+import { TowerIcon } from "./TowerIcon";
 
 /**
  * Écran de recrutement — et de SACRIFICE.
@@ -47,7 +48,16 @@ export function RecruitPicker({
   return (
     <div className="flex flex-col gap-5">
       <header>
-        <h2 className="font-display text-xl font-bold text-white">
+        <p
+          className={[
+            "flex items-center gap-1.5 font-display text-[10px] font-bold uppercase tracking-[0.2em]",
+            picked && full ? "text-cursed-light" : "text-domain-light",
+          ].join(" ")}
+        >
+          <TowerIcon name={picked && full ? "skull" : "recruit"} className="h-3.5 w-3.5" />
+          {picked && full ? "Sacrifice" : "Renfort"}
+        </p>
+        <h2 className="mt-1 font-display text-xl font-bold text-white">
           {picked && full ? "Qui laisses-tu partir ?" : "Un renfort se présente"}
         </h2>
         <p className="mt-1 text-sm text-white/50">
@@ -69,7 +79,8 @@ export function RecruitPicker({
               onClick={() => onRecruit(picked, slot)}
               disabled={busy}
               footer={
-                <span className="mt-1 block text-center font-display text-[11px] font-bold uppercase tracking-wide text-cursed">
+                <span className="mt-1 flex items-center justify-center gap-1 rounded-lg bg-cursed/15 py-1 font-display text-[11px] font-bold uppercase tracking-wide text-cursed-light">
+                  <TowerIcon name="skull" className="h-3.5 w-3.5" />
                   Sacrifier
                 </span>
               }
