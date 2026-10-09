@@ -1,14 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { ROSTER } from "@/data/roster/characters";
-import { battleValueOf } from "@/lib/games/battle/battleValues";
 import { dailyStarters, isDailyStarter, starterPool } from "./starters";
-import { STARTER_CHOICES, STARTER_MAX_VALUE, STARTER_MIN_VALUE } from "./types";
+import { STARTER_CHOICES } from "./types";
 
 /**
- * Les starters portent une promesse explicite du cahier des charges : « jamais
- * des personnages ultra puissants ». Ces tests la vérifient sur le ROSTER RÉEL,
- * pas sur des données de laboratoire — c'est la seule façon d'attraper une
- * dérive après un rééquilibrage de `battleValue` en admin.
+ * Les starters sont tirés au hasard dans TOUT le roster. Ces tests tournent sur
+ * le ROSTER RÉEL, pas sur des données de laboratoire.
  */
 
 const DAYS = [
@@ -20,19 +17,8 @@ const DAYS = [
 ];
 
 describe("vivier", () => {
-  it("ne retient que des personnages faibles à moyens", () => {
-    for (const c of starterPool(ROSTER)) {
-      const value = battleValueOf(c);
-      expect(value).toBeGreaterThanOrEqual(STARTER_MIN_VALUE);
-      expect(value).toBeLessThanOrEqual(STARTER_MAX_VALUE);
-    }
-  });
-
-  it("laisse les têtes d'affiche hors de portée au départ", () => {
-    const ids = starterPool(ROSTER).map((c) => c.id);
-    for (const star of ["gojo", "sukuna", "yuji-modulo", "mahoraga", "kenjaku"]) {
-      expect(ids).not.toContain(star);
-    }
+  it("retient tout le roster, têtes d'affiche comprises", () => {
+    expect(starterPool(ROSTER)).toHaveLength(ROSTER.length);
   });
 
   it("est ordonné de façon STABLE (dailyIndexes indexe une position)", () => {
@@ -70,16 +56,17 @@ describe("rotation quotidienne", () => {
     expect(new Set(signatures).size).toBe(DAYS.length);
   });
 
-  it("ne sort jamais un personnage hors bornes, quel que soit le jour", () => {
+  it("finit par proposer des personnages forts comme faibles", () => {
+    const offered = new Set<string>();
     for (let i = 0; i < 400; i += 1) {
       const day = new Date(Date.UTC(2026, 0, 1 + i)).toISOString().slice(0, 10);
-      for (const c of dailyStarters(day, ROSTER)) {
-        expect(battleValueOf(c)).toBeLessThanOrEqual(STARTER_MAX_VALUE);
-      }
+      for (const c of dailyStarters(day, ROSTER)) offered.add(c.id);
     }
+    expect(offered).toContain("gojo");
+    expect(offered).toContain("momo");
   });
 
-  it("rend une liste vide plutôt que de compléter avec un personnage trop fort", () => {
+  it("rend une liste vide sur un roster vide", () => {
     expect(dailyStarters("2026-08-30", [])).toEqual([]);
   });
 });
@@ -90,7 +77,6 @@ describe("garde serveur", () => {
     const chosen = dailyStarters(day, ROSTER)[0];
 
     expect(isDailyStarter(day, ROSTER, chosen.id)).toBe(true);
-    expect(isDailyStarter(day, ROSTER, "gojo")).toBe(false);
     expect(isDailyStarter(day, ROSTER, "inconnu")).toBe(false);
   });
 

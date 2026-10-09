@@ -1,9 +1,7 @@
 import type { Character } from "@/data/roster/characters";
 import { battleValueOf } from "@/lib/games/battle/battleValues";
 import { mulberry32 } from "@/lib/games/battle/rng";
-import { passiveOf } from "./abilities";
 import type { TowerConfig } from "./config";
-import { towerArchetypeOf } from "./stats";
 import {
   FLOORS_PER_STRATE,
   STRATE_COUNT,
@@ -39,12 +37,12 @@ import {
  */
 
 /**
- * Plafond de `battleValue` par strate — pour le recrutement ET pour le
- * placement des ennemis. C'est le curseur qui fait que Gojo et Sukuna
- * n'apparaissent qu'après 15 étages de survie.
+ * Plafond de `battleValue` par strate pour le placement des ENNEMIS. C'est le
+ * curseur qui fait que Gojo et Sukuna n'apparaissent en adversaires qu'après
+ * 15 étages de survie.
  *
- * Une seule échelle pour les deux usages, volontairement : on croise un
- * personnage à l'étage même où on pourrait le recruter.
+ * Le recrutement, lui, n'a plus de plafond : les renforts sont tirés au hasard
+ * dans tout le roster (cf. `pickRecruits`).
  */
 export const RECRUIT_CAPS: readonly number[] = [35, 55, 80, Infinity];
 
@@ -65,8 +63,6 @@ export interface TowerEntry {
   /** Rang de son arc dans l'ordre du récit. */
   arcIndex: number;
   value: number;
-  /** Passif « Polyvalence » : ignore le plafond de recrutement. */
-  ignoresRecruitCap: boolean;
 }
 
 export interface TowerRoster {
@@ -96,10 +92,7 @@ export function strateOfArc(arcIndex: number, arcCount: number): number {
   return Math.min(STRATE_COUNT - 1, strate);
 }
 
-/**
- * Strate correspondant à une `battleValue`, selon la même échelle que le
- * plafond de recrutement.
- */
+/** Strate correspondant à une `battleValue` (échelle `RECRUIT_CAPS`). */
 export function strateOfValue(value: number): number {
   for (let strate = 0; strate < RECRUIT_CAPS.length; strate += 1) {
     if (value <= RECRUIT_CAPS[strate]) return strate;
@@ -197,14 +190,8 @@ export function buildTowerRoster(
 
     const value = battleValueOf(character);
     const strate = strateOf(arcIndex, arcOrder.length, value);
-    const passive = passiveOf(towerArchetypeOf(character, config));
 
-    entries[character.id] = {
-      id: character.id,
-      arcIndex,
-      value,
-      ignoresRecruitCap: passive.ignoresRecruitCap,
-    };
+    entries[character.id] = { id: character.id, arcIndex, value };
     byStrate[strate].push(character.id);
   }
 
@@ -268,8 +255,7 @@ export function planTower(seed: number, tower: TowerRoster): FloorOptions[] {
         kind,
         prelude,
         enemyIds: pickEnemies(rand, tower, strate, kind, usedBosses),
-        recruitIds:
-          prelude === "recruit" ? pickRecruits(rand, tower, strate) : [],
+        recruitIds: prelude === "recruit" ? pickRecruits(rand, tower) : [],
         eventIndex: prelude === "event" ? Math.floor(rand() * 1_000_003) : 0,
       })),
     });
@@ -441,42 +427,29 @@ function pickDistinct(
 }
 
 /**
- * Candidats au recrutement, sous le plafond de la strate.
+ * Candidats au recrutement : tirage UNIFORME dans tout le vivier de la tour,
+ * toutes strates confondues. Un renfort peut aussi bien être un second couteau
+ * que Gojo, dès l'étage 1.
  *
  * On en propose `RECRUIT_CANDIDATES` et non 3 : `run.ts` doit pouvoir en écarter
  * ceux déjà présents dans l'escouade sans se retrouver à court, et sans avoir à
  * re-tirer (ce qui casserait le déterminisme).
  */
-function pickRecruits(
-  rand: () => number,
-  tower: TowerRoster,
-  strate: number,
-): string[] {
-  const cap = RECRUIT_CAPS[strate] ?? Infinity;
-  const eligible = tower.byStrate[strate].filter((id) => {
-    const entry = tower.entries[id];
-    return entry.value <= cap || entry.ignoresRecruitCap;
-  });
-
-  if (eligible.length === 0) return [];
+function pickRecruits(rand: () => number, tower: TowerRoster): string[] {
+  // Tri par `id` : l'ordre des clés ne doit dépendre que du roster, sinon la
+  // même graine ne redonnerait pas les mêmes recrues.
+  const pool = Object.keys(tower.entries).sort((a, b) => a.localeCompare(b));
 
   const chosen: string[] = [];
-  for (let i = 0; i < RECRUIT_CANDIDATES; i += 1) {
-    const candidate = pickDistinct(rand, eligible, chosen);
-    if (!candidate) break;
-    chosen.push(candidate);
+  for (let i = 0; i < RECRUIT_CANDIDATES && pool.length > 0; i += 1) {
+    const index = Math.floor(rand() * pool.length);
+    chosen.push(pool[index]);
+    pool.splice(index, 1);
   }
   return chosen;
 }
 
-/** Un personnage est-il recrutable à cette strate ? (garde serveur) */
-export function canRecruit(
-  tower: TowerRoster,
-  id: string,
-  strate: number,
-): boolean {
-  const entry = tower.entries[id];
-  if (!entry) return false;
-  const cap = RECRUIT_CAPS[strate] ?? Infinity;
-  return entry.value <= cap || entry.ignoresRecruitCap;
+/** Un personnage est-il recrutable ? (garde serveur : il doit être dans la tour) */
+export function canRecruit(tower: TowerRoster, id: string): boolean {
+  return id in tower.entries;
 }

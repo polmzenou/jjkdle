@@ -480,7 +480,7 @@ export function recruit(
   if (state.squad.some((m) => m.characterId === character.id)) {
     return fail("already-in-squad");
   }
-  if (!canRecruit(tower, character.id, plan.strate)) {
+  if (!canRecruit(tower, character.id)) {
     return fail("recruit-capped");
   }
 

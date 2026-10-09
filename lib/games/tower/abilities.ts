@@ -51,8 +51,6 @@ export interface PassiveSpec {
   fluxBonusPct: number;
   /** Remplace le seuil de la jauge d'ultime (100 = valeur par défaut). */
   ultimateThreshold: number;
-  /** Ignore le plafond de recrutement de la strate (hors combat, cf. floors). */
-  ignoresRecruitCap: boolean;
   /** Survit à un coup fatal avec 1 PV, une fois par combat. */
   survivesFatal: boolean;
 }
@@ -67,7 +65,6 @@ const NEUTRAL: Omit<PassiveSpec, "archetype" | "name" | "description"> = {
   strikeBonusHpPct: 0,
   fluxBonusPct: 0,
   ultimateThreshold: 100,
-  ignoresRecruitCap: false,
   survivesFatal: false,
 };
 
@@ -126,8 +123,9 @@ export const PASSIVES: Record<Archetype, PassiveSpec> = {
     ...NEUTRAL,
     archetype: "adaptive",
     name: "Polyvalence",
-    description: "Peut être recruté au-delà du plafond de sa strate.",
-    ignoresRecruitCap: true,
+    description: "Sa technique coûte 5 d'énergie de moins et il génère +20 % d'énergie occulte.",
+    techniqueDiscount: 5,
+    fluxBonusPct: 20,
   },
   stalwart: {
     ...NEUTRAL,

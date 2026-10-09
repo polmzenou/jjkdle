@@ -244,14 +244,28 @@ describe("génération de la tour", () => {
     expect(first.enemyIds[0]).toBe(pool[pool.length - 1]);
   });
 
-  it("ne propose au recrutement que des personnages sous le plafond de la strate", () => {
+  it("propose au recrutement des personnages distincts, pris dans toute la tour", () => {
     for (const option of all(11)) {
+      expect(new Set(option.recruitIds).size).toBe(option.recruitIds.length);
       for (const id of option.recruitIds) {
-        expect(tower.entries[id].value).toBeLessThanOrEqual(
-          RECRUIT_CAPS[option.strate],
-        );
+        expect(tower.entries[id]).toBeDefined();
       }
     }
+  });
+
+  it("peut proposer des recrues de n'importe quelle strate, dès l'étage 1", () => {
+    const strateOfId = new Map<string, number>();
+    tower.byStrate.forEach((pool, strate) =>
+      pool.forEach((id) => strateOfId.set(id, strate)),
+    );
+
+    const seen = new Set<number>();
+    for (let seed = 0; seed < 200; seed += 1) {
+      for (const option of planTower(seed, tower)[0].options) {
+        for (const id of option.recruitIds) seen.add(strateOfId.get(id)!);
+      }
+    }
+    expect(seen.size).toBe(STRATE_COUNT);
   });
 
   it("n'attache des recrues qu'aux préludes de recrutement", () => {
@@ -275,26 +289,19 @@ describe("génération de la tour", () => {
   });
 });
 
-describe("plafond de recrutement", () => {
+describe("recrutement sans plafond", () => {
   const roster = [
     character("faible", JJK_ARCS[0], 20),
     character("costaud", JJK_ARCS[0], 90),
-    // Note maximale en « versatility » ⇒ archétype `adaptive` ⇒ Polyvalence.
-    character("polyvalent", JJK_ARCS[0], 90, { versatility: 100 }),
   ];
   const tower = buildTowerRoster(roster, JJK_ARCS, JJK_TOWER_CONFIG);
 
-  it("refuse un personnage au-dessus du plafond de la strate", () => {
-    expect(canRecruit(tower, "faible", 0)).toBe(true);
-    expect(canRecruit(tower, "costaud", 0)).toBe(false);
-    expect(canRecruit(tower, "costaud", 3)).toBe(true);
-  });
-
-  it("le passif Polyvalence passe outre le plafond", () => {
-    expect(canRecruit(tower, "polyvalent", 0)).toBe(true);
+  it("accepte n'importe quel personnage de la tour, faible ou fort", () => {
+    expect(canRecruit(tower, "faible")).toBe(true);
+    expect(canRecruit(tower, "costaud")).toBe(true);
   });
 
   it("refuse un id inconnu (garde serveur)", () => {
-    expect(canRecruit(tower, "inexistant", 3)).toBe(false);
+    expect(canRecruit(tower, "inexistant")).toBe(false);
   });
 });

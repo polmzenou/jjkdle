@@ -284,7 +284,7 @@ export async function chooseStarterAction(
   const { run, context, user } = loaded;
 
   // Garde serveur : le client envoie un id, rien ne l'empêche d'y glisser
-  // celui de Gojo. C'est ce contrôle qui rend le plafond des starters réel.
+  // celui d'un personnage qui n'est pas proposé aujourd'hui.
   if (!isDailyStarter(todayKey(), context.list, characterId)) {
     return fail("Ce personnage n'est pas proposé aujourd'hui.");
   }
@@ -671,7 +671,7 @@ export async function skipRecruitAction(): Promise<TowerActionResult> {
 function recruitError(error: string): string {
   switch (error) {
     case "recruit-capped":
-      return "Ce personnage est encore hors de portée à cette strate.";
+      return "Ce personnage ne peut pas être recruté.";
     case "bad-slot":
       return "Choisis le personnage à sacrifier.";
     case "already-in-squad":

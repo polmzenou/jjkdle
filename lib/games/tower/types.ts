@@ -28,19 +28,11 @@ export const FLOORS_PER_STRATE = 5;
 /** Nombre de strates. */
 export const STRATE_COUNT = TOWER_FLOORS / FLOORS_PER_STRATE;
 
-/** Starters proposés à l'entrée. Le joueur en prend UN. */
-export const STARTER_CHOICES = 3;
-
 /**
- * Bornes de `battleValue` du vivier de starters (« jamais ultra puissants »).
- *
- * Le PLANCHER compte autant que le plafond : à 8, l'écart entre le starter le
- * plus faible et le plus fort était de 1 à 5, et tirer le plus faible rendait
- * les premiers étages ingagnables quoi qu'on fasse. Un choix entre trois
- * personnages n'a de sens que s'ils sont tous jouables.
+ * Starters proposés à l'entrée. Le joueur en prend UN. Tirés au hasard dans
+ * tout le roster (cf. `starterPool`).
  */
-export const STARTER_MIN_VALUE = 18;
-export const STARTER_MAX_VALUE = 40;
+export const STARTER_CHOICES = 3;
 
 // ──────────────────────────────────────────────────────────────────────────
 // Archétypes de capacités

@@ -1,11 +1,6 @@
 import type { Character } from "@/data/roster/characters";
-import { battleValueOf } from "@/lib/games/battle/battleValues";
 import { dailyIndexes } from "@/lib/rotation";
-import {
-  STARTER_CHOICES,
-  STARTER_MAX_VALUE,
-  STARTER_MIN_VALUE,
-} from "./types";
+import { STARTER_CHOICES } from "./types";
 
 /**
  * Starters du jour — module PUR.
@@ -24,37 +19,25 @@ import {
 export const STARTER_SALT = "tower-starter";
 
 /**
- * Vivier des starters : les personnages faibles à moyens, jamais les têtes
- * d'affiche.
+ * Vivier des starters : le roster ENTIER, sans filtre de puissance.
  *
- * Le filtre porte sur `battleValue` et NON sur `tier`, volontairement : le
- * roster JJK est aujourd'hui tieré en pyramide inversée (21 personnages en
- * tier 1 pour un seul en tier 4), donc `tier` n'est pas une échelle de
- * puissance fiable, alors que `battleValue` couvre proprement 2 → 100. Après le
- * re-tierage du roster, on pourra doubler le filtre par `tier` pour la
- * lisibilité — pas avant.
+ * Le tirage est volontairement aléatoire sur tout le roster : un jour on part
+ * avec des seconds couteaux, un autre avec une tête d'affiche. L'ancien filtre
+ * par `battleValue` (18 → 40) ne servait que des personnages de tier 4 / 4−.
  *
  * Le tri par `id` n'est pas cosmétique : `dailyIndexes` indexe une POSITION.
  * Un vivier dont l'ordre changerait d'un rendu à l'autre servirait des starters
  * différents au même joueur le même jour.
  */
 export function starterPool(roster: readonly Character[]): Character[] {
-  return roster
-    .filter((c) => {
-      const value = battleValueOf(c);
-      return value >= STARTER_MIN_VALUE && value <= STARTER_MAX_VALUE;
-    })
-    .slice()
-    .sort((a, b) => a.id.localeCompare(b.id));
+  return roster.slice().sort((a, b) => a.id.localeCompare(b.id));
 }
 
 /**
  * Les starters du jour `dateKey` ("YYYY-MM-DD").
  *
- * Renvoie moins de `STARTER_CHOICES` entrées si le vivier est trop petit —
- * l'appelant décide alors s'il peut lancer une partie ; ici on ne complète
- * jamais avec un personnage hors bornes, ce qui reviendrait à offrir Gojo au
- * premier étage sur un roster mal rempli.
+ * Renvoie moins de `STARTER_CHOICES` entrées si le roster est trop petit —
+ * l'appelant décide alors s'il peut lancer une partie.
  */
 export function dailyStarters(
   dateKey: string,
@@ -72,8 +55,7 @@ export function dailyStarters(
  * Le personnage choisi est-il bien un starter du jour ?
  *
  * Garde serveur : le client envoie un id, et rien n'empêcherait d'y glisser
- * celui de Sukuna. C'est la seule chose qui rend la borne de `starterPool`
- * réellement contraignante.
+ * celui d'un personnage qui n'est pas proposé aujourd'hui.
  */
 export function isDailyStarter(
   dateKey: string,
